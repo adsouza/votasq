@@ -1,0 +1,40 @@
+name: votasq
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+workspace:
+  - apps/client
+  - apps/server
+  - packages/shared
+
+dev_dependencies:
+  melos: ^7.3.0
+
+melos:
+  command:
+    bootstrap:
+      usePubspecOverrides: true
+
+  scripts:
+    setup:
+      run: melos bootstrap
+      description: Initialize the workspace and link packages.
+
+    gen:
+      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs"
+      description: Generate code for all packages.
+      packageFilters:
+        dependsOn: "build_runner"
+
+    deploy:server:
+      run: |
+        cd apps/server && \
+        gcloud run deploy votasq-server --source . --region us-central1 --allow-unauthenticated
+      description: Deploy the Dart server to Cloud Run.
+
+    build:client:
+      run: |
+        melos exec --scope="client" -- "flutter build apk --release && flutter build macos --release"
+      description: Build the Flutter client for Android and macOS.
