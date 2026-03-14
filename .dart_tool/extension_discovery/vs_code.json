@@ -1,0 +1,1 @@
+{"version":2,"entries":[{"package":"votasq","rootUri":"../","packageUri":"lib/"},{"package":"client","rootUri":"../apps/client/","packageUri":"lib/"},{"package":"server","rootUri":"../apps/server/","packageUri":"lib/"},{"package":"shared","rootUri":"../packages/shared/","packageUri":"lib/"}]}

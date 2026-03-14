@@ -10,7 +10,11 @@ resolution: workspace
 
 dependencies:
   dart_frog: ^1.1.0
+  googleapis: ^15.0.0
+  googleapis_auth: ^2.0.0
+  logging: ^1.3.0
   shared: any # Automatically resolved via workspace
+  shelf: ^1.4.0
   shelf_router: ^1.1.4
 
 dev_dependencies:

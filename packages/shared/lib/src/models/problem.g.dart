@@ -1,0 +1,19 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'problem.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
+  id: json['id'] as String,
+  description: json['description'] as String,
+  votes: (json['votes'] as num?)?.toInt() ?? 1,
+);
+
+Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
+  'id': instance.id,
+  'description': instance.description,
+  'votes': instance.votes,
+};
