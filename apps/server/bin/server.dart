@@ -31,6 +31,30 @@ Router _buildRouter() {
     });
 }
 
+/// Returns the GCP project ID from the env var or the metadata server.
+Future<String> _resolveProjectId() async {
+  final fromEnv = Platform.environment['GOOGLE_CLOUD_PROJECT'];
+  if (fromEnv != null) return fromEnv;
+
+  // On Cloud Run, query the metadata server.
+  final client = HttpClient();
+  try {
+    final request = await client.getUrl(
+      Uri.parse(
+        'http://metadata.google.internal'
+        '/computeMetadata/v1/project/project-id',
+      ),
+    );
+    request.headers.set('Metadata-Flavor', 'Google');
+    final response = await request.close();
+    final body = await response.transform(const SystemEncoding().decoder).join();
+    if (response.statusCode == 200 && body.isNotEmpty) return body.trim();
+  } finally {
+    client.close();
+  }
+  throw Exception('Could not determine GCP project ID');
+}
+
 void main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
@@ -47,14 +71,10 @@ void main() async {
   _log.info('Server listening on port $port');
 
   // Initialize DB after the server is up.
-  final projectId = Platform.environment['GOOGLE_CLOUD_PROJECT'];
-  if (projectId == null) {
-    _log.severe('GOOGLE_CLOUD_PROJECT env var is required');
-    exit(1);
-  }
   try {
+    final projectId = await _resolveProjectId();
     _db = await Db.initialize(projectId);
-    _log.info('Firestore connected');
+    _log.info('Firestore connected (project: $projectId)');
   } on Exception catch (e) {
     _log.severe('Failed to initialize Firestore: $e');
   }

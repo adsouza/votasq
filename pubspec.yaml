@@ -34,7 +34,6 @@ melos:
         --source .
         --region us-central1
         --allow-unauthenticated
-        --set-env-vars GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
       description: Deploy the Dart server to Cloud Run.
 
     build:client:
