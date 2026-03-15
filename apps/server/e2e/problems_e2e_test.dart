@@ -21,12 +21,23 @@ void main() {
   setUpAll(() async {
     const emulatorHost = 'localhost:8081';
 
-    // Clear emulator data before the run.
-    await http.delete(
-      Uri.parse(
-        'http://$emulatorHost/emulator/v1/projects/votasq-test/databases/(default)/documents',
-      ),
+    // Wait for the Firestore emulator to be ready, then clear its data.
+    final clearUrl = Uri.parse(
+      'http://$emulatorHost/emulator/v1/projects/votasq-test/databases/(default)/documents',
     );
+    var emulatorReady = false;
+    for (var i = 0; i < 30; i++) {
+      try {
+        await http.delete(clearUrl);
+        emulatorReady = true;
+        break;
+      } on Exception {
+        await Future<void>.delayed(const Duration(seconds: 1));
+      }
+    }
+    if (!emulatorReady) {
+      fail('Firestore emulator not reachable at $emulatorHost');
+    }
 
     // Start the Dart Frog server pointing at the emulator.
     serverProcess = await Process.start(
