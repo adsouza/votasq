@@ -95,7 +95,7 @@ These are tagged with `e2e` and excluded from normal test runs.
 firebase emulators:start --only firestore
 
 # Terminal 2 — run the E2E tests
-dart test apps/server/test/routes/problems_e2e_test.dart -t e2e
+dart test apps/server/e2e/ -t e2e
 ```
 
 ### Linting and Formatting

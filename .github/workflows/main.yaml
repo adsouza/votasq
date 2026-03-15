@@ -73,4 +73,4 @@ jobs:
           done
 
       - name: Run E2E Tests
-        run: dart test apps/server/test/routes/problems_e2e_test.dart -t e2e
+        run: dart test apps/server/e2e/ -t e2e
