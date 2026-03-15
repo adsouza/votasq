@@ -91,7 +91,7 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - run: flutter build macos --target lib/main_production.dart --release
+      - run: flutter build macos --flavor production --target lib/main_production.dart --release
 
       - name: Archive macOS build
         run: |
