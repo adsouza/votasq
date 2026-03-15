@@ -4,6 +4,7 @@ import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/services/api_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,7 +15,10 @@ class ProblemsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) {
-        final cubit = ProblemsCubit(ApiService('http://localhost:8080'));
+        const baseUrl = kDebugMode
+            ? 'http://localhost:8080'
+            : 'https://votasq-269624680910.us-central1.run.app';
+        final cubit = ProblemsCubit(ApiService(baseUrl));
         unawaited(cubit.loadProblems());
         return cubit;
       },
