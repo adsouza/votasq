@@ -10,7 +10,7 @@ resolution: workspace
 
 dependencies:
   dart_frog: ^1.1.0
-  googleapis: ^15.0.0
+  googleapis: ^16.0.0
   googleapis_auth: ^2.0.0
   shared: any # Automatically resolved via workspace
 
