@@ -1,23 +1,42 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:googleapis/firestore/v1.dart' as fs;
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared/shared.dart';
 
 /// Storage via Firestore using the official googleapis client.
 /// Authenticates automatically via App Default Creds on Cloud Run.
+/// When the FIRESTORE_EMULATOR_HOST env var is set, connects to the local
+/// emulator without authentication.
 class Db {
   Db._(this._firestore, this._basePath);
 
   final fs.FirestoreApi _firestore;
   final String _basePath;
 
-  /// Creates a [Db] instance authenticated via ADC.
+  /// Creates a [Db] instance authenticated via ADC, or unauthenticated when
+  /// connecting to the Firestore emulator.
   static Future<Db> initialize(String projectId) async {
-    final client = await clientViaApplicationDefaultCredentials(
-      scopes: [fs.FirestoreApi.datastoreScope],
+    final emulatorHost = Platform.environment['FIRESTORE_EMULATOR_HOST'];
+    final http.Client client;
+    final String? rootUrl;
+
+    if (emulatorHost != null) {
+      client = http.Client();
+      rootUrl = 'http://$emulatorHost/';
+    } else {
+      client = await clientViaApplicationDefaultCredentials(
+        scopes: [fs.FirestoreApi.datastoreScope],
+      );
+      rootUrl = null;
+    }
+
+    final firestore = fs.FirestoreApi(
+      client,
+      rootUrl: rootUrl ?? 'https://firestore.googleapis.com/',
     );
-    final firestore = fs.FirestoreApi(client);
     final basePath = 'projects/$projectId/databases/(default)/documents';
     return Db._(firestore, basePath);
   }
