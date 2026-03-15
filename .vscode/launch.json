@@ -5,36 +5,39 @@
       "name": "Launch development",
       "request": "launch",
       "type": "dart",
-      "program": "apps/client/lib/main_development.dart",
+      "cwd": "apps/client",
+      "program": "lib/main_development.dart",
       "args": [
         "--flavor",
         "development",
         "--target",
-        "apps/client/lib/main_development.dart"
+        "lib/main_development.dart"
       ]
     },
     {
       "name": "Launch staging",
       "request": "launch",
       "type": "dart",
-      "program": "apps/client/lib/main_staging.dart",
+      "cwd": "apps/client",
+      "program": "lib/main_staging.dart",
       "args": [
         "--flavor",
         "staging",
         "--target",
-        "apps/client/lib/main_staging.dart"
+        "lib/main_staging.dart"
       ]
     },
     {
       "name": "Launch production",
       "request": "launch",
       "type": "dart",
-      "program": "apps/client/lib/main_production.dart",
+      "cwd": "apps/client",
+      "program": "lib/main_production.dart",
       "args": [
         "--flavor",
         "production",
         "--target",
-        "apps/client/lib/main_production.dart"
+        "lib/main_production.dart"
       ]
     }
   ]
