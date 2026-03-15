@@ -33,7 +33,7 @@ COPY --from=flutter-build /app/apps/client/build/web/ apps/server/public/
 RUN dart pub global activate dart_frog_cli
 WORKDIR /app/apps/server
 RUN dart pub get
-RUN dart pub global run dart_frog build
+RUN dart_frog build
 
 WORKDIR /app/apps/server/build
 RUN dart pub get
