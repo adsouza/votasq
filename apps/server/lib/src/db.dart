@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:googleapis/firestore/v1.dart' as fs;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:shared/shared.dart';
@@ -34,26 +36,75 @@ class Db {
     );
   }
 
-  /// Fetch a page of problems.
+  /// Fetch a page of problems, sorted by votes descending.
   Future<({List<Problem> problems, String? nextPageToken})> getProblems({
     int pageSize = 99,
     String? pageToken,
   }) async {
-    final result = await _firestore.projects.databases.documents.list(
-      _basePath,
-      'problems',
-      pageSize: pageSize,
-      pageToken: pageToken,
-    );
-    final problems = (result.documents ?? []).map((doc) {
-      final id = doc.name!.split('/').last;
-      return Problem(
-        id: id,
-        description: doc.fields!['description']!.stringValue!,
-        votes: int.parse(doc.fields!['votes']!.integerValue!),
+    fs.Cursor? startAt;
+    if (pageToken != null) {
+      final cursor =
+          jsonDecode(utf8.decode(base64Decode(pageToken)))
+              as Map<String, dynamic>;
+      startAt = fs.Cursor(
+        values: [
+          fs.Value(integerValue: '${cursor['v']}'),
+          fs.Value(referenceValue: cursor['r'] as String),
+        ],
+        before: false,
       );
-    }).toList();
-    return (problems: problems, nextPageToken: result.nextPageToken);
+    }
+
+    final results =
+        await _firestore.projects.databases.documents.runQuery(
+      fs.RunQueryRequest(
+        structuredQuery: fs.StructuredQuery(
+          from: [fs.CollectionSelector(collectionId: 'problems')],
+          orderBy: [
+            fs.Order(
+              field: fs.FieldReference(fieldPath: 'votes'),
+              direction: 'DESCENDING',
+            ),
+            fs.Order(
+              field: fs.FieldReference(fieldPath: '__name__'),
+              direction: 'ASCENDING',
+            ),
+          ],
+          limit: pageSize,
+          startAt: startAt,
+        ),
+      ),
+      _basePath,
+    );
+
+    final problems = <Problem>[];
+    String? lastDocName;
+    int? lastVotes;
+
+    for (final result in results) {
+      final doc = result.document;
+      if (doc == null) continue;
+      final id = doc.name!.split('/').last;
+      final votes = int.parse(doc.fields!['votes']!.integerValue!);
+      problems.add(
+        Problem(
+          id: id,
+          description: doc.fields!['description']!.stringValue!,
+          votes: votes,
+        ),
+      );
+      lastDocName = doc.name;
+      lastVotes = votes;
+    }
+
+    String? nextPageToken;
+    if (problems.length == pageSize && lastDocName != null) {
+      nextPageToken = base64Encode(
+        utf8.encode(jsonEncode({'v': lastVotes, 'r': lastDocName})),
+      );
+    }
+
+    return (problems: problems, nextPageToken: nextPageToken);
   }
 
   /// Fetch a [Problem] by id.
