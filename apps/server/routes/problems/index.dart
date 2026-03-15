@@ -14,10 +14,19 @@ Future<Response> onRequest(RequestContext context) async {
 
 Future<Response> _get(RequestContext context) async {
   final db = await context.read<Future<Db>>();
+  final params = context.request.uri.queryParameters;
+  final pageSize = int.tryParse(params['pageSize'] ?? '') ?? 99;
+  final pageToken = params['pageToken'];
   try {
-    final problems = await db.getProblems();
+    final (:problems, :nextPageToken) = await db.getProblems(
+      pageSize: pageSize,
+      pageToken: pageToken,
+    );
     return Response.json(
-      body: {'data': problems.map((p) => p.toJson()).toList()},
+      body: {
+        'data': problems.map((p) => p.toJson()).toList(),
+        if (nextPageToken != null) 'nextPageToken': nextPageToken,
+      },
     );
   } on Exception {
     return Response(statusCode: 500);
