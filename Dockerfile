@@ -45,5 +45,6 @@ COPY --from=build /runtime/ /
 COPY --from=build /app/apps/server/build/bin/server /app/bin/server
 COPY --from=build /app/apps/server/build/public/ /app/public/
 
+WORKDIR /app
 EXPOSE 8080
 CMD ["/app/bin/server"]
