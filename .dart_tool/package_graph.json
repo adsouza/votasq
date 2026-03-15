@@ -224,17 +224,6 @@
       "dependencies": []
     },
     {
-      "name": "googleapis_auth",
-      "version": "2.0.0",
-      "dependencies": [
-        "args",
-        "crypto",
-        "google_identity_services_web",
-        "http",
-        "http_parser"
-      ]
-    },
-    {
       "name": "googleapis",
       "version": "16.0.0",
       "dependencies": [
@@ -911,24 +900,6 @@
       ]
     },
     {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
-      ]
-    },
-    {
-      "name": "google_identity_services_web",
-      "version": "0.3.3+1",
-      "dependencies": [
-        "meta",
-        "web"
-      ]
-    },
-    {
       "name": "_discoveryapis_commons",
       "version": "1.0.7",
       "dependencies": [
@@ -943,6 +914,16 @@
       "dependencies": [
         "hotreloader",
         "logging"
+      ]
+    },
+    {
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
       ]
     },
     {
@@ -977,6 +958,14 @@
       "dependencies": [
         "clock",
         "collection"
+      ]
+    },
+    {
+      "name": "google_identity_services_web",
+      "version": "0.3.3+1",
+      "dependencies": [
+        "meta",
+        "web"
       ]
     },
     {
@@ -1316,6 +1305,17 @@
         "ffi",
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "googleapis_auth",
+      "version": "2.0.0",
+      "dependencies": [
+        "args",
+        "crypto",
+        "google_identity_services_web",
+        "http",
+        "http_parser"
       ]
     }
   ],
