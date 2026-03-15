@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
 import 'package:shared/shared.dart';
+import 'package:uuid/uuid.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   return switch (context.request.method) {
@@ -41,9 +42,13 @@ Future<Response> _post(RequestContext context) async {
               await context.request.body(),
             )
             as Map<String, dynamic>;
-    final problem = Problem.fromJson(body).copyWith(votes: 1);
+    final problem = Problem.fromJson({
+      ...body,
+      'id': const Uuid().v4(),
+      'votes': 1,
+    });
     await db.saveProblem(problem);
-    return Response(statusCode: 201);
+    return Response.json(statusCode: 201, body: problem.toJson());
   } on Exception {
     return Response(statusCode: 400);
   }
