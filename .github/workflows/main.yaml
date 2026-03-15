@@ -26,3 +26,7 @@ jobs:
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
     with:
       flutter_version: "3.41.4"
+      format_directories: "apps packages"
+      analyze_directories: "apps packages"
+      test_recursion: true
+      min_coverage: 0

@@ -36,9 +36,11 @@ Future<Response> _get(RequestContext context) async {
 Future<Response> _post(RequestContext context) async {
   final db = await context.read<Future<Db>>();
   try {
-    final body = jsonDecode(
-      await context.request.body(),
-    ) as Map<String, dynamic>;
+    final body =
+        jsonDecode(
+              await context.request.body(),
+            )
+            as Map<String, dynamic>;
     final problem = Problem.fromJson(body);
     await db.saveProblem(problem);
     return Response(statusCode: 201);
