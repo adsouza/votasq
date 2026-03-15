@@ -41,7 +41,7 @@ Future<Response> _post(RequestContext context) async {
               await context.request.body(),
             )
             as Map<String, dynamic>;
-    final problem = Problem.fromJson(body);
+    final problem = Problem.fromJson(body).copyWith(votes: 1);
     await db.saveProblem(problem);
     return Response(statusCode: 201);
   } on Exception {
