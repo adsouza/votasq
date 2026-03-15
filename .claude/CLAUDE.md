@@ -52,6 +52,8 @@ melos deploy:server        # Deploy server to Cloud Run
 
 ## Architecture
 
+Update the `ARCHITECTURE.md` file in the project root dir after making architectural changes.
+
 ### Monorepo Structure
 
 Uses Dart's `workspace` feature (pubspec.yaml) with Melos for script orchestration. The `shared` package is referenced as `shared: any` by both client and server and resolved via workspace.
