@@ -34,6 +34,22 @@ class Db {
     );
   }
 
+  /// Fetch all problems.
+  Future<List<Problem>> getProblems() async {
+    final result = await _firestore.projects.databases.documents.list(
+      _basePath,
+      'problems',
+    );
+    return (result.documents ?? []).map((doc) {
+      final id = doc.name!.split('/').last;
+      return Problem(
+        id: id,
+        description: doc.fields!['description']!.stringValue!,
+        votes: int.parse(doc.fields!['votes']!.integerValue!),
+      );
+    }).toList();
+  }
+
   /// Fetch a [Problem] by id.
   Future<Problem> getProblem(String id) async {
     final doc = await _firestore.projects.databases.documents.get(
