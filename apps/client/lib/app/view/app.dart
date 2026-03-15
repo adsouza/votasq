@@ -1,5 +1,5 @@
-import 'package:client/counter/counter.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/problems/problems.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -16,7 +16,7 @@ class App extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const CounterPage(),
+      home: const ProblemsPage(),
     );
   }
 }

@@ -16,6 +16,31 @@ class ApiService {
     throw Exception('Failed to load problem');
   }
 
+  Future<({List<Problem> problems, String? nextPageToken})> listProblems({
+    int? pageSize,
+    String? pageToken,
+  }) async {
+    final params = <String, String>{
+      if (pageSize != null) 'pageSize': '$pageSize',
+      'pageToken': ?pageToken,
+    };
+    final uri = Uri.parse('$baseUrl/problems').replace(
+      queryParameters: params.isNotEmpty ? params : null,
+    );
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = (json['data'] as List)
+          .map((e) => Problem.fromJson(e as Map<String, dynamic>))
+          .toList();
+      return (
+        problems: data,
+        nextPageToken: json['nextPageToken'] as String?,
+      );
+    }
+    throw Exception('Failed to list problems');
+  }
+
   Future<void> addProblem(Problem problem) async {
     final response = await http.post(
       Uri.parse('$baseUrl/problems'),
