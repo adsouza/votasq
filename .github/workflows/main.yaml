@@ -23,10 +23,24 @@ jobs:
       modified_files_only: false
 
   build:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
-    with:
-      flutter_version: "3.41.4"
-      format_directories: "apps packages"
-      analyze_directories: "apps packages"
-      test_recursion: true
-      min_coverage: 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.4"
+
+      - name: Install Dependencies
+        run: |
+          flutter pub global activate very_good_cli
+          very_good packages get --recursive
+
+      - name: Check Formatting
+        run: dart format --set-exit-if-changed apps packages
+
+      - name: Analyze
+        run: flutter analyze apps packages
+
+      - name: Run Tests
+        run: very_good test --recursive --no-optimization --coverage --test-randomize-ordering-seed random
