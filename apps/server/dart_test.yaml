@@ -1,0 +1,7 @@
+tags:
+  e2e:
+    name: e2e
+
+# Exclude e2e tests from default runs; they require the Firestore emulator.
+# Run them explicitly with: dart test -t e2e
+exclude_tags: e2e

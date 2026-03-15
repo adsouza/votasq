@@ -14,7 +14,7 @@ import 'package:test/test.dart';
 ///   firebase emulators:start --only firestore
 ///   (Emulator must be running on localhost:8081)
 void main() {
-  late Process serverProcess;
+  Process? serverProcess;
   late Uri baseUrl;
   final client = http.Client();
 
@@ -63,7 +63,7 @@ void main() {
   });
 
   tearDownAll(() {
-    serverProcess.kill();
+    serverProcess?.kill();
     client.close();
   });
 
