@@ -23,8 +23,9 @@ class ProblemsState {
     return ProblemsState(
       status: status ?? this.status,
       problems: problems ?? this.problems,
-      nextPageToken:
-          nextPageToken != null ? nextPageToken() : this.nextPageToken,
+      nextPageToken: nextPageToken != null
+          ? nextPageToken()
+          : this.nextPageToken,
     );
   }
 }

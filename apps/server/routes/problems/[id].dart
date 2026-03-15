@@ -25,9 +25,11 @@ Future<Response> _get(RequestContext context, String id) async {
 Future<Response> _put(RequestContext context, String id) async {
   final db = await context.read<Future<Db>>();
   try {
-    final body = jsonDecode(
-      await context.request.body(),
-    ) as Map<String, dynamic>;
+    final body =
+        jsonDecode(
+              await context.request.body(),
+            )
+            as Map<String, dynamic>;
     final problem = Problem.fromJson({...body, 'id': id});
     await db.saveProblem(problem);
     return Response.json(body: problem.toJson());

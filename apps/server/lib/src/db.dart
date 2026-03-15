@@ -55,8 +55,7 @@ class Db {
       );
     }
 
-    final results =
-        await _firestore.projects.databases.documents.runQuery(
+    final results = await _firestore.projects.databases.documents.runQuery(
       fs.RunQueryRequest(
         structuredQuery: fs.StructuredQuery(
           from: [fs.CollectionSelector(collectionId: 'problems')],
