@@ -608,12 +608,6 @@
       "languageVersion": "2.17"
     },
     {
-      "name": "shelf_router",
-      "rootUri": "file:///Users/adsouza/.pub-cache/hosted/pub.dev/shelf_router-1.1.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
       "name": "shelf_static",
       "rootUri": "file:///Users/adsouza/.pub-cache/hosted/pub.dev/shelf_static-1.1.3",
       "packageUri": "lib/",
