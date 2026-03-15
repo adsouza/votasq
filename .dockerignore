@@ -1,0 +1,9 @@
+**/build/
+**/.dart_tool/
+**/.packages
+**/node_modules/
+**/.gradle/
+**/android/.gradle/
+**/.idea/
+**/.vscode/
+**/.git/
