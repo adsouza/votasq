@@ -34,13 +34,18 @@ class Db {
     );
   }
 
-  /// Fetch all problems.
-  Future<List<Problem>> getProblems() async {
+  /// Fetch a page of problems.
+  Future<({List<Problem> problems, String? nextPageToken})> getProblems({
+    int pageSize = 99,
+    String? pageToken,
+  }) async {
     final result = await _firestore.projects.databases.documents.list(
       _basePath,
       'problems',
+      pageSize: pageSize,
+      pageToken: pageToken,
     );
-    return (result.documents ?? []).map((doc) {
+    final problems = (result.documents ?? []).map((doc) {
       final id = doc.name!.split('/').last;
       return Problem(
         id: id,
@@ -48,6 +53,7 @@ class Db {
         votes: int.parse(doc.fields!['votes']!.integerValue!),
       );
     }).toList();
+    return (problems: problems, nextPageToken: result.nextPageToken);
   }
 
   /// Fetch a [Problem] by id.
