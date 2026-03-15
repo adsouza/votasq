@@ -40,7 +40,7 @@ _\*Client works on iOS, Android, Web, and Windows._
 To run all unit and widget tests use the following command:
 
 ```sh
-$ very_good test --coverage --test-randomize-ordering-seed random
+very_good test --coverage --test-randomize-ordering-seed random
 ```
 
 To view the generated coverage report you can use [lcov](https://github.com/linux-test-project/lcov).
@@ -67,7 +67,7 @@ dart run bloc_tools:bloc lint .
 
 You can also validate with VSCode-based IDEs using the [official bloc extension](https://marketplace.visualstudio.com/items?itemName=FelixAngelov.bloc).
 
-To learn more, visit https://bloclibrary.dev/lint/
+To learn more, visit <https://bloclibrary.dev/lint/>
 
 ---
 
@@ -89,7 +89,7 @@ This project relies on [flutter_localizations][flutter_localizations_link] and f
 }
 ```
 
-2. Then add a new key/value and description
+1. Then add a new key/value and description
 
 ```arb
 {
@@ -105,7 +105,7 @@ This project relies on [flutter_localizations][flutter_localizations_link] and f
 }
 ```
 
-3. Use the new string
+1. Use the new string
 
 ```dart
 import 'package:client/l10n/l10n.dart';
@@ -125,10 +125,10 @@ Update the `CFBundleLocalizations` array in the `Info.plist` at `ios/Runner/Info
     ...
 
     <key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>es</string>
-	</array>
+ <array>
+  <string>en</string>
+  <string>es</string>
+ </array>
 
     ...
 ```
@@ -137,14 +137,14 @@ Update the `CFBundleLocalizations` array in the `Info.plist` at `ios/Runner/Info
 
 1. For each supported locale, add a new ARB file in `lib/l10n/arb`.
 
-```
+```sh
 ├── l10n
 │   ├── arb
 │   │   ├── app_en.arb
 │   │   └── app_es.arb
 ```
 
-2. Add the translated strings to each `.arb` file:
+1. Add the translated strings to each `.arb` file:
 
 `app_en.arb`
 
