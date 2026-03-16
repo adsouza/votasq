@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:client/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 
 class AppBlocObserver extends BlocObserver {
@@ -28,9 +29,17 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true,
-  );
+  // Persistence is on by default for native platforms.
+  // On web it must be opted in and can fail (incognito, multi-tab).
+  if (kIsWeb) {
+    try {
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+      );
+    } on Exception catch (e) {
+      log('Web Firestore persistence unavailable: $e');
+    }
+  }
 
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);
