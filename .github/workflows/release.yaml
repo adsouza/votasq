@@ -42,7 +42,13 @@ jobs:
           ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
-        run: flutter build apk --flavor production --target lib/main_production.dart --release --dart-define=SERVER_URL=${{ env.SERVER_URL }} --split-per-abi
+        run: >
+          flutter build apk --flavor production --target lib/main_production.dart --release
+          --dart-define=SERVER_URL=${{ env.SERVER_URL }}
+          --split-per-abi
+          --split-debug-info=build/debug-info
+          --obfuscate
+          --tree-shake-icons
 
       - name: Build AAB
         env:
@@ -50,7 +56,12 @@ jobs:
           ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
-        run: flutter build appbundle --flavor production --target lib/main_production.dart --release --dart-define=SERVER_URL=${{ env.SERVER_URL }}
+        run: >
+          flutter build appbundle --flavor production --target lib/main_production.dart --release
+          --dart-define=SERVER_URL=${{ env.SERVER_URL }}
+          --split-debug-info=build/debug-info
+          --obfuscate
+          --tree-shake-icons
 
       - name: Collect Android artifacts
         run: |
