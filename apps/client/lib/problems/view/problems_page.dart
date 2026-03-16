@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
-import 'package:client/services/api_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:client/services/firestore_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,16 +13,9 @@ class ProblemsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) {
-        const baseUrl = kDebugMode
-            ? 'http://localhost:8080'
-            : String.fromEnvironment(
-                'SERVER_URL',
-                defaultValue: 'http://localhost:8080',
-              );
-        final cubit = ProblemsCubit(ApiService(baseUrl));
-        unawaited(cubit.loadProblems());
-        return cubit;
+      create: (context) {
+        final repo = context.read<FirestoreRepository>();
+        return ProblemsCubit(repo)..subscribe();
       },
       child: const ProblemsView(),
     );
@@ -84,8 +76,7 @@ class _ProblemsViewState extends State<ProblemsView> {
                   const Text('Failed to load problems'),
                   const SizedBox(height: 8),
                   ElevatedButton(
-                    onPressed: () =>
-                        context.read<ProblemsCubit>().loadProblems(),
+                    onPressed: () => context.read<ProblemsCubit>().subscribe(),
                     child: const Text('Retry'),
                   ),
                 ],

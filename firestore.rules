@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /problems/{problemId} {
+      allow read: if true;
+      allow create: if
+        request.resource.data.keys().hasAll(['description', 'votes', 'solved'])
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 80
+        && request.resource.data.votes is int
+        && request.resource.data.votes == 1
+        && request.resource.data.solved is bool
+        && request.resource.data.solved == false;
+      allow update: if
+        request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 80
+        && request.resource.data.votes is int
+        && request.resource.data.votes >= 0
+        && request.resource.data.solved is bool;
+    }
+  }
+}
