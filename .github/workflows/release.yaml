@@ -42,7 +42,7 @@ jobs:
           ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
-        run: flutter build apk --flavor production --target lib/main_production.dart --release --dart-define=SERVER_URL=${{ env.SERVER_URL }}
+        run: flutter build apk --flavor production --target lib/main_production.dart --release --dart-define=SERVER_URL=${{ env.SERVER_URL }} --split-per-abi
 
       - name: Build AAB
         env:
@@ -54,14 +54,14 @@ jobs:
 
       - name: Collect Android artifacts
         run: |
-          cp build/app/outputs/flutter-apk/app-production-release.apk .
+          cp build/app/outputs/flutter-apk/app-production-*-release.apk .
           cp build/app/outputs/bundle/productionRelease/app-production-release.aab .
 
       - uses: actions/upload-artifact@v4
         with:
           name: android
           path: |
-            apps/client/app-production-release.apk
+            apps/client/app-production-*-release.apk
             apps/client/app-production-release.aab
 
   web:
@@ -150,7 +150,7 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            app-production-release.apk
+            app-production-*-release.apk
             app-production-release.aab
             web-release.tar.gz
             macos-release.zip
