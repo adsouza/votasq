@@ -87,7 +87,7 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - run: flutter build web --target lib/main_production.dart --release --dart-define=SERVER_URL=
+      - run: flutter build web --target lib/main_production.dart --release --dart-define=SERVER_URL=https://api.votasq.example.com
 
       - name: Archive web build
         run: tar -czf web-release.tar.gz -C build/web .
