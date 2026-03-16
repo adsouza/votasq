@@ -11,7 +11,7 @@ RUN sed -i '/apps\/server/d' pubspec.yaml
 
 WORKDIR /app/apps/client
 RUN flutter pub get
-RUN flutter build web --release --target lib/main_production.dart
+RUN flutter build web --release --target lib/main_production.dart --dart-define=SERVER_URL=
 
 # Stage 2: Build the native server binary
 FROM dart:stable AS build
