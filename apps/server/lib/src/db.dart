@@ -47,6 +47,7 @@ class Db {
       fields: {
         'description': fs.Value(stringValue: problem.description),
         'votes': fs.Value(integerValue: '${problem.votes}'),
+        'solved': fs.Value(booleanValue: problem.solved),
       },
     );
     await _firestore.projects.databases.documents.patch(
@@ -78,6 +79,13 @@ class Db {
       fs.RunQueryRequest(
         structuredQuery: fs.StructuredQuery(
           from: [fs.CollectionSelector(collectionId: 'problems')],
+          where: fs.Filter(
+            fieldFilter: fs.FieldFilter(
+              field: fs.FieldReference(fieldPath: 'solved'),
+              op: 'EQUAL',
+              value: fs.Value(booleanValue: false),
+            ),
+          ),
           orderBy: [
             fs.Order(
               field: fs.FieldReference(fieldPath: 'votes'),
@@ -109,6 +117,7 @@ class Db {
           id: id,
           description: doc.fields!['description']!.stringValue!,
           votes: votes,
+          solved: doc.fields?['solved']?.booleanValue ?? false,
         ),
       );
       lastDocName = doc.name;
@@ -134,6 +143,7 @@ class Db {
       id: id,
       description: doc.fields!['description']!.stringValue!,
       votes: int.parse(doc.fields!['votes']!.integerValue!),
+      solved: doc.fields?['solved']?.booleanValue ?? false,
     );
   }
 }
