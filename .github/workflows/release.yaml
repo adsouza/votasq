@@ -65,8 +65,8 @@ jobs:
 
       - name: Collect Android artifacts
         run: |
-          cp build/app/outputs/flutter-apk/app-production-*-release.apk .
-          cp build/app/outputs/bundle/productionRelease/app-production-release.aab .
+          find build/app/outputs -name 'app-production-*-release.apk' -exec cp {} . \;
+          find build/app/outputs -name 'app-production-release.aab' -exec cp {} . \;
 
       - uses: actions/upload-artifact@v4
         with:
