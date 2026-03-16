@@ -103,7 +103,7 @@ jobs:
       - name: Archive macOS build
         run: |
           cd build/macos/Build/Products/Release-production
-          zip -r "$GITHUB_WORKSPACE/apps/client/macos-release.zip" *.app
+          zip -ry "$GITHUB_WORKSPACE/apps/client/macos-release.zip" *.app
 
       - uses: actions/upload-artifact@v4
         with:
