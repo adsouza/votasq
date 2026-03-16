@@ -108,8 +108,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
 
-      - run: flutter build macos --flavor production --target lib/main_production.dart --release --dart-define=SERVER_URL=${{ env.SERVER_URL }}
+      - run: >
+          flutter build macos --flavor production --target lib/main_production.dart --release
+          --dart-define=SERVER_URL=${{ env.SERVER_URL }}
+          --split-debug-info=build/debug-info
+          --obfuscate
+          --tree-shake-icons
 
       - name: Archive macOS build
         run: |
