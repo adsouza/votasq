@@ -17,7 +17,10 @@ class ProblemsPage extends StatelessWidget {
       create: (_) {
         const baseUrl = kDebugMode
             ? 'http://localhost:8080'
-            : 'https://votasq-269624680910.us-central1.run.app';
+            : String.fromEnvironment(
+                'SERVER_URL',
+                defaultValue: 'http://localhost:8080',
+              );
         final cubit = ProblemsCubit(ApiService(baseUrl));
         unawaited(cubit.loadProblems());
         return cubit;
