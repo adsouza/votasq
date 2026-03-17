@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:client/auth/auth.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
@@ -62,7 +63,26 @@ class _ProblemsViewState extends State<ProblemsView> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.problemsAppBarTitle)),
+      appBar: AppBar(
+        title: Text(l10n.problemsAppBarTitle),
+        actions: [
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, authState) {
+              if (authState.status == AuthStatus.authenticated) {
+                return IconButton(
+                  icon: const Icon(Icons.logout),
+                  tooltip: l10n.signOutButton,
+                  onPressed: () => context.read<AuthCubit>().signOut(),
+                );
+              }
+              return TextButton(
+                onPressed: () => context.read<AuthCubit>().signIn(),
+                child: Text(l10n.signInButton),
+              );
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<ProblemsCubit, ProblemsState>(
         builder: (context, state) {
           return switch (state.status) {
