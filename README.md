@@ -72,9 +72,9 @@ cd apps/client
 flutter run --flavor development --target lib/main_development.dart
 ```
 
-The client has three flavors (`development`, `staging`, `production`) with
-corresponding entry points (`lib/main_development.dart`, etc.). In debug mode
-the client connects to `localhost:8080`.
+The Flutter app has three flavors (`development`, `staging`, `production`)
+with corresponding entry points (`lib/main_development.dart`, etc.).
+It actually connects directly to Firestore instead of the server.
 
 ## Testing
 
