@@ -3,12 +3,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepository {
-  AuthRepository({FirebaseAuth? firebaseAuth, GoogleSignIn? googleSignIn})
-    : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-      _googleSignIn = kIsWeb ? null : (googleSignIn ?? GoogleSignIn());
+  AuthRepository({FirebaseAuth? firebaseAuth})
+    : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn? _googleSignIn;
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
@@ -20,14 +18,9 @@ class AuthRepository {
     if (kIsWeb) {
       return _firebaseAuth.signInWithPopup(GoogleAuthProvider());
     }
-    final googleUser = await _googleSignIn!.signIn();
-    if (googleUser == null) {
-      throw Exception('Google Sign-In was cancelled');
-    }
-    final googleAuth = await googleUser.authentication;
+    final account = await GoogleSignIn.instance.authenticate();
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+      idToken: account.authentication.idToken,
     );
     return _firebaseAuth.signInWithCredential(credential);
   }
@@ -38,7 +31,7 @@ class AuthRepository {
     } else {
       await Future.wait([
         _firebaseAuth.signOut(),
-        _googleSignIn!.signOut(),
+        GoogleSignIn.instance.signOut(),
       ]);
     }
   }
