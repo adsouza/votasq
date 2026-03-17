@@ -18,8 +18,24 @@ on:
       - "pubspec.yaml"
       - ".github/workflows/license_check.yaml"
 
+env:
+  FLUTTER_VERSION: "3.41.4"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   license_check:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/license_check.yml@v1
-    with:
-      allowed: "MIT,BSD-3-Clause,BSD-2-Clause,Apache-2.0"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - run: flutter pub get
+
+      - name: Install Very Good CLI
+        run: dart pub global activate very_good_cli
+
+      - name: Check licenses
+        run: very_good packages check licenses --allowed="MIT,BSD-3-Clause,BSD-2-Clause,Apache-2.0"
