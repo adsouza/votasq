@@ -68,7 +68,7 @@ jobs:
           find build/app/outputs -name 'app-production-*-release.apk' -exec cp {} . \;
           find build/app/outputs -name 'app-production-release.aab' -exec cp {} . \;
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android
           path: |
@@ -92,7 +92,7 @@ jobs:
       - name: Archive web build
         run: tar -czf web-release.tar.gz -C build/web .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web
           path: apps/client/web-release.tar.gz
@@ -141,7 +141,7 @@ jobs:
           cd build/macos/Build/Products/Release-production
           zip -ry "$GITHUB_WORKSPACE/apps/client/macos-release.zip" *.app
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: macos
           path: apps/client/macos-release.zip
@@ -168,7 +168,7 @@ jobs:
       - name: Archive Linux build
         run: tar -czf linux-release.tar.gz -C build/linux/x64/release/bundle .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux
           path: apps/client/linux-release.tar.gz
@@ -177,7 +177,7 @@ jobs:
     needs: [android, web, macos, linux]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           merge-multiple: true
 
