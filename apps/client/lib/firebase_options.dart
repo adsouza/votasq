@@ -29,10 +29,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return linux;
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -82,6 +79,16 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyCYSIsIXqC4u0MyaVd07wTG-nvAIdnl7Hs',
     appId: '1:269624680910:web:88c33e44cf910895124b9f',
+    messagingSenderId: '269624680910',
+    projectId: 'votasq',
+    authDomain: 'votasq-190fd.firebaseapp.com',
+    databaseURL: 'https://votasq-190fd.firebaseio.com',
+    storageBucket: 'votasq.firebasestorage.app',
+  );
+
+  static const FirebaseOptions linux = FirebaseOptions(
+    apiKey: 'AIzaSyCYSIsIXqC4u0MyaVd07wTG-nvAIdnl7Hs',
+    appId: '1:269624680910:web:33a9d10d05a7a28f124b9f',
     messagingSenderId: '269624680910',
     projectId: 'votasq',
     authDomain: 'votasq-190fd.firebaseapp.com',
