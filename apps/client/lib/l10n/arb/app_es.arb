@@ -3,5 +3,13 @@
     "problemsAppBarTitle": "Problemas",
     "@problemsAppBarTitle": {
         "description": "Texto mostrado en la AppBar de la página de problemas"
+    },
+    "signInButton": "Iniciar sesión",
+    "@signInButton": {
+        "description": "Etiqueta del botón de inicio de sesión"
+    },
+    "signOutButton": "Cerrar sesión",
+    "@signOutButton": {
+        "description": "Tooltip del botón de cierre de sesión"
     }
 }

@@ -26,6 +26,8 @@ melos gen                  # Runs build_runner across all packages that need it
 
 ### Format, Analyze, Test (mirrors CI)
 
+Always do this after making nontrivial changes:
+
 ```sh
 dart format --set-exit-if-changed apps packages
 flutter analyze apps packages
@@ -80,4 +82,5 @@ Uses Dart's `workspace` feature (pubspec.yaml) with Melos for script orchestrati
 
 ## CI
 
-GitHub Actions (`.github/workflows/main.yaml`): semantic PR check, spell check, format, analyze, test. Release workflow builds Android, Web, macOS, and Linux artifacts on version tags (`v*`).
+GitHub Actions (`.github/workflows/main.yaml`): semantic PR check, spell check, format, analyze, test.
+Release workflow builds Android, Web, macOS, and Linux artifacts on version tags (`v*`).

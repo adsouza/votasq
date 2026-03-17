@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDeuKG7R64HBXkVqVyZv-i4L6aR2r_G_oE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>269624680910</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>net.quikchange.votasq</string>
+	<key>PROJECT_ID</key>
+	<string>votasq</string>
+	<key>STORAGE_BUCKET</key>
+	<string>votasq.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>CLIENT_ID</key>
+	<string>269624680910-4ou35akn93js1rg2f8km3hiegrpft30u.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.269624680910-4ou35akn93js1rg2f8km3hiegrpft30u</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:269624680910:ios:3b37d6293e192f2b124b9f</string>
+	<key>DATABASE_URL</key>
+	<string>https://votasq-190fd.firebaseio.com</string>
+</dict>
+</plist>

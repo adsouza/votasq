@@ -3,5 +3,13 @@
     "problemsAppBarTitle": "Problems",
     "@problemsAppBarTitle": {
         "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "Sign In",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "Sign Out",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
     }
 }
