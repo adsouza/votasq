@@ -12,6 +12,8 @@ abstract class Problem with _$Problem {
     required String description,
     @Default(1) int votes,
     @Default(false) bool solved,
+    DateTime? createdAt,
+    DateTime? lastUpdatedAt,
   }) = _Problem;
 
   /// This factory is what the Server uses to encode and Client uses to decode

@@ -53,6 +53,8 @@ class FirestoreRepository {
       'description': description,
       'votes': 1,
       'solved': false,
+      'createdAt': FieldValue.serverTimestamp(),
+      'lastUpdatedAt': FieldValue.serverTimestamp(),
     });
   }
 
@@ -62,6 +64,7 @@ class FirestoreRepository {
       'description': problem.description,
       'votes': problem.votes,
       'solved': problem.solved,
+      'lastUpdatedAt': FieldValue.serverTimestamp(),
     });
   }
 
@@ -72,6 +75,8 @@ class FirestoreRepository {
       description: data['description'] as String,
       votes: (data['votes'] as num).toInt(),
       solved: data['solved'] as bool? ?? false,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp?)?.toDate(),
     );
   }
 }

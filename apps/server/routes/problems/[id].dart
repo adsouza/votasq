@@ -31,8 +31,8 @@ Future<Response> _put(RequestContext context, String id) async {
             )
             as Map<String, dynamic>;
     final problem = Problem.fromJson({...body, 'id': id});
-    await db.saveProblem(problem);
-    return Response.json(body: problem.toJson());
+    final updated = await db.updateProblem(problem);
+    return Response.json(body: updated.toJson());
   } on Exception {
     return Response(statusCode: 400);
   }

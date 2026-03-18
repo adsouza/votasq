@@ -41,13 +41,39 @@ class Db {
     return Db._(firestore, basePath);
   }
 
-  /// Persist a [Problem] document (create or overwrite).
-  Future<void> saveProblem(Problem problem) async {
+  /// Create a new [Problem] document, setting both timestamps.
+  Future<Problem> createProblem(Problem problem) async {
+    final now = DateTime.now().toUtc();
+    final timestamped = problem.copyWith(
+      createdAt: now,
+      lastUpdatedAt: now,
+    );
+    await _writeProblem(timestamped);
+    return timestamped;
+  }
+
+  /// Update an existing [Problem] document, setting `lastUpdatedAt`.
+  Future<Problem> updateProblem(Problem problem) async {
+    final now = DateTime.now().toUtc();
+    final timestamped = problem.copyWith(lastUpdatedAt: now);
+    await _writeProblem(timestamped);
+    return timestamped;
+  }
+
+  Future<void> _writeProblem(Problem problem) async {
     final document = fs.Document(
       fields: {
         'description': fs.Value(stringValue: problem.description),
         'votes': fs.Value(integerValue: '${problem.votes}'),
         'solved': fs.Value(booleanValue: problem.solved),
+        if (problem.createdAt != null)
+          'createdAt': fs.Value(
+            timestampValue: problem.createdAt!.toIso8601String(),
+          ),
+        if (problem.lastUpdatedAt != null)
+          'lastUpdatedAt': fs.Value(
+            timestampValue: problem.lastUpdatedAt!.toIso8601String(),
+          ),
       },
     );
     await _firestore.projects.databases.documents.patch(
@@ -118,6 +144,8 @@ class Db {
           description: doc.fields!['description']!.stringValue!,
           votes: votes,
           solved: doc.fields?['solved']?.booleanValue ?? false,
+          createdAt: _parseTimestamp(doc.fields?['createdAt']),
+          lastUpdatedAt: _parseTimestamp(doc.fields?['lastUpdatedAt']),
         ),
       );
       lastDocName = doc.name;
@@ -144,6 +172,13 @@ class Db {
       description: doc.fields!['description']!.stringValue!,
       votes: int.parse(doc.fields!['votes']!.integerValue!),
       solved: doc.fields?['solved']?.booleanValue ?? false,
+      createdAt: _parseTimestamp(doc.fields?['createdAt']),
+      lastUpdatedAt: _parseTimestamp(doc.fields?['lastUpdatedAt']),
     );
+  }
+
+  static DateTime? _parseTimestamp(fs.Value? value) {
+    final raw = value?.timestampValue;
+    return raw != null ? DateTime.parse(raw) : null;
   }
 }

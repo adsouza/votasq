@@ -47,8 +47,8 @@ Future<Response> _post(RequestContext context) async {
       'id': const Uuid().v4(),
       'votes': 1,
     });
-    await db.saveProblem(problem);
-    return Response.json(statusCode: 201, body: problem.toJson());
+    final created = await db.createProblem(problem);
+    return Response.json(statusCode: 201, body: created.toJson());
   } on Exception {
     return Response(statusCode: 400);
   }
