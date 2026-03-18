@@ -10,10 +10,10 @@ abstract class Problem with _$Problem {
   const factory Problem({
     required String id,
     required String description,
+    required DateTime createdAt,
+    required DateTime lastUpdatedAt,
     @Default(1) int votes,
     @Default(false) bool solved,
-    DateTime? createdAt,
-    DateTime? lastUpdatedAt,
   }) = _Problem;
 
   /// This factory is what the Server uses to encode and Client uses to decode

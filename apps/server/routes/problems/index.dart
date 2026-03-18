@@ -42,13 +42,16 @@ Future<Response> _post(RequestContext context) async {
               await context.request.body(),
             )
             as Map<String, dynamic>;
+    final now = DateTime.now().toUtc().toIso8601String();
     final problem = Problem.fromJson({
       ...body,
       'id': const Uuid().v4(),
       'votes': 1,
+      'createdAt': now,
+      'lastUpdatedAt': now,
     });
-    final created = await db.createProblem(problem);
-    return Response.json(statusCode: 201, body: created.toJson());
+    await db.saveProblem(problem);
+    return Response.json(statusCode: 201, body: problem.toJson());
   } on Exception {
     return Response(statusCode: 400);
   }

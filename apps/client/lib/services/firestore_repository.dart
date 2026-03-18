@@ -49,12 +49,13 @@ class FirestoreRepository {
   /// Create a new problem with a client-generated UUID.
   Future<void> addProblem({required String description}) async {
     final id = const Uuid().v4();
+    final now = DateTime.now().toUtc();
     await _problemsRef.doc(id).set({
       'description': description,
       'votes': 1,
       'solved': false,
-      'createdAt': FieldValue.serverTimestamp(),
-      'lastUpdatedAt': FieldValue.serverTimestamp(),
+      'createdAt': now,
+      'lastUpdatedAt': now,
     });
   }
 
@@ -64,7 +65,7 @@ class FirestoreRepository {
       'description': problem.description,
       'votes': problem.votes,
       'solved': problem.solved,
-      'lastUpdatedAt': FieldValue.serverTimestamp(),
+      'lastUpdatedAt': DateTime.now().toUtc(),
     });
   }
 
@@ -75,8 +76,8 @@ class FirestoreRepository {
       description: data['description'] as String,
       votes: (data['votes'] as num).toInt(),
       solved: data['solved'] as bool? ?? false,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
-      lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp?)?.toDate(),
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp).toDate(),
     );
   }
 }
