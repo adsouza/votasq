@@ -11,10 +11,11 @@ import 'package:shared/shared.dart';
 /// When the FIRESTORE_EMULATOR_HOST env var is set, connects to the local
 /// emulator without authentication.
 class Db {
-  Db._(this._firestore, this._basePath);
+  Db._(this._firestore, this._basePath, this._databasePath);
 
   final fs.FirestoreApi _firestore;
   final String _basePath;
+  final String _databasePath;
 
   /// Creates a [Db] instance authenticated via ADC, or unauthenticated when
   /// connecting to the Firestore emulator.
@@ -37,28 +38,31 @@ class Db {
       client,
       rootUrl: rootUrl ?? 'https://firestore.googleapis.com/',
     );
-    final basePath = 'projects/$projectId/databases/(default)/documents';
-    return Db._(firestore, basePath);
+    final databasePath = 'projects/$projectId/databases/(default)';
+    final basePath = '$databasePath/documents';
+    return Db._(firestore, basePath, databasePath);
   }
 
-  /// Persist a [Problem] document (create or overwrite).
+  /// Persist a [Problem] document and its revision snapshot atomically.
   Future<void> saveProblem(Problem problem) async {
-    final document = fs.Document(
-      fields: {
-        'description': fs.Value(stringValue: problem.description),
-        'votes': fs.Value(integerValue: '${problem.votes}'),
-        'solved': fs.Value(booleanValue: problem.solved),
-        'createdAt': fs.Value(
-          timestampValue: problem.createdAt.toIso8601String(),
-        ),
-        'lastUpdatedAt': fs.Value(
-          timestampValue: problem.lastUpdatedAt.toIso8601String(),
-        ),
-      },
+    final mainDoc = _problemToDocument(problem)
+      ..name = '$_basePath/problems/${problem.id}';
+    final revision = ProblemRevision(
+      description: problem.description,
+      version: problem.version,
+      archivedAt: problem.lastUpdatedAt,
     );
-    await _firestore.projects.databases.documents.patch(
-      document,
-      '$_basePath/problems/${problem.id}',
+    final revisionDoc = _revisionToDocument(revision)
+      ..name = '$_basePath/problems/${problem.id}/versions/${problem.version}';
+
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(
+        writes: [
+          fs.Write(update: mainDoc),
+          fs.Write(update: revisionDoc),
+        ],
+      ),
+      _databasePath,
     );
   }
 
@@ -124,6 +128,7 @@ class Db {
           description: doc.fields!['description']!.stringValue!,
           votes: votes,
           solved: doc.fields?['solved']?.booleanValue ?? false,
+          version: _parseVersion(doc.fields),
           createdAt: _parseTimestamp(doc.fields!['createdAt']!),
           lastUpdatedAt: _parseTimestamp(doc.fields!['lastUpdatedAt']!),
         ),
@@ -152,10 +157,84 @@ class Db {
       description: doc.fields!['description']!.stringValue!,
       votes: int.parse(doc.fields!['votes']!.integerValue!),
       solved: doc.fields?['solved']?.booleanValue ?? false,
+      version: _parseVersion(doc.fields),
       createdAt: _parseTimestamp(doc.fields!['createdAt']!),
       lastUpdatedAt: _parseTimestamp(doc.fields!['lastUpdatedAt']!),
     );
   }
+
+  /// Fetch all revisions of a [Problem], ordered by version ascending.
+  Future<List<ProblemRevision>> getVersions(String problemId) async {
+    final results = await _firestore.projects.databases.documents.runQuery(
+      fs.RunQueryRequest(
+        structuredQuery: fs.StructuredQuery(
+          from: [fs.CollectionSelector(collectionId: 'versions')],
+          orderBy: [
+            fs.Order(
+              field: fs.FieldReference(fieldPath: 'version'),
+              direction: 'ASCENDING',
+            ),
+          ],
+        ),
+      ),
+      '$_basePath/problems/$problemId',
+    );
+
+    final revisions = <ProblemRevision>[];
+    for (final result in results) {
+      final doc = result.document;
+      if (doc == null) continue;
+      revisions.add(
+        ProblemRevision(
+          description: doc.fields!['description']!.stringValue!,
+          version: _parseVersion(doc.fields),
+          archivedAt: _parseTimestamp(doc.fields!['archivedAt']!),
+          restoredFrom: _parseOptionalInt(doc.fields?['restoredFrom']),
+        ),
+      );
+    }
+    return revisions;
+  }
+
+  fs.Document _problemToDocument(Problem problem) {
+    return fs.Document(
+      fields: {
+        'description': fs.Value(stringValue: problem.description),
+        'votes': fs.Value(integerValue: '${problem.votes}'),
+        'solved': fs.Value(booleanValue: problem.solved),
+        'version': fs.Value(integerValue: '${problem.version}'),
+        'createdAt': fs.Value(
+          timestampValue: problem.createdAt.toIso8601String(),
+        ),
+        'lastUpdatedAt': fs.Value(
+          timestampValue: problem.lastUpdatedAt.toIso8601String(),
+        ),
+      },
+    );
+  }
+
+  fs.Document _revisionToDocument(ProblemRevision revision) {
+    return fs.Document(
+      fields: {
+        'description': fs.Value(stringValue: revision.description),
+        'version': fs.Value(integerValue: '${revision.version}'),
+        'archivedAt': fs.Value(
+          timestampValue: revision.archivedAt.toIso8601String(),
+        ),
+        if (revision.restoredFrom != null)
+          'restoredFrom': fs.Value(
+            integerValue: '${revision.restoredFrom}',
+          ),
+      },
+    );
+  }
+
+  /// Parse the version field, defaulting to 1 for backward compatibility.
+  static int _parseVersion(Map<String, fs.Value>? fields) =>
+      int.parse(fields?['version']?.integerValue ?? '1');
+
+  static int? _parseOptionalInt(fs.Value? value) =>
+      value?.integerValue != null ? int.parse(value!.integerValue!) : null;
 
   static DateTime _parseTimestamp(fs.Value value) =>
       DateTime.parse(value.timestampValue!);

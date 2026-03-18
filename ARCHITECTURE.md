@@ -28,7 +28,7 @@ Melos orchestrates cross-package scripts (`melos setup`, `melos gen`, etc.).
 `packages/shared` defines the data models used by both client and server.
 It has no Flutter dependency and no runtime logic beyond serialization.
 
-The core model is **Problem**:
+The core models are **Problem** and **ProblemRevision**:
 
 ```mermaid
 classDiagram
@@ -37,10 +37,27 @@ classDiagram
         +String id
         +String description
         +int votes = 1
-        +toJson() Map~String, dynamic~
-        +fromJson(Map~String, dynamic~)$ Problem
+        +bool solved = false
+        +int version = 1
+        +DateTime createdAt
+        +DateTime lastUpdatedAt
     }
+
+    class ProblemRevision {
+        <<freezed>>
+        +String description
+        +int version
+        +DateTime archivedAt
+        +int? restoredFrom
+    }
+
+    Problem "1" --> "*" ProblemRevision : versions subcollection
 ```
+
+`ProblemRevision` is an immutable record of a description change, stored in a
+Firestore subcollection (`problems/{id}/versions/{version}`). It intentionally
+omits mutable fields (`votes`, `solved`) and Problem-level fields (`id`,
+timestamps) that are irrelevant to the revision history.
 
 The `@freezed` annotation generates immutability, equality, `copyWith`, and
 pattern matching. `json_serializable` generates `toJson` / `fromJson`. Both
@@ -79,11 +96,12 @@ sequenceDiagram
 
 Dart Frog maps the filesystem to routes automatically:
 
-| File                         | Endpoint                                                    |
-|------------------------------|-------------------------------------------------------------|
-| `routes/index.dart`          | `GET /` — serves `public/index.html` (Flutter web build)    |
-| `routes/problems/index.dart` | `GET /problems` — paginated list, `POST /problems` — create |
-| `routes/problems/[id].dart`  | `GET /problems/:id` — read, `PUT /problems/:id` — update    |
+| File                                       | Endpoint                                                    |
+|--------------------------------------------|-------------------------------------------------------------|
+| `routes/index.dart`                        | `GET /` — serves `public/index.html` (Flutter web build)    |
+| `routes/problems/index.dart`               | `GET /problems` — paginated list, `POST /problems` — create |
+| `routes/problems/[id]/index.dart`          | `GET /problems/:id` — read, `PUT /problems/:id` — update    |
+| `routes/problems/[id]/versions/index.dart` | `GET /problems/:id/versions` — version history              |
 
 Each file exports an `onRequest` function that switches on HTTP method.
 
@@ -109,10 +127,15 @@ graph LR
 
 Key operations:
 
-- **saveProblem** — creates or overwrites a document in the `problems` collection
+- **saveProblem** — atomically writes the main `problems/{id}` document and a
+  `ProblemRevision` to the `problems/{id}/versions/{version}` subcollection
+  using a Firestore `commit` (atomic batched write). Every create or update
+  produces a new revision entry, providing an audit trail of description changes.
 - **getProblem** — fetches a single document by ID
 - **getProblems** — runs a `StructuredQuery` ordered by `votes DESC, __name__ ASC`
   with cursor-based pagination
+- **getVersions** — queries the `versions` subcollection for a given problem,
+  ordered by `version ASC`
 
 ### Pagination
 
@@ -159,15 +182,15 @@ It uses the BLoC pattern for state management.
 graph TD
     UI["ProblemsPage / ProblemsView<br/>(Flutter widgets)"]
     Cubit["ProblemsCubit<br/>(state management)"]
-    State["ProblemsState<br/>(status, problems, nextPageToken)"]
-    API["ApiService<br/>(HTTP client)"]
-    Server["Dart Frog Server"]
+    State["ProblemsState<br/>(status, problems, lastDocument, hasMore)"]
+    Repo["FirestoreRepository<br/>(FlutterFire cloud_firestore)"]
+    Firestore[(Cloud Firestore)]
 
     UI -->|"reads state via BlocBuilder"| State
-    UI -->|"calls loadProblems / loadMore"| Cubit
+    UI -->|"calls subscribe / loadMore"| Cubit
     Cubit -->|"emits"| State
-    Cubit -->|"calls"| API
-    API -->|"HTTP GET/POST/PUT"| Server
+    Cubit -->|"calls"| Repo
+    Repo -->|"real-time snapshots &<br/>batched writes"| Firestore
 ```
 
 ### State machine
@@ -175,18 +198,19 @@ graph TD
 ```mermaid
 stateDiagram-v2
     [*] --> initial
-    initial --> loading : loadProblems()
+    initial --> loading : subscribe()
     loading --> success : data received
     loading --> failure : exception
     success --> success : loadMore() appends
+    success --> success : real-time update
     success --> failure : loadMore() exception
-    failure --> loading : retry / loadProblems()
+    failure --> loading : retry / subscribe()
 ```
 
 `ProblemsState` holds the current `ProblemsStatus` enum (`initial`, `loading`,
-`success`, `failure`), the loaded `List<Problem>`, and an optional
-`nextPageToken`. The computed getter `hasMore` drives infinite scroll —
-when the user scrolls past 90% of the list, `loadMore()` fetches the next page
+`success`, `failure`), the loaded `List<Problem>`, an optional
+`lastDocument` (for cursor-based pagination), and a computed `hasMore` getter.
+When the user scrolls past 90% of the list, `loadMore()` fetches the next page
 and appends the results.
 
 ### Flavor system

@@ -3,4 +3,5 @@ library;
 
 export 'src/constants.dart';
 export 'src/models/problem.dart';
+export 'src/models/problem_revision.dart';
 export 'src/shared.dart';

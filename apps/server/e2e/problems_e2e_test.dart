@@ -99,6 +99,7 @@ void main() {
       final created = jsonDecode(response.body) as Map<String, dynamic>;
       expect(created['description'], desc);
       expect(created['votes'], 1, reason: 'New problems start with 1 vote');
+      expect(created['version'], 1, reason: 'New problems start at version 1');
       expect(created['id'], isNotEmpty, reason: 'Server should generate an ID');
       createdIds.add(created['id'] as String);
     }
@@ -158,13 +159,14 @@ void main() {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'description': updatedDescription,
-        'votes': 2,
+        'votes': 3,
       }),
     );
     expect(putResponse.statusCode, 200);
     final updated = jsonDecode(putResponse.body) as Map<String, dynamic>;
     expect(updated['description'], updatedDescription);
-    expect(updated['votes'], 2);
+    expect(updated['votes'], 3);
+    expect(updated['version'], 2, reason: 'Version should increment on update');
 
     // ── 5. Fetch again to verify persistence ──
     final verifyResponse = await client.get(
@@ -174,6 +176,36 @@ void main() {
     final verified = jsonDecode(verifyResponse.body) as Map<String, dynamic>;
     expect(verified['id'], targetId);
     expect(verified['description'], updatedDescription);
-    expect(verified['votes'], 2);
+    expect(verified['votes'], 3);
+    expect(verified['version'], 2);
+
+    // ── 6. Fetch version history ──
+    final versionsResponse = await client.get(
+      baseUrl.resolve('/problems/$targetId/versions'),
+    );
+    expect(versionsResponse.statusCode, 200);
+    final versionsBody =
+        jsonDecode(versionsResponse.body) as Map<String, dynamic>;
+    final versions = (versionsBody['data'] as List)
+        .cast<Map<String, dynamic>>();
+    expect(versions.length, 2, reason: 'Should have 2 versions after 1 update');
+
+    // Revisions should not contain Problem-specific fields.
+    expect(versions[0].containsKey('id'), isFalse);
+    expect(versions[0].containsKey('votes'), isFalse);
+    expect(versions[0].containsKey('solved'), isFalse);
+    expect(versions[0].containsKey('createdAt'), isFalse);
+    expect(versions[0].containsKey('lastUpdatedAt'), isFalse);
+
+    // Version 1: original state.
+    expect(versions[0]['version'], 1);
+    expect(versions[0]['description'], descriptions.first);
+    expect(versions[0]['archivedAt'], isNotNull);
+    expect(versions[0]['restoredFrom'], isNull);
+
+    // Version 2: updated state.
+    expect(versions[1]['version'], 2);
+    expect(versions[1]['description'], updatedDescription);
+    expect(versions[1]['archivedAt'], isNotNull);
   });
 }

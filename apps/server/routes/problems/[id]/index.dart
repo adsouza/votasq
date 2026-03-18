@@ -36,6 +36,7 @@ Future<Response> _put(RequestContext context, String id) async {
     final problem = Problem.fromJson({
       ...body,
       'id': id,
+      'version': existing.version + 1,
       'createdAt': existing.createdAt.toIso8601String(),
       'lastUpdatedAt': DateTime.now().toUtc().toIso8601String(),
     });

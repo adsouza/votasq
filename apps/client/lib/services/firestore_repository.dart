@@ -47,26 +47,61 @@ class FirestoreRepository {
   }
 
   /// Create a new problem with a client-generated UUID.
+  /// Uses a batched write to atomically create the main document and its
+  /// first revision snapshot.
   Future<void> addProblem({required String description}) async {
     final id = const Uuid().v4();
     final now = DateTime.now().toUtc();
-    await _problemsRef.doc(id).set({
+    const version = 1;
+    final problemData = {
       'description': description,
       'votes': 1,
       'solved': false,
+      'version': version,
       'createdAt': now,
       'lastUpdatedAt': now,
-    });
+    };
+    final revisionData = {
+      'description': description,
+      'version': version,
+      'archivedAt': now,
+    };
+
+    final batch = _firestore.batch()
+      ..set(_problemsRef.doc(id), problemData)
+      ..set(
+        _problemsRef.doc(id).collection('versions').doc('$version'),
+        revisionData,
+      );
+    await batch.commit();
   }
 
   /// Update a problem's fields.
+  /// Uses a batched write to atomically update the main document and create
+  /// a new revision snapshot.
   Future<void> updateProblem(Problem problem) async {
-    await _problemsRef.doc(problem.id).update({
+    final now = DateTime.now().toUtc();
+    final newVersion = problem.version + 1;
+    final mainData = {
       'description': problem.description,
       'votes': problem.votes,
       'solved': problem.solved,
-      'lastUpdatedAt': DateTime.now().toUtc(),
-    });
+      'version': newVersion,
+      'lastUpdatedAt': now,
+    };
+    final revisionData = {
+      'description': problem.description,
+      'version': newVersion,
+      'archivedAt': now,
+    };
+
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(problem.id), mainData)
+      ..set(
+        _problemsRef.doc(problem.id).collection('versions').doc('$newVersion'),
+        revisionData,
+      );
+    await batch.commit();
   }
 
   Problem _docToProblem(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -76,6 +111,7 @@ class FirestoreRepository {
       description: data['description'] as String,
       votes: (data['votes'] as num).toInt(),
       solved: data['solved'] as bool? ?? false,
+      version: (data['version'] as num?)?.toInt() ?? 1,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp).toDate(),
     );
