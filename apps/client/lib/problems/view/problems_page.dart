@@ -32,6 +32,7 @@ class ProblemsView extends StatefulWidget {
 
 class _ProblemsViewState extends State<ProblemsView> {
   final _scrollController = ScrollController();
+  final _addController = TextEditingController();
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
+    _addController.dispose();
     super.dispose();
   }
 
@@ -51,6 +53,58 @@ class _ProblemsViewState extends State<ProblemsView> {
     if (_isNearBottom) {
       unawaited(context.read<ProblemsCubit>().loadMore());
     }
+  }
+
+  bool get _hasEnoughWords =>
+      _addController.text
+          .trim()
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty)
+          .length >=
+      3;
+
+  void _submitProblem() {
+    if (!_hasEnoughWords) return;
+    final text = _addController.text.trim();
+    unawaited(context.read<ProblemsCubit>().addProblem(text));
+    _addController.clear();
+  }
+
+  Widget _buildAddProblemRow(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _addController,
+              builder: (context, value, child) {
+                return TextField(
+                  controller: _addController,
+                  maxLength: 80,
+                  decoration: InputDecoration(
+                    hintText: l10n.addProblemHint,
+                  ),
+                  onSubmitted: _hasEnoughWords ? (_) => _submitProblem() : null,
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _addController,
+            builder: (context, value, child) {
+              return ElevatedButton(
+                onPressed: _hasEnoughWords ? _submitProblem : null,
+                child: Text(l10n.addProblemButton),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   bool get _isNearBottom {
@@ -83,47 +137,62 @@ class _ProblemsViewState extends State<ProblemsView> {
           ),
         ],
       ),
-      body: BlocBuilder<ProblemsCubit, ProblemsState>(
-        builder: (context, state) {
-          return switch (state.status) {
-            ProblemsStatus.initial || ProblemsStatus.loading
-                when state.problems.isEmpty =>
-              const Center(child: CircularProgressIndicator()),
-            ProblemsStatus.failure when state.problems.isEmpty => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Failed to load problems'),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => context.read<ProblemsCubit>().subscribe(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-            _ => ListView.builder(
-              controller: _scrollController,
-              itemCount: state.problems.length + (state.hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index >= state.problems.length) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
+      body: Column(
+        children: [
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, authState) {
+              if (authState.status == AuthStatus.authenticated) {
+                return _buildAddProblemRow(context);
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          Expanded(
+            child: BlocBuilder<ProblemsCubit, ProblemsState>(
+              builder: (context, state) {
+                return switch (state.status) {
+                  ProblemsStatus.initial || ProblemsStatus.loading
+                      when state.problems.isEmpty =>
+                    const Center(child: CircularProgressIndicator()),
+                  ProblemsStatus.failure when state.problems.isEmpty => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Failed to load problems'),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () =>
+                              context.read<ProblemsCubit>().subscribe(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
                     ),
-                  );
-                }
-                final problem = state.problems[index];
-                return ListTile(
-                  title: Text(
-                    '${problem.description} (${problem.votes})',
                   ),
-                );
+                  _ => ListView.builder(
+                    controller: _scrollController,
+                    itemCount: state.problems.length + (state.hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= state.problems.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      final problem = state.problems[index];
+                      return ListTile(
+                        title: Text(
+                          '${problem.description} (${problem.votes})',
+                        ),
+                      );
+                    },
+                  ),
+                };
               },
             ),
-          };
-        },
+          ),
+        ],
       ),
     );
   }

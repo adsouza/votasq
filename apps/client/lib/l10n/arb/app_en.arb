@@ -11,5 +11,13 @@
     "signOutButton": "Sign Out",
     "@signOutButton": {
         "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "Contribute your own problem here",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "Add",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
     }
 }

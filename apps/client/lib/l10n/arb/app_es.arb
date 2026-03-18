@@ -11,5 +11,13 @@
     "signOutButton": "Cerrar sesión",
     "@signOutButton": {
         "description": "Tooltip del botón de cierre de sesión"
+    },
+    "addProblemHint": "Agregar tu propio problema aquí",
+    "@addProblemHint": {
+        "description": "Texto de marcador del campo de texto para agregar problema"
+    },
+    "addProblemButton": "Crear",
+    "@addProblemButton": {
+        "description": "Etiqueta del botón para agregar problema"
     }
 }
