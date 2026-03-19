@@ -146,35 +146,8 @@ jobs:
           name: macos
           path: apps/client/macos-release.zip
 
-  linux:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/client
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - name: Install Linux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build libgtk-3-dev
-
-      - run: flutter build linux --target lib/main_production.dart --release --dart-define=SERVER_URL=${{ env.SERVER_URL }}
-
-      - name: Archive Linux build
-        run: tar -czf linux-release.tar.gz -C build/linux/x64/release/bundle .
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: linux
-          path: apps/client/linux-release.tar.gz
-
   create-release:
-    needs: [android, web, macos, linux]
+    needs: [android, web, macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v8
@@ -190,4 +163,3 @@ jobs:
             app-production-release.aab
             web-release.tar.gz
             macos-release.zip
-            linux-release.tar.gz
