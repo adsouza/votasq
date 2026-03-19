@@ -55,9 +55,12 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }
 
   /// Create a new problem with the given description.
-  Future<void> addProblem(String description) async {
+  Future<void> addProblem({
+    required String description,
+    required String ownerId,
+  }) async {
     try {
-      await _repo.addProblem(description: description);
+      await _repo.addProblem(description: description, ownerId: ownerId);
     } on Exception catch (e, st) {
       log('addProblem failed: $e', stackTrace: st);
     }

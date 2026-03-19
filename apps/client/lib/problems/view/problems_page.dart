@@ -66,7 +66,13 @@ class _ProblemsViewState extends State<ProblemsView> {
   void _submitProblem() {
     if (!_hasEnoughWords) return;
     final text = _addController.text.trim();
-    unawaited(context.read<ProblemsCubit>().addProblem(text));
+    final userId = context.read<AuthCubit>().state.userId!;
+    unawaited(
+      context.read<ProblemsCubit>().addProblem(
+        description: text,
+        ownerId: userId,
+      ),
+    );
     _addController.clear();
   }
 

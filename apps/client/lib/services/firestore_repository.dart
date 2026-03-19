@@ -49,12 +49,16 @@ class FirestoreRepository {
   /// Create a new problem with a client-generated UUID.
   /// Uses a batched write to atomically create the main document and its
   /// first revision snapshot.
-  Future<void> addProblem({required String description}) async {
+  Future<void> addProblem({
+    required String description,
+    required String ownerId,
+  }) async {
     final id = const Uuid().v4();
     final now = DateTime.now().toUtc();
     const version = 1;
     final problemData = {
       'description': description,
+      'ownerId': ownerId,
       'votes': 1,
       'solved': false,
       'version': version,
@@ -109,6 +113,7 @@ class FirestoreRepository {
     return Problem(
       id: doc.id,
       description: data['description'] as String,
+      ownerId: data['ownerId'] as String,
       votes: (data['votes'] as num).toInt(),
       solved: data['solved'] as bool? ?? false,
       version: (data['version'] as num?)?.toInt() ?? 1,

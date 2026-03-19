@@ -126,6 +126,7 @@ class Db {
         Problem(
           id: id,
           description: doc.fields!['description']!.stringValue!,
+          ownerId: doc.fields!['ownerId']!.stringValue!,
           votes: votes,
           solved: doc.fields?['solved']?.booleanValue ?? false,
           version: _parseVersion(doc.fields),
@@ -155,6 +156,7 @@ class Db {
     return Problem(
       id: id,
       description: doc.fields!['description']!.stringValue!,
+      ownerId: doc.fields!['ownerId']!.stringValue!,
       votes: int.parse(doc.fields!['votes']!.integerValue!),
       solved: doc.fields?['solved']?.booleanValue ?? false,
       version: _parseVersion(doc.fields),
@@ -200,6 +202,7 @@ class Db {
     return fs.Document(
       fields: {
         'description': fs.Value(stringValue: problem.description),
+        'ownerId': fs.Value(stringValue: problem.ownerId),
         'votes': fs.Value(integerValue: '${problem.votes}'),
         'solved': fs.Value(booleanValue: problem.solved),
         'version': fs.Value(integerValue: '${problem.version}'),

@@ -8,14 +8,15 @@ import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
 /// End-to-end integration test that exercises the /problems endpoints
-/// against a live Dart Frog server backed by the Firebase Firestore emulator.
+/// against a live Dart Frog server backed by the Firebase emulators.
 ///
 /// Prerequisites:
-///   firebase emulators:start --only firestore
-///   (Emulator must be running on localhost:8081)
+///   firebase emulators:start --only auth,firestore
+///   (Auth emulator on localhost:9099, Firestore emulator on localhost:8081)
 void main() {
   Process? serverProcess;
   late Uri baseUrl;
+  late String uid;
   final client = http.Client();
 
   setUpAll(() async {
@@ -38,6 +39,22 @@ void main() {
     if (!emulatorReady) {
       fail('Firestore emulator not reachable at $emulatorHost');
     }
+
+    // Sign in anonymously via the Auth emulator to get a real UID.
+    const authHost = 'localhost:9099';
+    final signUpUrl = Uri.parse(
+      'http://$authHost/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key',
+    );
+    final authResponse = await http.post(
+      signUpUrl,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'returnSecureToken': true}),
+    );
+    if (authResponse.statusCode != 200) {
+      fail('Anonymous sign-in failed: ${authResponse.body}');
+    }
+    final authBody = jsonDecode(authResponse.body) as Map<String, dynamic>;
+    uid = authBody['localId'] as String;
 
     // Start the Dart Frog server pointing at the emulator.
     serverProcess = await Process.start(
@@ -91,7 +108,7 @@ void main() {
       final response = await client.post(
         baseUrl.resolve('/problems'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'description': desc}),
+        body: jsonEncode({'description': desc, 'ownerId': uid}),
       );
 
       expect(response.statusCode, 201, reason: 'POST should return 201');

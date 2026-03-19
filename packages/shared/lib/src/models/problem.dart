@@ -12,6 +12,7 @@ abstract class Problem with _$Problem {
     required String description,
     required DateTime createdAt,
     required DateTime lastUpdatedAt,
+    required String ownerId,
     @Default(1) int votes,
     @Default(false) bool solved,
     @Default(1) int version,
