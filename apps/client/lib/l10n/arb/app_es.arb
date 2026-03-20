@@ -23,5 +23,17 @@
     "editProblemHint": "Editar descripción del problema",
     "@editProblemHint": {
         "description": "Texto de marcador del campo de texto para editar problema"
+    },
+    "feedbackButton": "Enviar comentarios",
+    "@feedbackButton": {
+        "description": "Tooltip del botón de comentarios en la barra de la aplicación"
+    },
+    "feedbackSuccess": "¡Gracias por tus comentarios!",
+    "@feedbackSuccess": {
+        "description": "Mensaje del SnackBar después de enviar comentarios exitosamente"
+    },
+    "feedbackError": "No se pudieron enviar los comentarios. Inténtalo de nuevo.",
+    "@feedbackError": {
+        "description": "Mensaje del SnackBar cuando falla el envío de comentarios"
     }
 }

@@ -23,5 +23,17 @@
     "editProblemHint": "Edit problem description",
     "@editProblemHint": {
         "description": "Placeholder text for the inline edit text field"
+    },
+    "feedbackButton": "Send feedback",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "Thank you for your feedback!",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "Could not send feedback. Please try again.",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
     }
 }

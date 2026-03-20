@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:client/auth/auth.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
+import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -227,6 +230,44 @@ class _ProblemsViewState extends State<ProblemsView> {
       appBar: AppBar(
         title: Text(l10n.problemsAppBarTitle),
         actions: [
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, authState) {
+              if (authState.status != AuthStatus.authenticated) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                icon: const Text('🗣️', style: TextStyle(fontSize: 24)),
+                tooltip: l10n.feedbackButton,
+                onPressed: () {
+                  BetterFeedback.of(context).show((feedback) async {
+                    try {
+                      await context.read<FeedbackRepository>().submit(
+                        text: feedback.text,
+                        screenshot: feedback.screenshot,
+                        userId: context.read<AuthCubit>().state.userId!,
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.feedbackSuccess),
+                          ),
+                        );
+                      }
+                    } on Exception catch (e) {
+                      log('Feedback submission failed: $e');
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.feedbackError),
+                          ),
+                        );
+                      }
+                    }
+                  });
+                },
+              );
+            },
+          ),
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
               if (authState.status == AuthStatus.authenticated) {

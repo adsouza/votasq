@@ -33,5 +33,16 @@ service cloud.firestore {
           && request.resource.data.archivedAt is timestamp;
       }
     }
+
+    match /feedback/{feedbackId} {
+      allow create: if
+        request.auth != null
+        && request.resource.data.keys().hasAll(['text', 'screenshotPath', 'userId', 'submittedAt'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.screenshotPath is string
+        && request.resource.data.userId is string
+        && request.resource.data.userId == request.auth.uid;
+    }
   }
 }
