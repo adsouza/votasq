@@ -40,6 +40,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   final _addController = TextEditingController();
   final _editController = TextEditingController();
   final _editFocusNode = FocusNode();
+  static final _editTapRegionGroupId = Object();
   String? _editingProblemId;
 
   @override
@@ -166,6 +167,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   Widget _buildEditTile(Problem problem) {
     final l10n = context.l10n;
     return TapRegion(
+      groupId: _editTapRegionGroupId,
       onTapOutside: (_) => _cancelEdit(),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -235,36 +237,39 @@ class _ProblemsViewState extends State<ProblemsView> {
               if (authState.status != AuthStatus.authenticated) {
                 return const SizedBox.shrink();
               }
-              return IconButton(
-                icon: const Text('🗣️', style: TextStyle(fontSize: 24)),
-                tooltip: l10n.feedbackButton,
-                onPressed: () {
-                  BetterFeedback.of(context).show((feedback) async {
-                    try {
-                      await context.read<FeedbackRepository>().submit(
-                        text: feedback.text,
-                        screenshot: feedback.screenshot,
-                        userId: context.read<AuthCubit>().state.userId!,
-                      );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.feedbackSuccess),
-                          ),
+              return TapRegion(
+                groupId: _editTapRegionGroupId,
+                child: IconButton(
+                  icon: const Text('🗣️', style: TextStyle(fontSize: 24)),
+                  tooltip: l10n.feedbackButton,
+                  onPressed: () {
+                    BetterFeedback.of(context).show((feedback) async {
+                      try {
+                        await context.read<FeedbackRepository>().submit(
+                          text: feedback.text,
+                          screenshot: feedback.screenshot,
+                          userId: context.read<AuthCubit>().state.userId!,
                         );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.feedbackSuccess),
+                            ),
+                          );
+                        }
+                      } on Exception catch (e) {
+                        log('Feedback submission failed: $e');
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.feedbackError),
+                            ),
+                          );
+                        }
                       }
-                    } on Exception catch (e) {
-                      log('Feedback submission failed: $e');
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.feedbackError),
-                          ),
-                        );
-                      }
-                    }
-                  });
-                },
+                    });
+                  },
+                ),
               );
             },
           ),
