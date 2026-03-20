@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:shared/shared.dart';
 
 class ProblemsCubit extends Cubit<ProblemsState> {
   ProblemsCubit(this._repo) : super(const ProblemsState());
@@ -63,6 +64,15 @@ class ProblemsCubit extends Cubit<ProblemsState> {
       await _repo.addProblem(description: description, ownerId: ownerId);
     } on Exception catch (e, st) {
       log('addProblem failed: $e', stackTrace: st);
+    }
+  }
+
+  /// Update an existing problem.
+  Future<void> updateProblem(Problem problem) async {
+    try {
+      await _repo.updateProblem(problem);
+    } on Exception catch (e, st) {
+      log('updateProblem failed: $e', stackTrace: st);
     }
   }
 

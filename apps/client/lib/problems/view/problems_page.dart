@@ -6,7 +6,9 @@ import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/shared.dart';
 
 class ProblemsPage extends StatelessWidget {
   const ProblemsPage({super.key});
@@ -33,6 +35,9 @@ class ProblemsView extends StatefulWidget {
 class _ProblemsViewState extends State<ProblemsView> {
   final _scrollController = ScrollController();
   final _addController = TextEditingController();
+  final _editController = TextEditingController();
+  final _editFocusNode = FocusNode();
+  String? _editingProblemId;
 
   @override
   void initState() {
@@ -46,6 +51,8 @@ class _ProblemsViewState extends State<ProblemsView> {
       ..removeListener(_onScroll)
       ..dispose();
     _addController.dispose();
+    _editController.dispose();
+    _editFocusNode.dispose();
     super.dispose();
   }
 
@@ -55,16 +62,11 @@ class _ProblemsViewState extends State<ProblemsView> {
     }
   }
 
-  bool get _hasEnoughWords =>
-      _addController.text
-          .trim()
-          .split(RegExp(r'\s+'))
-          .where((w) => w.isNotEmpty)
-          .length >=
-      3;
+  static bool _hasEnoughWords(String text) =>
+      text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 3;
 
   void _submitProblem() {
-    if (!_hasEnoughWords) return;
+    if (!_hasEnoughWords(_addController.text)) return;
     final text = _addController.text.trim();
     final userId = context.read<AuthCubit>().state.userId!;
     unawaited(
@@ -93,7 +95,9 @@ class _ProblemsViewState extends State<ProblemsView> {
                   decoration: InputDecoration(
                     hintText: l10n.addProblemHint,
                   ),
-                  onSubmitted: _hasEnoughWords ? (_) => _submitProblem() : null,
+                  onSubmitted: _hasEnoughWords(_addController.text)
+                      ? (_) => _submitProblem()
+                      : null,
                 );
               },
             ),
@@ -103,12 +107,109 @@ class _ProblemsViewState extends State<ProblemsView> {
             valueListenable: _addController,
             builder: (context, value, child) {
               return ElevatedButton(
-                onPressed: _hasEnoughWords ? _submitProblem : null,
+                onPressed: _hasEnoughWords(_addController.text)
+                    ? _submitProblem
+                    : null,
                 child: Text(l10n.addProblemButton),
               );
             },
           ),
         ],
+      ),
+    );
+  }
+
+  void _startEdit(Problem problem) {
+    setState(() {
+      _editingProblemId = problem.id;
+      _editController.text = problem.description;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _editFocusNode.requestFocus();
+    });
+  }
+
+  void _cancelEdit() {
+    setState(() {
+      _editingProblemId = null;
+    });
+  }
+
+  void _submitEdit(Problem problem) {
+    if (!_hasEnoughWords(_editController.text)) return;
+    final newDescription = _editController.text.trim();
+    if (newDescription != problem.description) {
+      unawaited(
+        context.read<ProblemsCubit>().updateProblem(
+          problem.copyWith(description: newDescription),
+        ),
+      );
+    }
+    _cancelEdit();
+  }
+
+  Widget _buildReadTile(Problem problem, {required bool showEditButton}) {
+    return ListTile(
+      title: Text('${problem.description} (${problem.votes})'),
+      trailing: showEditButton
+          ? TextButton(
+              onPressed: () => _startEdit(problem),
+              child: const Text('🖊️'),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildEditTile(Problem problem) {
+    final l10n = context.l10n;
+    return TapRegion(
+      onTapOutside: (_) => _cancelEdit(),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: KeyboardListener(
+          focusNode: FocusNode(),
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent &&
+                event.logicalKey == LogicalKeyboardKey.escape) {
+              _cancelEdit();
+            }
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _editController,
+                  builder: (context, value, child) {
+                    return TextField(
+                      controller: _editController,
+                      focusNode: _editFocusNode,
+                      maxLength: 80,
+                      decoration: InputDecoration(
+                        hintText: l10n.editProblemHint,
+                      ),
+                      onSubmitted: _hasEnoughWords(_editController.text)
+                          ? (_) => _submitEdit(problem)
+                          : null,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _editController,
+                builder: (context, value, child) {
+                  return TextButton(
+                    onPressed: _hasEnoughWords(_editController.text)
+                        ? () => _submitEdit(problem)
+                        : null,
+                    child: const Text('✓'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -187,10 +288,15 @@ class _ProblemsViewState extends State<ProblemsView> {
                         );
                       }
                       final problem = state.problems[index];
-                      return ListTile(
-                        title: Text(
-                          '${problem.description} (${problem.votes})',
-                        ),
+                      if (_editingProblemId == problem.id) {
+                        return _buildEditTile(problem);
+                      }
+                      final userId = context.read<AuthCubit>().state.userId;
+                      final isOwner =
+                          userId != null && userId == problem.ownerId;
+                      return _buildReadTile(
+                        problem,
+                        showEditButton: isOwner,
                       );
                     },
                   ),

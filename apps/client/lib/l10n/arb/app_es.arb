@@ -19,5 +19,9 @@
     "addProblemButton": "Crear",
     "@addProblemButton": {
         "description": "Etiqueta del botón para agregar problema"
+    },
+    "editProblemHint": "Editar descripción del problema",
+    "@editProblemHint": {
+        "description": "Texto de marcador del campo de texto para editar problema"
     }
 }

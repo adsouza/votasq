@@ -19,5 +19,9 @@
     "addProblemButton": "Add",
     "@addProblemButton": {
         "description": "Label for the add-problem button"
+    },
+    "editProblemHint": "Edit problem description",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
     }
 }
