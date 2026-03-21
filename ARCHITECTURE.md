@@ -232,7 +232,7 @@ the new filter.
 Problems are scoped by geography via a `geoscope` field — a slash-delimited
 hierarchical string (e.g. `"us/ny/nyc"`, `"eu/gb/eng/london"`, `"/"` for
 global). The hierarchy supports up to 6 levels: root, continent, country,
-region, city, neighbourhood.
+region, city, neighborhood.
 
 ```mermaid
 graph TD
