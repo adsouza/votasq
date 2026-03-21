@@ -1,6 +1,6 @@
 {
     "@@locale": "es",
-    "problemsAppBarTitle": "Problemas",
+    "problemsAppBarTitle": "Problemas que podemos resolver juntos",
     "@problemsAppBarTitle": {
         "description": "Texto mostrado en la AppBar de la página de problemas"
     },
