@@ -22,7 +22,10 @@ service cloud.firestore {
         && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 80
         && request.resource.data.geoscope is string
-        && request.resource.data.geoscope == resource.data.geoscope
+        && request.resource.data.geoscope.size() > 0
+        && request.resource.data.geoscope.size() <= 72
+        && (request.resource.data.geoscope == resource.data.geoscope
+            || (request.auth != null && request.auth.uid == resource.data.ownerId))
         && request.resource.data.votes is int
         && request.resource.data.votes >= 0
         && request.resource.data.solved is bool

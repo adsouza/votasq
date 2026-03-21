@@ -54,6 +54,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   static final _editTapRegionGroupId = Object();
   String? _editingProblemId;
   String? _addProblemGeoscope;
+  String? _editProblemGeoscope;
 
   @override
   void initState() {
@@ -122,19 +123,35 @@ class _ProblemsViewState extends State<ProblemsView> {
               },
             ),
           ),
-          ..._buildGeoscopeDropdown(context, l10n),
-          const SizedBox(width: 8),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _addController,
             builder: (context, value, child) {
-              return Tooltip(
-                message: l10n.addProblemTooltip,
-                child: ElevatedButton(
-                  onPressed: _hasEnoughWords(_addController.text)
-                      ? _submitProblem
-                      : null,
-                  child: Text(l10n.addProblemButton),
-                ),
+              final hasWords = _hasEnoughWords(_addController.text);
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ..._buildGeoscopeDropdown(
+                    geoscope: context
+                        .read<GeoscopeCubit>()
+                        .state
+                        .selectedGeoscope,
+                    currentValue:
+                        _addProblemGeoscope ??
+                        context.read<GeoscopeCubit>().state.selectedGeoscope,
+                    onChanged: (value) => setState(() {
+                      _addProblemGeoscope = value;
+                    }),
+                    enabled: hasWords,
+                  ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: l10n.addProblemTooltip,
+                    child: ElevatedButton(
+                      onPressed: hasWords ? _submitProblem : null,
+                      child: Text(l10n.addProblemButton),
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -143,16 +160,21 @@ class _ProblemsViewState extends State<ProblemsView> {
     );
   }
 
-  List<Widget> _buildGeoscopeDropdown(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  /// Build a geoscope dropdown for the given [geoscope] value.
+  /// [currentValue] is the currently selected ID, [onChanged] is called when
+  /// the user picks a new level. Returns an empty list if the geoscope is
+  /// global (`"/"`), hiding the dropdown entirely.
+  List<Widget> _buildGeoscopeDropdown({
+    required String geoscope,
+    required String currentValue,
+    required ValueChanged<String> onChanged,
+    bool enabled = true,
+  }) {
+    if (geoscope == '/') return [];
+    final l10n = context.l10n;
     final geoState = context.read<GeoscopeCubit>().state;
-    final selectedGeoscope = geoState.selectedGeoscope;
-    if (selectedGeoscope == '/') return [];
-
     final ancestorIds = FirestoreRepository.geoscopeAncestors(
-      selectedGeoscope,
+      geoscope,
     ).reversed.toList();
     final labelMap = {
       for (final g in geoState.availableGeoscopes) g.id: g.label,
@@ -163,23 +185,27 @@ class _ProblemsViewState extends State<ProblemsView> {
       return DropdownMenuItem(value: id, child: Text(label));
     }).toList();
 
-    final currentValue = _addProblemGeoscope ?? ancestorIds.first;
+    // If currentValue isn't in the ancestor list (e.g. problem was created
+    // under a different geoscope), fall back to the most granular ancestor.
+    final effectiveValue = ancestorIds.contains(currentValue)
+        ? currentValue
+        : ancestorIds.first;
 
     return [
       const SizedBox(width: 8),
       DropdownButton<String>(
-        value: currentValue,
+        value: effectiveValue,
         items: items,
         selectedItemBuilder: (_) => ancestorIds.map((id) {
           if (id == '/') return Text(l10n.geoscopeGlobal);
           return Text(id.split('/').last);
         }).toList(),
-        onChanged: (value) {
-          if (value == null) return;
-          setState(() {
-            _addProblemGeoscope = value;
-          });
-        },
+        onChanged: enabled
+            ? (value) {
+                if (value == null) return;
+                onChanged(value);
+              }
+            : null,
       ),
     ];
   }
@@ -187,6 +213,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   void _startEdit(Problem problem) {
     setState(() {
       _editingProblemId = problem.id;
+      _editProblemGeoscope = problem.geoscope;
       _editController.text = problem.description;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -197,16 +224,22 @@ class _ProblemsViewState extends State<ProblemsView> {
   void _cancelEdit() {
     setState(() {
       _editingProblemId = null;
+      _editProblemGeoscope = null;
     });
   }
 
   void _submitEdit(Problem problem) {
     if (!_hasEnoughWords(_editController.text)) return;
     final newDescription = _editController.text.trim();
-    if (newDescription != problem.description) {
+    final newGeoscope = _editProblemGeoscope ?? problem.geoscope;
+    if (newDescription != problem.description ||
+        newGeoscope != problem.geoscope) {
       unawaited(
         context.read<ProblemsCubit>().updateProblem(
-          problem.copyWith(description: newDescription),
+          problem.copyWith(
+            description: newDescription,
+            geoscope: newGeoscope,
+          ),
         ),
       );
     }
@@ -313,15 +346,30 @@ class _ProblemsViewState extends State<ProblemsView> {
                   },
                 ),
               ),
-              const SizedBox(width: 8),
               ValueListenableBuilder<TextEditingValue>(
                 valueListenable: _editController,
                 builder: (context, value, child) {
-                  return TextButton(
-                    onPressed: _hasEnoughWords(_editController.text)
-                        ? () => _submitEdit(problem)
-                        : null,
-                    child: const Text('✓'),
+                  final hasWords = _hasEnoughWords(_editController.text);
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ..._buildGeoscopeDropdown(
+                        geoscope: context
+                            .read<GeoscopeCubit>()
+                            .state
+                            .selectedGeoscope,
+                        currentValue: _editProblemGeoscope ?? problem.geoscope,
+                        onChanged: (value) => setState(() {
+                          _editProblemGeoscope = value;
+                        }),
+                        enabled: hasWords,
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: hasWords ? () => _submitEdit(problem) : null,
+                        child: const Text('✓'),
+                      ),
+                    ],
                   );
                 },
               ),

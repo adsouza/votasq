@@ -107,6 +107,7 @@ class FirestoreRepository {
     final newVersion = problem.version + 1;
     final mainData = {
       'description': problem.description,
+      'geoscope': problem.geoscope,
       'votes': problem.votes,
       'complaints': problem.complaints,
       'solved': problem.solved,
