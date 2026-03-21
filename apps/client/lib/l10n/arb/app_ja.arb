@@ -1,0 +1,51 @@
+{
+    "@@locale": "ja",
+    "problemsAppBarTitle": "一緒に解決できる問題",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "ログイン",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "ログアウト",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "あなたの問題をここに投稿してください",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "追加",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "あなたの問題をリストに追加する",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "問題の説明を編集",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "この問題を編集",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "この問題を不正として報告",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "フィードバックを送信",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "フィードバックありがとうございます！",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "フィードバックを送信できませんでした。もう一度お試しください。",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "@@locale": "uk",
+    "problemsAppBarTitle": "Проблеми, які ми можемо вирішити разом",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "Увійти",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "Вийти",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "Додайте свою проблему тут",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "Додати",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "Додати вашу проблему до списку",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "Редагувати опис проблеми",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "Редагувати цю проблему",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "Поскаржитися на цю проблему",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "Надіслати відгук",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "Дякуємо за ваш відгук!",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "Не вдалося надіслати відгук. Спробуйте ще раз.",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    }
+}

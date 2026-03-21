@@ -1,0 +1,51 @@
+{
+    "@@locale": "hi",
+    "problemsAppBarTitle": "समस्याएँ जो हम मिलकर हल कर सकते हैं",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "साइन इन",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "साइन आउट",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "यहाँ अपनी समस्या दर्ज करें",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "जोड़ें",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "अपनी समस्या सूची में शामिल करें",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "समस्या का विवरण संपादित करें",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "इस समस्या को संपादित करें",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "इस समस्या की दुरुपयोग के रूप में रिपोर्ट करें",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "प्रतिक्रिया भेजें",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "प्रतिक्रिया भेजी नहीं जा सकी। कृपया पुनः प्रयास करें।",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    }
+}

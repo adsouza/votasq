@@ -1,0 +1,51 @@
+{
+    "@@locale": "zh",
+    "problemsAppBarTitle": "我们可以一起解决的问题",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "登录",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "退出",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "在此提交你的问题",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "添加",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "将你的问题加入列表",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "编辑问题描述",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "编辑此问题",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "举报此问题为滥用",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "发送反馈",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "感谢你的反馈！",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "无法发送反馈，请重试。",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    }
+}

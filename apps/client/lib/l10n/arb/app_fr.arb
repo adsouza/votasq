@@ -1,0 +1,51 @@
+{
+    "@@locale": "fr",
+    "problemsAppBarTitle": "Des problèmes que nous pouvons résoudre ensemble",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "Se connecter",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "Se déconnecter",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "Proposez votre propre problème ici",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "Ajouter",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "Ajouter votre problème à la liste",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "Modifier la description du problème",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "Modifier ce problème",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "Signaler ce problème comme abusif",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "Envoyer un commentaire",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "Merci pour votre commentaire !",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "Impossible d'envoyer le commentaire. Veuillez réessayer.",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    }
+}

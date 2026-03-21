@@ -1,0 +1,51 @@
+{
+    "@@locale": "ar",
+    "problemsAppBarTitle": "مشاكل يمكننا حلها معًا",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "تسجيل الدخول",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "تسجيل الخروج",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "أضف مشكلتك هنا",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "إضافة",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "أضف مشكلتك إلى القائمة",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "تعديل وصف المشكلة",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "تعديل هذه المشكلة",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "الإبلاغ عن هذه المشكلة كإساءة",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "إرسال ملاحظات",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "شكرًا على ملاحظاتك!",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "تعذّر إرسال الملاحظات. يرجى المحاولة مرة أخرى.",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    }
+}
