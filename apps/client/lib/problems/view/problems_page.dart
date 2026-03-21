@@ -288,8 +288,34 @@ class _ProblemsViewState extends State<ProblemsView> {
     required bool showComplaintButton,
   }) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     return ListTile(
-      title: Text('${problem.description} (${problem.votes})'),
+      title: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 6,
+        children: [
+          Text(problem.description),
+          if (problem.geoscope != '/')
+            Chip(
+              label: Text(
+                problem.geoscope.split('/').last,
+                style: const TextStyle(fontSize: 12),
+              ),
+              backgroundColor: theme.colorScheme.tertiaryContainer,
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          Chip(
+            label: Text(
+              '${problem.votes}',
+              style: const TextStyle(fontSize: 12),
+            ),
+            backgroundColor: theme.colorScheme.secondaryContainer,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ],
+      ),
       trailing: showEditButton
           ? Tooltip(
               message: l10n.editProblemButton,
