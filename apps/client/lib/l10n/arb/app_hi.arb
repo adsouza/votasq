@@ -48,7 +48,7 @@
     "@feedbackError": {
         "description": "SnackBar message shown when feedback submission fails"
     },
-    "geoscopeGlobal": "वैश्विक (सभी स्थान)",
+    "geoscopeGlobal": "वैश्विक",
     "@geoscopeGlobal": {
         "description": "Label for the global geoscope option in the picker"
     },

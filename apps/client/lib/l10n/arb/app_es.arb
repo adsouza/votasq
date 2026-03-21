@@ -48,7 +48,7 @@
     "@feedbackError": {
         "description": "Mensaje del SnackBar cuando falla el envío de comentarios"
     },
-    "geoscopeGlobal": "Global (todas las ubicaciones)",
+    "geoscopeGlobal": "Global",
     "@geoscopeGlobal": {
         "description": "Etiqueta de la opción global en el selector de ubicación"
     },

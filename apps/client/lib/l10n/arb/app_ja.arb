@@ -48,7 +48,7 @@
     "@feedbackError": {
         "description": "SnackBar message shown when feedback submission fails"
     },
-    "geoscopeGlobal": "グローバル（すべての地域）",
+    "geoscopeGlobal": "グローバル",
     "@geoscopeGlobal": {
         "description": "Label for the global geoscope option in the picker"
     },
