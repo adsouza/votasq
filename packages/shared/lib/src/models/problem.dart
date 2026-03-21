@@ -14,6 +14,7 @@ abstract class Problem with _$Problem {
     required DateTime lastUpdatedAt,
     required String ownerId,
     @Default(1) int votes,
+    @Default([]) List<String> complaints,
     @Default(false) bool solved,
     @Default(1) int version,
   }) = _Problem;

@@ -152,13 +152,58 @@ class _ProblemsViewState extends State<ProblemsView> {
     _cancelEdit();
   }
 
-  Widget _buildReadTile(Problem problem, {required bool showEditButton}) {
+  Future<void> _confirmComplaint(Problem problem) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Flag as abusive?'),
+        content: const Text(
+          'Are you sure you want to report this problem as abusive? '
+          'It will be hidden from your list.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Report'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final userId = context.read<AuthCubit>().state.userId!;
+    unawaited(
+      context.read<FirestoreRepository>().addComplaint(
+        problemId: problem.id,
+        userId: userId,
+      ),
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Complaint submitted')),
+      );
+    }
+  }
+
+  Widget _buildReadTile(
+    Problem problem, {
+    required bool showEditButton,
+    required bool showComplaintButton,
+  }) {
     return ListTile(
       title: Text('${problem.description} (${problem.votes})'),
       trailing: showEditButton
           ? TextButton(
               onPressed: () => _startEdit(problem),
               child: const Text('🖊️'),
+            )
+          : showComplaintButton
+          ? TextButton(
+              onPressed: () => _confirmComplaint(problem),
+              child: const Text('🙈'),
             )
           : null,
     );
@@ -321,28 +366,40 @@ class _ProblemsViewState extends State<ProblemsView> {
                       ],
                     ),
                   ),
-                  _ => ListView.builder(
-                    controller: _scrollController,
-                    itemCount: state.problems.length + (state.hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= state.problems.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-                      final problem = state.problems[index];
-                      if (_editingProblemId == problem.id) {
-                        return _buildEditTile(problem);
-                      }
+                  _ => Builder(
+                    builder: (context) {
                       final userId = context.read<AuthCubit>().state.userId;
-                      final isOwner =
-                          userId != null && userId == problem.ownerId;
-                      return _buildReadTile(
-                        problem,
-                        showEditButton: isOwner,
+                      final visible = userId == null
+                          ? state.problems
+                          : state.problems
+                                .where(
+                                  (p) => !p.complaints.contains(userId),
+                                )
+                                .toList();
+                      return ListView.builder(
+                        controller: _scrollController,
+                        itemCount: visible.length + (state.hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= visible.length) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          final problem = visible[index];
+                          if (_editingProblemId == problem.id) {
+                            return _buildEditTile(problem);
+                          }
+                          final isOwner =
+                              userId != null && userId == problem.ownerId;
+                          return _buildReadTile(
+                            problem,
+                            showEditButton: isOwner,
+                            showComplaintButton: userId != null && !isOwner,
+                          );
+                        },
                       );
                     },
                   ),

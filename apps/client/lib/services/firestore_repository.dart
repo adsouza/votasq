@@ -89,6 +89,7 @@ class FirestoreRepository {
     final mainData = {
       'description': problem.description,
       'votes': problem.votes,
+      'complaints': problem.complaints,
       'solved': problem.solved,
       'version': newVersion,
       'lastUpdatedAt': now,
@@ -108,6 +109,17 @@ class FirestoreRepository {
     await batch.commit();
   }
 
+  /// Atomically add a user's complaint to a problem.
+  /// Uses FieldValue.arrayUnion for concurrent-safe, idempotent append.
+  Future<void> addComplaint({
+    required String problemId,
+    required String userId,
+  }) async {
+    await _problemsRef.doc(problemId).update({
+      'complaints': FieldValue.arrayUnion([userId]),
+    });
+  }
+
   Problem _docToProblem(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     return Problem(
@@ -115,6 +127,11 @@ class FirestoreRepository {
       description: data['description'] as String,
       ownerId: data['ownerId'] as String,
       votes: (data['votes'] as num).toInt(),
+      complaints:
+          (data['complaints'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       solved: data['solved'] as bool? ?? false,
       version: (data['version'] as num?)?.toInt() ?? 1,
       createdAt: (data['createdAt'] as Timestamp).toDate(),

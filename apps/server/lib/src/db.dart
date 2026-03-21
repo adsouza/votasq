@@ -128,6 +128,7 @@ class Db {
           description: doc.fields!['description']!.stringValue!,
           ownerId: doc.fields!['ownerId']!.stringValue!,
           votes: votes,
+          complaints: _parseStringList(doc.fields?['complaints']),
           solved: doc.fields?['solved']?.booleanValue ?? false,
           version: _parseVersion(doc.fields),
           createdAt: _parseTimestamp(doc.fields!['createdAt']!),
@@ -158,6 +159,7 @@ class Db {
       description: doc.fields!['description']!.stringValue!,
       ownerId: doc.fields!['ownerId']!.stringValue!,
       votes: int.parse(doc.fields!['votes']!.integerValue!),
+      complaints: _parseStringList(doc.fields?['complaints']),
       solved: doc.fields?['solved']?.booleanValue ?? false,
       version: _parseVersion(doc.fields),
       createdAt: _parseTimestamp(doc.fields!['createdAt']!),
@@ -204,6 +206,13 @@ class Db {
         'description': fs.Value(stringValue: problem.description),
         'ownerId': fs.Value(stringValue: problem.ownerId),
         'votes': fs.Value(integerValue: '${problem.votes}'),
+        'complaints': fs.Value(
+          arrayValue: fs.ArrayValue(
+            values: problem.complaints
+                .map((uid) => fs.Value(stringValue: uid))
+                .toList(),
+          ),
+        ),
         'solved': fs.Value(booleanValue: problem.solved),
         'version': fs.Value(integerValue: '${problem.version}'),
         'createdAt': fs.Value(
@@ -241,4 +250,7 @@ class Db {
 
   static DateTime _parseTimestamp(fs.Value value) =>
       DateTime.parse(value.timestampValue!);
+
+  static List<String> _parseStringList(fs.Value? value) =>
+      value?.arrayValue?.values?.map((v) => v.stringValue!).toList() ?? [];
 }
