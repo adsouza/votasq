@@ -53,6 +53,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   final _editFocusNode = FocusNode();
   static final _editTapRegionGroupId = Object();
   String? _editingProblemId;
+  String? _addProblemGeoscope;
 
   @override
   void initState() {
@@ -88,9 +89,13 @@ class _ProblemsViewState extends State<ProblemsView> {
       context.read<ProblemsCubit>().addProblem(
         description: text,
         ownerId: userId,
+        geoscope: _addProblemGeoscope,
       ),
     );
     _addController.clear();
+    setState(() {
+      _addProblemGeoscope = null;
+    });
   }
 
   Widget _buildAddProblemRow(BuildContext context) {
@@ -117,6 +122,7 @@ class _ProblemsViewState extends State<ProblemsView> {
               },
             ),
           ),
+          ..._buildGeoscopeDropdown(context, l10n),
           const SizedBox(width: 8),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _addController,
@@ -135,6 +141,47 @@ class _ProblemsViewState extends State<ProblemsView> {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildGeoscopeDropdown(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final geoState = context.read<GeoscopeCubit>().state;
+    final selectedGeoscope = geoState.selectedGeoscope;
+    if (selectedGeoscope == '/') return [];
+
+    final ancestorIds = FirestoreRepository.geoscopeAncestors(
+      selectedGeoscope,
+    ).reversed.toList();
+    final labelMap = {
+      for (final g in geoState.availableGeoscopes) g.id: g.label,
+    };
+
+    final items = ancestorIds.map((id) {
+      final label = id == '/' ? l10n.geoscopeGlobal : (labelMap[id] ?? id);
+      return DropdownMenuItem(value: id, child: Text(label));
+    }).toList();
+
+    final currentValue = _addProblemGeoscope ?? ancestorIds.first;
+
+    return [
+      const SizedBox(width: 8),
+      DropdownButton<String>(
+        value: currentValue,
+        items: items,
+        selectedItemBuilder: (_) => ancestorIds.map((id) {
+          if (id == '/') return Text(l10n.geoscopeGlobal);
+          return Text(id.split('/').last);
+        }).toList(),
+        onChanged: (value) {
+          if (value == null) return;
+          setState(() {
+            _addProblemGeoscope = value;
+          });
+        },
+      ),
+    ];
   }
 
   void _startEdit(Problem problem) {
@@ -410,10 +457,12 @@ class _ProblemsViewState extends State<ProblemsView> {
         children: [
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
-              if (authState.status == AuthStatus.authenticated) {
-                return _buildAddProblemRow(context);
+              if (authState.status != AuthStatus.authenticated) {
+                return const SizedBox.shrink();
               }
-              return const SizedBox.shrink();
+              return BlocBuilder<GeoscopeCubit, GeoscopeState>(
+                builder: (context, _) => _buildAddProblemRow(context),
+              );
             },
           ),
           Expanded(

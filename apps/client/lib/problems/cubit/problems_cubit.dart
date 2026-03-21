@@ -59,15 +59,17 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }
 
   /// Create a new problem with the given description.
+  /// If [geoscope] is provided it overrides the current viewing geoscope.
   Future<void> addProblem({
     required String description,
     required String ownerId,
+    String? geoscope,
   }) async {
     try {
       await _repo.addProblem(
         description: description,
         ownerId: ownerId,
-        geoscope: state.geoscope,
+        geoscope: geoscope ?? state.geoscope,
       );
     } on Exception catch (e, st) {
       log('addProblem failed: $e', stackTrace: st);
