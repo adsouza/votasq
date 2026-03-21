@@ -22,6 +22,9 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  go_router: ^15.1.2
   google_sign_in: ^7.2.0
   intl: ^0.20.2
   shared: any # Use the same shared logic as the server
