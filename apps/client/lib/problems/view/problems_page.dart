@@ -110,11 +110,14 @@ class _ProblemsViewState extends State<ProblemsView> {
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _addController,
             builder: (context, value, child) {
-              return ElevatedButton(
-                onPressed: _hasEnoughWords(_addController.text)
-                    ? _submitProblem
-                    : null,
-                child: Text(l10n.addProblemButton),
+              return Tooltip(
+                message: l10n.addProblemTooltip,
+                child: ElevatedButton(
+                  onPressed: _hasEnoughWords(_addController.text)
+                      ? _submitProblem
+                      : null,
+                  child: Text(l10n.addProblemButton),
+                ),
               );
             },
           ),
@@ -193,17 +196,24 @@ class _ProblemsViewState extends State<ProblemsView> {
     required bool showEditButton,
     required bool showComplaintButton,
   }) {
+    final l10n = context.l10n;
     return ListTile(
       title: Text('${problem.description} (${problem.votes})'),
       trailing: showEditButton
-          ? TextButton(
-              onPressed: () => _startEdit(problem),
-              child: const Text('🖊️'),
+          ? Tooltip(
+              message: l10n.editProblemButton,
+              child: TextButton(
+                onPressed: () => _startEdit(problem),
+                child: const Text('🖊️'),
+              ),
             )
           : showComplaintButton
-          ? TextButton(
-              onPressed: () => _confirmComplaint(problem),
-              child: const Text('🙈'),
+          ? Tooltip(
+              message: l10n.flagProblemButton,
+              child: TextButton(
+                onPressed: () => _confirmComplaint(problem),
+                child: const Text('🙈'),
+              ),
             )
           : null,
     );

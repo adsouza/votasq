@@ -20,9 +20,21 @@
     "@addProblemButton": {
         "description": "Label for the add-problem button"
     },
+    "addProblemTooltip": "Include your problem in the list",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
     "editProblemHint": "Edit problem description",
     "@editProblemHint": {
         "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "Edit this problem",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "Flag this problem as abuse",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
     },
     "feedbackButton": "Send feedback",
     "@feedbackButton": {

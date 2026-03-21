@@ -20,9 +20,21 @@
     "@addProblemButton": {
         "description": "Etiqueta del botón para agregar problema"
     },
+    "addProblemTooltip": "Incluir tu problema en la lista",
+    "@addProblemTooltip": {
+        "description": "Tooltip del botón para agregar problema"
+    },
     "editProblemHint": "Editar descripción del problema",
     "@editProblemHint": {
         "description": "Texto de marcador del campo de texto para editar problema"
+    },
+    "editProblemButton": "Editar este problema",
+    "@editProblemButton": {
+        "description": "Tooltip del botón de edición en un elemento de la lista de problemas"
+    },
+    "flagProblemButton": "Reportar este problema",
+    "@flagProblemButton": {
+        "description": "Tooltip del botón de reporte en un elemento de la lista de problemas"
     },
     "feedbackButton": "Enviar comentarios",
     "@feedbackButton": {
