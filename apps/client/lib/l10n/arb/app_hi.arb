@@ -55,5 +55,9 @@
     "geoscopeChangeMenuItem": "स्थान बदलें",
     "@geoscopeChangeMenuItem": {
         "description": "Menu item label to open the geoscope picker"
+    },
+    "showOnlyOwnedMenuItem": "केवल मेरी समस्याएँ दिखाएँ",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Menu item label to toggle showing only problems owned by the current user"
     }
 }

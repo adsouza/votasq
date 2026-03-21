@@ -55,5 +55,9 @@
     "geoscopeChangeMenuItem": "場所を変更",
     "@geoscopeChangeMenuItem": {
         "description": "Menu item label to open the geoscope picker"
+    },
+    "showOnlyOwnedMenuItem": "自分の問題のみ表示",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Menu item label to toggle showing only problems owned by the current user"
     }
 }

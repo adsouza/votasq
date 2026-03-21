@@ -55,5 +55,9 @@
     "geoscopeChangeMenuItem": "Cambiar ubicación",
     "@geoscopeChangeMenuItem": {
         "description": "Elemento de menú para abrir el selector de ubicación"
+    },
+    "showOnlyOwnedMenuItem": "Mostrar solo mis problemas",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Elemento de menú para mostrar solo los problemas del usuario actual"
     }
 }

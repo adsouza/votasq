@@ -55,6 +55,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   String? _editingProblemId;
   String? _addProblemGeoscope;
   String? _editProblemGeoscope;
+  bool _showOnlyOwned = false;
 
   @override
   void initState() {
@@ -455,9 +456,25 @@ class _ProblemsViewState extends State<ProblemsView> {
           onSelected: (value) {
             if (value == 'change_location') {
               _showGeoscopePicker(context);
+            } else if (value == 'toggle_owned') {
+              setState(() {
+                _showOnlyOwned = !_showOnlyOwned;
+              });
             }
           },
           itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'toggle_owned',
+              child: ListTile(
+                leading: Icon(
+                  _showOnlyOwned
+                      ? Icons.check_box
+                      : Icons.check_box_outline_blank,
+                ),
+                title: Text(l10n.showOnlyOwnedMenuItem),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
             PopupMenuItem(
               value: 'change_location',
               child: ListTile(
@@ -563,13 +580,18 @@ class _ProblemsViewState extends State<ProblemsView> {
                   _ => Builder(
                     builder: (context) {
                       final userId = context.read<AuthCubit>().state.userId;
-                      final visible = userId == null
-                          ? state.problems
-                          : state.problems
-                                .where(
-                                  (p) => !p.complaints.contains(userId),
-                                )
-                                .toList();
+                      var filtered = state.problems;
+                      if (userId != null) {
+                        filtered = filtered
+                            .where((p) => !p.complaints.contains(userId))
+                            .toList();
+                      }
+                      if (_showOnlyOwned && userId != null) {
+                        filtered = filtered
+                            .where((p) => p.ownerId == userId)
+                            .toList();
+                      }
+                      final visible = filtered;
                       return ListView.builder(
                         controller: _scrollController,
                         itemCount: visible.length + (state.hasMore ? 1 : 0),
