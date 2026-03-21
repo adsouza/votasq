@@ -9,9 +9,11 @@ import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:feedback/feedback.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
 
 class ProblemsPage extends StatelessWidget {
@@ -211,6 +213,16 @@ class _ProblemsViewState extends State<ProblemsView> {
     ];
   }
 
+  void _copyProblemLink(Problem problem) {
+    const webBase = 'http://votasq.quikchange.net';
+    final base = kIsWeb ? Uri.base : Uri.parse(webBase);
+    final url = base.resolve('/problems/${problem.id}').toString();
+    unawaited(Clipboard.setData(ClipboardData(text: url)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.problemLinkCopied)),
+    );
+  }
+
   void _startEdit(Problem problem) {
     setState(() {
       _editingProblemId = problem.id;
@@ -295,7 +307,10 @@ class _ProblemsViewState extends State<ProblemsView> {
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 6,
         children: [
-          Text(problem.description),
+          GestureDetector(
+            onDoubleTap: () => context.go('/problems/${problem.id}'),
+            child: Text(problem.description),
+          ),
           if (problem.geoscope != '/')
             Chip(
               label: Text(
@@ -317,23 +332,34 @@ class _ProblemsViewState extends State<ProblemsView> {
           ),
         ],
       ),
-      trailing: showEditButton
-          ? Tooltip(
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Tooltip(
+            message: l10n.copyProblemLink,
+            child: IconButton(
+              icon: const Icon(Icons.link, size: 20),
+              onPressed: () => _copyProblemLink(problem),
+            ),
+          ),
+          if (showEditButton)
+            Tooltip(
               message: l10n.editProblemButton,
               child: TextButton(
                 onPressed: () => _startEdit(problem),
                 child: const Text('🖊️'),
               ),
             )
-          : showComplaintButton
-          ? Tooltip(
+          else if (showComplaintButton)
+            Tooltip(
               message: l10n.flagProblemButton,
               child: TextButton(
                 onPressed: () => _confirmComplaint(problem),
                 child: const Text('🙈'),
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 

@@ -63,6 +63,14 @@ class FirestoreRepository {
     return (problems: problems, lastDoc: lastDoc);
   }
 
+  /// Fetch a single problem by its document ID.
+  /// Returns `null` if the document does not exist.
+  Future<Problem?> getProblem(String id) async {
+    final doc = await _problemsRef.doc(id).get();
+    if (!doc.exists) return null;
+    return _docToProblem(doc);
+  }
+
   /// Create a new problem with a client-generated UUID.
   /// Uses a batched write to atomically create the main document and its
   /// first revision snapshot.

@@ -59,5 +59,33 @@
     "showOnlyOwnedMenuItem": "Mostrar solo mis problemas",
     "@showOnlyOwnedMenuItem": {
         "description": "Elemento de menú para mostrar solo los problemas del usuario actual"
+    },
+    "problemDetailPageTitle": "Detalles del problema",
+    "@problemDetailPageTitle": {
+        "description": "Título en la AppBar de la página de detalles del problema"
+    },
+    "problemNotFound": "Problema no encontrado",
+    "@problemNotFound": {
+        "description": "Mensaje de error cuando no se encuentra un problema por ID"
+    },
+    "problemDetailSaveButton": "Guardar",
+    "@problemDetailSaveButton": {
+        "description": "Etiqueta del botón de guardar en la página de detalles del problema"
+    },
+    "problemDetailBackButton": "Volver",
+    "@problemDetailBackButton": {
+        "description": "Etiqueta del botón de volver en la página de detalles del problema"
+    },
+    "geoscopeLabel": "Ámbito geográfico:",
+    "@geoscopeLabel": {
+        "description": "Etiqueta junto al selector de ámbito geográfico en la página de detalles del problema"
+    },
+    "copyProblemLink": "Copiar enlace a este problema",
+    "@copyProblemLink": {
+        "description": "Tooltip del botón de copiar enlace en un elemento de la lista de problemas"
+    },
+    "problemLinkCopied": "Enlace copiado al portapapeles",
+    "@problemLinkCopied": {
+        "description": "Mensaje del SnackBar después de copiar el enlace de un problema"
     }
 }

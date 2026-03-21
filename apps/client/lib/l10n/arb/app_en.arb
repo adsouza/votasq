@@ -59,5 +59,33 @@
     "showOnlyOwnedMenuItem": "Show only my problems",
     "@showOnlyOwnedMenuItem": {
         "description": "Menu item label to toggle showing only problems owned by the current user"
+    },
+    "problemDetailPageTitle": "Problem Details",
+    "@problemDetailPageTitle": {
+        "description": "Title in the AppBar of the problem detail page"
+    },
+    "problemNotFound": "Problem not found",
+    "@problemNotFound": {
+        "description": "Error message when a problem cannot be found by ID"
+    },
+    "problemDetailSaveButton": "Save",
+    "@problemDetailSaveButton": {
+        "description": "Label for the save button on the problem detail page"
+    },
+    "problemDetailBackButton": "Back",
+    "@problemDetailBackButton": {
+        "description": "Label for the back button on the problem detail page"
+    },
+    "geoscopeLabel": "Geographic scope:",
+    "@geoscopeLabel": {
+        "description": "Label shown next to the geoscope dropdown on the problem detail page"
+    },
+    "copyProblemLink": "Copy link to this problem",
+    "@copyProblemLink": {
+        "description": "Tooltip for the copy-link button on a problem list item"
+    },
+    "problemLinkCopied": "Link copied to clipboard",
+    "@problemLinkCopied": {
+        "description": "SnackBar message shown after copying a problem link"
     }
 }
