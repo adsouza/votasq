@@ -17,22 +17,24 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   void subscribe() {
     emit(state.copyWith(status: ProblemsStatus.loading));
     unawaited(_subscription?.cancel());
-    _subscription = _repo.watchProblems().listen(
-      (result) {
-        emit(
-          state.copyWith(
-            status: ProblemsStatus.success,
-            problems: result.problems,
-            lastDocument: () => result.lastDoc,
-            hasMore: result.problems.length >= _pageSize,
-          ),
+    _subscription = _repo
+        .watchProblems(geoscope: state.geoscope)
+        .listen(
+          (result) {
+            emit(
+              state.copyWith(
+                status: ProblemsStatus.success,
+                problems: result.problems,
+                lastDocument: () => result.lastDoc,
+                hasMore: result.problems.length >= _pageSize,
+              ),
+            );
+          },
+          onError: (Object e, StackTrace st) {
+            log('subscribe failed: $e', stackTrace: st);
+            emit(state.copyWith(status: ProblemsStatus.failure));
+          },
         );
-      },
-      onError: (Object e, StackTrace st) {
-        log('subscribe failed: $e', stackTrace: st);
-        emit(state.copyWith(status: ProblemsStatus.failure));
-      },
-    );
   }
 
   /// Load the next page of problems (appends to existing list).
@@ -40,6 +42,7 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     if (!state.hasMore || state.lastDocument == null) return;
     try {
       final result = await _repo.getProblems(
+        geoscope: state.geoscope,
         startAfter: state.lastDocument,
       );
       emit(
@@ -61,10 +64,20 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     required String ownerId,
   }) async {
     try {
-      await _repo.addProblem(description: description, ownerId: ownerId);
+      await _repo.addProblem(
+        description: description,
+        ownerId: ownerId,
+        geoscope: state.geoscope,
+      );
     } on Exception catch (e, st) {
       log('addProblem failed: $e', stackTrace: st);
     }
+  }
+
+  /// Switch to a different geoscope, resetting the problem list.
+  void changeGeoscope(String geoscope) {
+    emit(ProblemsState(geoscope: geoscope));
+    subscribe();
   }
 
   /// Update an existing problem.

@@ -4,10 +4,13 @@ service cloud.firestore {
     match /problems/{problemId} {
       allow read: if true;
       allow create: if
-        request.resource.data.keys().hasAll(['description', 'votes', 'solved', 'version'])
+        request.resource.data.keys().hasAll(['description', 'votes', 'solved', 'version', 'geoscope'])
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 80
+        && request.resource.data.geoscope is string
+        && request.resource.data.geoscope.size() > 0
+        && request.resource.data.geoscope.size() <= 72
         && request.resource.data.votes is int
         && request.resource.data.votes == 1
         && request.resource.data.solved is bool
@@ -18,6 +21,8 @@ service cloud.firestore {
         request.resource.data.description is string
         && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 80
+        && request.resource.data.geoscope is string
+        && request.resource.data.geoscope == resource.data.geoscope
         && request.resource.data.votes is int
         && request.resource.data.votes >= 0
         && request.resource.data.solved is bool
@@ -32,6 +37,10 @@ service cloud.firestore {
           && request.resource.data.version is int
           && request.resource.data.archivedAt is timestamp;
       }
+    }
+
+    match /geoscopes/{geoscopeId} {
+      allow read: if true;
     }
 
     match /feedback/{feedbackId} {

@@ -14,29 +14,46 @@ class FirestoreRepository {
   CollectionReference<Map<String, dynamic>> get _problemsRef =>
       _firestore.collection(_collection);
 
-  /// Unsolved problems, ordered by votes DESC then doc ID ASC.
-  Query<Map<String, dynamic>> get _baseQuery => _problemsRef
+  /// Compute all ancestor geoscopes for a given geoscope string.
+  /// E.g. `"na/us/ny/nyc"` → `['/', 'na', 'na/us', 'na/us/ny', 'na/us/ny/nyc']`.
+  static List<String> geoscopeAncestors(String geoscope) {
+    if (geoscope == '/') return ['/'];
+    final parts = geoscope.split('/');
+    return [
+      '/',
+      for (var i = 0; i < parts.length; i++) parts.sublist(0, i + 1).join('/'),
+    ];
+  }
+
+  /// Unsolved problems matching the given geoscope or any ancestor,
+  /// ordered by votes DESC then doc ID ASC.
+  Query<Map<String, dynamic>> _geoscopedQuery(String geoscope) => _problemsRef
+      .where('geoscope', whereIn: geoscopeAncestors(geoscope))
       .where('solved', isEqualTo: false)
       .orderBy('votes', descending: true)
       .orderBy(FieldPath.documentId);
 
-  /// Real-time stream of the first page of unsolved problems.
+  /// Real-time stream of the first page of unsolved problems
+  /// matching the given [geoscope] or any of its ancestors.
   Stream<({List<Problem> problems, DocumentSnapshot? lastDoc})> watchProblems({
+    required String geoscope,
     int limit = _pageSize,
   }) {
-    return _baseQuery.limit(limit).snapshots().map((snapshot) {
+    return _geoscopedQuery(geoscope).limit(limit).snapshots().map((snapshot) {
       final problems = snapshot.docs.map(_docToProblem).toList();
       final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
       return (problems: problems, lastDoc: lastDoc);
     });
   }
 
-  /// Fetch a page of problems for infinite scroll.
+  /// Fetch a page of problems for infinite scroll,
+  /// matching the given [geoscope] or any of its ancestors.
   Future<({List<Problem> problems, DocumentSnapshot? lastDoc})> getProblems({
+    required String geoscope,
     int pageSize = _pageSize,
     DocumentSnapshot? startAfter,
   }) async {
-    var query = _baseQuery.limit(pageSize);
+    var query = _geoscopedQuery(geoscope).limit(pageSize);
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
     }
@@ -52,6 +69,7 @@ class FirestoreRepository {
   Future<void> addProblem({
     required String description,
     required String ownerId,
+    required String geoscope,
   }) async {
     final id = const Uuid().v4();
     final now = DateTime.now().toUtc();
@@ -59,6 +77,7 @@ class FirestoreRepository {
     final problemData = {
       'description': description,
       'ownerId': ownerId,
+      'geoscope': geoscope,
       'votes': 1,
       'solved': false,
       'version': version,
@@ -120,12 +139,32 @@ class FirestoreRepository {
     });
   }
 
+  /// Fetch available geoscopes from the `geoscopes` collection,
+  /// sorted by population descending.
+  Future<List<({String id, String label})>> getGeoscopes() async {
+    final snapshot = await _firestore.collection('geoscopes').get();
+    final docs = snapshot.docs.toList()
+      ..sort((a, b) {
+        final popA = (a.data()['population'] as num?) ?? 0;
+        final popB = (b.data()['population'] as num?) ?? 0;
+        return popB.compareTo(popA);
+      });
+    return docs.map((doc) {
+      final data = doc.data();
+      return (
+        id: data['id'] as String? ?? doc.id,
+        label: data['label'] as String? ?? doc.id,
+      );
+    }).toList();
+  }
+
   Problem _docToProblem(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     return Problem(
       id: doc.id,
       description: data['description'] as String,
       ownerId: data['ownerId'] as String,
+      geoscope: data['geoscope'] as String? ?? '/',
       votes: (data['votes'] as num).toInt(),
       complaints:
           (data['complaints'] as List<dynamic>?)

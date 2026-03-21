@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:client/auth/auth.dart';
+import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
@@ -21,9 +22,19 @@ class ProblemsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) {
         final repo = context.read<FirestoreRepository>();
-        return ProblemsCubit(repo)..subscribe();
+        final geoscope = context.read<GeoscopeCubit>().state.selectedGeoscope;
+        return ProblemsCubit(repo)..changeGeoscope(geoscope);
       },
-      child: const ProblemsView(),
+      child: BlocListener<GeoscopeCubit, GeoscopeState>(
+        listenWhen: (prev, curr) =>
+            prev.selectedGeoscope != curr.selectedGeoscope,
+        listener: (context, geoscopeState) {
+          context.read<ProblemsCubit>().changeGeoscope(
+            geoscopeState.selectedGeoscope,
+          );
+        },
+        child: const ProblemsView(),
+      ),
     );
   }
 }
@@ -274,6 +285,38 @@ class _ProblemsViewState extends State<ProblemsView> {
     );
   }
 
+  void _showGeoscopePicker(BuildContext context) {
+    final l10n = context.l10n;
+    final geoscopeCubit = context.read<GeoscopeCubit>();
+    final geoState = geoscopeCubit.state;
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (_) {
+          final items = [
+            (id: '/', label: l10n.geoscopeGlobal),
+            ...geoState.availableGeoscopes,
+          ];
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (_, index) {
+              final item = items[index];
+              final isSelected = item.id == geoState.selectedGeoscope;
+              return ListTile(
+                title: Text(item.label),
+                trailing: isSelected ? const Icon(Icons.check) : null,
+                onTap: () {
+                  unawaited(geoscopeCubit.selectGeoscope(item.id));
+                  Navigator.of(context).pop();
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   bool get _isNearBottom {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
@@ -286,6 +329,24 @@ class _ProblemsViewState extends State<ProblemsView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.problemsAppBarTitle),
+        leading: PopupMenuButton<String>(
+          icon: const Icon(Icons.menu),
+          onSelected: (value) {
+            if (value == 'change_location') {
+              _showGeoscopePicker(context);
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'change_location',
+              child: ListTile(
+                leading: const Icon(Icons.location_on),
+                title: Text(l10n.geoscopeChangeMenuItem),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
         actions: [
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {

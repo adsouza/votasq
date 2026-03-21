@@ -47,5 +47,13 @@
     "feedbackError": "无法发送反馈，请重试。",
     "@feedbackError": {
         "description": "SnackBar message shown when feedback submission fails"
+    },
+    "geoscopeGlobal": "全球（所有地区）",
+    "@geoscopeGlobal": {
+        "description": "Label for the global geoscope option in the picker"
+    },
+    "geoscopeChangeMenuItem": "更改位置",
+    "@geoscopeChangeMenuItem": {
+        "description": "Menu item label to open the geoscope picker"
     }
 }

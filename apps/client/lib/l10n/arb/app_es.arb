@@ -47,5 +47,13 @@
     "feedbackError": "No se pudieron enviar los comentarios. Inténtalo de nuevo.",
     "@feedbackError": {
         "description": "Mensaje del SnackBar cuando falla el envío de comentarios"
+    },
+    "geoscopeGlobal": "Global (todas las ubicaciones)",
+    "@geoscopeGlobal": {
+        "description": "Etiqueta de la opción global en el selector de ubicación"
+    },
+    "geoscopeChangeMenuItem": "Cambiar ubicación",
+    "@geoscopeChangeMenuItem": {
+        "description": "Elemento de menú para abrir el selector de ubicación"
     }
 }

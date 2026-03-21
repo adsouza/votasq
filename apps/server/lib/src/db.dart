@@ -66,10 +66,24 @@ class Db {
     );
   }
 
+  /// Compute all ancestor geoscopes for a given geoscope string.
+  /// E.g. `"na/us/ny/nyc"` → `['/', 'na', 'na/us', 'na/us/ny', 'na/us/ny/nyc']`.
+  static List<String> _geoscopeAncestors(String geoscope) {
+    if (geoscope == '/') return ['/'];
+    final parts = geoscope.split('/');
+    return [
+      '/',
+      for (var i = 0; i < parts.length; i++) parts.sublist(0, i + 1).join('/'),
+    ];
+  }
+
   /// Fetch a page of problems, sorted by votes descending.
+  /// When [geoscope] is provided, filters to problems matching that geoscope
+  /// or any of its ancestors (e.g. country-level and global problems).
   Future<({List<Problem> problems, String? nextPageToken})> getProblems({
     int pageSize = 99,
     String? pageToken,
+    String? geoscope,
   }) async {
     fs.Cursor? startAt;
     if (pageToken != null) {
@@ -85,17 +99,47 @@ class Db {
       );
     }
 
+    final solvedFilter = fs.Filter(
+      fieldFilter: fs.FieldFilter(
+        field: fs.FieldReference(fieldPath: 'solved'),
+        op: 'EQUAL',
+        value: fs.Value(booleanValue: false),
+      ),
+    );
+
+    final fs.Filter whereFilter;
+    if (geoscope != null) {
+      final ancestors = _geoscopeAncestors(geoscope);
+      final geoscopeFilter = fs.Filter(
+        compositeFilter: fs.CompositeFilter(
+          op: 'OR',
+          filters: [
+            for (final ancestor in ancestors)
+              fs.Filter(
+                fieldFilter: fs.FieldFilter(
+                  field: fs.FieldReference(fieldPath: 'geoscope'),
+                  op: 'EQUAL',
+                  value: fs.Value(stringValue: ancestor),
+                ),
+              ),
+          ],
+        ),
+      );
+      whereFilter = fs.Filter(
+        compositeFilter: fs.CompositeFilter(
+          op: 'AND',
+          filters: [solvedFilter, geoscopeFilter],
+        ),
+      );
+    } else {
+      whereFilter = solvedFilter;
+    }
+
     final results = await _firestore.projects.databases.documents.runQuery(
       fs.RunQueryRequest(
         structuredQuery: fs.StructuredQuery(
           from: [fs.CollectionSelector(collectionId: 'problems')],
-          where: fs.Filter(
-            fieldFilter: fs.FieldFilter(
-              field: fs.FieldReference(fieldPath: 'solved'),
-              op: 'EQUAL',
-              value: fs.Value(booleanValue: false),
-            ),
-          ),
+          where: whereFilter,
           orderBy: [
             fs.Order(
               field: fs.FieldReference(fieldPath: 'votes'),
@@ -127,6 +171,7 @@ class Db {
           id: id,
           description: doc.fields!['description']!.stringValue!,
           ownerId: doc.fields!['ownerId']!.stringValue!,
+          geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
           votes: votes,
           complaints: _parseStringList(doc.fields?['complaints']),
           solved: doc.fields?['solved']?.booleanValue ?? false,
@@ -158,6 +203,7 @@ class Db {
       id: id,
       description: doc.fields!['description']!.stringValue!,
       ownerId: doc.fields!['ownerId']!.stringValue!,
+      geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
       votes: int.parse(doc.fields!['votes']!.integerValue!),
       complaints: _parseStringList(doc.fields?['complaints']),
       solved: doc.fields?['solved']?.booleanValue ?? false,
@@ -205,6 +251,7 @@ class Db {
       fields: {
         'description': fs.Value(stringValue: problem.description),
         'ownerId': fs.Value(stringValue: problem.ownerId),
+        'geoscope': fs.Value(stringValue: problem.geoscope),
         'votes': fs.Value(integerValue: '${problem.votes}'),
         'complaints': fs.Value(
           arrayValue: fs.ArrayValue(

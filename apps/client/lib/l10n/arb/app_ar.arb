@@ -47,5 +47,13 @@
     "feedbackError": "تعذّر إرسال الملاحظات. يرجى المحاولة مرة أخرى.",
     "@feedbackError": {
         "description": "SnackBar message shown when feedback submission fails"
+    },
+    "geoscopeGlobal": "عالمي (جميع المواقع)",
+    "@geoscopeGlobal": {
+        "description": "Label for the global geoscope option in the picker"
+    },
+    "geoscopeChangeMenuItem": "تغيير الموقع",
+    "@geoscopeChangeMenuItem": {
+        "description": "Menu item label to open the geoscope picker"
     }
 }

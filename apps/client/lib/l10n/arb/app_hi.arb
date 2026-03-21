@@ -47,5 +47,13 @@
     "feedbackError": "प्रतिक्रिया भेजी नहीं जा सकी। कृपया पुनः प्रयास करें।",
     "@feedbackError": {
         "description": "SnackBar message shown when feedback submission fails"
+    },
+    "geoscopeGlobal": "वैश्विक (सभी स्थान)",
+    "@geoscopeGlobal": {
+        "description": "Label for the global geoscope option in the picker"
+    },
+    "geoscopeChangeMenuItem": "स्थान बदलें",
+    "@geoscopeChangeMenuItem": {
+        "description": "Menu item label to open the geoscope picker"
     }
 }

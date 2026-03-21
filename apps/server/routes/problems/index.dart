@@ -19,9 +19,11 @@ Future<Response> _get(RequestContext context) async {
   final pageSize = int.tryParse(params['pageSize'] ?? '') ?? 99;
   final pageToken = params['pageToken'];
   try {
+    final geoscope = params['geoscope'];
     final (:problems, :nextPageToken) = await db.getProblems(
       pageSize: pageSize,
       pageToken: pageToken,
+      geoscope: geoscope,
     );
     return Response.json(
       body: {

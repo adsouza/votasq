@@ -25,6 +25,7 @@ dependencies:
   google_sign_in: ^7.2.0
   intl: ^0.20.2
   shared: any # Use the same shared logic as the server
+  shared_preferences: ^2.5.0
   uuid: ^4.5.1
 
 dev_dependencies:

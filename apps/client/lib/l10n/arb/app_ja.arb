@@ -47,5 +47,13 @@
     "feedbackError": "フィードバックを送信できませんでした。もう一度お試しください。",
     "@feedbackError": {
         "description": "SnackBar message shown when feedback submission fails"
+    },
+    "geoscopeGlobal": "グローバル（すべての地域）",
+    "@geoscopeGlobal": {
+        "description": "Label for the global geoscope option in the picker"
+    },
+    "geoscopeChangeMenuItem": "場所を変更",
+    "@geoscopeChangeMenuItem": {
+        "description": "Menu item label to open the geoscope picker"
     }
 }

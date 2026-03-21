@@ -25,9 +25,13 @@ void main() {
       repo = _MockFirestoreRepository();
       feedbackRepo = _MockFeedbackRepository();
       authRepo = _MockAuthRepository();
-      when(() => repo.watchProblems(limit: any(named: 'limit'))).thenAnswer(
-        (_) => const Stream.empty(),
-      );
+      when(
+        () => repo.watchProblems(
+          geoscope: any(named: 'geoscope'),
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer((_) => const Stream.empty());
+      when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
       when(() => authRepo.authStateChanges).thenAnswer(
         (_) => const Stream<User?>.empty(),
       );

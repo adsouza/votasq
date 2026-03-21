@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:client/auth/auth.dart';
+import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/problems.dart';
 import 'package:client/services/feedback_repository.dart';
@@ -32,8 +35,19 @@ class App extends StatelessWidget {
         ),
         RepositoryProvider.value(value: authRepo),
       ],
-      child: BlocProvider(
-        create: (_) => AuthCubit(authRepo),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => AuthCubit(authRepo)),
+          BlocProvider(
+            create: (context) {
+              final cubit = GeoscopeCubit(
+                context.read<FirestoreRepository>(),
+              );
+              unawaited(cubit.initialize());
+              return cubit;
+            },
+          ),
+        ],
         child: BetterFeedback(
           child: MaterialApp(
             theme: ThemeData(
