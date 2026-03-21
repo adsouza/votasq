@@ -36,6 +36,7 @@ classDiagram
         <<freezed>>
         +String id
         +String description
+        +String geoscope = "/"
         +int votes = 1
         +bool solved = false
         +int version = 1
@@ -133,7 +134,10 @@ Key operations:
   produces a new revision entry, providing an audit trail of description changes.
 - **getProblem** — fetches a single document by ID
 - **getProblems** — runs a `StructuredQuery` ordered by `votes DESC, __name__ ASC`
-  with cursor-based pagination
+  with cursor-based pagination. Accepts an optional `geoscope` parameter; when
+  provided, builds an ancestor-inclusive filter (OR of equality checks on the
+  geoscope and all its parent levels) so that country-level and global problems
+  appear alongside city-scoped results
 - **getVersions** — queries the `versions` subcollection for a given problem,
   ordered by `version ASC`
 
@@ -182,14 +186,20 @@ It uses the BLoC pattern for state management.
 graph TD
     UI["ProblemsPage / ProblemsView<br/>(Flutter widgets)"]
     Cubit["ProblemsCubit<br/>(state management)"]
-    State["ProblemsState<br/>(status, problems, lastDocument, hasMore)"]
+    GeoCubit["GeoscopeCubit<br/>(location selection)"]
+    State["ProblemsState<br/>(status, problems, lastDocument, hasMore, geoscope)"]
     Repo["FirestoreRepository<br/>(FlutterFire cloud_firestore)"]
+    Prefs["SharedPreferences<br/>(persisted geoscope)"]
     Firestore[(Cloud Firestore)]
 
     UI -->|"reads state via BlocBuilder"| State
     UI -->|"calls subscribe / loadMore"| Cubit
+    UI -->|"opens geoscope picker"| GeoCubit
+    GeoCubit -->|"selectGeoscope triggers<br/>changeGeoscope on"| Cubit
+    GeoCubit -->|"persists selection"| Prefs
+    GeoCubit -->|"fetches geoscopes collection"| Repo
     Cubit -->|"emits"| State
-    Cubit -->|"calls"| Repo
+    Cubit -->|"calls with geoscope filter"| Repo
     Repo -->|"real-time snapshots &<br/>batched writes"| Firestore
 ```
 
@@ -204,14 +214,48 @@ stateDiagram-v2
     success --> success : loadMore() appends
     success --> success : real-time update
     success --> failure : loadMore() exception
+    success --> initial : changeGeoscope()
     failure --> loading : retry / subscribe()
+    initial --> loading : changeGeoscope() → subscribe()
 ```
 
 `ProblemsState` holds the current `ProblemsStatus` enum (`initial`, `loading`,
 `success`, `failure`), the loaded `List<Problem>`, an optional
-`lastDocument` (for cursor-based pagination), and a computed `hasMore` getter.
-When the user scrolls past 90% of the list, `loadMore()` fetches the next page
-and appends the results.
+`lastDocument` (for cursor-based pagination), a `hasMore` flag, and the
+current `geoscope` filter string. When the user scrolls past 90% of the list,
+`loadMore()` fetches the next page and appends the results. When the user
+changes geoscope, `changeGeoscope()` resets the state and re-subscribes with
+the new filter.
+
+### Geoscope (location scoping)
+
+Problems are scoped by geography via a `geoscope` field — a slash-delimited
+hierarchical string (e.g. `"us/ny/nyc"`, `"eu/gb/eng/london"`, `"/"` for
+global). The hierarchy supports up to 6 levels: root, continent, country,
+region, city, neighbourhood.
+
+```mermaid
+graph TD
+    Root["/  (global)"]
+    Root --> NA["na"]
+    Root --> EU["eu"]
+    NA --> US["na/us"]
+    US --> NY["na/us/ny"]
+    NY --> NYC["na/us/ny/nyc"]
+    NYC --> BK["na/us/ny/nyc/brooklyn"]
+    EU --> GB["eu/gb"]
+```
+
+Queries are **ancestor-inclusive**: viewing `"us/ny/nyc"` uses a Firestore
+`whereIn` filter on `['/', 'us', 'us/ny', 'us/ny/nyc']` so that country-level
+and global problems appear alongside city-scoped ones.
+
+Available geoscopes are stored in a Firestore `geoscopes` collection (each
+document has `id`, `label`, and `population` fields). The `GeoscopeCubit`
+manages selection, persists the user's choice in `SharedPreferences`, and
+infers a default from the device locale on first launch. If the persisted value
+becomes stale (e.g. after a hierarchy migration), it falls back via suffix
+matching against available geoscopes.
 
 ### Flavor system
 
@@ -229,7 +273,7 @@ the Cloud Run URL in release builds.
 
 ### Internationalization
 
-ARB files in `lib/l10n/arb/` define localized strings (English + Spanish).
+ARB files in `lib/l10n/arb/` define localized strings (EN, ES, ZH, AR, FR, JA, HI, UK).
 Flutter generates `AppLocalizations` at build time. Access in widgets via the
 `context.l10n` extension.
 
