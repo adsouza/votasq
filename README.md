@@ -91,8 +91,8 @@ The server has E2E tests that run against the Firebase Firestore emulator.
 These are tagged with `e2e` and excluded from normal test runs.
 
 ```sh
-# Terminal 1 — start the emulator
-firebase emulators:start --only firestore
+# Terminal 1 — start the emulators
+firebase emulators:start --only auth,firestore
 
 # Terminal 2 — run the E2E tests
 dart test apps/server/e2e/ -t e2e
@@ -114,6 +114,7 @@ flutter analyze apps packages
 | `POST` | `/problems`                            | Create a problem — send `{"description": "..."}`             |
 | `GET`  | `/problems/:id`                        | Get a single problem                                         |
 | `PUT`  | `/problems/:id`                        | Update a problem — send `{"description": "...", "votes": N}` |
+| `GET`  | `/problems/:id/translations/:lang`     | Get cached translation (creates via Cloud Translate on miss) |
 
 ## Build and Deploy
 

@@ -275,11 +275,11 @@ via Dart conditional imports:
 - Web (Chrome 138+) — Chrome LanguageDetector API, trigram fallback
 - Web (other) / Desktop — Trigram detector
 
-**Translation:**
+**Translation (on-device):**
 
-- iOS / Android — ML Kit (google\_mlkit\_translation), server fallback
-- Web (Chrome 138+) — Chrome Translator API, server fallback
-- Web (other) / Desktop — Server (Cloud Translation API v3)
+- iOS / Android — ML Kit (google\_mlkit\_translation)
+- Web (Chrome 138+) — Chrome Translator API
+- Web (other) / Desktop — not available (falls through to cached server translation)
 
 **Translation caching:**
 

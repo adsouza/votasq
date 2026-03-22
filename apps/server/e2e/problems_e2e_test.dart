@@ -56,14 +56,24 @@ void main() {
     final authBody = jsonDecode(authResponse.body) as Map<String, dynamic>;
     uid = authBody['localId'] as String;
 
-    // Start the Dart Frog server pointing at the emulator.
-    serverProcess = await Process.start(
+    // Build the Dart Frog server, then run the compiled binary.
+    // Using the compiled server avoids stdin issues with `dart_frog dev`.
+    final buildResult = await Process.run(
       'dart_frog',
-      ['dev', '--port', '8085'],
+      ['build'],
+      workingDirectory: 'apps/server',
+    );
+    if (buildResult.exitCode != 0) {
+      fail('dart_frog build failed: ${buildResult.stderr}');
+    }
+    serverProcess = await Process.start(
+      'dart',
+      ['build/bin/server.dart'],
       workingDirectory: 'apps/server',
       environment: {
         'GOOGLE_CLOUD_PROJECT': 'votasq-test',
         'FIRESTORE_EMULATOR_HOST': emulatorHost,
+        'PORT': '8085',
       },
     );
 
@@ -224,5 +234,134 @@ void main() {
     expect(versions[1]['version'], 2);
     expect(versions[1]['description'], updatedDescription);
     expect(versions[1]['archivedAt'], isNotNull);
+  });
+
+  test('geoscope filtering is ancestor-inclusive', () async {
+    // Create problems at different geoscope levels.
+    Future<String> create(String desc, String geoscope) async {
+      final r = await client.post(
+        baseUrl.resolve('/problems'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'description': desc,
+          'ownerId': uid,
+          'geoscope': geoscope,
+        }),
+      );
+      expect(r.statusCode, 201);
+      return (jsonDecode(r.body) as Map<String, dynamic>)['id'] as String;
+    }
+
+    final globalId = await create('Global issue here', '/');
+    final countryId = await create('Country issue here', 'na/us');
+    final cityId = await create('City-level issue here', 'na/us/ny/nyc');
+    final otherId = await create('Other city problem', 'eu/gb/eng/london');
+
+    // Helper to fetch all problem IDs for a given geoscope.
+    Future<Set<String>> fetchIds(String geoscope) async {
+      final r = await client.get(
+        baseUrl.resolve('/problems?geoscope=$geoscope'),
+      );
+      expect(r.statusCode, 200);
+      final body = jsonDecode(r.body) as Map<String, dynamic>;
+      final data = (body['data'] as List).cast<Map<String, dynamic>>();
+      return data.map((p) => p['id'] as String).toSet();
+    }
+
+    // ── Querying at city level should include city, country, and global ──
+    final nycResults = await fetchIds('na/us/ny/nyc');
+    expect(nycResults, contains(cityId));
+    expect(nycResults, contains(countryId));
+    expect(nycResults, contains(globalId));
+    expect(nycResults, isNot(contains(otherId)));
+
+    // ── Querying at country level should include country and global ──
+    final usResults = await fetchIds('na/us');
+    expect(usResults, contains(countryId));
+    expect(usResults, contains(globalId));
+    expect(usResults, isNot(contains(cityId)));
+    expect(usResults, isNot(contains(otherId)));
+
+    // ── Querying at global should only include global ──
+    final globalResults = await fetchIds('/');
+    expect(globalResults, contains(globalId));
+    expect(globalResults, isNot(contains(countryId)));
+    expect(globalResults, isNot(contains(cityId)));
+    expect(globalResults, isNot(contains(otherId)));
+
+    // ── Querying a different branch should not see US/NYC problems ──
+    final londonResults = await fetchIds('eu/gb/eng/london');
+    expect(londonResults, contains(otherId));
+    expect(londonResults, contains(globalId));
+    expect(londonResults, isNot(contains(countryId)));
+    expect(londonResults, isNot(contains(cityId)));
+  });
+
+  test('translation cache: hit, invalidation on description change', () async {
+    // ── 1. Create a problem ──
+    final createResponse = await client.post(
+      baseUrl.resolve('/problems'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'description': 'Arreglar las calles', 'ownerId': uid}),
+    );
+    expect(createResponse.statusCode, 201);
+    final problem = jsonDecode(createResponse.body) as Map<String, dynamic>;
+    final problemId = problem['id'] as String;
+
+    // ── 2. Seed a cached translation via the Firestore emulator ──
+    const emulatorHost = 'localhost:8081';
+    final translationDocUrl = Uri.parse(
+      'http://$emulatorHost/v1/projects/votasq-test'
+      '/databases/(default)/documents'
+      '/problems/$problemId/translations/en',
+    );
+    final seedResponse = await client.patch(
+      translationDocUrl,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'fields': {
+          'description': {'stringValue': 'Fix the streets'},
+        },
+      }),
+    );
+    expect(
+      seedResponse.statusCode,
+      200,
+      reason: 'Seeding translation via emulator should succeed',
+    );
+
+    // ── 3. GET the translation — should return the cached value ──
+    final cacheHitResponse = await client.get(
+      baseUrl.resolve('/problems/$problemId/translations/en'),
+    );
+    expect(cacheHitResponse.statusCode, 200);
+    final cached = jsonDecode(cacheHitResponse.body) as Map<String, dynamic>;
+    expect(
+      cached['description'],
+      'Fix the streets',
+      reason: 'Should return the seeded cached translation',
+    );
+
+    // ── 4. Update the problem description ──
+    final putResponse = await client.put(
+      baseUrl.resolve('/problems/$problemId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'description': 'Reparar las aceras',
+        'votes': 1,
+      }),
+    );
+    expect(putResponse.statusCode, 200);
+
+    // ── 5. Verify the cached translation was invalidated ──
+    // Reading the translation doc directly from the emulator should 404.
+    final deletedResponse = await client.get(translationDocUrl);
+    expect(
+      deletedResponse.statusCode,
+      isNot(200),
+      reason:
+          'Cached translation should have been deleted '
+          'after description change',
+    );
   });
 }
