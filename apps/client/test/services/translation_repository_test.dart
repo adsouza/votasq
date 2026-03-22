@@ -58,7 +58,7 @@ void main() {
         verify(
           () => httpClient.get(
             Uri.parse(
-              'https://example.com/problems/p1/translations/es',
+              'https://example.com/api/problems/p1/translations/es',
             ),
             headers: any(named: 'headers'),
           ),
@@ -102,7 +102,7 @@ void main() {
         expect(result, 'es');
         verify(
           () => httpClient.post(
-            Uri.parse('https://example.com/detect'),
+            Uri.parse('https://example.com/api/detect'),
             headers: any(named: 'headers'),
             body: jsonEncode({'text': 'hola mundo'}),
           ),

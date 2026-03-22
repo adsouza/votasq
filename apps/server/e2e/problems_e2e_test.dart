@@ -116,7 +116,7 @@ void main() {
     final createdIds = <String>[];
     for (final desc in descriptions) {
       final response = await client.post(
-        baseUrl.resolve('/problems'),
+        baseUrl.resolve('/api/problems'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'description': desc, 'ownerId': uid}),
       );
@@ -139,7 +139,7 @@ void main() {
 
     // First page.
     var listResponse = await client.get(
-      baseUrl.resolve('/problems?pageSize=2'),
+      baseUrl.resolve('/api/problems?pageSize=2'),
     );
     expect(listResponse.statusCode, 200);
     var listBody = jsonDecode(listResponse.body) as Map<String, dynamic>;
@@ -153,7 +153,7 @@ void main() {
     // Second page.
     final token = listBody['nextPageToken'] as String;
     listResponse = await client.get(
-      baseUrl.resolve('/problems?pageSize=2&pageToken=$token'),
+      baseUrl.resolve('/api/problems?pageSize=2&pageToken=$token'),
     );
     expect(listResponse.statusCode, 200);
     listBody = jsonDecode(listResponse.body) as Map<String, dynamic>;
@@ -171,7 +171,7 @@ void main() {
     // ── 3. Fetch one problem by ID ──
     final targetId = createdIds.first;
     final getResponse = await client.get(
-      baseUrl.resolve('/problems/$targetId'),
+      baseUrl.resolve('/api/problems/$targetId'),
     );
     expect(getResponse.statusCode, 200);
     final fetched = jsonDecode(getResponse.body) as Map<String, dynamic>;
@@ -182,7 +182,7 @@ void main() {
     // ── 4. Update: change description & increment votes ──
     const updatedDescription = 'Fix login timeout on all network conditions';
     final putResponse = await client.put(
-      baseUrl.resolve('/problems/$targetId'),
+      baseUrl.resolve('/api/problems/$targetId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'description': updatedDescription,
@@ -197,7 +197,7 @@ void main() {
 
     // ── 5. Fetch again to verify persistence ──
     final verifyResponse = await client.get(
-      baseUrl.resolve('/problems/$targetId'),
+      baseUrl.resolve('/api/problems/$targetId'),
     );
     expect(verifyResponse.statusCode, 200);
     final verified = jsonDecode(verifyResponse.body) as Map<String, dynamic>;
@@ -208,7 +208,7 @@ void main() {
 
     // ── 6. Fetch version history ──
     final versionsResponse = await client.get(
-      baseUrl.resolve('/problems/$targetId/versions'),
+      baseUrl.resolve('/api/problems/$targetId/versions'),
     );
     expect(versionsResponse.statusCode, 200);
     final versionsBody =
@@ -240,7 +240,7 @@ void main() {
     // Create problems at different geoscope levels.
     Future<String> create(String desc, String geoscope) async {
       final r = await client.post(
-        baseUrl.resolve('/problems'),
+        baseUrl.resolve('/api/problems'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'description': desc,
@@ -260,7 +260,7 @@ void main() {
     // Helper to fetch all problem IDs for a given geoscope.
     Future<Set<String>> fetchIds(String geoscope) async {
       final r = await client.get(
-        baseUrl.resolve('/problems?geoscope=$geoscope'),
+        baseUrl.resolve('/api/problems?geoscope=$geoscope'),
       );
       expect(r.statusCode, 200);
       final body = jsonDecode(r.body) as Map<String, dynamic>;
@@ -300,7 +300,7 @@ void main() {
   test('translation cache: hit, invalidation on description change', () async {
     // ── 1. Create a problem ──
     final createResponse = await client.post(
-      baseUrl.resolve('/problems'),
+      baseUrl.resolve('/api/problems'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'description': 'Arreglar las calles', 'ownerId': uid}),
     );
@@ -332,7 +332,7 @@ void main() {
 
     // ── 3. GET the translation — should return the cached value ──
     final cacheHitResponse = await client.get(
-      baseUrl.resolve('/problems/$problemId/translations/en'),
+      baseUrl.resolve('/api/problems/$problemId/translations/en'),
     );
     expect(cacheHitResponse.statusCode, 200);
     final cached = jsonDecode(cacheHitResponse.body) as Map<String, dynamic>;
@@ -344,7 +344,7 @@ void main() {
 
     // ── 4. Update the problem description ──
     final putResponse = await client.put(
-      baseUrl.resolve('/problems/$problemId'),
+      baseUrl.resolve('/api/problems/$problemId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'description': 'Reparar las aceras',

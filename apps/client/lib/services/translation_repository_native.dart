@@ -64,7 +64,9 @@ class TranslationRepository {
     required String targetLanguage,
   }) async {
     final response = await _client.get(
-      Uri.parse('$_baseUrl/problems/$problemId/translations/$targetLanguage'),
+      Uri.parse(
+        '$_baseUrl/api/problems/$problemId/translations/$targetLanguage',
+      ),
     );
     if (response.statusCode != 200) {
       throw Exception('Problem translation failed: ${response.statusCode}');
@@ -90,7 +92,7 @@ class TranslationRepository {
   /// Detects the language of [text] via the server's Cloud Translation API.
   Future<String> detectLanguageViaServer(String text) async {
     final response = await _client.post(
-      Uri.parse('$_baseUrl/detect'),
+      Uri.parse('$_baseUrl/api/detect'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'text': text}),
     );

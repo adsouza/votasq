@@ -290,16 +290,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.escape): () =>
-            context.pop(),
+        const SingleActivator(LogicalKeyboardKey.escape): () => context.pop(),
       },
       child: Focus(
         autofocus: true,
         child: Scaffold(
           appBar: AppBar(title: Text(l10n.problemDetailPageTitle)),
-          body: isOwner
-              ? _buildEditBody(problem)
-              : _buildReadOnlyBody(problem),
+          body: isOwner ? _buildEditBody(problem) : _buildReadOnlyBody(problem),
         ),
       ),
     );
