@@ -248,6 +248,61 @@ class Db {
     return revisions;
   }
 
+  /// Fetch a cached [TranslatedProblem] for the given problem and language.
+  /// Returns `null` if no cached translation exists.
+  Future<TranslatedProblem?> getTranslation(
+    String problemId,
+    String langCode,
+  ) async {
+    try {
+      final doc = await _firestore.projects.databases.documents.get(
+        '$_basePath/problems/$problemId/translations/$langCode',
+      );
+      return TranslatedProblem(
+        description: doc.fields!['description']!.stringValue!,
+      );
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status == 404) return null;
+      rethrow;
+    }
+  }
+
+  /// Cache a [TranslatedProblem] for the given problem and language.
+  Future<void> saveTranslation(
+    String problemId,
+    String langCode,
+    TranslatedProblem translation,
+  ) async {
+    final doc = _translatedProblemToDocument(translation)
+      ..name = '$_basePath/problems/$problemId/translations/$langCode';
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(writes: [fs.Write(update: doc)]),
+      _databasePath,
+    );
+  }
+
+  /// Delete all cached translations for a problem.
+  Future<void> deleteTranslations(String problemId) async {
+    String? pageToken;
+    do {
+      final response = await _firestore.projects.databases.documents.list(
+        '$_basePath/problems/$problemId',
+        'translations',
+        mask_fieldPaths: [],
+        pageToken: pageToken,
+      );
+      final docs = response.documents;
+      if (docs == null || docs.isEmpty) return;
+      await _firestore.projects.databases.documents.commit(
+        fs.CommitRequest(
+          writes: [for (final doc in docs) fs.Write(delete: doc.name)],
+        ),
+        _databasePath,
+      );
+      pageToken = response.nextPageToken;
+    } while (pageToken != null);
+  }
+
   fs.Document _problemToDocument(Problem problem) {
     return fs.Document(
       fields: {
@@ -271,6 +326,14 @@ class Db {
         'lastUpdatedAt': fs.Value(
           timestampValue: problem.lastUpdatedAt.toIso8601String(),
         ),
+      },
+    );
+  }
+
+  fs.Document _translatedProblemToDocument(TranslatedProblem translation) {
+    return fs.Document(
+      fields: {
+        'description': fs.Value(stringValue: translation.description),
       },
     );
   }

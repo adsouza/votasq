@@ -40,6 +40,15 @@ service cloud.firestore {
           && request.resource.data.version is int
           && request.resource.data.archivedAt is timestamp;
       }
+
+      match /translations/{langCode} {
+        allow read: if true;
+        allow create: if
+          request.resource.data.keys().hasAll(['description'])
+          && request.resource.data.description is string
+          && request.resource.data.description.size() > 0;
+        allow delete: if true;
+      }
     }
 
     match /geoscopes/{geoscopeId} {

@@ -97,12 +97,13 @@ sequenceDiagram
 
 Dart Frog maps the filesystem to routes automatically:
 
-| File                                       | Endpoint                                                    |
-|--------------------------------------------|-------------------------------------------------------------|
-| `routes/index.dart`                        | `GET /` — serves `public/index.html` (Flutter web build)    |
-| `routes/problems/index.dart`               | `GET /problems` — paginated list, `POST /problems` — create |
-| `routes/problems/[id]/index.dart`          | `GET /problems/:id` — read, `PUT /problems/:id` — update    |
-| `routes/problems/[id]/versions/index.dart` | `GET /problems/:id/versions` — version history              |
+| File                                             | Endpoint                                                    |
+|--------------------------------------------------|-------------------------------------------------------------|
+| `routes/index.dart`                              | `GET /` — serves `public/index.html` (Flutter web build)    |
+| `routes/problems/index.dart`                     | `GET /problems` — paginated list, `POST /problems` — create |
+| `routes/problems/[id]/index.dart`                | `GET /problems/:id` — read, `PUT /problems/:id` — update    |
+| `routes/problems/[id]/versions/index.dart`       | `GET /problems/:id/versions` — version history              |
+| `routes/problems/[id]/translations/[lang].dart`  | `GET /problems/:id/translations/:lang` — cached translation |
 
 Each file exports an `onRequest` function that switches on HTTP method.
 
@@ -260,8 +261,10 @@ matching against available geoscopes.
 ### Language detection & translation
 
 The client detects the language of problem descriptions at write time and stores
-it in the `lang` field on each Problem. At read time, `TranslatableText` simply
+it in the `lang` field on each Problem. At read time, `ProblemTranslation`
 compares `lang` to the user's locale to decide whether to show a translate icon.
+Individual fields are rendered by `TranslatedField` widgets that read translation
+state from the nearest `ProblemTranslation` ancestor.
 
 Both detection and translation use platform-specific implementations selected
 via Dart conditional imports:
@@ -277,6 +280,21 @@ via Dart conditional imports:
 - iOS / Android — ML Kit (google\_mlkit\_translation), server fallback
 - Web (Chrome 138+) — Chrome Translator API, server fallback
 - Web (other) / Desktop — Server (Cloud Translation API v3)
+
+**Translation caching:**
+
+Translations from Cloud Translate (and on-device translations) are cached in a
+Firestore subcollection at `problems/{id}/translations/{langCode}` as
+`TranslatedProblem` objects. The translation flow is:
+
+1. Check Firestore cache (direct client read)
+2. Try on-device translation (ML Kit / Chrome API) — if successful, the result
+   is written to the cache so other clients benefit
+3. Fall back to `GET /problems/{id}/translations/{lang}` — the server checks the
+   cache, translates via Cloud Translate on miss, caches, and returns
+
+When a problem's description is modified, all cached translations are deleted
+(both client `updateProblem` and server `PUT /problems/{id}`).
 
 > **Desktop ML Kit constraint:** The `google_mlkit_language_id` and
 > `google_mlkit_translation` packages register Flutter method channels even on

@@ -6,7 +6,7 @@ import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
-import 'package:client/problems/widgets/translatable_text.dart';
+import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:feedback/feedback.dart';
@@ -314,7 +314,15 @@ class _ProblemsViewState extends State<ProblemsView> {
         children: [
           GestureDetector(
             onDoubleTap: () => context.go('/problems/${problem.id}'),
-            child: TranslatableText(problem.description, lang: problem.lang),
+            child: ProblemTranslation(
+              problemId: problem.id,
+              lang: problem.lang,
+              originalDescription: problem.description,
+              child: TranslatedField(
+                problem.description,
+                fieldSelector: (tp) => tp.description,
+              ),
+            ),
           ),
           if (problem.geoscope != '/')
             Chip(

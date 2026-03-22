@@ -138,6 +138,14 @@ class FirestoreRepository {
     final lang = userLanguage != null
         ? await _detectLang(problem.description, userLanguage)
         : problem.lang;
+
+    // Invalidate cached translations when the description changes.
+    final existing = await _problemsRef.doc(problem.id).get();
+    if (existing.exists &&
+        existing.data()?['description'] != problem.description) {
+      await _deleteTranslations(problem.id);
+    }
+
     final now = DateTime.now().toUtc();
     final newVersion = problem.version + 1;
     final mainData = {
@@ -190,6 +198,50 @@ class FirestoreRepository {
     }
 
     return 'und';
+  }
+
+  /// Fetch a cached [TranslatedProblem] for the given problem and language.
+  /// Returns `null` if no cached translation exists.
+  Future<TranslatedProblem?> getTranslation(
+    String problemId,
+    String langCode,
+  ) async {
+    final doc = await _problemsRef
+        .doc(problemId)
+        .collection('translations')
+        .doc(langCode)
+        .get();
+    if (!doc.exists) return null;
+    final data = doc.data();
+    if (data == null) return null;
+    return TranslatedProblem(description: data['description'] as String);
+  }
+
+  /// Cache a [TranslatedProblem] for the given problem and language.
+  Future<void> saveTranslation(
+    String problemId,
+    String langCode,
+    TranslatedProblem translation,
+  ) async {
+    await _problemsRef
+        .doc(problemId)
+        .collection('translations')
+        .doc(langCode)
+        .set({'description': translation.description});
+  }
+
+  /// Delete all cached translations for a problem.
+  Future<void> _deleteTranslations(String problemId) async {
+    final snapshot = await _problemsRef
+        .doc(problemId)
+        .collection('translations')
+        .get();
+    if (snapshot.docs.isEmpty) return;
+    final batch = _firestore.batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
   }
 
   /// Atomically add a user's complaint to a problem.

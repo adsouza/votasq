@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
-import 'package:client/problems/widgets/translatable_text.dart';
+import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -156,10 +156,15 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TranslatableText(
-            problem.description,
+          ProblemTranslation(
+            problemId: problem.id,
             lang: problem.lang,
-            style: theme.textTheme.headlineSmall,
+            originalDescription: problem.description,
+            child: TranslatedField(
+              problem.description,
+              fieldSelector: (tp) => tp.description,
+              style: theme.textTheme.headlineSmall,
+            ),
           ),
           const SizedBox(height: 16),
           Wrap(
