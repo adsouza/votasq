@@ -87,5 +87,9 @@
     "problemLinkCopied": "链接已复制到剪贴板",
     "@problemLinkCopied": {
         "description": "SnackBar message shown after copying a problem link"
+    },
+    "geoscopeDropdownTooltip": "选择问题的地理范围",
+    "@geoscopeDropdownTooltip": {
+        "description": "Tooltip shown when hovering over the geoscope dropdown"
     }
 }

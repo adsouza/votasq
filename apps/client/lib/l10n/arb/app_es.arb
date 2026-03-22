@@ -87,5 +87,9 @@
     "problemLinkCopied": "Enlace copiado al portapapeles",
     "@problemLinkCopied": {
         "description": "Mensaje del SnackBar después de copiar el enlace de un problema"
+    },
+    "geoscopeDropdownTooltip": "Selecciona el ámbito geográfico de tu problema",
+    "@geoscopeDropdownTooltip": {
+        "description": "Tooltip que se muestra al pasar el cursor sobre el selector de ámbito geográfico"
     }
 }

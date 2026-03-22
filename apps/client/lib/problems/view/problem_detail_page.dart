@@ -7,6 +7,7 @@ import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
@@ -207,6 +208,9 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 decoration: InputDecoration(
                   hintText: l10n.editProblemHint,
                 ),
+                onSubmitted: _hasEnoughWords(value.text)
+                    ? (_) => _save()
+                    : null,
               );
             },
           ),
@@ -284,9 +288,20 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     final userId = context.read<AuthCubit>().state.userId;
     final isOwner = userId != null && userId == problem.ownerId;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.problemDetailPageTitle)),
-      body: isOwner ? _buildEditBody(problem) : _buildReadOnlyBody(problem),
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.escape): () =>
+            context.pop(),
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          appBar: AppBar(title: Text(l10n.problemDetailPageTitle)),
+          body: isOwner
+              ? _buildEditBody(problem)
+              : _buildReadOnlyBody(problem),
+        ),
+      ),
     );
   }
 }

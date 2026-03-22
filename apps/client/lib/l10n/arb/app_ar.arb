@@ -87,5 +87,9 @@
     "problemLinkCopied": "تم نسخ الرابط إلى الحافظة",
     "@problemLinkCopied": {
         "description": "SnackBar message shown after copying a problem link"
+    },
+    "geoscopeDropdownTooltip": "اختر النطاق الجغرافي لمشكلتك",
+    "@geoscopeDropdownTooltip": {
+        "description": "Tooltip shown when hovering over the geoscope dropdown"
     }
 }

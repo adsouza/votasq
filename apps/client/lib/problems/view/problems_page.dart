@@ -199,19 +199,22 @@ class _ProblemsViewState extends State<ProblemsView> {
 
     return [
       const SizedBox(width: 8),
-      DropdownButton<String>(
-        value: effectiveValue,
-        items: items,
-        selectedItemBuilder: (_) => ancestorIds.map((id) {
-          if (id == '/') return Text(l10n.geoscopeGlobal);
-          return Text(id.split('/').last);
-        }).toList(),
-        onChanged: enabled
-            ? (value) {
-                if (value == null) return;
-                onChanged(value);
-              }
-            : null,
+      Tooltip(
+        message: l10n.geoscopeDropdownTooltip,
+        child: DropdownButton<String>(
+          value: effectiveValue,
+          items: items,
+          selectedItemBuilder: (_) => ancestorIds.map((id) {
+            if (id == '/') return Text(l10n.geoscopeGlobal);
+            return Text(id.split('/').last);
+          }).toList(),
+          onChanged: enabled
+              ? (value) {
+                  if (value == null) return;
+                  onChanged(value);
+                }
+              : null,
+        ),
       ),
     ];
   }

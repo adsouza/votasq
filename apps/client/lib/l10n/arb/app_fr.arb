@@ -87,5 +87,9 @@
     "problemLinkCopied": "Lien copié dans le presse-papiers",
     "@problemLinkCopied": {
         "description": "SnackBar message shown after copying a problem link"
+    },
+    "geoscopeDropdownTooltip": "Sélectionnez la portée géographique de votre problème",
+    "@geoscopeDropdownTooltip": {
+        "description": "Tooltip shown when hovering over the geoscope dropdown"
     }
 }
