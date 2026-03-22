@@ -53,28 +53,31 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     final authRepo = widget.authRepository ?? AuthRepository();
+    final langService =
+        widget.languageDetectionService ?? LanguageDetectionService();
+    final translationRepo =
+        widget.translationRepository ??
+        TranslationRepository(
+          serverBaseUrl: const String.fromEnvironment(
+            'SERVER_BASE_URL',
+            defaultValue: 'https://votasq.quikchange.net',
+          ),
+        );
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (_) => widget.firestoreRepository ?? FirestoreRepository(),
+          create: (_) =>
+              widget.firestoreRepository ??
+              FirestoreRepository(
+                languageDetectionService: langService,
+                translationRepository: translationRepo,
+              ),
         ),
         RepositoryProvider(
           create: (_) => widget.feedbackRepository ?? FeedbackRepository(),
         ),
-        RepositoryProvider(
-          create: (_) =>
-              widget.languageDetectionService ?? LanguageDetectionService(),
-        ),
-        RepositoryProvider(
-          create: (_) =>
-              widget.translationRepository ??
-              TranslationRepository(
-                serverBaseUrl: const String.fromEnvironment(
-                  'SERVER_BASE_URL',
-                  defaultValue: 'https://votasq.quikchange.net',
-                ),
-              ),
-        ),
+        RepositoryProvider.value(value: langService),
+        RepositoryProvider.value(value: translationRepo),
         RepositoryProvider.value(value: authRepo),
       ],
       child: MultiBlocProvider(

@@ -175,7 +175,12 @@ void main() {
     testWidgets('save calls updateProblem and navigates home', (tester) async {
       final problem = _problem();
       when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
-      when(() => repo.updateProblem(any())).thenAnswer((_) async {});
+      when(
+        () => repo.updateProblem(
+          any(),
+          userLanguage: any(named: 'userLanguage'),
+        ),
+      ).thenAnswer((_) async {});
       when(() => authCubit.state).thenReturn(
         const AuthState(
           status: AuthStatus.authenticated,
@@ -194,7 +199,12 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
-      verify(() => repo.updateProblem(any())).called(1);
+      verify(
+        () => repo.updateProblem(
+          any(),
+          userLanguage: any(named: 'userLanguage'),
+        ),
+      ).called(1);
       expect(find.text('home'), findsOneWidget);
     });
   });

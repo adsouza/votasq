@@ -1,22 +1,24 @@
-import 'dart:async';
 import 'dart:developer';
 
-import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Displays [text] with an optional translate icon when the detected language
-/// differs from the app's current locale. Tapping the icon fetches and shows
-/// the translation inline.
+/// Displays [text] with an optional translate icon when [lang] differs from
+/// the app's current locale. Tapping the icon fetches and shows the
+/// translation inline.
 class TranslatableText extends StatefulWidget {
   const TranslatableText(
     this.text, {
+    this.lang,
     this.style,
     super.key,
   });
 
   final String text;
+
+  /// BCP-47 language code the text was written in, or `null` if unknown.
+  final String? lang;
   final TextStyle? style;
 
   @override
@@ -24,42 +26,23 @@ class TranslatableText extends StatefulWidget {
 }
 
 class _TranslatableTextState extends State<TranslatableText> {
-  bool _needsTranslation = false;
-  String? _lastDetectedText;
   String? _translatedText;
   bool _translating = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _detectIfNeeded();
-  }
-
-  @override
   void didUpdateWidget(TranslatableText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _detectIfNeeded();
-  }
-
-  void _detectIfNeeded() {
-    if (_lastDetectedText != widget.text) {
-      _lastDetectedText = widget.text;
+    if (oldWidget.text != widget.text || oldWidget.lang != widget.lang) {
       _translatedText = null;
       _translating = false;
-      unawaited(_detect());
     }
   }
 
-  Future<void> _detect() async {
-    final service = context.read<LanguageDetectionService>();
+  bool get _needsTranslation {
+    final lang = widget.lang;
+    if (lang == null) return false;
     final userLanguage = Localizations.localeOf(context).languageCode;
-    final result = await service.needsTranslation(
-      text: widget.text,
-      userLanguage: userLanguage,
-    );
-    if (mounted && result != _needsTranslation) {
-      setState(() => _needsTranslation = result);
-    }
+    return lang != userLanguage;
   }
 
   Future<void> _translate() async {
@@ -71,6 +54,7 @@ class _TranslatableTextState extends State<TranslatableText> {
       final result = await repo.translate(
         text: widget.text,
         targetLanguage: userLanguage,
+        sourceLanguage: widget.lang,
       );
       if (mounted) setState(() => _translatedText = result);
     } on Exception catch (e) {

@@ -40,4 +40,13 @@ class Translator {
     );
     return response.translations!.first.translatedText!;
   }
+
+  /// Detects the language of [text]. Returns a BCP-47 code (e.g. `"hi"`).
+  Future<String> detectLanguage(String text) async {
+    final response = await _api.projects.locations.detectLanguage(
+      t.DetectLanguageRequest(content: text, mimeType: 'text/plain'),
+      _parent,
+    );
+    return response.languages!.first.languageCode!;
+  }
 }

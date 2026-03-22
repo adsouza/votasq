@@ -63,6 +63,7 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   Future<void> addProblem({
     required String description,
     required String ownerId,
+    required String userLanguage,
     String? geoscope,
   }) async {
     try {
@@ -70,6 +71,7 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         description: description,
         ownerId: ownerId,
         geoscope: geoscope ?? state.geoscope,
+        userLanguage: userLanguage,
       );
     } on Exception catch (e, st) {
       log('addProblem failed: $e', stackTrace: st);
@@ -83,9 +85,12 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }
 
   /// Update an existing problem.
-  Future<void> updateProblem(Problem problem) async {
+  Future<void> updateProblem(
+    Problem problem, {
+    String? userLanguage,
+  }) async {
     try {
-      await _repo.updateProblem(problem);
+      await _repo.updateProblem(problem, userLanguage: userLanguage);
     } on Exception catch (e, st) {
       log('updateProblem failed: $e', stackTrace: st);
     }

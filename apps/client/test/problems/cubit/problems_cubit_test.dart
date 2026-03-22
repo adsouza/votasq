@@ -184,6 +184,7 @@ void main() {
             description: any(named: 'description'),
             ownerId: any(named: 'ownerId'),
             geoscope: any(named: 'geoscope'),
+            userLanguage: any(named: 'userLanguage'),
           ),
         ).thenAnswer((_) async {});
         return ProblemsCubit(repo);
@@ -192,6 +193,7 @@ void main() {
       act: (cubit) => cubit.addProblem(
         description: 'a new problem',
         ownerId: 'user1',
+        userLanguage: 'en',
       ),
       verify: (_) {
         verify(
@@ -199,6 +201,7 @@ void main() {
             description: 'a new problem',
             ownerId: 'user1',
             geoscope: 'us/nyc',
+            userLanguage: 'en',
           ),
         ).called(1);
       },
@@ -212,6 +215,7 @@ void main() {
             description: any(named: 'description'),
             ownerId: any(named: 'ownerId'),
             geoscope: any(named: 'geoscope'),
+            userLanguage: any(named: 'userLanguage'),
           ),
         ).thenAnswer((_) async {});
         return ProblemsCubit(repo);
@@ -220,6 +224,7 @@ void main() {
       act: (cubit) => cubit.addProblem(
         description: 'a new problem',
         ownerId: 'user1',
+        userLanguage: 'en',
         geoscope: '/',
       ),
       verify: (_) {
@@ -228,6 +233,7 @@ void main() {
             description: 'a new problem',
             ownerId: 'user1',
             geoscope: '/',
+            userLanguage: 'en',
           ),
         ).called(1);
       },
@@ -241,6 +247,7 @@ void main() {
             description: any(named: 'description'),
             ownerId: any(named: 'ownerId'),
             geoscope: any(named: 'geoscope'),
+            userLanguage: any(named: 'userLanguage'),
           ),
         ).thenThrow(Exception('fail'));
         return ProblemsCubit(repo);
@@ -248,6 +255,7 @@ void main() {
       act: (cubit) => cubit.addProblem(
         description: 'a new problem',
         ownerId: 'user1',
+        userLanguage: 'en',
       ),
       expect: () => <ProblemsState>[],
     );

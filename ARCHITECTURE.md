@@ -257,6 +257,37 @@ infers a default from the device locale on first launch. If the persisted value
 becomes stale (e.g. after a hierarchy migration), it falls back via suffix
 matching against available geoscopes.
 
+### Language detection & translation
+
+The client detects the language of problem descriptions at write time and stores
+it in the `lang` field on each Problem. At read time, `TranslatableText` simply
+compares `lang` to the user's locale to decide whether to show a translate icon.
+
+Both detection and translation use platform-specific implementations selected
+via Dart conditional imports:
+
+**Detection:**
+
+- iOS / Android — ML Kit (google\_mlkit\_language\_id)
+- Web (Chrome 138+) — Chrome LanguageDetector API, trigram fallback
+- Web (other) / Desktop — Trigram detector
+
+**Translation:**
+
+- iOS / Android — ML Kit (google\_mlkit\_translation), server fallback
+- Web (Chrome 138+) — Chrome Translator API, server fallback
+- Web (other) / Desktop — Server (Cloud Translation API v3)
+
+> **Desktop ML Kit constraint:** The `google_mlkit_language_id` and
+> `google_mlkit_translation` packages register Flutter method channels even on
+> platforms they don't support. On macOS this interferes with the text input
+> method channel, breaking `TextField` editing. To prevent this, **the ML Kit
+> import chain must stay in the service/repository layer** — view and widget
+> files must never import `language_detection_service.dart` or
+> `translation_repository.dart` directly. `FirestoreRepository` owns the
+> `LanguageDetectionService` instance so views can trigger detection without
+> importing ML Kit transitively.
+
 ### Flavor system
 
 Three entry points configure the app for different environments:

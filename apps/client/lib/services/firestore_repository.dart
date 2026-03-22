@@ -1,13 +1,29 @@
+import 'dart:developer';
+
+import 'package:client/services/language_detection_service.dart';
+import 'package:client/services/translation_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared/shared.dart';
 import 'package:uuid/uuid.dart';
 
 /// Direct Firestore access layer, replacing the HTTP API service.
+///
+/// Language detection is handled here (not in views) because the ML Kit
+/// packages register method channels that break text input on desktop
+/// platforms. Keeping the import chain in the service layer prevents views
+/// from transitively pulling in those packages.
 class FirestoreRepository {
-  FirestoreRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreRepository({
+    FirebaseFirestore? firestore,
+    LanguageDetectionService? languageDetectionService,
+    TranslationRepository? translationRepository,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _langService = languageDetectionService ?? LanguageDetectionService(),
+       _translationRepo = translationRepository;
 
   final FirebaseFirestore _firestore;
+  final LanguageDetectionService _langService;
+  final TranslationRepository? _translationRepo;
   static const _collection = 'problems';
   static const _pageSize = 20;
 
@@ -78,7 +94,9 @@ class FirestoreRepository {
     required String description,
     required String ownerId,
     required String geoscope,
+    required String userLanguage,
   }) async {
+    final lang = await _detectLang(description, userLanguage);
     final id = const Uuid().v4();
     final now = DateTime.now().toUtc();
     const version = 1;
@@ -86,6 +104,7 @@ class FirestoreRepository {
       'description': description,
       'ownerId': ownerId,
       'geoscope': geoscope,
+      'lang': lang,
       'votes': 1,
       'solved': false,
       'version': version,
@@ -110,12 +129,21 @@ class FirestoreRepository {
   /// Update a problem's fields.
   /// Uses a batched write to atomically update the main document and create
   /// a new revision snapshot.
-  Future<void> updateProblem(Problem problem) async {
+  ///
+  /// If [userLanguage] is provided, re-detects the description language.
+  Future<void> updateProblem(
+    Problem problem, {
+    String? userLanguage,
+  }) async {
+    final lang = userLanguage != null
+        ? await _detectLang(problem.description, userLanguage)
+        : problem.lang;
     final now = DateTime.now().toUtc();
     final newVersion = problem.version + 1;
     final mainData = {
       'description': problem.description,
       'geoscope': problem.geoscope,
+      'lang': ?lang,
       'votes': problem.votes,
       'complaints': problem.complaints,
       'solved': problem.solved,
@@ -135,6 +163,33 @@ class FirestoreRepository {
         revisionData,
       );
     await batch.commit();
+  }
+
+  /// Detects the language of [text]. Returns [userLanguage] if the text
+  /// matches it, otherwise identifies the actual language via on-device
+  /// detection first, falling back to Cloud Translation if needed.
+  Future<String> _detectLang(String text, String userLanguage) async {
+    final foreign = await _langService.needsTranslation(
+      text: text,
+      userLanguage: userLanguage,
+    );
+    if (!foreign) return userLanguage;
+
+    // Try on-device detection (ML Kit or trigrams).
+    final detected = await _langService.detectLanguage(text);
+    if (detected != null) return detected;
+
+    // Fall back to Cloud Translation's language detection.
+    final repo = _translationRepo;
+    if (repo != null) {
+      try {
+        return await repo.detectLanguageViaServer(text);
+      } on Exception catch (e) {
+        log('Server language detection failed: $e');
+      }
+    }
+
+    return 'und';
   }
 
   /// Atomically add a user's complaint to a problem.
@@ -174,6 +229,7 @@ class FirestoreRepository {
       description: data['description'] as String,
       ownerId: data['ownerId'] as String,
       geoscope: data['geoscope'] as String? ?? '/',
+      lang: data['lang'] as String?,
       votes: (data['votes'] as num).toInt(),
       complaints:
           (data['complaints'] as List<dynamic>?)

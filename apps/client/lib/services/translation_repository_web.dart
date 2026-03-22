@@ -72,8 +72,12 @@ class TranslationRepository {
       return null;
     }
 
+    // Chrome Translator API requires an explicit source language.
+    // If unknown, skip to the server fallback which auto-detects.
+    if (sourceLanguage == null) return null;
+
     final options = _TranslatorOptions(
-      sourceLanguage: sourceLanguage ?? 'en',
+      sourceLanguage: sourceLanguage,
       targetLanguage: targetLanguage,
     );
 
@@ -102,5 +106,19 @@ class TranslationRepository {
     }
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     return body['translatedText'] as String;
+  }
+
+  /// Detects the language of [text] via the server's Cloud Translation API.
+  Future<String> detectLanguageViaServer(String text) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/detect'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'text': text}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Language detection failed: ${response.statusCode}');
+    }
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return body['detectedLanguage'] as String;
   }
 }

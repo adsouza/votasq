@@ -13,6 +13,7 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
   lastUpdatedAt: DateTime.parse(json['lastUpdatedAt'] as String),
   ownerId: json['ownerId'] as String,
   geoscope: json['geoscope'] as String? ?? '/',
+  lang: json['lang'] as String?,
   votes: (json['votes'] as num?)?.toInt() ?? 1,
   complaints:
       (json['complaints'] as List<dynamic>?)
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
   'lastUpdatedAt': instance.lastUpdatedAt.toIso8601String(),
   'ownerId': instance.ownerId,
   'geoscope': instance.geoscope,
+  'lang': instance.lang,
   'votes': instance.votes,
   'complaints': instance.complaints,
   'solved': instance.solved,

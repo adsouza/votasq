@@ -172,6 +172,7 @@ class Db {
           description: doc.fields!['description']!.stringValue!,
           ownerId: doc.fields!['ownerId']!.stringValue!,
           geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
+          lang: doc.fields?['lang']?.stringValue,
           votes: votes,
           complaints: _parseStringList(doc.fields?['complaints']),
           solved: doc.fields?['solved']?.booleanValue ?? false,
@@ -204,6 +205,7 @@ class Db {
       description: doc.fields!['description']!.stringValue!,
       ownerId: doc.fields!['ownerId']!.stringValue!,
       geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
+      lang: doc.fields?['lang']?.stringValue,
       votes: int.parse(doc.fields!['votes']!.integerValue!),
       complaints: _parseStringList(doc.fields?['complaints']),
       solved: doc.fields?['solved']?.booleanValue ?? false,
@@ -252,6 +254,7 @@ class Db {
         'description': fs.Value(stringValue: problem.description),
         'ownerId': fs.Value(stringValue: problem.ownerId),
         'geoscope': fs.Value(stringValue: problem.geoscope),
+        if (problem.lang != null) 'lang': fs.Value(stringValue: problem.lang),
         'votes': fs.Value(integerValue: '${problem.votes}'),
         'complaints': fs.Value(
           arrayValue: fs.ArrayValue(

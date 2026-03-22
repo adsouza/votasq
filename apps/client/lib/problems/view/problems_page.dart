@@ -90,10 +90,12 @@ class _ProblemsViewState extends State<ProblemsView> {
     if (!_hasEnoughWords(_addController.text)) return;
     final text = _addController.text.trim();
     final userId = context.read<AuthCubit>().state.userId!;
+    final userLang = Localizations.localeOf(context).languageCode;
     unawaited(
       context.read<ProblemsCubit>().addProblem(
         description: text,
         ownerId: userId,
+        userLanguage: userLang,
         geoscope: _addProblemGeoscope,
       ),
     );
@@ -248,12 +250,14 @@ class _ProblemsViewState extends State<ProblemsView> {
     final newGeoscope = _editProblemGeoscope ?? problem.geoscope;
     if (newDescription != problem.description ||
         newGeoscope != problem.geoscope) {
+      final userLang = Localizations.localeOf(context).languageCode;
       unawaited(
         context.read<ProblemsCubit>().updateProblem(
           problem.copyWith(
             description: newDescription,
             geoscope: newGeoscope,
           ),
+          userLanguage: userLang,
         ),
       );
     }
@@ -310,7 +314,7 @@ class _ProblemsViewState extends State<ProblemsView> {
         children: [
           GestureDetector(
             onDoubleTap: () => context.go('/problems/${problem.id}'),
-            child: TranslatableText(problem.description),
+            child: TranslatableText(problem.description, lang: problem.lang),
           ),
           if (problem.geoscope != '/')
             Chip(

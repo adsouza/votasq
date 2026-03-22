@@ -80,11 +80,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     if (newDescription != problem.description ||
         newGeoscope != problem.geoscope) {
       try {
+        final userLang = Localizations.localeOf(context).languageCode;
         await context.read<FirestoreRepository>().updateProblem(
           problem.copyWith(
             description: newDescription,
             geoscope: newGeoscope,
           ),
+          userLanguage: userLang,
         );
       } on Exception catch (e) {
         log('Failed to save problem: $e');
@@ -156,6 +158,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         children: [
           TranslatableText(
             problem.description,
+            lang: problem.lang,
             style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),

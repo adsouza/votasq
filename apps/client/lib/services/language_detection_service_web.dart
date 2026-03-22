@@ -81,6 +81,27 @@ class LanguageDetectionService {
     return !_trigramDetector.isLanguage(text, userLanguage);
   }
 
+  /// Returns the detected BCP-47 language code for [text], or `null` if
+  /// detection is inconclusive.
+  Future<String?> detectLanguage(String text) async {
+    final detector = await _getDetector();
+    if (detector != null) {
+      try {
+        final results = (await detector.detect(text).toDart).toDart;
+        if (results.isNotEmpty) {
+          final best = results.first;
+          if (best.detectedLanguage != 'und' && best.confidence >= 0.5) {
+            return best.detectedLanguage;
+          }
+        }
+      } on Object catch (e) {
+        log('Chrome detectLanguage failed: $e');
+      }
+    }
+    final detected = _trigramDetector.detect(text);
+    return detected == 'und' ? null : detected;
+  }
+
   /// Releases resources held by the detector.
   Future<void> dispose() async {
     _detector?.destroy();

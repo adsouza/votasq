@@ -26,13 +26,17 @@ class TranslationRepository {
   Future<String> translate({
     required String text,
     required String targetLanguage,
+    String? sourceLanguage,
   }) async {
     if (_mlKitSupported) {
       // Try ML Kit on-device translation first.
       final target = BCP47Code.fromRawValue(targetLanguage);
       if (target != null) {
         try {
-          final source = await _detectSource(text);
+          // Use the provided source language, or detect it.
+          final source = sourceLanguage != null
+              ? BCP47Code.fromRawValue(sourceLanguage)
+              : await _detectSource(text);
           if (source != null && source != target) {
             final translator = OnDeviceTranslator(
               sourceLanguage: source,
@@ -81,5 +85,19 @@ class TranslationRepository {
     }
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     return body['translatedText'] as String;
+  }
+
+  /// Detects the language of [text] via the server's Cloud Translation API.
+  Future<String> detectLanguageViaServer(String text) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/detect'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'text': text}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Language detection failed: ${response.statusCode}');
+    }
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return body['detectedLanguage'] as String;
   }
 }
