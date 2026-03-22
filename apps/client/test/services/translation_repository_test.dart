@@ -39,8 +39,9 @@ void main() {
 
     group('translateProblem', () {
       test('returns TranslatedProblem on success', () async {
-        when(() => httpClient.get(any(), headers: any(named: 'headers')))
-            .thenAnswer(
+        when(
+          () => httpClient.get(any(), headers: any(named: 'headers')),
+        ).thenAnswer(
           (_) async => http.Response(
             jsonEncode({'description': 'hello world'}),
             200,
@@ -65,8 +66,9 @@ void main() {
       });
 
       test('throws on non-200 response', () async {
-        when(() => httpClient.get(any(), headers: any(named: 'headers')))
-            .thenAnswer((_) async => http.Response('', 500));
+        when(
+          () => httpClient.get(any(), headers: any(named: 'headers')),
+        ).thenAnswer((_) async => http.Response('', 500));
 
         expect(
           () => repo.translateProblem(
