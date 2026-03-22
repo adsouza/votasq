@@ -7,6 +7,8 @@ import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/view/problems_page.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/language_detection_service.dart';
+import 'package:client/services/translation_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +26,12 @@ class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
 class _MockFeedbackRepository extends Mock implements FeedbackRepository {}
+
+class _MockLanguageDetectionService extends Mock
+    implements LanguageDetectionService {}
+
+class _MockTranslationRepository extends Mock
+    implements TranslationRepository {}
 
 Problem _problem({
   String id = '1',
@@ -52,6 +60,8 @@ void main() {
   late GeoscopeCubit geoscopeCubit;
   late FirestoreRepository firestoreRepo;
   late FeedbackRepository feedbackRepo;
+  late LanguageDetectionService languageDetectionService;
+  late TranslationRepository translationRepo;
 
   setUp(() {
     problemsCubit = _MockProblemsCubit();
@@ -59,11 +69,19 @@ void main() {
     geoscopeCubit = _MockGeoscopeCubit();
     firestoreRepo = _MockFirestoreRepository();
     feedbackRepo = _MockFeedbackRepository();
+    languageDetectionService = _MockLanguageDetectionService();
+    translationRepo = _MockTranslationRepository();
 
     // Default states.
     when(() => problemsCubit.state).thenReturn(const ProblemsState());
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
+    when(
+      () => languageDetectionService.needsTranslation(
+        text: any(named: 'text'),
+        userLanguage: any(named: 'userLanguage'),
+      ),
+    ).thenAnswer((_) async => false);
   });
 
   Widget buildSubject() {
@@ -77,6 +95,12 @@ void main() {
         providers: [
           RepositoryProvider<FirestoreRepository>.value(value: firestoreRepo),
           RepositoryProvider<FeedbackRepository>.value(value: feedbackRepo),
+          RepositoryProvider<LanguageDetectionService>.value(
+            value: languageDetectionService,
+          ),
+          RepositoryProvider<TranslationRepository>.value(
+            value: translationRepo,
+          ),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,

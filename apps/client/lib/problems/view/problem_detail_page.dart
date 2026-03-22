@@ -4,11 +4,13 @@ import 'dart:developer';
 import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/problems/widgets/translatable_text.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
+import 'package:word_count/word_count.dart';
 
 class ProblemDetailPage extends StatefulWidget {
   const ProblemDetailPage({required this.problemId, super.key});
@@ -68,8 +70,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
-  static bool _hasEnoughWords(String text) =>
-      text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 3;
+  static bool _hasEnoughWords(String text) => wordsCount(text.trim()) >= 3;
 
   Future<void> _save() async {
     final problem = _problem;
@@ -153,7 +154,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          TranslatableText(
             problem.description,
             style: theme.textTheme.headlineSmall,
           ),

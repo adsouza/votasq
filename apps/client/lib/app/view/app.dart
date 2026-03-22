@@ -6,6 +6,8 @@ import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/language_detection_service.dart';
+import 'package:client/services/translation_repository.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +18,8 @@ class App extends StatefulWidget {
     this.firestoreRepository,
     this.feedbackRepository,
     this.authRepository,
+    this.languageDetectionService,
+    this.translationRepository,
     this.router,
     super.key,
   });
@@ -23,6 +27,8 @@ class App extends StatefulWidget {
   final FirestoreRepository? firestoreRepository;
   final FeedbackRepository? feedbackRepository;
   final AuthRepository? authRepository;
+  final LanguageDetectionService? languageDetectionService;
+  final TranslationRepository? translationRepository;
   final GoRouter? router;
 
   @override
@@ -54,6 +60,20 @@ class _AppState extends State<App> {
         ),
         RepositoryProvider(
           create: (_) => widget.feedbackRepository ?? FeedbackRepository(),
+        ),
+        RepositoryProvider(
+          create: (_) =>
+              widget.languageDetectionService ?? LanguageDetectionService(),
+        ),
+        RepositoryProvider(
+          create: (_) =>
+              widget.translationRepository ??
+              TranslationRepository(
+                serverBaseUrl: const String.fromEnvironment(
+                  'SERVER_BASE_URL',
+                  defaultValue: 'https://votasq.quikchange.net',
+                ),
+              ),
         ),
         RepositoryProvider.value(value: authRepo),
       ],

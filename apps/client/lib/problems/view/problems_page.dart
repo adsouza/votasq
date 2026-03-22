@@ -6,6 +6,7 @@ import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
+import 'package:client/problems/widgets/translatable_text.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:feedback/feedback.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
+import 'package:word_count/word_count.dart';
 
 class ProblemsPage extends StatelessWidget {
   const ProblemsPage({super.key});
@@ -82,8 +84,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     }
   }
 
-  static bool _hasEnoughWords(String text) =>
-      text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 3;
+  static bool _hasEnoughWords(String text) => wordsCount(text.trim()) >= 3;
 
   void _submitProblem() {
     if (!_hasEnoughWords(_addController.text)) return;
@@ -309,7 +310,7 @@ class _ProblemsViewState extends State<ProblemsView> {
         children: [
           GestureDetector(
             onDoubleTap: () => context.go('/problems/${problem.id}'),
-            child: Text(problem.description),
+            child: TranslatableText(problem.description),
           ),
           if (problem.geoscope != '/')
             Chip(

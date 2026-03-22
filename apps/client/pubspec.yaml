@@ -25,11 +25,15 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   go_router: ^15.1.2
+  google_mlkit_language_id: ^0.6.0
+  google_mlkit_translation: ^0.6.0
   google_sign_in: ^7.2.0
+  http: ^1.2.1
   intl: ^0.20.2
   shared: any # Use the same shared logic as the server
   shared_preferences: ^2.5.0
   uuid: ^4.5.1
+  word_count: ^1.0.4
 
 dev_dependencies:
   bloc_lint: ^0.4.0

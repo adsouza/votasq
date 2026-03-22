@@ -4,6 +4,8 @@ import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/view/problem_detail_page.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/language_detection_service.dart';
+import 'package:client/services/translation_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +19,12 @@ class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
+
+class _MockLanguageDetectionService extends Mock
+    implements LanguageDetectionService {}
+
+class _MockTranslationRepository extends Mock
+    implements TranslationRepository {}
 
 Problem _problem({
   String id = 'test-id',
@@ -41,6 +49,8 @@ void main() {
   late FirestoreRepository repo;
   late AuthCubit authCubit;
   late GeoscopeCubit geoscopeCubit;
+  late LanguageDetectionService languageDetectionService;
+  late TranslationRepository translationRepo;
 
   setUpAll(() {
     registerFallbackValue(_problem());
@@ -50,9 +60,17 @@ void main() {
     repo = _MockFirestoreRepository();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
+    languageDetectionService = _MockLanguageDetectionService();
+    translationRepo = _MockTranslationRepository();
 
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
+    when(
+      () => languageDetectionService.needsTranslation(
+        text: any(named: 'text'),
+        userLanguage: any(named: 'userLanguage'),
+      ),
+    ).thenAnswer((_) async => false);
   });
 
   Widget buildSubject({
@@ -82,8 +100,16 @@ void main() {
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
       ],
-      child: RepositoryProvider<FirestoreRepository>.value(
-        value: repo,
+      child: MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<FirestoreRepository>.value(value: repo),
+          RepositoryProvider<LanguageDetectionService>.value(
+            value: languageDetectionService,
+          ),
+          RepositoryProvider<TranslationRepository>.value(
+            value: translationRepo,
+          ),
+        ],
         child: MaterialApp.router(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
