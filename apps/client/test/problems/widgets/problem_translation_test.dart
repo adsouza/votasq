@@ -89,21 +89,25 @@ void main() {
       expect(find.byIcon(Icons.translate), findsNothing);
     });
 
-    testWidgets('shows translate icon when lang differs', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(lang: 'es'),
-      );
-      // Text is inside a Text.rich with spans; use textContaining.
-      expect(
-        find.textContaining('hola mundo amigos'),
-        findsOneWidget,
-      );
+    testWidgets('shows translate icon when lang differs and cache misses', (
+      tester,
+    ) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer((_) async => null);
+
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle(); // Complete auto cache check.
+
+      expect(find.textContaining('hola mundo amigos'), findsOneWidget);
       expect(find.byIcon(Icons.translate), findsOneWidget);
     });
   });
 
-  group('ProblemTranslation', () {
-    testWidgets('uses Firestore cache on hit', (tester) async {
+  group('Cache probe', () {
+    testWidgets('automatically shows cached translation without tap', (
+      tester,
+    ) async {
       when(
         () => firestoreRepo.getTranslation(any(), any()),
       ).thenAnswer(
@@ -112,15 +116,12 @@ void main() {
       );
 
       await tester.pumpWidget(buildSubject(lang: 'es'));
-
-      // Tap translate icon.
-      await tester.tap(find.byIcon(Icons.translate));
       await tester.pumpAndSettle();
 
-      // Should show translated text.
+      // Translation appears without any tap.
       expect(find.text('hello world friends'), findsOneWidget);
-      // Original should be struck through (still visible).
       expect(find.text('hola mundo amigos'), findsOneWidget);
+      expect(find.byIcon(Icons.translate), findsNothing);
 
       // Should NOT have called on-device or server translation.
       verifyNever(
@@ -138,7 +139,28 @@ void main() {
       );
     });
 
-    testWidgets('falls through to on-device when cache misses', (tester) async {
+    testWidgets('shows spinner during cache probe', (tester) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer((_) async {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        return null;
+      });
+
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pump(); // Trigger post-frame callback.
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byIcon(Icons.translate), findsNothing);
+
+      await tester.pumpAndSettle();
+    });
+  });
+
+  group('ProblemTranslation', () {
+    testWidgets('falls through to on-device when cache misses', (
+      tester,
+    ) async {
       when(
         () => firestoreRepo.getTranslation(any(), any()),
       ).thenAnswer((_) async => null);
@@ -156,6 +178,8 @@ void main() {
       ).thenAnswer((_) async {});
 
       await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle(); // Complete auto cache check.
+
       await tester.tap(find.byIcon(Icons.translate));
       await tester.pumpAndSettle();
 
@@ -220,6 +244,8 @@ void main() {
       );
 
       await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle(); // Complete auto cache check.
+
       await tester.tap(find.byIcon(Icons.translate));
       await tester.pumpAndSettle();
 
@@ -235,17 +261,20 @@ void main() {
     });
 
     testWidgets('shows spinner while translating', (tester) async {
+      // Auto cache check returns null quickly; _translate() re-check is slow.
+      var callCount = 0;
       when(
         () => firestoreRepo.getTranslation(any(), any()),
-      ).thenAnswer(
-        (_) async {
-          // Delay to keep spinner visible.
-          await Future<void>.delayed(const Duration(seconds: 1));
-          return const TranslatedProblem(description: 'translated');
-        },
-      );
+      ).thenAnswer((_) async {
+        callCount++;
+        if (callCount <= 1) return null; // Auto cache check.
+        await Future<void>.delayed(const Duration(seconds: 1));
+        return const TranslatedProblem(description: 'translated');
+      });
 
       await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle(); // Complete auto cache check.
+
       await tester.tap(find.byIcon(Icons.translate));
       await tester.pump();
 
@@ -257,13 +286,15 @@ void main() {
 
     testWidgets('resets when problemId changes', (tester) async {
       when(
-        () => firestoreRepo.getTranslation(any(), any()),
+        () => firestoreRepo.getTranslation('p1', any()),
       ).thenAnswer(
         (_) async => const TranslatedProblem(description: 'cached translation'),
       );
+      when(
+        () => firestoreRepo.getTranslation('p2', any()),
+      ).thenAnswer((_) async => null);
 
       await tester.pumpWidget(buildSubject(lang: 'es'));
-      await tester.tap(find.byIcon(Icons.translate));
       await tester.pumpAndSettle();
 
       expect(find.text('cached translation'), findsOneWidget);
@@ -322,7 +353,12 @@ void main() {
     testWidgets('translate icon appears when auto-translate is disabled', (
       tester,
     ) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer((_) async => null);
+
       await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle(); // Complete auto cache check.
 
       expect(find.byIcon(Icons.translate), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);

@@ -51,6 +51,7 @@ class ProblemTranslationState {
     required this.translation,
     required this.needsTranslation,
     required this.isTranslating,
+    required this.isCheckingCache,
     required this.translate,
     this.autoTranslate = false,
   });
@@ -58,6 +59,7 @@ class ProblemTranslationState {
   final TranslatedProblem? translation;
   final bool needsTranslation;
   final bool isTranslating;
+  final bool isCheckingCache;
   final VoidCallback translate;
   final bool autoTranslate;
 }
@@ -65,6 +67,7 @@ class ProblemTranslationState {
 class _ProblemTranslationState extends State<ProblemTranslation> {
   TranslatedProblem? _translation;
   bool _translating = false;
+  bool _cacheChecked = false;
 
   @override
   void didUpdateWidget(ProblemTranslation oldWidget) {
@@ -74,6 +77,7 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
         oldWidget.originalDescription != widget.originalDescription) {
       _translation = null;
       _translating = false;
+      _cacheChecked = false;
       _scheduleAutoTranslate();
     }
   }
@@ -90,6 +94,29 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
         unawaited(_translate());
       }
     });
+  }
+
+  /// Probes the Firestore cache for an existing translation. Does not trigger
+  /// on-device or server-side translation.
+  Future<void> _checkCache() async {
+    if (_cacheChecked || _translating || _translation != null) return;
+    _cacheChecked = true;
+    try {
+      final userLanguage = Localizations.localeOf(context).languageCode;
+      final firestoreRepo = context.read<FirestoreRepository>();
+      final cached = await firestoreRepo.getTranslation(
+        widget.problemId,
+        userLanguage,
+      );
+      if (mounted) {
+        setState(() {
+          if (cached != null) _translation = cached;
+        });
+      }
+    } on Exception catch (e) {
+      log('Cache check failed: $e');
+      if (mounted) setState(() {});
+    }
   }
 
   bool get _needsTranslation {
@@ -158,11 +185,14 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
       autoTranslate = false;
     }
 
-    if (autoTranslate &&
-        _needsTranslation &&
-        _translation == null &&
-        !_translating) {
-      _scheduleAutoTranslate();
+    if (_needsTranslation && _translation == null && !_translating) {
+      if (!_cacheChecked) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_checkCache());
+        });
+      } else if (autoTranslate) {
+        _scheduleAutoTranslate();
+      }
     }
 
     return _ProblemTranslationScope(
@@ -170,6 +200,7 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
         translation: _translation,
         needsTranslation: _needsTranslation,
         isTranslating: _translating,
+        isCheckingCache: _needsTranslation && !_cacheChecked,
         translate: _translate,
         autoTranslate: autoTranslate,
       ),
@@ -191,6 +222,7 @@ class _ProblemTranslationScope extends InheritedWidget {
       state.translation != oldWidget.state.translation ||
       state.needsTranslation != oldWidget.state.needsTranslation ||
       state.isTranslating != oldWidget.state.isTranslating ||
+      state.isCheckingCache != oldWidget.state.isCheckingCache ||
       state.autoTranslate != oldWidget.state.autoTranslate;
 }
 
@@ -256,7 +288,10 @@ class TranslatedField extends StatelessWidget {
           const TextSpan(text: ' '),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
-            child: (scope.isTranslating || scope.autoTranslate)
+            child:
+                (scope.isTranslating ||
+                    scope.isCheckingCache ||
+                    scope.autoTranslate)
                 ? SizedBox(
                     width: 14,
                     height: 14,
