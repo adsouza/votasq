@@ -1,0 +1,99 @@
+{
+    "@@locale": "ta",
+    "problemsAppBarTitle": "நாம் இணைந்து தீர்க்கக்கூடிய பிரச்சனைகள்",
+    "@problemsAppBarTitle": {
+        "description": "பிரச்சனைகள் பக்கத்தின் ஆப்பார்-ல் காட்டப்படும் உரை"
+    },
+    "signInButton": "உள்நுழை",
+    "@signInButton": {
+        "description": "உள்நுழைவு பொத்தானின் லேபிள்"
+    },
+    "signOutButton": "வெளியேறு",
+    "@signOutButton": {
+        "description": "வெளியேறு பொத்தானின் டூல்டிப்"
+    },
+    "addProblemHint": "உங்கள் சொந்த பிரச்சனையை இங்கே சேர்க்கவும்",
+    "@addProblemHint": {
+        "description": "பிரச்சனை சேர்க்கும் உரை புலத்திற்கான இடம்பிடிப்பு உரை"
+    },
+    "addProblemButton": "சேர்",
+    "@addProblemButton": {
+        "description": "பிரச்சனை சேர்க்கும் பொத்தானின் லேபிள்"
+    },
+    "addProblemTooltip": "உங்கள் பிரச்சனையை பட்டியலில் சேர்க்கவும்",
+    "@addProblemTooltip": {
+        "description": "பிரச்சனை சேர்க்கும் பொத்தானின் டூல்டிப்"
+    },
+    "editProblemHint": "பிரச்சனை விவரணையைத் திருத்து",
+    "@editProblemHint": {
+        "description": "இன்லைன் திருத்த உரை புலத்திற்கான இடம்பிடிப்பு உரை"
+    },
+    "editProblemButton": "இந்த பிரச்சனையைத் திருத்து",
+    "@editProblemButton": {
+        "description": "பிரச்சனை பட்டியல் உருப்படியில் திருத்தம் பொத்தானின் டூல்டிப்"
+    },
+    "flagProblemButton": "இந்த பிரச்சனையை தவறான பயன்பாடு என புகாரளி",
+    "@flagProblemButton": {
+        "description": "பிரச்சனை பட்டியல் உருப்படியில் புகார் பொத்தானின் டூல்டிப்"
+    },
+    "feedbackButton": "கருத்து அனுப்பு",
+    "@feedbackButton": {
+        "description": "ஆப் பார்-ல் கருத்து பொத்தானின் டூல்டிப்"
+    },
+    "feedbackSuccess": "உங்கள் கருத்துக்கு நன்றி!",
+    "@feedbackSuccess": {
+        "description": "வெற்றிகரமான கருத்து சமர்ப்பித்த பிறகு SnackBar செய்தி"
+    },
+    "feedbackError": "கருத்தை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+    "@feedbackError": {
+        "description": "கருத்து சமர்ப்பிப்பு தோல்வியடையும்போது SnackBar செய்தி"
+    },
+    "geoscopeGlobal": "உலகளாவிய",
+    "@geoscopeGlobal": {
+        "description": "இடம் தேர்வியில் உலகளாவிய விருப்பத்தின் லேபிள்"
+    },
+    "geoscopeChangeMenuItem": "இடத்தை மாற்று",
+    "@geoscopeChangeMenuItem": {
+        "description": "இடம் தேர்வியைத் திறக்க மெனு உருப்படி லேபிள்"
+    },
+    "showOnlyOwnedMenuItem": "எனது பிரச்சனைகளை மட்டும் காட்டு",
+    "@showOnlyOwnedMenuItem": {
+        "description": "தற்போதைய பயனரின் பிரச்சனைகளை மட்டும் காட்ட மெனு உருப்படி லேபிள்"
+    },
+    "problemDetailPageTitle": "பிரச்சனை விவரங்கள்",
+    "@problemDetailPageTitle": {
+        "description": "பிரச்சனை விவரப் பக்கத்தின் ஆப்பார்-ல் தலைப்பு"
+    },
+    "problemNotFound": "பிரச்சனை கண்டுபிடிக்கப்படவில்லை",
+    "@problemNotFound": {
+        "description": "ID மூலம் பிரச்சனை கண்டுபிடிக்க முடியாதபோது பிழை செய்தி"
+    },
+    "problemDetailSaveButton": "சேமி",
+    "@problemDetailSaveButton": {
+        "description": "பிரச்சனை விவரப் பக்கத்தில் சேமி பொத்தானின் லேபிள்"
+    },
+    "problemDetailBackButton": "பின்செல்",
+    "@problemDetailBackButton": {
+        "description": "பிரச்சனை விவரப் பக்கத்தில் பின்செல் பொத்தானின் லேபிள்"
+    },
+    "geoscopeLabel": "புவியியல் நோக்கம்:",
+    "@geoscopeLabel": {
+        "description": "பிரச்சனை விவரப் பக்கத்தில் புவியியல் நோக்க கீழ்தோன்றலுக்கு அடுத்த லேபிள்"
+    },
+    "copyProblemLink": "இந்த பிரச்சனையின் இணைப்பை நகலெடு",
+    "@copyProblemLink": {
+        "description": "பிரச்சனை பட்டியல் உருப்படியில் இணைப்பு நகலெடு பொத்தானின் டூல்டிப்"
+    },
+    "problemLinkCopied": "இணைப்பு கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது",
+    "@problemLinkCopied": {
+        "description": "பிரச்சனை இணைப்பை நகலெடுத்த பிறகு SnackBar செய்தி"
+    },
+    "geoscopeDropdownTooltip": "உங்கள் பிரச்சனைக்கான புவியியல் நோக்கத்தைத் தேர்ந்தெடுக்கவும்",
+    "@geoscopeDropdownTooltip": {
+        "description": "புவியியல் நோக்க கீழ்தோன்றல் மீது நகரும்போது காட்டப்படும் டூல்டிப்"
+    },
+    "autoTranslateMenuItem": "உரையை தானாகவே மொழிபெயர்",
+    "@autoTranslateMenuItem": {
+        "description": "வெளிநாட்டு மொழிகளில் உள்ள பிரச்சனைகளின் தானியங்கி மொழிபெயர்ப்பை இயக்க மெனு உருப்படி லேபிள்"
+    }
+}

@@ -1,0 +1,99 @@
+{
+    "@@locale": "de",
+    "problemsAppBarTitle": "Probleme, die wir gemeinsam lösen können",
+    "@problemsAppBarTitle": {
+        "description": "Text in der AppBar der Problemseite"
+    },
+    "signInButton": "Anmelden",
+    "@signInButton": {
+        "description": "Beschriftung der Anmeldeschaltfläche"
+    },
+    "signOutButton": "Abmelden",
+    "@signOutButton": {
+        "description": "Tooltip der Abmeldeschaltfläche"
+    },
+    "addProblemHint": "Tragen Sie hier Ihr eigenes Problem ein",
+    "@addProblemHint": {
+        "description": "Platzhaltertext für das Textfeld zum Hinzufügen eines Problems"
+    },
+    "addProblemButton": "Hinzufügen",
+    "@addProblemButton": {
+        "description": "Beschriftung der Schaltfläche zum Hinzufügen eines Problems"
+    },
+    "addProblemTooltip": "Fügen Sie Ihr Problem der Liste hinzu",
+    "@addProblemTooltip": {
+        "description": "Tooltip der Schaltfläche zum Hinzufügen eines Problems"
+    },
+    "editProblemHint": "Problembeschreibung bearbeiten",
+    "@editProblemHint": {
+        "description": "Platzhaltertext für das Inline-Bearbeitungstextfeld"
+    },
+    "editProblemButton": "Dieses Problem bearbeiten",
+    "@editProblemButton": {
+        "description": "Tooltip der Bearbeitungsschaltfläche bei einem Problemlisteneintrag"
+    },
+    "flagProblemButton": "Dieses Problem als Missbrauch melden",
+    "@flagProblemButton": {
+        "description": "Tooltip der Meldeschaltfläche bei einem Problemlisteneintrag"
+    },
+    "feedbackButton": "Feedback senden",
+    "@feedbackButton": {
+        "description": "Tooltip der Feedback-Schaltfläche in der App-Leiste"
+    },
+    "feedbackSuccess": "Vielen Dank für Ihr Feedback!",
+    "@feedbackSuccess": {
+        "description": "SnackBar-Nachricht nach erfolgreicher Feedback-Übermittlung"
+    },
+    "feedbackError": "Feedback konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+    "@feedbackError": {
+        "description": "SnackBar-Nachricht bei fehlgeschlagener Feedback-Übermittlung"
+    },
+    "geoscopeGlobal": "Global",
+    "@geoscopeGlobal": {
+        "description": "Beschriftung der globalen Option im Standortauswähler"
+    },
+    "geoscopeChangeMenuItem": "Standort ändern",
+    "@geoscopeChangeMenuItem": {
+        "description": "Menüpunkt zum Öffnen des Standortauswählers"
+    },
+    "showOnlyOwnedMenuItem": "Nur meine Probleme anzeigen",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Menüpunkt zum Umschalten auf die Anzeige nur eigener Probleme"
+    },
+    "problemDetailPageTitle": "Problemdetails",
+    "@problemDetailPageTitle": {
+        "description": "Titel in der AppBar der Problemdetailseite"
+    },
+    "problemNotFound": "Problem nicht gefunden",
+    "@problemNotFound": {
+        "description": "Fehlermeldung, wenn ein Problem anhand der ID nicht gefunden wird"
+    },
+    "problemDetailSaveButton": "Speichern",
+    "@problemDetailSaveButton": {
+        "description": "Beschriftung der Speichern-Schaltfläche auf der Problemdetailseite"
+    },
+    "problemDetailBackButton": "Zurück",
+    "@problemDetailBackButton": {
+        "description": "Beschriftung der Zurück-Schaltfläche auf der Problemdetailseite"
+    },
+    "geoscopeLabel": "Geografischer Bereich:",
+    "@geoscopeLabel": {
+        "description": "Beschriftung neben dem Dropdown für den geografischen Bereich auf der Problemdetailseite"
+    },
+    "copyProblemLink": "Link zu diesem Problem kopieren",
+    "@copyProblemLink": {
+        "description": "Tooltip der Schaltfläche zum Kopieren des Links bei einem Problemlisteneintrag"
+    },
+    "problemLinkCopied": "Link in die Zwischenablage kopiert",
+    "@problemLinkCopied": {
+        "description": "SnackBar-Nachricht nach dem Kopieren eines Problemlinks"
+    },
+    "geoscopeDropdownTooltip": "Wählen Sie den geografischen Bereich für Ihr Problem",
+    "@geoscopeDropdownTooltip": {
+        "description": "Tooltip beim Überfahren des Dropdown-Menüs für den geografischen Bereich"
+    },
+    "autoTranslateMenuItem": "Text automatisch übersetzen",
+    "@autoTranslateMenuItem": {
+        "description": "Menüpunkt zum Aktivieren der automatischen Übersetzung von Problemen in Fremdsprachen"
+    }
+}

@@ -1,0 +1,99 @@
+{
+    "@@locale": "bn",
+    "problemsAppBarTitle": "যে সমস্যাগুলো আমরা একসাথে সমাধান করতে পারি",
+    "@problemsAppBarTitle": {
+        "description": "সমস্যা পৃষ্ঠার অ্যাপবারে প্রদর্শিত পাঠ্য"
+    },
+    "signInButton": "সাইন ইন",
+    "@signInButton": {
+        "description": "সাইন ইন বোতামের লেবেল"
+    },
+    "signOutButton": "সাইন আউট",
+    "@signOutButton": {
+        "description": "সাইন আউট বোতামের টুলটিপ"
+    },
+    "addProblemHint": "এখানে আপনার নিজের সমস্যা যোগ করুন",
+    "@addProblemHint": {
+        "description": "সমস্যা যোগ করার টেক্সট ফিল্ডের প্লেসহোল্ডার পাঠ্য"
+    },
+    "addProblemButton": "যোগ করুন",
+    "@addProblemButton": {
+        "description": "সমস্যা যোগ করার বোতামের লেবেল"
+    },
+    "addProblemTooltip": "তালিকায় আপনার সমস্যা অন্তর্ভুক্ত করুন",
+    "@addProblemTooltip": {
+        "description": "সমস্যা যোগ করার বোতামের টুলটিপ"
+    },
+    "editProblemHint": "সমস্যার বিবরণ সম্পাদনা করুন",
+    "@editProblemHint": {
+        "description": "ইনলাইন সম্পাদনা টেক্সট ফিল্ডের প্লেসহোল্ডার পাঠ্য"
+    },
+    "editProblemButton": "এই সমস্যাটি সম্পাদনা করুন",
+    "@editProblemButton": {
+        "description": "সমস্যা তালিকার আইটেমে সম্পাদনা বোতামের টুলটিপ"
+    },
+    "flagProblemButton": "এই সমস্যাটি অপব্যবহার হিসেবে রিপোর্ট করুন",
+    "@flagProblemButton": {
+        "description": "সমস্যা তালিকার আইটেমে রিপোর্ট বোতামের টুলটিপ"
+    },
+    "feedbackButton": "মতামত পাঠান",
+    "@feedbackButton": {
+        "description": "অ্যাপ বারে মতামত বোতামের টুলটিপ"
+    },
+    "feedbackSuccess": "আপনার মতামতের জন্য ধন্যবাদ!",
+    "@feedbackSuccess": {
+        "description": "সফল মতামত জমা দেওয়ার পরে স্ন্যাকবার বার্তা"
+    },
+    "feedbackError": "মতামত পাঠানো যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "@feedbackError": {
+        "description": "মতামত জমা দেওয়া ব্যর্থ হলে স্ন্যাকবার বার্তা"
+    },
+    "geoscopeGlobal": "বিশ্বব্যাপী",
+    "@geoscopeGlobal": {
+        "description": "অবস্থান নির্বাচকে বিশ্বব্যাপী বিকল্পের লেবেল"
+    },
+    "geoscopeChangeMenuItem": "অবস্থান পরিবর্তন করুন",
+    "@geoscopeChangeMenuItem": {
+        "description": "অবস্থান নির্বাচক খোলার মেনু আইটেম লেবেল"
+    },
+    "showOnlyOwnedMenuItem": "শুধুমাত্র আমার সমস্যাগুলো দেখান",
+    "@showOnlyOwnedMenuItem": {
+        "description": "শুধুমাত্র বর্তমান ব্যবহারকারীর সমস্যা দেখানোর মেনু আইটেম লেবেল"
+    },
+    "problemDetailPageTitle": "সমস্যার বিবরণ",
+    "@problemDetailPageTitle": {
+        "description": "সমস্যার বিবরণ পৃষ্ঠার অ্যাপবারে শিরোনাম"
+    },
+    "problemNotFound": "সমস্যা পাওয়া যায়নি",
+    "@problemNotFound": {
+        "description": "আইডি দ্বারা সমস্যা খুঁজে না পেলে ত্রুটি বার্তা"
+    },
+    "problemDetailSaveButton": "সংরক্ষণ করুন",
+    "@problemDetailSaveButton": {
+        "description": "সমস্যার বিবরণ পৃষ্ঠায় সংরক্ষণ বোতামের লেবেল"
+    },
+    "problemDetailBackButton": "পেছনে",
+    "@problemDetailBackButton": {
+        "description": "সমস্যার বিবরণ পৃষ্ঠায় পেছনে বোতামের লেবেল"
+    },
+    "geoscopeLabel": "ভৌগোলিক পরিসর:",
+    "@geoscopeLabel": {
+        "description": "সমস্যার বিবরণ পৃষ্ঠায় ভৌগোলিক পরিসর ড্রপডাউনের পাশের লেবেল"
+    },
+    "copyProblemLink": "এই সমস্যার লিঙ্ক কপি করুন",
+    "@copyProblemLink": {
+        "description": "সমস্যা তালিকার আইটেমে লিঙ্ক কপি বোতামের টুলটিপ"
+    },
+    "problemLinkCopied": "লিঙ্ক ক্লিপবোর্ডে কপি হয়েছে",
+    "@problemLinkCopied": {
+        "description": "সমস্যার লিঙ্ক কপি করার পরে স্ন্যাকবার বার্তা"
+    },
+    "geoscopeDropdownTooltip": "আপনার সমস্যার জন্য ভৌগোলিক পরিসর নির্বাচন করুন",
+    "@geoscopeDropdownTooltip": {
+        "description": "ভৌগোলিক পরিসর ড্রপডাউনের উপর মাউস রাখলে প্রদর্শিত টুলটিপ"
+    },
+    "autoTranslateMenuItem": "স্বয়ংক্রিয়ভাবে পাঠ্য অনুবাদ করুন",
+    "@autoTranslateMenuItem": {
+        "description": "বিদেশী ভাষায় সমস্যার স্বয়ংক্রিয় অনুবাদ সক্রিয় করার মেনু আইটেম লেবেল"
+    }
+}

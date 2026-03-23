@@ -1,0 +1,99 @@
+{
+    "@@locale": "pa",
+    "problemsAppBarTitle": "ਸਮੱਸਿਆਵਾਂ ਜੋ ਅਸੀਂ ਮਿਲ ਕੇ ਹੱਲ ਕਰ ਸਕਦੇ ਹਾਂ",
+    "@problemsAppBarTitle": {
+        "description": "ਸਮੱਸਿਆਵਾਂ ਪੰਨੇ ਦੀ ਐਪਬਾਰ ਵਿੱਚ ਦਿਖਾਇਆ ਗਿਆ ਟੈਕਸਟ"
+    },
+    "signInButton": "ਸਾਈਨ ਇਨ",
+    "@signInButton": {
+        "description": "ਸਾਈਨ ਇਨ ਬਟਨ ਦਾ ਲੇਬਲ"
+    },
+    "signOutButton": "ਸਾਈਨ ਆਊਟ",
+    "@signOutButton": {
+        "description": "ਸਾਈਨ ਆਊਟ ਬਟਨ ਦੀ ਟੂਲਟਿੱਪ"
+    },
+    "addProblemHint": "ਇੱਥੇ ਆਪਣੀ ਸਮੱਸਿਆ ਸ਼ਾਮਲ ਕਰੋ",
+    "@addProblemHint": {
+        "description": "ਸਮੱਸਿਆ ਸ਼ਾਮਲ ਕਰਨ ਦੇ ਟੈਕਸਟ ਫੀਲਡ ਲਈ ਪਲੇਸਹੋਲਡਰ ਟੈਕਸਟ"
+    },
+    "addProblemButton": "ਸ਼ਾਮਲ ਕਰੋ",
+    "@addProblemButton": {
+        "description": "ਸਮੱਸਿਆ ਸ਼ਾਮਲ ਕਰਨ ਦੇ ਬਟਨ ਦਾ ਲੇਬਲ"
+    },
+    "addProblemTooltip": "ਆਪਣੀ ਸਮੱਸਿਆ ਸੂਚੀ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ",
+    "@addProblemTooltip": {
+        "description": "ਸਮੱਸਿਆ ਸ਼ਾਮਲ ਕਰਨ ਦੇ ਬਟਨ ਦੀ ਟੂਲਟਿੱਪ"
+    },
+    "editProblemHint": "ਸਮੱਸਿਆ ਦਾ ਵੇਰਵਾ ਸੋਧੋ",
+    "@editProblemHint": {
+        "description": "ਇਨਲਾਈਨ ਸੋਧ ਟੈਕਸਟ ਫੀਲਡ ਲਈ ਪਲੇਸਹੋਲਡਰ ਟੈਕਸਟ"
+    },
+    "editProblemButton": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਸੋਧੋ",
+    "@editProblemButton": {
+        "description": "ਸਮੱਸਿਆ ਸੂਚੀ ਆਈਟਮ ਉੱਤੇ ਸੋਧ ਬਟਨ ਦੀ ਟੂਲਟਿੱਪ"
+    },
+    "flagProblemButton": "ਇਸ ਸਮੱਸਿਆ ਦੀ ਦੁਰਵਰਤੋਂ ਵਜੋਂ ਰਿਪੋਰਟ ਕਰੋ",
+    "@flagProblemButton": {
+        "description": "ਸਮੱਸਿਆ ਸੂਚੀ ਆਈਟਮ ਉੱਤੇ ਰਿਪੋਰਟ ਬਟਨ ਦੀ ਟੂਲਟਿੱਪ"
+    },
+    "feedbackButton": "ਫੀਡਬੈਕ ਭੇਜੋ",
+    "@feedbackButton": {
+        "description": "ਐਪ ਬਾਰ ਵਿੱਚ ਫੀਡਬੈਕ ਬਟਨ ਦੀ ਟੂਲਟਿੱਪ"
+    },
+    "feedbackSuccess": "ਤੁਹਾਡੇ ਫੀਡਬੈਕ ਲਈ ਧੰਨਵਾਦ!",
+    "@feedbackSuccess": {
+        "description": "ਸਫਲ ਫੀਡਬੈਕ ਜਮ੍ਹਾਂ ਕਰਨ ਤੋਂ ਬਾਅਦ ਸਨੈਕਬਾਰ ਸੁਨੇਹਾ"
+    },
+    "feedbackError": "ਫੀਡਬੈਕ ਨਹੀਂ ਭੇਜਿਆ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "@feedbackError": {
+        "description": "ਫੀਡਬੈਕ ਜਮ੍ਹਾਂ ਕਰਨ ਵਿੱਚ ਅਸਫਲ ਹੋਣ ਤੇ ਸਨੈਕਬਾਰ ਸੁਨੇਹਾ"
+    },
+    "geoscopeGlobal": "ਗਲੋਬਲ",
+    "@geoscopeGlobal": {
+        "description": "ਟਿਕਾਣਾ ਚੁਣਨ ਵਾਲੇ ਵਿੱਚ ਗਲੋਬਲ ਵਿਕਲਪ ਦਾ ਲੇਬਲ"
+    },
+    "geoscopeChangeMenuItem": "ਟਿਕਾਣਾ ਬਦਲੋ",
+    "@geoscopeChangeMenuItem": {
+        "description": "ਟਿਕਾਣਾ ਚੁਣਨ ਵਾਲਾ ਖੋਲ੍ਹਣ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"
+    },
+    "showOnlyOwnedMenuItem": "ਸਿਰਫ਼ ਮੇਰੀਆਂ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਓ",
+    "@showOnlyOwnedMenuItem": {
+        "description": "ਸਿਰਫ਼ ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ ਦੀਆਂ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਉਣ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"
+    },
+    "problemDetailPageTitle": "ਸਮੱਸਿਆ ਦੇ ਵੇਰਵੇ",
+    "@problemDetailPageTitle": {
+        "description": "ਸਮੱਸਿਆ ਵੇਰਵੇ ਪੰਨੇ ਦੀ ਐਪਬਾਰ ਵਿੱਚ ਸਿਰਲੇਖ"
+    },
+    "problemNotFound": "ਸਮੱਸਿਆ ਨਹੀਂ ਲੱਭੀ",
+    "@problemNotFound": {
+        "description": "ਜਦੋਂ ID ਨਾਲ ਸਮੱਸਿਆ ਨਹੀਂ ਲੱਭ ਸਕਦੀ ਤਾਂ ਗਲਤੀ ਸੁਨੇਹਾ"
+    },
+    "problemDetailSaveButton": "ਸੇਵ ਕਰੋ",
+    "@problemDetailSaveButton": {
+        "description": "ਸਮੱਸਿਆ ਵੇਰਵੇ ਪੰਨੇ ਉੱਤੇ ਸੇਵ ਬਟਨ ਦਾ ਲੇਬਲ"
+    },
+    "problemDetailBackButton": "ਪਿੱਛੇ",
+    "@problemDetailBackButton": {
+        "description": "ਸਮੱਸਿਆ ਵੇਰਵੇ ਪੰਨੇ ਉੱਤੇ ਪਿੱਛੇ ਬਟਨ ਦਾ ਲੇਬਲ"
+    },
+    "geoscopeLabel": "ਭੂਗੋਲਿਕ ਦਾਇਰਾ:",
+    "@geoscopeLabel": {
+        "description": "ਸਮੱਸਿਆ ਵੇਰਵੇ ਪੰਨੇ ਉੱਤੇ ਭੂਗੋਲਿਕ ਦਾਇਰੇ ਦੇ ਡ੍ਰੌਪਡਾਊਨ ਦੇ ਨਾਲ ਲੇਬਲ"
+    },
+    "copyProblemLink": "ਇਸ ਸਮੱਸਿਆ ਦਾ ਲਿੰਕ ਕਾਪੀ ਕਰੋ",
+    "@copyProblemLink": {
+        "description": "ਸਮੱਸਿਆ ਸੂਚੀ ਆਈਟਮ ਉੱਤੇ ਲਿੰਕ ਕਾਪੀ ਬਟਨ ਦੀ ਟੂਲਟਿੱਪ"
+    },
+    "problemLinkCopied": "ਲਿੰਕ ਕਲਿੱਪਬੋਰਡ ਤੇ ਕਾਪੀ ਹੋ ਗਿਆ",
+    "@problemLinkCopied": {
+        "description": "ਸਮੱਸਿਆ ਦਾ ਲਿੰਕ ਕਾਪੀ ਕਰਨ ਤੋਂ ਬਾਅਦ ਸਨੈਕਬਾਰ ਸੁਨੇਹਾ"
+    },
+    "geoscopeDropdownTooltip": "ਆਪਣੀ ਸਮੱਸਿਆ ਲਈ ਭੂਗੋਲਿਕ ਦਾਇਰਾ ਚੁਣੋ",
+    "@geoscopeDropdownTooltip": {
+        "description": "ਭੂਗੋਲਿਕ ਦਾਇਰੇ ਦੇ ਡ੍ਰੌਪਡਾਊਨ ਉੱਤੇ ਮਾਊਸ ਰੱਖਣ ਤੇ ਦਿਖਾਈ ਗਈ ਟੂਲਟਿੱਪ"
+    },
+    "autoTranslateMenuItem": "ਟੈਕਸਟ ਦਾ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਕਰੋ",
+    "@autoTranslateMenuItem": {
+        "description": "ਵਿਦੇਸ਼ੀ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਸਮੱਸਿਆਵਾਂ ਦੇ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"
+    }
+}

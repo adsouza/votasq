@@ -1,0 +1,99 @@
+{
+    "@@locale": "te",
+    "problemsAppBarTitle": "మనం కలిసి పరిష్కరించగల సమస్యలు",
+    "@problemsAppBarTitle": {
+        "description": "సమస్యల పేజీ యాప్‌బార్‌లో చూపించే టెక్స్ట్"
+    },
+    "signInButton": "సైన్ ఇన్",
+    "@signInButton": {
+        "description": "సైన్ ఇన్ బటన్ లేబుల్"
+    },
+    "signOutButton": "సైన్ అవుట్",
+    "@signOutButton": {
+        "description": "సైన్ అవుట్ బటన్ టూల్‌టిప్"
+    },
+    "addProblemHint": "మీ స్వంత సమస్యను ఇక్కడ జోడించండి",
+    "@addProblemHint": {
+        "description": "సమస్య జోడించే టెక్స్ట్ ఫీల్డ్ కోసం ప్లేస్‌హోల్డర్ టెక్స్ట్"
+    },
+    "addProblemButton": "జోడించు",
+    "@addProblemButton": {
+        "description": "సమస్య జోడించే బటన్ లేబుల్"
+    },
+    "addProblemTooltip": "మీ సమస్యను జాబితాలో చేర్చండి",
+    "@addProblemTooltip": {
+        "description": "సమస్య జోడించే బటన్ టూల్‌టిప్"
+    },
+    "editProblemHint": "సమస్య వివరణను సవరించండి",
+    "@editProblemHint": {
+        "description": "ఇన్‌లైన్ సవరణ టెక్స్ట్ ఫీల్డ్ కోసం ప్లేస్‌హోల్డర్ టెక్స్ట్"
+    },
+    "editProblemButton": "ఈ సమస్యను సవరించండి",
+    "@editProblemButton": {
+        "description": "సమస్య జాబితా అంశంలో సవరణ బటన్ టూల్‌టిప్"
+    },
+    "flagProblemButton": "ఈ సమస్యను దుర్వినియోగంగా నివేదించండి",
+    "@flagProblemButton": {
+        "description": "సమస్య జాబితా అంశంలో నివేదన బటన్ టూల్‌టిప్"
+    },
+    "feedbackButton": "అభిప్రాయం పంపండి",
+    "@feedbackButton": {
+        "description": "యాప్ బార్‌లో అభిప్రాయం బటన్ టూల్‌టిప్"
+    },
+    "feedbackSuccess": "మీ అభిప్రాయానికి ధన్యవాదాలు!",
+    "@feedbackSuccess": {
+        "description": "విజయవంతమైన అభిప్రాయం సమర్పణ తర్వాత స్నాక్‌బార్ సందేశం"
+    },
+    "feedbackError": "అభిప్రాయం పంపలేకపోయాము. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+    "@feedbackError": {
+        "description": "అభిప్రాయం సమర్పణ విఫలమైనప్పుడు స్నాక్‌బార్ సందేశం"
+    },
+    "geoscopeGlobal": "ప్రపంచవ్యాప్తం",
+    "@geoscopeGlobal": {
+        "description": "స్థానం ఎంపికలో ప్రపంచవ్యాప్త ఎంపిక లేబుల్"
+    },
+    "geoscopeChangeMenuItem": "స్థానం మార్చండి",
+    "@geoscopeChangeMenuItem": {
+        "description": "స్థానం ఎంపికను తెరవడానికి మెనూ అంశం లేబుల్"
+    },
+    "showOnlyOwnedMenuItem": "నా సమస్యలు మాత్రమే చూపించు",
+    "@showOnlyOwnedMenuItem": {
+        "description": "ప్రస్తుత వినియోగదారు సమస్యలు మాత్రమే చూపించడానికి మెనూ అంశం లేబుల్"
+    },
+    "problemDetailPageTitle": "సమస్య వివరాలు",
+    "@problemDetailPageTitle": {
+        "description": "సమస్య వివరాల పేజీ యాప్‌బార్‌లో శీర్షిక"
+    },
+    "problemNotFound": "సమస్య కనుగొనబడలేదు",
+    "@problemNotFound": {
+        "description": "ID ద్వారా సమస్య కనుగొనబడనప్పుడు లోపం సందేశం"
+    },
+    "problemDetailSaveButton": "సేవ్ చేయి",
+    "@problemDetailSaveButton": {
+        "description": "సమస్య వివరాల పేజీలో సేవ్ బటన్ లేబుల్"
+    },
+    "problemDetailBackButton": "వెనుకకు",
+    "@problemDetailBackButton": {
+        "description": "సమస్య వివరాల పేజీలో వెనుకకు బటన్ లేబుల్"
+    },
+    "geoscopeLabel": "భౌగోళిక పరిధి:",
+    "@geoscopeLabel": {
+        "description": "సమస్య వివరాల పేజీలో భౌగోళిక పరిధి డ్రాప్‌డౌన్ పక్కన లేబుల్"
+    },
+    "copyProblemLink": "ఈ సమస్యకు లింక్ కాపీ చేయండి",
+    "@copyProblemLink": {
+        "description": "సమస్య జాబితా అంశంలో లింక్ కాపీ బటన్ టూల్‌టిప్"
+    },
+    "problemLinkCopied": "లింక్ క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది",
+    "@problemLinkCopied": {
+        "description": "సమస్య లింక్ కాపీ చేసిన తర్వాత స్నాక్‌బార్ సందేశం"
+    },
+    "geoscopeDropdownTooltip": "మీ సమస్యకు భౌగోళిక పరిధిని ఎంచుకోండి",
+    "@geoscopeDropdownTooltip": {
+        "description": "భౌగోళిక పరిధి డ్రాప్‌డౌన్‌పై మౌస్ ఉంచినప్పుడు చూపించే టూల్‌టిప్"
+    },
+    "autoTranslateMenuItem": "వచనాన్ని స్వయంచాలకంగా అనువదించు",
+    "@autoTranslateMenuItem": {
+        "description": "విదేశీ భాషల్లో సమస్యల స్వయంచాలక అనువాదాన్ని ప్రారంభించడానికి మెనూ అంశం లేబుల్"
+    }
+}
