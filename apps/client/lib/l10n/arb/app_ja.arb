@@ -91,5 +91,9 @@
     "geoscopeDropdownTooltip": "問題の地理的範囲を選択してください",
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
+    },
+    "autoTranslateMenuItem": "テキストを自動翻訳",
+    "@autoTranslateMenuItem": {
+        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
     }
 }

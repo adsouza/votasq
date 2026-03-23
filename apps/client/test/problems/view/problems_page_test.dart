@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/auth/auth.dart';
+import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
@@ -82,6 +83,7 @@ void main() {
         userLanguage: any(named: 'userLanguage'),
       ),
     ).thenAnswer((_) async => false);
+    when(() => translationRepo.canTranslateOnDevice).thenReturn(false);
   });
 
   Widget buildSubject() {
@@ -90,6 +92,9 @@ void main() {
         BlocProvider<ProblemsCubit>.value(value: problemsCubit),
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
+        BlocProvider<AutoTranslateCubit>(
+          create: (_) => AutoTranslateCubit(),
+        ),
       ],
       child: MultiRepositoryProvider(
         providers: [

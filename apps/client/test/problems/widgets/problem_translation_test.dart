@@ -1,3 +1,4 @@
+import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/translation_repository.dart';
@@ -30,29 +31,37 @@ void main() {
     String? lang,
     String originalDescription = 'hola mundo amigos',
     Locale locale = const Locale('en'),
+    bool autoTranslate = false,
   }) {
-    return MultiRepositoryProvider(
+    return MultiBlocProvider(
       providers: [
-        RepositoryProvider<FirestoreRepository>.value(value: firestoreRepo),
-        RepositoryProvider<TranslationRepository>.value(
-          value: translationRepo,
+        BlocProvider<AutoTranslateCubit>(
+          create: (_) => AutoTranslateCubit(initial: autoTranslate),
         ),
       ],
-      child: MaterialApp(
-        locale: locale,
-        supportedLocales: const [Locale('en'), Locale('es')],
-        localizationsDelegates: const [
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
+      child: MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<FirestoreRepository>.value(value: firestoreRepo),
+          RepositoryProvider<TranslationRepository>.value(
+            value: translationRepo,
+          ),
         ],
-        home: Scaffold(
-          body: ProblemTranslation(
-            problemId: problemId,
-            lang: lang,
-            originalDescription: originalDescription,
-            child: TranslatedField(
-              originalDescription,
-              fieldSelector: (tp) => tp.description,
+        child: MaterialApp(
+          locale: locale,
+          supportedLocales: const [Locale('en'), Locale('es')],
+          localizationsDelegates: const [
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          home: Scaffold(
+            body: ProblemTranslation(
+              problemId: problemId,
+              lang: lang,
+              originalDescription: originalDescription,
+              child: TranslatedField(
+                originalDescription,
+                fieldSelector: (tp) => tp.description,
+              ),
             ),
           ),
         ),
@@ -265,6 +274,58 @@ void main() {
 
       // Translation should be reset — translate icon reappears.
       expect(find.byIcon(Icons.translate), findsOneWidget);
+    });
+  });
+
+  group('Auto-translate', () {
+    testWidgets('auto-translates without tap when enabled', (tester) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            const TranslatedProblem(description: 'hello world friends'),
+      );
+
+      await tester.pumpWidget(
+        buildSubject(lang: 'es', autoTranslate: true),
+      );
+      await tester.pumpAndSettle();
+
+      // Translation should appear without any tap.
+      expect(find.text('hello world friends'), findsOneWidget);
+      expect(find.text('hola mundo amigos'), findsOneWidget);
+      expect(find.byIcon(Icons.translate), findsNothing);
+    });
+
+    testWidgets('shows spinner (not icon) when auto-translate is enabled', (
+      tester,
+    ) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer((_) async {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        return const TranslatedProblem(description: 'translated');
+      });
+
+      await tester.pumpWidget(
+        buildSubject(lang: 'es', autoTranslate: true),
+      );
+      await tester.pump();
+
+      // Spinner should appear, not the translate icon.
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byIcon(Icons.translate), findsNothing);
+
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('translate icon appears when auto-translate is disabled', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+
+      expect(find.byIcon(Icons.translate), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });
 }

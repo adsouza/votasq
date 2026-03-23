@@ -91,5 +91,9 @@
     "geoscopeDropdownTooltip": "अपनी समस्या का भौगोलिक दायरा चुनें",
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
+    },
+    "autoTranslateMenuItem": "पाठ स्वचालित रूप से अनुवाद करें",
+    "@autoTranslateMenuItem": {
+        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
     }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:flutter/material.dart';
@@ -51,12 +52,14 @@ class ProblemTranslationState {
     required this.needsTranslation,
     required this.isTranslating,
     required this.translate,
+    this.autoTranslate = false,
   });
 
   final TranslatedProblem? translation;
   final bool needsTranslation;
   final bool isTranslating;
   final VoidCallback translate;
+  final bool autoTranslate;
 }
 
 class _ProblemTranslationState extends State<ProblemTranslation> {
@@ -71,7 +74,22 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
         oldWidget.originalDescription != widget.originalDescription) {
       _translation = null;
       _translating = false;
+      _scheduleAutoTranslate();
     }
+  }
+
+  void _scheduleAutoTranslate() {
+    if (!_needsTranslation || _translating || _translation != null) return;
+    try {
+      if (!context.read<AutoTranslateCubit>().state) return;
+    } on Object {
+      return; // Cubit not provided (e.g. in tests without it).
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _translation == null && !_translating) {
+        unawaited(_translate());
+      }
+    });
   }
 
   bool get _needsTranslation {
@@ -133,12 +151,27 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
 
   @override
   Widget build(BuildContext context) {
+    bool autoTranslate;
+    try {
+      autoTranslate = context.watch<AutoTranslateCubit>().state;
+    } on Object {
+      autoTranslate = false;
+    }
+
+    if (autoTranslate &&
+        _needsTranslation &&
+        _translation == null &&
+        !_translating) {
+      _scheduleAutoTranslate();
+    }
+
     return _ProblemTranslationScope(
       state: ProblemTranslationState(
         translation: _translation,
         needsTranslation: _needsTranslation,
         isTranslating: _translating,
         translate: _translate,
+        autoTranslate: autoTranslate,
       ),
       child: widget.child,
     );
@@ -157,7 +190,8 @@ class _ProblemTranslationScope extends InheritedWidget {
   bool updateShouldNotify(_ProblemTranslationScope oldWidget) =>
       state.translation != oldWidget.state.translation ||
       state.needsTranslation != oldWidget.state.needsTranslation ||
-      state.isTranslating != oldWidget.state.isTranslating;
+      state.isTranslating != oldWidget.state.isTranslating ||
+      state.autoTranslate != oldWidget.state.autoTranslate;
 }
 
 /// Displays a single translatable text field within a [ProblemTranslation].
@@ -222,7 +256,7 @@ class TranslatedField extends StatelessWidget {
           const TextSpan(text: ' '),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
-            child: scope.isTranslating
+            child: (scope.isTranslating || scope.autoTranslate)
                 ? SizedBox(
                     width: 14,
                     height: 14,

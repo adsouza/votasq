@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:client/auth/auth.dart';
+import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
@@ -9,6 +10,7 @@ import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/translation_repository.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -502,6 +504,8 @@ class _ProblemsViewState extends State<ProblemsView> {
               setState(() {
                 _showOnlyOwned = !_showOnlyOwned;
               });
+            } else if (value == 'toggle_auto_translate') {
+              unawaited(context.read<AutoTranslateCubit>().toggle());
             }
           },
           itemBuilder: (context) => [
@@ -517,6 +521,19 @@ class _ProblemsViewState extends State<ProblemsView> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
+            if (context.read<TranslationRepository>().canTranslateOnDevice)
+              PopupMenuItem(
+                value: 'toggle_auto_translate',
+                child: ListTile(
+                  leading: Icon(
+                    context.read<AutoTranslateCubit>().state
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
+                  ),
+                  title: Text(l10n.autoTranslateMenuItem),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
             PopupMenuItem(
               value: 'change_location',
               child: ListTile(

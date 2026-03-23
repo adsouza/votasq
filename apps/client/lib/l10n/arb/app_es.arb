@@ -91,5 +91,9 @@
     "geoscopeDropdownTooltip": "Selecciona el ámbito geográfico de tu problema",
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip que se muestra al pasar el cursor sobre el selector de ámbito geográfico"
+    },
+    "autoTranslateMenuItem": "Traducir texto automáticamente",
+    "@autoTranslateMenuItem": {
+        "description": "Elemento de menú para activar la traducción automática de problemas en otros idiomas"
     }
 }

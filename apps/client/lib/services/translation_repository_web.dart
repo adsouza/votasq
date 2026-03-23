@@ -41,6 +41,9 @@ class TranslationRepository {
   final http.Client _client;
   bool _chromeApiUnavailable = false;
 
+  /// Whether this platform supports on-device translation.
+  bool get canTranslateOnDevice => !_translatorGlobal.isUndefinedOrNull;
+
   /// Attempts on-device translation of [text] into [targetLanguage] via the
   /// Chrome Translator API. Returns `null` when unavailable or on failure.
   Future<String?> translate({

@@ -91,5 +91,9 @@
     "geoscopeDropdownTooltip": "Select the geo scope for your problem",
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
+    },
+    "autoTranslateMenuItem": "Translate text automatically",
+    "@autoTranslateMenuItem": {
+        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
     }
 }

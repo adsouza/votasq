@@ -24,6 +24,9 @@ class TranslationRepository {
   final String _baseUrl;
   final http.Client _client;
 
+  /// Whether this platform supports on-device translation.
+  bool get canTranslateOnDevice => _mlKitSupported;
+
   /// Attempts on-device translation of [text] into [targetLanguage].
   /// Returns `null` when on-device translation is unavailable or fails.
   Future<String?> translate({

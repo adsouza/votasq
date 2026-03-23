@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:client/app/router.dart';
 import 'package:client/auth/auth.dart';
+import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/services/feedback_repository.dart';
@@ -83,6 +84,7 @@ class _AppState extends State<App> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => AuthCubit(authRepo)),
+          BlocProvider(create: (_) => AutoTranslateCubit()),
           BlocProvider(
             create: (context) {
               final cubit = GeoscopeCubit(
