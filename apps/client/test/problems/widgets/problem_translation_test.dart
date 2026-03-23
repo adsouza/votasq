@@ -30,6 +30,7 @@ void main() {
     String problemId = 'p1',
     String? lang,
     String originalDescription = 'hola mundo amigos',
+    String originalGoal = '',
     Locale locale = const Locale('en'),
     bool autoTranslate = false,
   }) {
@@ -58,9 +59,21 @@ void main() {
               problemId: problemId,
               lang: lang,
               originalDescription: originalDescription,
-              child: TranslatedField(
-                originalDescription,
-                fieldSelector: (tp) => tp.description,
+              originalGoal: originalGoal,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TranslatedField(
+                    originalDescription,
+                    fieldSelector: (tp) => tp.description,
+                  ),
+                  if (originalGoal.isNotEmpty)
+                    TranslatedField(
+                      originalGoal,
+                      fieldSelector: (tp) => tp.goal,
+                    ),
+                  const ProblemTranslateButton(),
+                ],
               ),
             ),
           ),
@@ -362,6 +375,89 @@ void main() {
 
       expect(find.byIcon(Icons.translate), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+  });
+
+  group('Goal translation', () {
+    testWidgets('on-device translates both description and goal', (
+      tester,
+    ) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer((_) async => null);
+
+      var translateCallCount = 0;
+      when(
+        () => translationRepo.translate(
+          text: any(named: 'text'),
+          targetLanguage: any(named: 'targetLanguage'),
+          sourceLanguage: any(named: 'sourceLanguage'),
+        ),
+      ).thenAnswer((invocation) async {
+        translateCallCount++;
+        final text = invocation.namedArguments[#text] as String;
+        return text == 'hola mundo amigos'
+            ? 'hello world friends'
+            : 'less traffic';
+      });
+
+      when(
+        () => firestoreRepo.saveTranslation(any(), any(), any()),
+      ).thenAnswer((_) async {});
+
+      await tester.pumpWidget(
+        buildSubject(
+          lang: 'es',
+          originalGoal: 'menos tráfico',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Two translate icons (description + goal); tapping either triggers
+      // translation of both fields since ProblemTranslation translates once.
+      await tester.tap(find.byIcon(Icons.translate).first);
+      await tester.pumpAndSettle();
+
+      // Both translations should appear.
+      expect(find.text('hello world friends'), findsOneWidget);
+      expect(find.text('less traffic'), findsOneWidget);
+
+      // translate() should have been called twice: once for description,
+      // once for goal.
+      expect(translateCallCount, 2);
+    });
+
+    testWidgets('skips goal translation when goal is empty', (tester) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer((_) async => null);
+
+      when(
+        () => translationRepo.translate(
+          text: any(named: 'text'),
+          targetLanguage: any(named: 'targetLanguage'),
+          sourceLanguage: any(named: 'sourceLanguage'),
+        ),
+      ).thenAnswer((_) async => 'hello world friends');
+
+      when(
+        () => firestoreRepo.saveTranslation(any(), any(), any()),
+      ).thenAnswer((_) async {});
+
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.translate));
+      await tester.pumpAndSettle();
+
+      // translate() should have been called only once (for description).
+      verify(
+        () => translationRepo.translate(
+          text: any(named: 'text'),
+          targetLanguage: any(named: 'targetLanguage'),
+          sourceLanguage: any(named: 'sourceLanguage'),
+        ),
+      ).called(1);
     });
   });
 }

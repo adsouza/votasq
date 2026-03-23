@@ -41,7 +41,8 @@ Future<Response> _put(RequestContext context, String id) async {
       'createdAt': existing.createdAt.toIso8601String(),
       'lastUpdatedAt': DateTime.now().toUtc().toIso8601String(),
     });
-    if (body['description'] != existing.description) {
+    if (body['description'] != existing.description ||
+        body['goal'] != existing.goal) {
       await db.deleteTranslations(id);
     }
     await db.saveProblem(problem);

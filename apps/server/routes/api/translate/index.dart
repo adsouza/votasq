@@ -10,14 +10,26 @@ Future<Response> onRequest(RequestContext context) async {
   };
 }
 
+/// Translates the input to English and returns both the detected source
+/// language and the English translation. This costs the same as pure detection
+/// but gives us a usable translation for free.
 Future<Response> _post(RequestContext context) async {
   final translator = await context.read<Future<Translator>>();
   try {
     final body =
         jsonDecode(await context.request.body()) as Map<String, dynamic>;
     final text = body['text'] as String;
-    final detected = await translator.detectLanguage(text);
-    return Response.json(body: {'detectedLanguage': detected});
+    final (:translatedText, :detectedLanguage) = await translator
+        .translateWithDetection(
+          text: text,
+          targetLanguage: 'en',
+        );
+    return Response.json(
+      body: {
+        'detectedLanguage': detectedLanguage,
+        'translation': translatedText,
+      },
+    );
   } on Exception {
     return Response(statusCode: 400);
   }

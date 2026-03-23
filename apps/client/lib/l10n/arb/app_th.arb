@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "แปลข้อความอัตโนมัติ",
     "@autoTranslateMenuItem": {
         "description": "ป้ายกำกับรายการเมนูเปิดการแปลอัตโนมัติของปัญหาในภาษาต่างประเทศ"
+    },
+    "addGoalHint": "ผลลัพธ์ใดจะแก้ปัญหานี้ได้?",
+    "@addGoalHint": {
+        "description": "ข้อความตัวอย่างสำหรับช่องเพิ่มเป้าหมาย"
+    },
+    "editGoalHint": "แก้ไขผลลัพธ์ที่ต้องการ",
+    "@editGoalHint": {
+        "description": "ข้อความตัวอย่างสำหรับช่องแก้ไขเป้าหมาย"
+    },
+    "goalLabel": "เป้าหมาย",
+    "@goalLabel": {
+        "description": "ป้ายกำกับช่องเป้าหมาย"
+    },
+    "languageMismatchError": "ภาษาไม่ตรงกัน: คำอธิบายดูเหมือนเป็นภาษา {descLang} แต่เป้าหมายเป็นภาษา {goalLang} ทั้งสองช่องต้องเป็นภาษาเดียวกัน",
+    "@languageMismatchError": {
+        "description": "ข้อความแสดงข้อผิดพลาดเมื่อคำอธิบายและเป้าหมายตรวจพบว่าเป็นภาษาต่างกัน",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

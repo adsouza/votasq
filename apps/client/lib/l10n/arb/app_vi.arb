@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Tự động dịch văn bản",
     "@autoTranslateMenuItem": {
         "description": "Nhãn mục menu để bật dịch tự động vấn đề bằng ngôn ngữ nước ngoài"
+    },
+    "addGoalHint": "Kết quả nào sẽ giải quyết vấn đề này?",
+    "@addGoalHint": {
+        "description": "Văn bản gợi ý cho trường thêm mục tiêu"
+    },
+    "editGoalHint": "Chỉnh sửa kết quả mong muốn",
+    "@editGoalHint": {
+        "description": "Văn bản gợi ý cho trường chỉnh sửa mục tiêu"
+    },
+    "goalLabel": "Mục tiêu",
+    "@goalLabel": {
+        "description": "Nhãn trường mục tiêu"
+    },
+    "languageMismatchError": "Ngôn ngữ không khớp: mô tả có vẻ bằng {descLang} nhưng mục tiêu bằng {goalLang}. Cả hai trường phải cùng một ngôn ngữ.",
+    "@languageMismatchError": {
+        "description": "Thông báo lỗi khi mô tả và mục tiêu được phát hiện bằng các ngôn ngữ khác nhau",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

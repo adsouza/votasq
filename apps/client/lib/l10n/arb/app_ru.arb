@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Автоматический перевод текста",
     "@autoTranslateMenuItem": {
         "description": "Метка пункта меню для включения автоматического перевода проблем на иностранных языках"
+    },
+    "addGoalHint": "Какой результат решит эту проблему?",
+    "@addGoalHint": {
+        "description": "Подсказка для поля добавления цели"
+    },
+    "editGoalHint": "Редактировать желаемый результат",
+    "@editGoalHint": {
+        "description": "Подсказка для поля редактирования цели"
+    },
+    "goalLabel": "Цель",
+    "@goalLabel": {
+        "description": "Метка поля цели"
+    },
+    "languageMismatchError": "Несовпадение языков: описание, похоже, на {descLang}, а цель — на {goalLang}. Оба поля должны быть на одном языке.",
+    "@languageMismatchError": {
+        "description": "Сообщение об ошибке когда описание и цель обнаружены на разных языках",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

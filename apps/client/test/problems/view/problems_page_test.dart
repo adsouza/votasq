@@ -37,6 +37,7 @@ class _MockTranslationRepository extends Mock
 Problem _problem({
   String id = '1',
   String description = 'first test problem',
+  String goal = '',
   String ownerId = 'owner1',
   String geoscope = '/',
   int votes = 3,
@@ -46,6 +47,7 @@ Problem _problem({
   return Problem(
     id: id,
     description: description,
+    goal: goal,
     ownerId: ownerId,
     geoscope: geoscope,
     votes: votes,
@@ -263,6 +265,71 @@ void main() {
       // Both menu items should be visible.
       expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
       expect(find.byIcon(Icons.location_on), findsOneWidget);
+    });
+
+    testWidgets('goal field hidden until description has 3 words', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      // Only the description field is visible initially.
+      expect(find.byType(TextField), findsOneWidget);
+
+      // Type fewer than 3 words and focus — goal stays hidden.
+      await tester.enterText(find.byType(TextField), 'two words');
+      await tester.pump(); // onChanged
+      await tester.pump(); // postFrameCallback
+      expect(find.byType(TextField), findsOneWidget);
+
+      // Type 3+ words — goal field appears.
+      await tester.enterText(find.byType(TextField), 'now three words here');
+      await tester.pump(); // onChanged
+      await tester.pump(); // postFrameCallback
+      expect(find.byType(TextField), findsNWidgets(2));
+    });
+
+    testWidgets('shows goal text for problems with non-empty goal', (
+      tester,
+    ) async {
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(
+              description: 'traffic is terrible',
+              goal: 'reduce commute times',
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.text('traffic is terrible'), findsOneWidget);
+      expect(find.text('reduce commute times'), findsOneWidget);
+    });
+
+    testWidgets('hides goal text for problems with empty goal', (
+      tester,
+    ) async {
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(description: 'traffic is terrible')],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.text('traffic is terrible'), findsOneWidget);
+      // No extra text widget for the empty goal.
+      final textWidgets = tester.widgetList<Text>(find.byType(Text));
+      expect(
+        textWidgets.where((t) => t.data == '').length,
+        isZero,
+      );
     });
   });
 }

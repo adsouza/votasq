@@ -9,6 +9,7 @@ abstract class TranslatedProblem with _$TranslatedProblem {
   /// Creates a translated problem.
   const factory TranslatedProblem({
     required String description,
+    @Default('') String goal,
   }) = _TranslatedProblem;
 
   /// Deserializes a [TranslatedProblem] from JSON.

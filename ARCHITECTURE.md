@@ -36,6 +36,7 @@ classDiagram
         <<freezed>>
         +String id
         +String description
+        +String goal = ""
         +String geoscope = "/"
         +int votes = 1
         +bool solved = false
@@ -47,18 +48,30 @@ classDiagram
     class ProblemRevision {
         <<freezed>>
         +String description
+        +String goal = ""
         +int version
         +DateTime archivedAt
         +int? restoredFrom
     }
 
+    class TranslatedProblem {
+        <<freezed>>
+        +String description
+        +String goal = ""
+    }
+
     Problem "1" --> "*" ProblemRevision : versions subcollection
+    Problem "1" --> "*" TranslatedProblem : translations subcollection
 ```
 
-`ProblemRevision` is an immutable record of a description change, stored in a
-Firestore subcollection (`problems/{id}/versions/{version}`). It intentionally
-omits mutable fields (`votes`, `solved`) and Problem-level fields (`id`,
-timestamps) that are irrelevant to the revision history.
+`ProblemRevision` is an immutable snapshot of the textual fields (`description`,
+`goal`) at a specific version, stored in a Firestore subcollection
+(`problems/{id}/versions/{version}`). It intentionally omits mutable fields
+(`votes`, `solved`) and Problem-level fields (`id`, timestamps) that are
+irrelevant to the revision history.
+
+`TranslatedProblem` caches the translation of both text fields for a given
+language, stored at `problems/{id}/translations/{langCode}`.
 
 The `@freezed` annotation generates immutability, equality, `copyWith`, and
 pattern matching. `json_serializable` generates `toJson` / `fromJson`. Both
@@ -97,13 +110,14 @@ sequenceDiagram
 
 Dart Frog maps the filesystem to routes automatically:
 
-| File                                             | Endpoint                                                    |
-|--------------------------------------------------|-------------------------------------------------------------|
-| `routes/index.dart`                              | `GET /` — serves `public/index.html` (Flutter web build)    |
-| `routes/problems/index.dart`                     | `GET /problems` — paginated list, `POST /problems` — create |
-| `routes/problems/[id]/index.dart`                | `GET /problems/:id` — read, `PUT /problems/:id` — update    |
-| `routes/problems/[id]/versions/index.dart`       | `GET /problems/:id/versions` — version history              |
-| `routes/problems/[id]/translations/[lang].dart`  | `GET /problems/:id/translations/:lang` — cached translation |
+| File                                            | Endpoint                                                    |
+|-------------------------------------------------|-------------------------------------------------------------|
+| `routes/index.dart`                             | GET / — serves public/index.html (Flutter web build)        |
+| `routes/problems/index.dart`                    | GET /problems — paginated list; POST /problems — create     |
+| `routes/problems/[id]/index.dart`               | GET /problems/:id — read; PUT /problems/:id — update        |
+| `routes/problems/[id]/versions/index.dart`      | GET /problems/:id/versions — version history                |
+| `routes/problems/[id]/translations/[lang].dart` | GET /problems/:id/translations/:lang — cached translation   |
+| `routes/translate/index.dart`                   | POST /translate — translate to English; returns lang + text |
 
 Each file exports an `onRequest` function that switches on HTTP method.
 
@@ -132,7 +146,7 @@ Key operations:
 - **saveProblem** — atomically writes the main `problems/{id}` document and a
   `ProblemRevision` to the `problems/{id}/versions/{version}` subcollection
   using a Firestore `commit` (atomic batched write). Every create or update
-  produces a new revision entry, providing an audit trail of description changes.
+  produces a new revision entry, providing an audit trail of text changes.
 - **getProblem** — fetches a single document by ID
 - **getProblems** — runs a `StructuredQuery` ordered by `votes DESC, __name__ ASC`
   with cursor-based pagination. Accepts an optional `geoscope` parameter; when
@@ -260,11 +274,15 @@ matching against available geoscopes.
 
 ### Language detection & translation
 
-The client detects the language of problem descriptions at write time and stores
-it in the `lang` field on each Problem. At read time, `ProblemTranslation`
-compares `lang` to the user's locale to decide whether to show a translate icon.
-Individual fields are rendered by `TranslatedField` widgets that read translation
-state from the nearest `ProblemTranslation` ancestor.
+The client detects the language of both text fields (`description` and `goal`)
+at write time and stores a single `lang` code on each Problem. Both fields must
+be in the same language — cross-field validation rejects mismatches with a
+`LanguageMismatchException` that surfaces as a toast in the UI.
+
+At read time, `ProblemTranslation` compares `lang` to the user's locale to
+decide whether to show a translate icon. Individual fields are rendered by
+`TranslatedField` widgets that read translation state from the nearest
+`ProblemTranslation` ancestor.
 
 Both detection and translation use platform-specific implementations selected
 via Dart conditional imports:
@@ -281,20 +299,28 @@ via Dart conditional imports:
 - Web (Chrome 138+) — Chrome Translator API
 - Web (other) / Desktop — not available (falls through to cached server translation)
 
+**Server fallback — translate instead of detect:**
+
+When on-device detection fails, the client calls `POST /translate` which
+translates the text to English via Cloud Translate. This costs the same as pure
+detection but returns both the detected source language and a usable English
+translation. The client caches the English translation in Firestore so it is
+available to other users immediately.
+
 **Translation caching:**
 
-Translations from Cloud Translate (and on-device translations) are cached in a
-Firestore subcollection at `problems/{id}/translations/{langCode}` as
-`TranslatedProblem` objects. The translation flow is:
+Translations (both `description` and `goal`) are cached in a Firestore
+subcollection at `problems/{id}/translations/{langCode}` as `TranslatedProblem`
+objects. The translation flow is:
 
 1. Check Firestore cache (direct client read)
 2. Try on-device translation (ML Kit / Chrome API) — if successful, the result
    is written to the cache so other clients benefit
 3. Fall back to `GET /problems/{id}/translations/{lang}` — the server checks the
-   cache, translates via Cloud Translate on miss, caches, and returns
+   cache, translates both fields via Cloud Translate on miss, caches, and returns
 
-When a problem's description is modified, all cached translations are deleted
-(both client `updateProblem` and server `PUT /problems/{id}`).
+When a problem's `description` or `goal` is modified, all cached translations
+are deleted (both client `updateProblem` and server `PUT /problems/{id}`).
 
 > **Desktop ML Kit constraint:** The `google_mlkit_language_id` and
 > `google_mlkit_translation` packages register Flutter method channels even on
@@ -322,7 +348,7 @@ the Cloud Run URL in release builds.
 
 ### Internationalization
 
-ARB files in `lib/l10n/arb/` define localized strings (EN, ES, ZH, AR, FR, JA, HI, UK).
+ARB files in `lib/l10n/arb/` define localized strings for 23 languages.
 Flutter generates `AppLocalizations` at build time. Access in widgets via the
 `context.l10n` extension.
 

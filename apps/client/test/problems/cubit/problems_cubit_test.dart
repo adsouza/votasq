@@ -17,6 +17,7 @@ class _FakeDocumentSnapshot extends Fake
 Problem _problem({
   String id = '1',
   String description = 'test problem one',
+  String goal = '',
   String ownerId = 'user1',
   String geoscope = '/',
   int votes = 1,
@@ -25,6 +26,7 @@ Problem _problem({
   return Problem(
     id: id,
     description: description,
+    goal: goal,
     ownerId: ownerId,
     geoscope: geoscope,
     votes: votes,
@@ -182,6 +184,7 @@ void main() {
         when(
           () => repo.addProblem(
             description: any(named: 'description'),
+            goal: any(named: 'goal'),
             ownerId: any(named: 'ownerId'),
             geoscope: any(named: 'geoscope'),
             userLanguage: any(named: 'userLanguage'),
@@ -208,11 +211,45 @@ void main() {
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
+      'addProblem passes goal to repo',
+      build: () {
+        when(
+          () => repo.addProblem(
+            description: any(named: 'description'),
+            goal: any(named: 'goal'),
+            ownerId: any(named: 'ownerId'),
+            geoscope: any(named: 'geoscope'),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {});
+        return ProblemsCubit(repo);
+      },
+      act: (cubit) => cubit.addProblem(
+        description: 'a new problem',
+        goal: 'reduce traffic jams',
+        ownerId: 'user1',
+        userLanguage: 'en',
+      ),
+      verify: (_) {
+        verify(
+          () => repo.addProblem(
+            description: 'a new problem',
+            goal: 'reduce traffic jams',
+            ownerId: 'user1',
+            geoscope: '/',
+            userLanguage: 'en',
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
       'addProblem uses override geoscope when provided',
       build: () {
         when(
           () => repo.addProblem(
             description: any(named: 'description'),
+            goal: any(named: 'goal'),
             ownerId: any(named: 'ownerId'),
             geoscope: any(named: 'geoscope'),
             userLanguage: any(named: 'userLanguage'),
@@ -233,7 +270,7 @@ void main() {
             description: 'a new problem',
             ownerId: 'user1',
             geoscope: '/',
-            userLanguage: 'en',
+            userLanguage: any(named: 'userLanguage'),
           ),
         ).called(1);
       },
@@ -245,6 +282,7 @@ void main() {
         when(
           () => repo.addProblem(
             description: any(named: 'description'),
+            goal: any(named: 'goal'),
             ownerId: any(named: 'ownerId'),
             geoscope: any(named: 'geoscope'),
             userLanguage: any(named: 'userLanguage'),

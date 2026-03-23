@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "自动翻译文本",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "addGoalHint": "什么结果能解决这个问题？",
+    "@addGoalHint": {
+        "description": "添加目标文本框的占位文字"
+    },
+    "editGoalHint": "编辑期望结果",
+    "@editGoalHint": {
+        "description": "编辑目标文本框的占位文字"
+    },
+    "goalLabel": "目标",
+    "@goalLabel": {
+        "description": "目标字段的标签"
+    },
+    "languageMismatchError": "语言不匹配：描述似乎是{descLang}，但目标似乎是{goalLang}。两个字段必须使用相同的语言。",
+    "@languageMismatchError": {
+        "description": "当问题描述和目标被检测为不同语言时显示的错误提示",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

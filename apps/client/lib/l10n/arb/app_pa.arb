@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "ਟੈਕਸਟ ਦਾ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਕਰੋ",
     "@autoTranslateMenuItem": {
         "description": "ਵਿਦੇਸ਼ੀ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਸਮੱਸਿਆਵਾਂ ਦੇ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"
+    },
+    "addGoalHint": "ਕਿਹੜਾ ਨਤੀਜਾ ਇਸ ਨੂੰ ਹੱਲ ਕਰੇਗਾ?",
+    "@addGoalHint": {
+        "description": "ਟੀਚਾ ਜੋੜਨ ਦੇ ਟੈਕਸਟ ਫੀਲਡ ਦਾ ਪਲੇਸਹੋਲਡਰ"
+    },
+    "editGoalHint": "ਲੋੜੀਂਦਾ ਨਤੀਜਾ ਸੰਪਾਦਿਤ ਕਰੋ",
+    "@editGoalHint": {
+        "description": "ਟੀਚਾ ਸੰਪਾਦਨ ਟੈਕਸਟ ਫੀਲਡ ਦਾ ਪਲੇਸਹੋਲਡਰ"
+    },
+    "goalLabel": "ਟੀਚਾ",
+    "@goalLabel": {
+        "description": "ਟੀਚਾ ਫੀਲਡ ਦਾ ਲੇਬਲ"
+    },
+    "languageMismatchError": "ਭਾਸ਼ਾ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ: ਵਰਣਨ {descLang} ਵਿੱਚ ਲੱਗਦਾ ਹੈ ਪਰ ਟੀਚਾ {goalLang} ਵਿੱਚ ਲੱਗਦਾ ਹੈ। ਦੋਵੇਂ ਖੇਤਰ ਇੱਕੋ ਭਾਸ਼ਾ ਵਿੱਚ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।",
+    "@languageMismatchError": {
+        "description": "ਜਦੋਂ ਵਰਣਨ ਅਤੇ ਟੀਚਾ ਵੱਖ-ਵੱਖ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਖੋਜੇ ਜਾਂਦੇ ਹਨ ਤਾਂ ਦਿਖਾਈ ਜਾਣ ਵਾਲੀ ਗਲਤੀ",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

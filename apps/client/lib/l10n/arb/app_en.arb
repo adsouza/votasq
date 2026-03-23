@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Translate text automatically",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "addGoalHint": "What outcome would solve this?",
+    "@addGoalHint": {
+        "description": "Placeholder text for the add-goal text field"
+    },
+    "editGoalHint": "Edit desired outcome",
+    "@editGoalHint": {
+        "description": "Placeholder text for the edit-goal text field"
+    },
+    "goalLabel": "Goal",
+    "@goalLabel": {
+        "description": "Label for the goal field"
+    },
+    "languageMismatchError": "Language mismatch: description appears to be in {descLang} but goal appears to be in {goalLang}. Both fields must be in the same language.",
+    "@languageMismatchError": {
+        "description": "Error toast shown when the problem description and goal are detected as different languages",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "ترجمه خودکار متن",
     "@autoTranslateMenuItem": {
         "description": "برچسب آیتم منو برای فعال‌سازی ترجمه خودکار مشکلات به زبان‌های خارجی"
+    },
+    "addGoalHint": "چه نتیجه‌ای این مشکل را حل می‌کند؟",
+    "@addGoalHint": {
+        "description": "متن راهنمای فیلد افزودن هدف"
+    },
+    "editGoalHint": "ویرایش نتیجه مطلوب",
+    "@editGoalHint": {
+        "description": "متن راهنمای فیلد ویرایش هدف"
+    },
+    "goalLabel": "هدف",
+    "@goalLabel": {
+        "description": "برچسب فیلد هدف"
+    },
+    "languageMismatchError": "عدم تطابق زبان: توضیحات به نظر به زبان {descLang} و هدف به زبان {goalLang} است. هر دو فیلد باید به یک زبان باشند.",
+    "@languageMismatchError": {
+        "description": "پیام خطا هنگامی که توضیحات و هدف به زبان‌های مختلف تشخیص داده شوند",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

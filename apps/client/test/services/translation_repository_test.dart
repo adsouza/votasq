@@ -80,7 +80,7 @@ void main() {
       });
     });
 
-    group('detectLanguageViaServer', () {
+    group('translateToEnglish', () {
       test('returns detected language code', () async {
         when(
           () => httpClient.post(
@@ -90,19 +90,23 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => http.Response(
-            jsonEncode({'detectedLanguage': 'es'}),
+            jsonEncode({
+              'detectedLanguage': 'es',
+              'translation': 'hello world',
+            }),
             200,
           ),
         );
 
-        final result = await repo.detectLanguageViaServer(
+        final result = await repo.translateToEnglish(
           'hola mundo',
         );
 
-        expect(result, 'es');
+        expect(result.detectedLanguage, 'es');
+        expect(result.translation, 'hello world');
         verify(
           () => httpClient.post(
-            Uri.parse('https://example.com/api/detect'),
+            Uri.parse('https://example.com/api/translate'),
             headers: any(named: 'headers'),
             body: jsonEncode({'text': 'hola mundo'}),
           ),
@@ -119,7 +123,7 @@ void main() {
         ).thenAnswer((_) async => http.Response('', 400));
 
         expect(
-          () => repo.detectLanguageViaServer('test'),
+          () => repo.translateToEnglish('test'),
           throwsException,
         );
       });

@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "স্বয়ংক্রিয়ভাবে পাঠ্য অনুবাদ করুন",
     "@autoTranslateMenuItem": {
         "description": "বিদেশী ভাষায় সমস্যার স্বয়ংক্রিয় অনুবাদ সক্রিয় করার মেনু আইটেম লেবেল"
+    },
+    "addGoalHint": "কোন ফলাফল এটি সমাধান করবে?",
+    "@addGoalHint": {
+        "description": "লক্ষ্য যোগ করার টেক্সট ফিল্ডের প্লেসহোল্ডার"
+    },
+    "editGoalHint": "কাঙ্ক্ষিত ফলাফল সম্পাদনা করুন",
+    "@editGoalHint": {
+        "description": "লক্ষ্য সম্পাদনা টেক্সট ফিল্ডের প্লেসহোল্ডার"
+    },
+    "goalLabel": "লক্ষ্য",
+    "@goalLabel": {
+        "description": "লক্ষ্য ফিল্ডের লেবেল"
+    },
+    "languageMismatchError": "ভাষার অমিল: বিবরণটি {descLang} ভাষায় মনে হচ্ছে কিন্তু লক্ষ্যটি {goalLang} ভাষায় মনে হচ্ছে। উভয় ক্ষেত্র একই ভাষায় হতে হবে।",
+    "@languageMismatchError": {
+        "description": "বিবরণ এবং লক্ষ্য ভিন্ন ভাষায় শনাক্ত হলে দেখানো ত্রুটি বার্তা",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

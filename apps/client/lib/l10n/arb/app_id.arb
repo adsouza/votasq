@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Terjemahkan teks secara otomatis",
     "@autoTranslateMenuItem": {
         "description": "Label item menu untuk mengaktifkan terjemahan otomatis masalah dalam bahasa asing"
+    },
+    "addGoalHint": "Hasil apa yang akan menyelesaikan ini?",
+    "@addGoalHint": {
+        "description": "Teks petunjuk untuk kolom tambah tujuan"
+    },
+    "editGoalHint": "Edit hasil yang diinginkan",
+    "@editGoalHint": {
+        "description": "Teks petunjuk untuk kolom edit tujuan"
+    },
+    "goalLabel": "Tujuan",
+    "@goalLabel": {
+        "description": "Label kolom tujuan"
+    },
+    "languageMismatchError": "Bahasa tidak cocok: deskripsi tampaknya dalam {descLang} tetapi tujuan dalam {goalLang}. Kedua kolom harus dalam bahasa yang sama.",
+    "@languageMismatchError": {
+        "description": "Pesan kesalahan saat deskripsi dan tujuan terdeteksi dalam bahasa berbeda",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

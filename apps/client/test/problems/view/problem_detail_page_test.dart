@@ -29,6 +29,7 @@ class _MockTranslationRepository extends Mock
 Problem _problem({
   String id = 'test-id',
   String description = 'test problem description',
+  String goal = '',
   String ownerId = 'owner1',
   String geoscope = '/',
   int votes = 5,
@@ -37,6 +38,7 @@ Problem _problem({
   return Problem(
     id: id,
     description: description,
+    goal: goal,
     ownerId: ownerId,
     geoscope: geoscope,
     votes: votes,
@@ -159,7 +161,7 @@ void main() {
       );
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(2));
       expect(find.text('Save'), findsOneWidget);
     });
 
@@ -193,7 +195,7 @@ void main() {
 
       // Modify the description.
       await tester.enterText(
-        find.byType(TextField),
+        find.byType(TextField).first,
         'updated problem description',
       );
       await tester.tap(find.text('Save'));
@@ -206,6 +208,39 @@ void main() {
         ),
       ).called(1);
       expect(find.text('home'), findsOneWidget);
+    });
+
+    testWidgets('shows goal in read-only view when non-empty', (
+      tester,
+    ) async {
+      when(
+        () => repo.getProblem(any()),
+      ).thenAnswer(
+        (_) async => _problem(goal: 'reduce commute times'),
+      );
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(find.text('reduce commute times'), findsOneWidget);
+    });
+
+    testWidgets('hides goal in read-only view when empty', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(find.text('test problem description'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
     });
   });
 }

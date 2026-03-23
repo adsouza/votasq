@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Traduzir texto automaticamente",
     "@autoTranslateMenuItem": {
         "description": "Rótulo do item de menu para ativar a tradução automática de problemas em idiomas estrangeiros"
+    },
+    "addGoalHint": "Qual resultado resolveria isso?",
+    "@addGoalHint": {
+        "description": "Texto de dica para o campo de adicionar objetivo"
+    },
+    "editGoalHint": "Editar resultado desejado",
+    "@editGoalHint": {
+        "description": "Texto de dica para o campo de edição de objetivo"
+    },
+    "goalLabel": "Objetivo",
+    "@goalLabel": {
+        "description": "Rótulo do campo de objetivo"
+    },
+    "languageMismatchError": "Idiomas diferentes: a descrição parece estar em {descLang} mas o objetivo em {goalLang}. Ambos os campos devem estar no mesmo idioma.",
+    "@languageMismatchError": {
+        "description": "Mensagem de erro quando a descrição e o objetivo são detectados em idiomas diferentes",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

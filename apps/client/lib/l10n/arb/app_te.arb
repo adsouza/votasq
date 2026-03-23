@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "వచనాన్ని స్వయంచాలకంగా అనువదించు",
     "@autoTranslateMenuItem": {
         "description": "విదేశీ భాషల్లో సమస్యల స్వయంచాలక అనువాదాన్ని ప్రారంభించడానికి మెనూ అంశం లేబుల్"
+    },
+    "addGoalHint": "ఏ ఫలితం దీన్ని పరిష్కరిస్తుంది?",
+    "@addGoalHint": {
+        "description": "లక్ష్యం జోడించే టెక్స్ట్ ఫీల్డ్ ప్లేస్‌హోల్డర్"
+    },
+    "editGoalHint": "కోరుకున్న ఫలితాన్ని సవరించండి",
+    "@editGoalHint": {
+        "description": "లక్ష్యం సవరణ టెక్స్ట్ ఫీల్డ్ ప్లేస్‌హోల్డర్"
+    },
+    "goalLabel": "లక్ష్యం",
+    "@goalLabel": {
+        "description": "లక్ష్యం ఫీల్డ్ లేబుల్"
+    },
+    "languageMismatchError": "భాష సరిపోలలేదు: వివరణ {descLang}లో ఉన్నట్లు కనిపిస్తుంది కానీ లక్ష్యం {goalLang}లో ఉన్నట్లు కనిపిస్తుంది. రెండు ఫీల్డ్‌లు ఒకే భాషలో ఉండాలి.",
+    "@languageMismatchError": {
+        "description": "వివరణ మరియు లక్ష్యం వేర్వేరు భాషల్లో గుర్తించబడినప్పుడు చూపించే లోపం",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

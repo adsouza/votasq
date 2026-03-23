@@ -115,10 +115,15 @@ class TranslationRepository {
     }
   }
 
-  /// Detects the language of [text] via the server's Cloud Translation API.
-  Future<String> detectLanguageViaServer(String text) async {
+  /// Translates [text] to English via the server, returning both the detected
+  /// source language and the English translation. This is used as a fallback
+  /// when on-device detection fails — translating costs the same as pure
+  /// detection but gives us a cacheable English translation for free.
+  Future<({String detectedLanguage, String translation})> translateToEnglish(
+    String text,
+  ) async {
     final response = await _client.post(
-      Uri.parse('$_baseUrl/api/detect'),
+      Uri.parse('$_baseUrl/api/translate'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'text': text}),
     );
@@ -126,6 +131,9 @@ class TranslationRepository {
       throw Exception('Language detection failed: ${response.statusCode}');
     }
     final body = jsonDecode(response.body) as Map<String, dynamic>;
-    return body['detectedLanguage'] as String;
+    return (
+      detectedLanguage: body['detectedLanguage'] as String,
+      translation: body['translation'] as String,
+    );
   }
 }

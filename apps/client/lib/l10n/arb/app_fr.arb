@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Traduire le texte automatiquement",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "addGoalHint": "Quel résultat résoudrait ce problème ?",
+    "@addGoalHint": {
+        "description": "Texte d'indice pour le champ d'ajout d'objectif"
+    },
+    "editGoalHint": "Modifier le résultat souhaité",
+    "@editGoalHint": {
+        "description": "Texte d'indice pour le champ de modification d'objectif"
+    },
+    "goalLabel": "Objectif",
+    "@goalLabel": {
+        "description": "Libellé du champ objectif"
+    },
+    "languageMismatchError": "Langues différentes : la description semble être en {descLang} mais l'objectif semble être en {goalLang}. Les deux champs doivent être dans la même langue.",
+    "@languageMismatchError": {
+        "description": "Toast d'erreur lorsque la description et l'objectif sont dans des langues différentes",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

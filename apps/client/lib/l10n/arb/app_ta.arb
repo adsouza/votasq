@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "உரையை தானாகவே மொழிபெயர்",
     "@autoTranslateMenuItem": {
         "description": "வெளிநாட்டு மொழிகளில் உள்ள பிரச்சனைகளின் தானியங்கி மொழிபெயர்ப்பை இயக்க மெனு உருப்படி லேபிள்"
+    },
+    "addGoalHint": "எந்த முடிவு இதை தீர்க்கும்?",
+    "@addGoalHint": {
+        "description": "இலக்கு சேர்க்கும் உரை புலத்தின் இடங்காட்டி"
+    },
+    "editGoalHint": "விரும்பிய முடிவை திருத்து",
+    "@editGoalHint": {
+        "description": "இலக்கு திருத்தும் உரை புலத்தின் இடங்காட்டி"
+    },
+    "goalLabel": "இலக்கு",
+    "@goalLabel": {
+        "description": "இலக்கு புலத்தின் லேபிள்"
+    },
+    "languageMismatchError": "மொழி பொருந்தவில்லை: விளக்கம் {descLang} மொழியில் உள்ளது ஆனால் இலக்கு {goalLang} மொழியில் உள்ளது. இரண்டு புலங்களும் ஒரே மொழியில் இருக்க வேண்டும்.",
+    "@languageMismatchError": {
+        "description": "விளக்கம் மற்றும் இலக்கு வெவ்வேறு மொழிகளில் கண்டறியப்பட்டால் காட்டப்படும் பிழை",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

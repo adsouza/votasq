@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "텍스트 자동 번역",
     "@autoTranslateMenuItem": {
         "description": "외국어 문제의 자동 번역을 활성화하는 메뉴 항목 라벨"
+    },
+    "addGoalHint": "어떤 결과가 이것을 해결할까요?",
+    "@addGoalHint": {
+        "description": "목표 추가 텍스트 필드의 플레이스홀더"
+    },
+    "editGoalHint": "원하는 결과 편집",
+    "@editGoalHint": {
+        "description": "목표 편집 텍스트 필드의 플레이스홀더"
+    },
+    "goalLabel": "목표",
+    "@goalLabel": {
+        "description": "목표 필드의 라벨"
+    },
+    "languageMismatchError": "언어 불일치: 설명은 {descLang}로 보이지만 목표는 {goalLang}로 보입니다. 두 필드 모두 같은 언어여야 합니다.",
+    "@languageMismatchError": {
+        "description": "설명과 목표가 다른 언어로 감지될 때 표시되는 오류 메시지",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

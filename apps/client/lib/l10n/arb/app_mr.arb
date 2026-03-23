@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "मजकूर आपोआप भाषांतर करा",
     "@autoTranslateMenuItem": {
         "description": "परदेशी भाषांमधील समस्यांचे स्वयंचलित भाषांतर सुरू करण्यासाठी मेनू आयटम लेबल"
+    },
+    "addGoalHint": "कोणता परिणाम हे सोडवेल?",
+    "@addGoalHint": {
+        "description": "ध्येय जोडण्याच्या टेक्स्ट फील्डचा प्लेसहोल्डर"
+    },
+    "editGoalHint": "इच्छित परिणाम संपादित करा",
+    "@editGoalHint": {
+        "description": "ध्येय संपादन टेक्स्ट फील्डचा प्लेसहोल्डर"
+    },
+    "goalLabel": "ध्येय",
+    "@goalLabel": {
+        "description": "ध्येय फील्डचे लेबल"
+    },
+    "languageMismatchError": "भाषा जुळत नाही: वर्णन {descLang} मध्ये दिसते पण ध्येय {goalLang} मध्ये दिसते. दोन्ही फील्ड एकाच भाषेत असणे आवश्यक आहे.",
+    "@languageMismatchError": {
+        "description": "वर्णन आणि ध्येय वेगवेगळ्या भाषांमध्ये आढळल्यावर दाखवली जाणारी त्रुटी",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

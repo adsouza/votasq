@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "テキストを自動翻訳",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "addGoalHint": "どんな結果がこれを解決しますか？",
+    "@addGoalHint": {
+        "description": "目標追加テキストフィールドのプレースホルダー"
+    },
+    "editGoalHint": "望む結果を編集",
+    "@editGoalHint": {
+        "description": "目標編集テキストフィールドのプレースホルダー"
+    },
+    "goalLabel": "目標",
+    "@goalLabel": {
+        "description": "目標フィールドのラベル"
+    },
+    "languageMismatchError": "言語の不一致：説明は{descLang}のようですが、目標は{goalLang}のようです。両方のフィールドは同じ言語で記入してください。",
+    "@languageMismatchError": {
+        "description": "説明と目標が異なる言語で検出された場合のエラートースト",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

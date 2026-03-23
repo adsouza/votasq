@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Text automatisch übersetzen",
     "@autoTranslateMenuItem": {
         "description": "Menüpunkt zum Aktivieren der automatischen Übersetzung von Problemen in Fremdsprachen"
+    },
+    "addGoalHint": "Welches Ergebnis würde dies lösen?",
+    "@addGoalHint": {
+        "description": "Platzhaltertext für das Ziel-Eingabefeld"
+    },
+    "editGoalHint": "Gewünschtes Ergebnis bearbeiten",
+    "@editGoalHint": {
+        "description": "Platzhaltertext für das Ziel-Bearbeitungsfeld"
+    },
+    "goalLabel": "Ziel",
+    "@goalLabel": {
+        "description": "Beschriftung des Zielfelds"
+    },
+    "languageMismatchError": "Sprachkonflikt: Die Beschreibung scheint auf {descLang} zu sein, aber das Ziel auf {goalLang}. Beide Felder müssen in derselben Sprache verfasst sein.",
+    "@languageMismatchError": {
+        "description": "Fehlermeldung wenn Beschreibung und Ziel in verschiedenen Sprachen erkannt werden",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

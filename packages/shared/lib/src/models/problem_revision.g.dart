@@ -9,6 +9,7 @@ part of 'problem_revision.dart';
 _ProblemRevision _$ProblemRevisionFromJson(Map<String, dynamic> json) =>
     _ProblemRevision(
       description: json['description'] as String,
+      goal: json['goal'] as String? ?? '',
       version: (json['version'] as num).toInt(),
       archivedAt: DateTime.parse(json['archivedAt'] as String),
       restoredFrom: (json['restoredFrom'] as num?)?.toInt(),
@@ -17,6 +18,7 @@ _ProblemRevision _$ProblemRevisionFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ProblemRevisionToJson(_ProblemRevision instance) =>
     <String, dynamic>{
       'description': instance.description,
+      'goal': instance.goal,
       'version': instance.version,
       'archivedAt': instance.archivedAt.toIso8601String(),
       'restoredFrom': instance.restoredFrom,

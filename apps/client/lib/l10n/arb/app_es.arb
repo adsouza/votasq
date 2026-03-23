@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Traducir texto automáticamente",
     "@autoTranslateMenuItem": {
         "description": "Elemento de menú para activar la traducción automática de problemas en otros idiomas"
+    },
+    "addGoalHint": "¿Qué resultado resolvería esto?",
+    "@addGoalHint": {
+        "description": "Texto del marcador para el campo de meta"
+    },
+    "editGoalHint": "Editar resultado deseado",
+    "@editGoalHint": {
+        "description": "Texto del marcador para el campo de edición de meta"
+    },
+    "goalLabel": "Meta",
+    "@goalLabel": {
+        "description": "Etiqueta del campo de meta"
+    },
+    "languageMismatchError": "Idiomas no coinciden: la descripción parece estar en {descLang} pero la meta parece estar en {goalLang}. Ambos campos deben estar en el mismo idioma.",
+    "@languageMismatchError": {
+        "description": "Toast de error cuando la descripción y la meta del problema están en idiomas diferentes",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

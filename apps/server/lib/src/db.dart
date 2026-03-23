@@ -49,6 +49,7 @@ class Db {
       ..name = '$_basePath/problems/${problem.id}';
     final revision = ProblemRevision(
       description: problem.description,
+      goal: problem.goal,
       version: problem.version,
       archivedAt: problem.lastUpdatedAt,
     );
@@ -170,6 +171,7 @@ class Db {
         Problem(
           id: id,
           description: doc.fields!['description']!.stringValue!,
+          goal: doc.fields?['goal']?.stringValue ?? '',
           ownerId: doc.fields!['ownerId']!.stringValue!,
           geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
           lang: doc.fields?['lang']?.stringValue,
@@ -203,6 +205,7 @@ class Db {
     return Problem(
       id: id,
       description: doc.fields!['description']!.stringValue!,
+      goal: doc.fields?['goal']?.stringValue ?? '',
       ownerId: doc.fields!['ownerId']!.stringValue!,
       geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
       lang: doc.fields?['lang']?.stringValue,
@@ -239,6 +242,7 @@ class Db {
       revisions.add(
         ProblemRevision(
           description: doc.fields!['description']!.stringValue!,
+          goal: doc.fields?['goal']?.stringValue ?? '',
           version: _parseVersion(doc.fields),
           archivedAt: _parseTimestamp(doc.fields!['archivedAt']!),
           restoredFrom: _parseOptionalInt(doc.fields?['restoredFrom']),
@@ -260,6 +264,7 @@ class Db {
       );
       return TranslatedProblem(
         description: doc.fields!['description']!.stringValue!,
+        goal: doc.fields?['goal']?.stringValue ?? '',
       );
     } on fs.DetailedApiRequestError catch (e) {
       if (e.status == 404) return null;
@@ -307,6 +312,7 @@ class Db {
     return fs.Document(
       fields: {
         'description': fs.Value(stringValue: problem.description),
+        'goal': fs.Value(stringValue: problem.goal),
         'ownerId': fs.Value(stringValue: problem.ownerId),
         'geoscope': fs.Value(stringValue: problem.geoscope),
         if (problem.lang != null) 'lang': fs.Value(stringValue: problem.lang),
@@ -334,6 +340,7 @@ class Db {
     return fs.Document(
       fields: {
         'description': fs.Value(stringValue: translation.description),
+        'goal': fs.Value(stringValue: translation.goal),
       },
     );
   }
@@ -342,6 +349,7 @@ class Db {
     return fs.Document(
       fields: {
         'description': fs.Value(stringValue: revision.description),
+        'goal': fs.Value(stringValue: revision.goal),
         'version': fs.Value(integerValue: '${revision.version}'),
         'archivedAt': fs.Value(
           timestampValue: revision.archivedAt.toIso8601String(),

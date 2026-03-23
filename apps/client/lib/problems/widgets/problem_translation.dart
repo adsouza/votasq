@@ -18,6 +18,7 @@ class ProblemTranslation extends StatefulWidget {
     required this.problemId,
     required this.originalDescription,
     required this.child,
+    this.originalGoal = '',
     this.lang,
     super.key,
   });
@@ -27,6 +28,9 @@ class ProblemTranslation extends StatefulWidget {
 
   /// The original description text, used for on-device translation.
   final String originalDescription;
+
+  /// The original goal text, used for on-device translation.
+  final String originalGoal;
 
   /// BCP-47 language code the problem was written in, or `null` if unknown.
   final String? lang;
@@ -74,7 +78,8 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.problemId != widget.problemId ||
         oldWidget.lang != widget.lang ||
-        oldWidget.originalDescription != widget.originalDescription) {
+        oldWidget.originalDescription != widget.originalDescription ||
+        oldWidget.originalGoal != widget.originalGoal) {
       _translation = null;
       _translating = false;
       _cacheChecked = false;
@@ -151,7 +156,18 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
         sourceLanguage: widget.lang,
       );
       if (onDevice != null) {
-        final translated = TranslatedProblem(description: onDevice);
+        String? onDeviceGoal;
+        if (widget.originalGoal.isNotEmpty) {
+          onDeviceGoal = await translationRepo.translate(
+            text: widget.originalGoal,
+            targetLanguage: userLanguage,
+            sourceLanguage: widget.lang,
+          );
+        }
+        final translated = TranslatedProblem(
+          description: onDevice,
+          goal: onDeviceGoal ?? '',
+        );
         if (mounted) setState(() => _translation = translated);
         // Cache in background so other clients benefit.
         unawaited(
@@ -230,8 +246,10 @@ class _ProblemTranslationScope extends InheritedWidget {
 ///
 /// Reads the translation state from the nearest [ProblemTranslation] ancestor.
 /// When a translation is available, shows the original with strikethrough and
-/// the translated text below. When translation is needed but not yet started,
-/// shows a translate icon inline.
+/// the translated text below. Otherwise shows the original text as-is.
+///
+/// Use [ProblemTranslateButton] to show a single translate trigger for the
+/// entire problem rather than per-field icons.
 class TranslatedField extends StatelessWidget {
   const TranslatedField(
     this.originalText, {
@@ -280,36 +298,45 @@ class TranslatedField extends StatelessWidget {
       );
     }
 
-    // Translation needed but not started or in progress — show icon/spinner.
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: originalText, style: style),
-          const TextSpan(text: ' '),
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child:
-                (scope.isTranslating ||
-                    scope.isCheckingCache ||
-                    scope.autoTranslate)
-                ? SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.primary,
-                    ),
-                  )
-                : GestureDetector(
-                    onTap: scope.translate,
-                    child: Icon(
-                      Icons.translate,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-          ),
-        ],
+    // Translation not yet available — show original text only.
+    return Text(originalText, style: style);
+  }
+}
+
+/// A single translate button for an entire problem.
+///
+/// Reads the [ProblemTranslation] scope and shows a translate icon (tap to
+/// trigger), a spinner (while translating / checking cache), or nothing
+/// (when translation is complete or not needed).
+class ProblemTranslateButton extends StatelessWidget {
+  const ProblemTranslateButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = ProblemTranslation.of(context);
+    final theme = Theme.of(context);
+
+    if (scope == null || !scope.needsTranslation || scope.translation != null) {
+      return const SizedBox.shrink();
+    }
+
+    if (scope.isTranslating || scope.isCheckingCache || scope.autoTranslate) {
+      return SizedBox(
+        width: 14,
+        height: 14,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: scope.translate,
+      child: Icon(
+        Icons.translate,
+        size: 16,
+        color: theme.colorScheme.primary,
       ),
     );
   }

@@ -65,14 +65,18 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     required String ownerId,
     required String userLanguage,
     String? geoscope,
+    String goal = '',
   }) async {
     try {
       await _repo.addProblem(
         description: description,
+        goal: goal,
         ownerId: ownerId,
         geoscope: geoscope ?? state.geoscope,
         userLanguage: userLanguage,
       );
+    } on LanguageMismatchException {
+      rethrow;
     } on Exception catch (e, st) {
       log('addProblem failed: $e', stackTrace: st);
     }
@@ -91,6 +95,8 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }) async {
     try {
       await _repo.updateProblem(problem, userLanguage: userLanguage);
+    } on LanguageMismatchException {
+      rethrow;
     } on Exception catch (e, st) {
       log('updateProblem failed: $e', stackTrace: st);
     }

@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Перекладати текст автоматично",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "addGoalHint": "Який результат вирішить це?",
+    "@addGoalHint": {
+        "description": "Текст підказки для поля додавання мети"
+    },
+    "editGoalHint": "Редагувати бажаний результат",
+    "@editGoalHint": {
+        "description": "Текст підказки для поля редагування мети"
+    },
+    "goalLabel": "Мета",
+    "@goalLabel": {
+        "description": "Мітка поля мети"
+    },
+    "languageMismatchError": "Невідповідність мов: опис, здається, написаний мовою {descLang}, а мета — мовою {goalLang}. Обидва поля мають бути однією мовою.",
+    "@languageMismatchError": {
+        "description": "Повідомлення про помилку, коли опис і мета написані різними мовами",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

@@ -30,6 +30,21 @@ class Translator {
     required String text,
     required String targetLanguage,
   }) async {
+    final result = await translateWithDetection(
+      text: text,
+      targetLanguage: targetLanguage,
+    );
+    return result.translatedText;
+  }
+
+  /// Translates [text] into [targetLanguage] and also returns the detected
+  /// source language. Useful when you need both translation and detection in
+  /// a single API call.
+  Future<({String translatedText, String detectedLanguage})>
+  translateWithDetection({
+    required String text,
+    required String targetLanguage,
+  }) async {
     final response = await _api.projects.locations.translateText(
       t.TranslateTextRequest(
         contents: [text],
@@ -38,7 +53,11 @@ class Translator {
       ),
       _parent,
     );
-    return response.translations!.first.translatedText!;
+    final translation = response.translations!.first;
+    return (
+      translatedText: translation.translatedText!,
+      detectedLanguage: translation.detectedLanguageCode!,
+    );
   }
 
   /// Detects the language of [text]. Returns a BCP-47 code (e.g. `"hi"`).

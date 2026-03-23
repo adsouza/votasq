@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "Metni otomatik çevir",
     "@autoTranslateMenuItem": {
         "description": "Yabancı dillerdeki sorunların otomatik cihaz üzerinde çevirisini açmak için menü öğesi etiketi"
+    },
+    "addGoalHint": "Hangi sonuç bunu çözer?",
+    "@addGoalHint": {
+        "description": "Hedef ekleme metin alanı için ipucu metni"
+    },
+    "editGoalHint": "İstenen sonucu düzenle",
+    "@editGoalHint": {
+        "description": "Hedef düzenleme metin alanı için ipucu metni"
+    },
+    "goalLabel": "Hedef",
+    "@goalLabel": {
+        "description": "Hedef alanı etiketi"
+    },
+    "languageMismatchError": "Dil uyuşmazlığı: açıklama {descLang} dilinde, hedef ise {goalLang} dilinde görünüyor. Her iki alan da aynı dilde olmalıdır.",
+    "@languageMismatchError": {
+        "description": "Açıklama ve hedef farklı dillerde algılandığında gösterilen hata mesajı",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

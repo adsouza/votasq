@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:client/services/language_detection_service.dart';
@@ -5,6 +6,26 @@ import 'package:client/services/translation_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared/shared.dart';
 import 'package:uuid/uuid.dart';
+
+/// Thrown when the description and goal are detected as different languages.
+class LanguageMismatchException implements Exception {
+  const LanguageMismatchException({
+    required this.descriptionLang,
+    required this.goalLang,
+  });
+
+  final String descriptionLang;
+  final String goalLang;
+}
+
+/// Result of language detection. When the server fallback is used, English
+/// translations come back for free and can be cached.
+/// Result of language detection. When the server fallback is used, English
+/// translations come back for free and can be cached.
+typedef DetectionResult = ({
+  String lang,
+  TranslatedProblem? englishTranslation,
+});
 
 /// Direct Firestore access layer, replacing the HTTP API service.
 ///
@@ -95,16 +116,22 @@ class FirestoreRepository {
     required String ownerId,
     required String geoscope,
     required String userLanguage,
+    String goal = '',
   }) async {
-    final lang = await _detectLang(description, userLanguage);
+    final result = await _detectAndValidateLang(
+      description,
+      goal,
+      userLanguage,
+    );
     final id = const Uuid().v4();
     final now = DateTime.now().toUtc();
     const version = 1;
     final problemData = {
       'description': description,
+      'goal': goal,
       'ownerId': ownerId,
       'geoscope': geoscope,
-      'lang': lang,
+      'lang': result.lang,
       'votes': 1,
       'solved': false,
       'version': version,
@@ -113,6 +140,7 @@ class FirestoreRepository {
     };
     final revisionData = {
       'description': description,
+      'goal': goal,
       'version': version,
       'archivedAt': now,
     };
@@ -124,6 +152,12 @@ class FirestoreRepository {
         revisionData,
       );
     await batch.commit();
+
+    // Cache the free English translation if the server fallback was used.
+    final english = result.englishTranslation;
+    if (english != null) {
+      unawaited(saveTranslation(id, 'en', english));
+    }
   }
 
   /// Update a problem's fields.
@@ -135,14 +169,20 @@ class FirestoreRepository {
     Problem problem, {
     String? userLanguage,
   }) async {
-    final lang = userLanguage != null
-        ? await _detectLang(problem.description, userLanguage)
-        : problem.lang;
+    final result = userLanguage != null
+        ? await _detectAndValidateLang(
+            problem.description,
+            problem.goal,
+            userLanguage,
+          )
+        : null;
+    final lang = result?.lang ?? problem.lang;
 
-    // Invalidate cached translations when the description changes.
+    // Invalidate cached translations when the text changes.
     final existing = await _problemsRef.doc(problem.id).get();
     if (existing.exists &&
-        existing.data()?['description'] != problem.description) {
+        (existing.data()?['description'] != problem.description ||
+            existing.data()?['goal'] != problem.goal)) {
       await _deleteTranslations(problem.id);
     }
 
@@ -150,6 +190,7 @@ class FirestoreRepository {
     final newVersion = problem.version + 1;
     final mainData = {
       'description': problem.description,
+      'goal': problem.goal,
       'geoscope': problem.geoscope,
       'lang': ?lang,
       'votes': problem.votes,
@@ -160,6 +201,7 @@ class FirestoreRepository {
     };
     final revisionData = {
       'description': problem.description,
+      'goal': problem.goal,
       'version': newVersion,
       'archivedAt': now,
     };
@@ -171,33 +213,133 @@ class FirestoreRepository {
         revisionData,
       );
     await batch.commit();
+
+    // Cache the free English translation if the server fallback was used.
+    final english = result?.englishTranslation;
+    if (english != null) {
+      unawaited(saveTranslation(problem.id, 'en', english));
+    }
   }
 
-  /// Detects the language of [text]. Returns [userLanguage] if the text
-  /// matches it, otherwise identifies the actual language via on-device
-  /// detection first, falling back to Cloud Translation if needed.
-  Future<String> _detectLang(String text, String userLanguage) async {
-    final foreign = await _langService.needsTranslation(
-      text: text,
+  /// Detects the language of [description] and [goal], validating that both
+  /// fields are in the same language. Throws [LanguageMismatchException] if
+  /// they differ.
+  ///
+  /// When the server fallback is used, returns English translations obtained
+  /// for free alongside the detected language.
+  Future<DetectionResult> _detectAndValidateLang(
+    String description,
+    String goal,
+    String userLanguage,
+  ) async {
+    final descForeign = await _langService.needsTranslation(
+      text: description,
       userLanguage: userLanguage,
     );
-    if (!foreign) return userLanguage;
 
-    // Try on-device detection (ML Kit or trigrams).
-    final detected = await _langService.detectLanguage(text);
-    if (detected != null) return detected;
+    // No goal — single-field detection only.
+    if (goal.isEmpty) {
+      return _detectSingleLang(description, descForeign, userLanguage);
+    }
 
-    // Fall back to Cloud Translation's language detection.
+    final goalForeign = await _langService.needsTranslation(
+      text: goal,
+      userLanguage: userLanguage,
+    );
+
+    // Both match the user's language.
+    if (!descForeign && !goalForeign) {
+      return (lang: userLanguage, englishTranslation: null);
+    }
+
+    // One matches, one doesn't — mismatch.
+    if (descForeign != goalForeign) {
+      final descLang = descForeign
+          ? await _langService.detectLanguage(description) ?? '?'
+          : userLanguage;
+      final goalLang = goalForeign
+          ? await _langService.detectLanguage(goal) ?? '?'
+          : userLanguage;
+      throw LanguageMismatchException(
+        descriptionLang: descLang,
+        goalLang: goalLang,
+      );
+    }
+
+    // Both foreign — detect each on-device and check they agree.
+    final descLang = await _langService.detectLanguage(description);
+    final goalLang = await _langService.detectLanguage(goal);
+
+    if (descLang != null && goalLang != null && descLang != goalLang) {
+      throw LanguageMismatchException(
+        descriptionLang: descLang,
+        goalLang: goalLang,
+      );
+    }
+
+    // Use whichever was detected on-device.
+    final detected = descLang ?? goalLang;
+    if (detected != null) {
+      return (lang: detected, englishTranslation: null);
+    }
+
+    // Fall back to server: translate both fields to English. This gives us
+    // language detection for free plus cacheable English translations.
     final repo = _translationRepo;
     if (repo != null) {
       try {
-        return await repo.detectLanguageViaServer(text);
+        final descResult = await repo.translateToEnglish(description);
+        final goalResult = await repo.translateToEnglish(goal);
+        if (descResult.detectedLanguage != goalResult.detectedLanguage) {
+          throw LanguageMismatchException(
+            descriptionLang: descResult.detectedLanguage,
+            goalLang: goalResult.detectedLanguage,
+          );
+        }
+        return (
+          lang: descResult.detectedLanguage,
+          englishTranslation: TranslatedProblem(
+            description: descResult.translation,
+            goal: goalResult.translation,
+          ),
+        );
+      } on LanguageMismatchException {
+        rethrow;
       } on Exception catch (e) {
         log('Server language detection failed: $e');
       }
     }
 
-    return 'und';
+    return (lang: 'und', englishTranslation: null);
+  }
+
+  /// Single-field language detection (no cross-field validation needed).
+  Future<DetectionResult> _detectSingleLang(
+    String text,
+    bool isForeign,
+    String userLanguage,
+  ) async {
+    if (!isForeign) return (lang: userLanguage, englishTranslation: null);
+
+    final detected = await _langService.detectLanguage(text);
+    if (detected != null) return (lang: detected, englishTranslation: null);
+
+    final repo = _translationRepo;
+    if (repo != null) {
+      try {
+        final result = await repo.translateToEnglish(text);
+        return (
+          lang: result.detectedLanguage,
+          englishTranslation: TranslatedProblem(
+            description: result.translation,
+          ),
+        );
+      } on Exception catch (e) {
+        log('Server language detection failed: $e');
+      }
+    }
+
+    return (lang: 'und', englishTranslation: null);
   }
 
   /// Fetch a cached [TranslatedProblem] for the given problem and language.
@@ -214,7 +356,10 @@ class FirestoreRepository {
     if (!doc.exists) return null;
     final data = doc.data();
     if (data == null) return null;
-    return TranslatedProblem(description: data['description'] as String);
+    return TranslatedProblem(
+      description: data['description'] as String,
+      goal: data['goal'] as String? ?? '',
+    );
   }
 
   /// Cache a [TranslatedProblem] for the given problem and language.
@@ -227,7 +372,10 @@ class FirestoreRepository {
         .doc(problemId)
         .collection('translations')
         .doc(langCode)
-        .set({'description': translation.description});
+        .set({
+          'description': translation.description,
+          'goal': translation.goal,
+        });
   }
 
   /// Delete all cached translations for a problem.
@@ -279,6 +427,7 @@ class FirestoreRepository {
     return Problem(
       id: doc.id,
       description: data['description'] as String,
+      goal: data['goal'] as String? ?? '',
       ownerId: data['ownerId'] as String,
       geoscope: data['geoscope'] as String? ?? '/',
       lang: data['lang'] as String?,

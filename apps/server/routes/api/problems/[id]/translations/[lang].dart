@@ -30,11 +30,20 @@ Future<Response> _get(
   final translator = await context.read<Future<Translator>>();
   try {
     final problem = await db.getProblem(id);
-    final translated = await translator.translate(
+    final translatedDesc = await translator.translate(
       text: problem.description,
       targetLanguage: lang,
     );
-    final translatedProblem = TranslatedProblem(description: translated);
+    final translatedGoal = problem.goal.isNotEmpty
+        ? await translator.translate(
+            text: problem.goal,
+            targetLanguage: lang,
+          )
+        : '';
+    final translatedProblem = TranslatedProblem(
+      description: translatedDesc,
+      goal: translatedGoal,
+    );
     await db.saveTranslation(id, lang, translatedProblem);
     return Response.json(body: translatedProblem.toJson());
   } on Exception {

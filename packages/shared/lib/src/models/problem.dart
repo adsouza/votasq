@@ -13,6 +13,7 @@ abstract class Problem with _$Problem {
     required DateTime createdAt,
     required DateTime lastUpdatedAt,
     required String ownerId,
+    @Default('') String goal,
     @Default('/') String geoscope,
     String? lang,
     @Default(1) int votes,

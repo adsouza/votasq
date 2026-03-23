@@ -9,7 +9,8 @@ import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/feedback_repository.dart';
-import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/firestore_repository.dart'
+    show FirestoreRepository, LanguageMismatchException;
 import 'package:client/services/translation_repository.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -55,13 +56,19 @@ class ProblemsView extends StatefulWidget {
 class _ProblemsViewState extends State<ProblemsView> {
   final _scrollController = ScrollController();
   final _addController = TextEditingController();
+  final _addGoalController = TextEditingController();
   final _editController = TextEditingController();
+  final _editGoalController = TextEditingController();
+  final _addFocusNode = FocusNode();
+  final _addRowFocusNode = FocusNode();
   final _editFocusNode = FocusNode();
   static final _editTapRegionGroupId = Object();
   String? _editingProblemId;
   String? _addProblemGeoscope;
   String? _editProblemGeoscope;
   bool _showOnlyOwned = false;
+  bool _addGoalVisible = false;
+  bool _submitting = false;
 
   @override
   void initState() {
@@ -75,7 +82,11 @@ class _ProblemsViewState extends State<ProblemsView> {
       ..removeListener(_onScroll)
       ..dispose();
     _addController.dispose();
+    _addGoalController.dispose();
+    _addFocusNode.dispose();
+    _addRowFocusNode.dispose();
     _editController.dispose();
+    _editGoalController.dispose();
     _editFocusNode.dispose();
     super.dispose();
   }
@@ -86,24 +97,66 @@ class _ProblemsViewState extends State<ProblemsView> {
     }
   }
 
-  static bool _hasEnoughWords(String text) => wordsCount(text.trim()) >= 3;
+  static bool _hasEnoughWords(String text) =>
+      text.length >= 20 && wordsCount(text.trim()) >= 3;
 
-  void _submitProblem() {
-    if (!_hasEnoughWords(_addController.text)) return;
+  Future<void> _submitProblem() async {
+    if (_submitting || !_hasEnoughWords(_addController.text)) return;
     final text = _addController.text.trim();
+    final goalText = _addGoalController.text.trim();
     final userId = context.read<AuthCubit>().state.userId!;
     final userLang = Localizations.localeOf(context).languageCode;
-    unawaited(
-      context.read<ProblemsCubit>().addProblem(
+
+    setState(() => _submitting = true);
+    try {
+      await context.read<ProblemsCubit>().addProblem(
         description: text,
+        goal: goalText,
         ownerId: userId,
         userLanguage: userLang,
         geoscope: _addProblemGeoscope,
-      ),
-    );
-    _addController.clear();
-    setState(() {
-      _addProblemGeoscope = null;
+      );
+      // Success — clear fields.
+      _addController.clear();
+      _addGoalController.clear();
+      setState(() {
+        _addProblemGeoscope = null;
+        _addGoalVisible = false;
+      });
+    } on LanguageMismatchException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.languageMismatchError(
+                e.descriptionLang,
+                e.goalLang,
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  void _onAddDescriptionChanged() {
+    _updateAddGoalVisibility();
+  }
+
+  /// Show the goal field when the description has enough words and anything
+  /// in the add-problem row is focused. We defer the check by one frame so
+  /// that focus has settled on the new target when tabbing between fields.
+  void _updateAddGoalVisibility() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final hasWords = _hasEnoughWords(_addController.text);
+      final rowHasFocus = _addRowFocusNode.hasFocus;
+      final shouldShow = hasWords && rowHasFocus;
+      if (shouldShow != _addGoalVisible) {
+        setState(() => _addGoalVisible = shouldShow);
+      }
     });
   }
 
@@ -111,59 +164,103 @@ class _ProblemsViewState extends State<ProblemsView> {
     final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: _addController,
-              builder: (context, value, child) {
-                return TextField(
-                  controller: _addController,
-                  maxLength: 80,
-                  decoration: InputDecoration(
-                    hintText: l10n.addProblemHint,
-                  ),
-                  onSubmitted: _hasEnoughWords(_addController.text)
-                      ? (_) => _submitProblem()
-                      : null,
-                );
-              },
-            ),
+      child: KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: (event) {
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.escape) {
+            _addGoalController.clear();
+            _addFocusNode.unfocus();
+            setState(() => _addGoalVisible = false);
+          }
+        },
+        child: Focus(
+          focusNode: _addRowFocusNode,
+          onFocusChange: (_) => _updateAddGoalVisibility(),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _addController,
+                  builder: (context, value, child) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _addController,
+                          focusNode: _addFocusNode,
+                          readOnly: _submitting,
+                          maxLength: 80,
+                          decoration: InputDecoration(
+                            hintText: l10n.addProblemHint,
+                          ),
+                          onChanged: (_) => _onAddDescriptionChanged(),
+                          onSubmitted:
+                              _hasEnoughWords(_addController.text) &&
+                                  !_submitting
+                              ? (_) => _submitProblem()
+                              : null,
+                        ),
+                        if (_addGoalVisible)
+                          TextField(
+                            controller: _addGoalController,
+                            readOnly: _submitting,
+                            maxLength: 80,
+                            decoration: InputDecoration(
+                              hintText: l10n.addGoalHint,
+                            ),
+                            onSubmitted:
+                                _hasEnoughWords(_addController.text) &&
+                                    !_submitting
+                                ? (_) => _submitProblem()
+                                : null,
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _addController,
+                builder: (context, value, child) {
+                  final hasWords = _hasEnoughWords(_addController.text);
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ..._buildGeoscopeDropdown(
+                        geoscope: context
+                            .read<GeoscopeCubit>()
+                            .state
+                            .selectedGeoscope,
+                        currentValue:
+                            _addProblemGeoscope ??
+                            context
+                                .read<GeoscopeCubit>()
+                                .state
+                                .selectedGeoscope,
+                        onChanged: (value) => setState(() {
+                          _addProblemGeoscope = value;
+                        }),
+                        enabled: hasWords,
+                      ),
+                      const SizedBox(width: 8),
+                      Tooltip(
+                        message: l10n.addProblemTooltip,
+                        child: ElevatedButton(
+                          onPressed: hasWords && !_submitting
+                              ? _submitProblem
+                              : null,
+                          child: Text(l10n.addProblemButton),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: _addController,
-            builder: (context, value, child) {
-              final hasWords = _hasEnoughWords(_addController.text);
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ..._buildGeoscopeDropdown(
-                    geoscope: context
-                        .read<GeoscopeCubit>()
-                        .state
-                        .selectedGeoscope,
-                    currentValue:
-                        _addProblemGeoscope ??
-                        context.read<GeoscopeCubit>().state.selectedGeoscope,
-                    onChanged: (value) => setState(() {
-                      _addProblemGeoscope = value;
-                    }),
-                    enabled: hasWords,
-                  ),
-                  const SizedBox(width: 8),
-                  Tooltip(
-                    message: l10n.addProblemTooltip,
-                    child: ElevatedButton(
-                      onPressed: hasWords ? _submitProblem : null,
-                      child: Text(l10n.addProblemButton),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -236,6 +333,7 @@ class _ProblemsViewState extends State<ProblemsView> {
       _editingProblemId = problem.id;
       _editProblemGeoscope = problem.geoscope;
       _editController.text = problem.description;
+      _editGoalController.text = problem.goal;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _editFocusNode.requestFocus();
@@ -249,22 +347,43 @@ class _ProblemsViewState extends State<ProblemsView> {
     });
   }
 
-  void _submitEdit(Problem problem) {
-    if (!_hasEnoughWords(_editController.text)) return;
+  Future<void> _submitEdit(Problem problem) async {
+    if (_submitting || !_hasEnoughWords(_editController.text)) return;
     final newDescription = _editController.text.trim();
+    final newGoal = _editGoalController.text.trim();
     final newGeoscope = _editProblemGeoscope ?? problem.geoscope;
     if (newDescription != problem.description ||
+        newGoal != problem.goal ||
         newGeoscope != problem.geoscope) {
       final userLang = Localizations.localeOf(context).languageCode;
-      unawaited(
-        context.read<ProblemsCubit>().updateProblem(
+      setState(() => _submitting = true);
+      try {
+        await context.read<ProblemsCubit>().updateProblem(
           problem.copyWith(
             description: newDescription,
+            goal: newGoal,
             geoscope: newGeoscope,
           ),
           userLanguage: userLang,
-        ),
-      );
+        );
+      } on LanguageMismatchException catch (e) {
+        if (mounted) {
+          setState(() => _submitting = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                context.l10n.languageMismatchError(
+                  e.descriptionLang,
+                  e.goalLang,
+                ),
+              ),
+            ),
+          );
+        }
+        return;
+      } finally {
+        if (mounted && _submitting) setState(() => _submitting = false);
+      }
     }
     _cancelEdit();
   }
@@ -313,42 +432,59 @@ class _ProblemsViewState extends State<ProblemsView> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     return ListTile(
-      title: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 6,
-        children: [
-          GestureDetector(
-            onDoubleTap: () => context.go('/problems/${problem.id}'),
-            child: ProblemTranslation(
-              problemId: problem.id,
-              lang: problem.lang,
-              originalDescription: problem.description,
-              child: TranslatedField(
-                problem.description,
-                fieldSelector: (tp) => tp.description,
+      title: ProblemTranslation(
+        problemId: problem.id,
+        lang: problem.lang,
+        originalDescription: problem.description,
+        originalGoal: problem.goal,
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          children: [
+            GestureDetector(
+              onDoubleTap: () => context.go('/problems/${problem.id}'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TranslatedField(
+                    problem.description,
+                    fieldSelector: (tp) => tp.description,
+                  ),
+                  if (problem.goal.isNotEmpty)
+                    TranslatedField(
+                      problem.goal,
+                      fieldSelector: (tp) => tp.goal,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
-          if (problem.geoscope != '/')
+            if (problem.geoscope != '/')
+              Chip(
+                label: Text(
+                  problem.geoscope.split('/').last,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                backgroundColor: theme.colorScheme.tertiaryContainer,
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             Chip(
               label: Text(
-                problem.geoscope.split('/').last,
+                '${problem.votes}',
                 style: const TextStyle(fontSize: 12),
               ),
-              backgroundColor: theme.colorScheme.tertiaryContainer,
+              backgroundColor: theme.colorScheme.secondaryContainer,
               visualDensity: VisualDensity.compact,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-          Chip(
-            label: Text(
-              '${problem.votes}',
-              style: const TextStyle(fontSize: 12),
-            ),
-            backgroundColor: theme.colorScheme.secondaryContainer,
-            visualDensity: VisualDensity.compact,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ],
+            const ProblemTranslateButton(),
+          ],
+        ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -403,16 +539,37 @@ class _ProblemsViewState extends State<ProblemsView> {
                 child: ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _editController,
                   builder: (context, value, child) {
-                    return TextField(
-                      controller: _editController,
-                      focusNode: _editFocusNode,
-                      maxLength: 80,
-                      decoration: InputDecoration(
-                        hintText: l10n.editProblemHint,
-                      ),
-                      onSubmitted: _hasEnoughWords(_editController.text)
-                          ? (_) => _submitEdit(problem)
-                          : null,
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _editController,
+                          focusNode: _editFocusNode,
+                          readOnly: _submitting,
+                          maxLength: 80,
+                          decoration: InputDecoration(
+                            hintText: l10n.editProblemHint,
+                          ),
+                          onSubmitted:
+                              _hasEnoughWords(_editController.text) &&
+                                  !_submitting
+                              ? (_) => _submitEdit(problem)
+                              : null,
+                        ),
+                        TextField(
+                          controller: _editGoalController,
+                          readOnly: _submitting,
+                          maxLength: 80,
+                          decoration: InputDecoration(
+                            hintText: l10n.editGoalHint,
+                          ),
+                          onSubmitted:
+                              _hasEnoughWords(_editController.text) &&
+                                  !_submitting
+                              ? (_) => _submitEdit(problem)
+                              : null,
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -437,7 +594,9 @@ class _ProblemsViewState extends State<ProblemsView> {
                       ),
                       const SizedBox(width: 8),
                       TextButton(
-                        onPressed: hasWords ? () => _submitEdit(problem) : null,
+                        onPressed: hasWords && !_submitting
+                            ? () => _submitEdit(problem)
+                            : null,
                         child: const Text('✓'),
                       ),
                     ],

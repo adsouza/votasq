@@ -107,14 +107,15 @@ flutter analyze apps packages
 
 ## REST API
 
-| Method | Endpoint                               | Description                                                  |
-|--------|----------------------------------------|--------------------------------------------------------------|
-| `GET`  | `/`                                    | Serves the Flutter web client                                |
-| `GET`  | `/problems?pageSize=N&pageToken=TOKEN` | List problems (paginated, sorted by votes descending)        |
-| `POST` | `/problems`                            | Create a problem — send `{"description": "..."}`             |
-| `GET`  | `/problems/:id`                        | Get a single problem                                         |
-| `PUT`  | `/problems/:id`                        | Update a problem — send `{"description": "...", "votes": N}` |
-| `GET`  | `/problems/:id/translations/:lang`     | Get cached translation (creates via Cloud Translate on miss) |
+| Method | Endpoint                               | Description                                                          |
+|--------|----------------------------------------|----------------------------------------------------------------------|
+| `GET`  | `/`                                    | Serves the Flutter web client                                        |
+| `GET`  | `/problems?pageSize=N&pageToken=TOKEN` | List problems (paginated, sorted by votes descending)                |
+| `POST` | `/problems`                            | Create a problem — send `{"description": "...", "goal": "..."}`      |
+| `GET`  | `/problems/:id`                        | Get a single problem                                                 |
+| `PUT`  | `/problems/:id`                        | Update a problem — send `{"description": "...", "goal": "...", ...}` |
+| `GET`  | `/problems/:id/translations/:lang`     | Get cached translation (creates via Cloud Translate on miss)         |
+| `POST` | `/translate`                           | Translate text to English; returns `{detectedLanguage, translation}` |
 
 ## Build and Deploy
 

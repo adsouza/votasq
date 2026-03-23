@@ -11,6 +11,7 @@ abstract class ProblemRevision with _$ProblemRevision {
     required String description,
     required int version,
     required DateTime archivedAt,
+    @Default('') String goal,
     int? restoredFrom,
   }) = _ProblemRevision;
 

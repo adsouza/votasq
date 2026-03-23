@@ -95,5 +95,25 @@
     "autoTranslateMenuItem": "ترجمة النص تلقائيًا",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "addGoalHint": "ما النتيجة التي تحل هذا؟",
+    "@addGoalHint": {
+        "description": "نص تلميحي لحقل إضافة الهدف"
+    },
+    "editGoalHint": "تعديل النتيجة المطلوبة",
+    "@editGoalHint": {
+        "description": "نص تلميحي لحقل تعديل الهدف"
+    },
+    "goalLabel": "الهدف",
+    "@goalLabel": {
+        "description": "تسمية حقل الهدف"
+    },
+    "languageMismatchError": "عدم تطابق اللغة: يبدو أن الوصف بلغة {descLang} لكن الهدف بلغة {goalLang}. يجب أن يكون كلا الحقلين بنفس اللغة.",
+    "@languageMismatchError": {
+        "description": "رسالة خطأ عند اكتشاف أن الوصف والهدف بلغات مختلفة",
+        "placeholders": {
+            "descLang": { "type": "String" },
+            "goalLang": { "type": "String" }
+        }
     }
 }

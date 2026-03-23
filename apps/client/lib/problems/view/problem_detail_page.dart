@@ -5,7 +5,8 @@ import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
-import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/firestore_repository.dart'
+    show FirestoreRepository, LanguageMismatchException;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +25,7 @@ class ProblemDetailPage extends StatefulWidget {
 
 class _ProblemDetailPageState extends State<ProblemDetailPage> {
   final _controller = TextEditingController();
+  final _goalController = TextEditingController();
   Problem? _problem;
   bool _loading = true;
   String? _error;
@@ -38,6 +40,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _goalController.dispose();
     super.dispose();
   }
 
@@ -57,6 +60,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       setState(() {
         _problem = problem;
         _controller.text = problem.description;
+        _goalController.text = problem.goal;
         _geoscope = problem.geoscope;
         _loading = false;
       });
@@ -71,24 +75,42 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
-  static bool _hasEnoughWords(String text) => wordsCount(text.trim()) >= 3;
+  static bool _hasEnoughWords(String text) =>
+      text.length >= 20 && wordsCount(text.trim()) >= 3;
 
   Future<void> _save() async {
     final problem = _problem;
     if (problem == null || !_hasEnoughWords(_controller.text)) return;
     final newDescription = _controller.text.trim();
+    final newGoal = _goalController.text.trim();
     final newGeoscope = _geoscope ?? problem.geoscope;
     if (newDescription != problem.description ||
+        newGoal != problem.goal ||
         newGeoscope != problem.geoscope) {
       try {
         final userLang = Localizations.localeOf(context).languageCode;
         await context.read<FirestoreRepository>().updateProblem(
           problem.copyWith(
             description: newDescription,
+            goal: newGoal,
             geoscope: newGeoscope,
           ),
           userLanguage: userLang,
         );
+      } on LanguageMismatchException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                context.l10n.languageMismatchError(
+                  e.descriptionLang,
+                  e.goalLang,
+                ),
+              ),
+            ),
+          );
+        }
+        return;
       } on Exception catch (e) {
         log('Failed to save problem: $e');
       }
@@ -161,26 +183,45 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             problemId: problem.id,
             lang: problem.lang,
             originalDescription: problem.description,
-            child: TranslatedField(
-              problem.description,
-              fieldSelector: (tp) => tp.description,
-              style: theme.textTheme.headlineSmall,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            children: [
-              if (problem.geoscope != '/')
-                Chip(
-                  label: Text(_geoscopeLabel(problem.geoscope)),
-                  backgroundColor: theme.colorScheme.tertiaryContainer,
+            originalGoal: problem.goal,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TranslatedField(
+                  problem.description,
+                  fieldSelector: (tp) => tp.description,
+                  style: theme.textTheme.headlineSmall,
                 ),
-              Chip(
-                label: Text('${problem.votes}'),
-                backgroundColor: theme.colorScheme.secondaryContainer,
-              ),
-            ],
+                if (problem.goal.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  TranslatedField(
+                    problem.goal,
+                    fieldSelector: (tp) => tp.goal,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (problem.geoscope != '/')
+                      Chip(
+                        label: Text(_geoscopeLabel(problem.geoscope)),
+                        backgroundColor: theme.colorScheme.tertiaryContainer,
+                      ),
+                    Chip(
+                      label: Text('${problem.votes}'),
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                    ),
+                    const ProblemTranslateButton(),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           FilledButton.tonal(
@@ -207,6 +248,22 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 maxLength: 80,
                 decoration: InputDecoration(
                   hintText: l10n.editProblemHint,
+                ),
+                onSubmitted: _hasEnoughWords(value.text)
+                    ? (_) => _save()
+                    : null,
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _controller,
+            builder: (context, value, child) {
+              return TextField(
+                controller: _goalController,
+                maxLength: 80,
+                decoration: InputDecoration(
+                  hintText: l10n.editGoalHint,
                 ),
                 onSubmitted: _hasEnoughWords(value.text)
                     ? (_) => _save()

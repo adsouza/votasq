@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TranslatedProblem {
 
- String get description;
+ String get description; String get goal;
 /// Create a copy of TranslatedProblem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TranslatedProblemCopyWith<TranslatedProblem> get copyWith => _$TranslatedProble
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TranslatedProblem&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TranslatedProblem&&(identical(other.description, description) || other.description == description)&&(identical(other.goal, goal) || other.goal == goal));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,description);
+int get hashCode => Object.hash(runtimeType,description,goal);
 
 @override
 String toString() {
-  return 'TranslatedProblem(description: $description)';
+  return 'TranslatedProblem(description: $description, goal: $goal)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TranslatedProblemCopyWith<$Res>  {
   factory $TranslatedProblemCopyWith(TranslatedProblem value, $Res Function(TranslatedProblem) _then) = _$TranslatedProblemCopyWithImpl;
 @useResult
 $Res call({
- String description
+ String description, String goal
 });
 
 
@@ -65,9 +65,10 @@ class _$TranslatedProblemCopyWithImpl<$Res>
 
 /// Create a copy of TranslatedProblem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? description = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? description = null,Object? goal = null,}) {
   return _then(_self.copyWith(
 description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,goal: null == goal ? _self.goal : goal // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String description,  String goal)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TranslatedProblem() when $default != null:
-return $default(_that.description);case _:
+return $default(_that.description,_that.goal);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String description,  String goal)  $default,) {final _that = this;
 switch (_that) {
 case _TranslatedProblem():
-return $default(_that.description);case _:
+return $default(_that.description,_that.goal);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String description,  String goal)?  $default,) {final _that = this;
 switch (_that) {
 case _TranslatedProblem() when $default != null:
-return $default(_that.description);case _:
+return $default(_that.description,_that.goal);case _:
   return null;
 
 }
@@ -209,10 +210,11 @@ return $default(_that.description);case _:
 @JsonSerializable()
 
 class _TranslatedProblem implements TranslatedProblem {
-  const _TranslatedProblem({required this.description});
+  const _TranslatedProblem({required this.description, this.goal = ''});
   factory _TranslatedProblem.fromJson(Map<String, dynamic> json) => _$TranslatedProblemFromJson(json);
 
 @override final  String description;
+@override@JsonKey() final  String goal;
 
 /// Create a copy of TranslatedProblem
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TranslatedProblem&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TranslatedProblem&&(identical(other.description, description) || other.description == description)&&(identical(other.goal, goal) || other.goal == goal));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,description);
+int get hashCode => Object.hash(runtimeType,description,goal);
 
 @override
 String toString() {
-  return 'TranslatedProblem(description: $description)';
+  return 'TranslatedProblem(description: $description, goal: $goal)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$TranslatedProblemCopyWith<$Res> implements $TranslatedPro
   factory _$TranslatedProblemCopyWith(_TranslatedProblem value, $Res Function(_TranslatedProblem) _then) = __$TranslatedProblemCopyWithImpl;
 @override @useResult
 $Res call({
- String description
+ String description, String goal
 });
 
 
@@ -264,9 +266,10 @@ class __$TranslatedProblemCopyWithImpl<$Res>
 
 /// Create a copy of TranslatedProblem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? description = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? description = null,Object? goal = null,}) {
   return _then(_TranslatedProblem(
 description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,goal: null == goal ? _self.goal : goal // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
