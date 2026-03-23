@@ -1,0 +1,99 @@
+{
+    "@@locale": "mr",
+    "problemsAppBarTitle": "आपण एकत्र सोडवू शकतो अशा समस्या",
+    "@problemsAppBarTitle": {
+        "description": "समस्या पृष्ठाच्या अ‍ॅपबारमध्ये दाखवलेला मजकूर"
+    },
+    "signInButton": "साइन इन",
+    "@signInButton": {
+        "description": "साइन इन बटणाचे लेबल"
+    },
+    "signOutButton": "साइन आउट",
+    "@signOutButton": {
+        "description": "साइन आउट बटणाचे टूलटिप"
+    },
+    "addProblemHint": "तुमची स्वतःची समस्या येथे जोडा",
+    "@addProblemHint": {
+        "description": "समस्या जोडण्याच्या मजकूर फील्डसाठी प्लेसहोल्डर मजकूर"
+    },
+    "addProblemButton": "जोडा",
+    "@addProblemButton": {
+        "description": "समस्या जोडण्याच्या बटणाचे लेबल"
+    },
+    "addProblemTooltip": "तुमची समस्या यादीमध्ये समाविष्ट करा",
+    "@addProblemTooltip": {
+        "description": "समस्या जोडण्याच्या बटणाचे टूलटिप"
+    },
+    "editProblemHint": "समस्येचे वर्णन संपादित करा",
+    "@editProblemHint": {
+        "description": "इनलाइन संपादन मजकूर फील्डसाठी प्लेसहोल्डर मजकूर"
+    },
+    "editProblemButton": "ही समस्या संपादित करा",
+    "@editProblemButton": {
+        "description": "समस्या यादी आयटमवरील संपादन बटणाचे टूलटिप"
+    },
+    "flagProblemButton": "या समस्येची गैरवापर म्हणून तक्रार करा",
+    "@flagProblemButton": {
+        "description": "समस्या यादी आयटमवरील तक्रार बटणाचे टूलटिप"
+    },
+    "feedbackButton": "अभिप्राय पाठवा",
+    "@feedbackButton": {
+        "description": "अ‍ॅप बारमधील अभिप्राय बटणाचे टूलटिप"
+    },
+    "feedbackSuccess": "तुमच्या अभिप्रायाबद्दल धन्यवाद!",
+    "@feedbackSuccess": {
+        "description": "यशस्वी अभिप्राय सबमिशननंतर स्नॅकबार संदेश"
+    },
+    "feedbackError": "अभिप्राय पाठवता आला नाही. कृपया पुन्हा प्रयत्न करा.",
+    "@feedbackError": {
+        "description": "अभिप्राय सबमिशन अयशस्वी झाल्यावर स्नॅकबार संदेश"
+    },
+    "geoscopeGlobal": "जागतिक",
+    "@geoscopeGlobal": {
+        "description": "स्थान निवडकर्त्यामधील जागतिक पर्यायाचे लेबल"
+    },
+    "geoscopeChangeMenuItem": "स्थान बदला",
+    "@geoscopeChangeMenuItem": {
+        "description": "स्थान निवडकर्ता उघडण्यासाठी मेनू आयटम लेबल"
+    },
+    "showOnlyOwnedMenuItem": "फक्त माझ्या समस्या दाखवा",
+    "@showOnlyOwnedMenuItem": {
+        "description": "फक्त सध्याच्या वापरकर्त्याच्या समस्या दाखवण्यासाठी मेनू आयटम लेबल"
+    },
+    "problemDetailPageTitle": "समस्या तपशील",
+    "@problemDetailPageTitle": {
+        "description": "समस्या तपशील पृष्ठाच्या अ‍ॅपबारमधील शीर्षक"
+    },
+    "problemNotFound": "समस्या सापडली नाही",
+    "@problemNotFound": {
+        "description": "आयडीने समस्या सापडत नसल्यावर त्रुटी संदेश"
+    },
+    "problemDetailSaveButton": "जतन करा",
+    "@problemDetailSaveButton": {
+        "description": "समस्या तपशील पृष्ठावरील जतन बटणाचे लेबल"
+    },
+    "problemDetailBackButton": "मागे",
+    "@problemDetailBackButton": {
+        "description": "समस्या तपशील पृष्ठावरील मागे बटणाचे लेबल"
+    },
+    "geoscopeLabel": "भौगोलिक व्याप्ती:",
+    "@geoscopeLabel": {
+        "description": "समस्या तपशील पृष्ठावरील भौगोलिक व्याप्ती ड्रॉपडाउनच्या शेजारी लेबल"
+    },
+    "copyProblemLink": "या समस्येची लिंक कॉपी करा",
+    "@copyProblemLink": {
+        "description": "समस्या यादी आयटमवरील लिंक कॉपी बटणाचे टूलटिप"
+    },
+    "problemLinkCopied": "लिंक क्लिपबोर्डवर कॉपी झाली",
+    "@problemLinkCopied": {
+        "description": "समस्येची लिंक कॉपी केल्यानंतर स्नॅकबार संदेश"
+    },
+    "geoscopeDropdownTooltip": "तुमच्या समस्येसाठी भौगोलिक व्याप्ती निवडा",
+    "@geoscopeDropdownTooltip": {
+        "description": "भौगोलिक व्याप्ती ड्रॉपडाउनवर माउस ठेवल्यावर दाखवलेले टूलटिप"
+    },
+    "autoTranslateMenuItem": "मजकूर आपोआप भाषांतर करा",
+    "@autoTranslateMenuItem": {
+        "description": "परदेशी भाषांमधील समस्यांचे स्वयंचलित भाषांतर सुरू करण्यासाठी मेनू आयटम लेबल"
+    }
+}

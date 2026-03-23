@@ -1,0 +1,99 @@
+{
+    "@@locale": "th",
+    "problemsAppBarTitle": "ปัญหาที่เราสามารถแก้ไขร่วมกันได้",
+    "@problemsAppBarTitle": {
+        "description": "ข้อความที่แสดงใน AppBar ของหน้าปัญหา"
+    },
+    "signInButton": "เข้าสู่ระบบ",
+    "@signInButton": {
+        "description": "ป้ายกำกับปุ่มเข้าสู่ระบบ"
+    },
+    "signOutButton": "ออกจากระบบ",
+    "@signOutButton": {
+        "description": "คำแนะนำปุ่มออกจากระบบ"
+    },
+    "addProblemHint": "เพิ่มปัญหาของคุณที่นี่",
+    "@addProblemHint": {
+        "description": "ข้อความตัวอย่างสำหรับช่องเพิ่มปัญหา"
+    },
+    "addProblemButton": "เพิ่ม",
+    "@addProblemButton": {
+        "description": "ป้ายกำกับปุ่มเพิ่มปัญหา"
+    },
+    "addProblemTooltip": "เพิ่มปัญหาของคุณลงในรายการ",
+    "@addProblemTooltip": {
+        "description": "คำแนะนำปุ่มเพิ่มปัญหา"
+    },
+    "editProblemHint": "แก้ไขรายละเอียดปัญหา",
+    "@editProblemHint": {
+        "description": "ข้อความตัวอย่างสำหรับช่องแก้ไขแบบอินไลน์"
+    },
+    "editProblemButton": "แก้ไขปัญหานี้",
+    "@editProblemButton": {
+        "description": "คำแนะนำปุ่มแก้ไขในรายการปัญหา"
+    },
+    "flagProblemButton": "รายงานปัญหานี้ว่าไม่เหมาะสม",
+    "@flagProblemButton": {
+        "description": "คำแนะนำปุ่มรายงานในรายการปัญหา"
+    },
+    "feedbackButton": "ส่งความคิดเห็น",
+    "@feedbackButton": {
+        "description": "คำแนะนำปุ่มความคิดเห็นในแถบแอป"
+    },
+    "feedbackSuccess": "ขอบคุณสำหรับความคิดเห็นของคุณ!",
+    "@feedbackSuccess": {
+        "description": "ข้อความ SnackBar หลังจากส่งความคิดเห็นสำเร็จ"
+    },
+    "feedbackError": "ไม่สามารถส่งความคิดเห็นได้ กรุณาลองอีกครั้ง",
+    "@feedbackError": {
+        "description": "ข้อความ SnackBar เมื่อส่งความคิดเห็นไม่สำเร็จ"
+    },
+    "geoscopeGlobal": "ทั่วโลก",
+    "@geoscopeGlobal": {
+        "description": "ป้ายกำกับตัวเลือกทั่วโลกในตัวเลือกสถานที่"
+    },
+    "geoscopeChangeMenuItem": "เปลี่ยนสถานที่",
+    "@geoscopeChangeMenuItem": {
+        "description": "ป้ายกำกับรายการเมนูเปิดตัวเลือกสถานที่"
+    },
+    "showOnlyOwnedMenuItem": "แสดงเฉพาะปัญหาของฉัน",
+    "@showOnlyOwnedMenuItem": {
+        "description": "ป้ายกำกับรายการเมนูแสดงเฉพาะปัญหาของผู้ใช้ปัจจุบัน"
+    },
+    "problemDetailPageTitle": "รายละเอียดปัญหา",
+    "@problemDetailPageTitle": {
+        "description": "ชื่อใน AppBar ของหน้ารายละเอียดปัญหา"
+    },
+    "problemNotFound": "ไม่พบปัญหา",
+    "@problemNotFound": {
+        "description": "ข้อความแสดงข้อผิดพลาดเมื่อไม่พบปัญหาตาม ID"
+    },
+    "problemDetailSaveButton": "บันทึก",
+    "@problemDetailSaveButton": {
+        "description": "ป้ายกำกับปุ่มบันทึกในหน้ารายละเอียดปัญหา"
+    },
+    "problemDetailBackButton": "กลับ",
+    "@problemDetailBackButton": {
+        "description": "ป้ายกำกับปุ่มกลับในหน้ารายละเอียดปัญหา"
+    },
+    "geoscopeLabel": "ขอบเขตทางภูมิศาสตร์:",
+    "@geoscopeLabel": {
+        "description": "ป้ายกำกับถัดจากเมนูแบบเลื่อนลงขอบเขตทางภูมิศาสตร์ในหน้ารายละเอียดปัญหา"
+    },
+    "copyProblemLink": "คัดลอกลิงก์ปัญหานี้",
+    "@copyProblemLink": {
+        "description": "คำแนะนำปุ่มคัดลอกลิงก์ในรายการปัญหา"
+    },
+    "problemLinkCopied": "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว",
+    "@problemLinkCopied": {
+        "description": "ข้อความ SnackBar หลังจากคัดลอกลิงก์ปัญหา"
+    },
+    "geoscopeDropdownTooltip": "เลือกขอบเขตทางภูมิศาสตร์สำหรับปัญหาของคุณ",
+    "@geoscopeDropdownTooltip": {
+        "description": "คำแนะนำที่แสดงเมื่อวางเมาส์เหนือเมนูแบบเลื่อนลงขอบเขตทางภูมิศาสตร์"
+    },
+    "autoTranslateMenuItem": "แปลข้อความอัตโนมัติ",
+    "@autoTranslateMenuItem": {
+        "description": "ป้ายกำกับรายการเมนูเปิดการแปลอัตโนมัติของปัญหาในภาษาต่างประเทศ"
+    }
+}

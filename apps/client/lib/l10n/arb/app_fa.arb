@@ -1,0 +1,99 @@
+{
+    "@@locale": "fa",
+    "problemsAppBarTitle": "مشکلاتی که می‌توانیم با هم حل کنیم",
+    "@problemsAppBarTitle": {
+        "description": "متن نمایش داده شده در نوار برنامه صفحه مشکلات"
+    },
+    "signInButton": "ورود",
+    "@signInButton": {
+        "description": "برچسب دکمه ورود"
+    },
+    "signOutButton": "خروج",
+    "@signOutButton": {
+        "description": "راهنمای دکمه خروج"
+    },
+    "addProblemHint": "مشکل خود را اینجا اضافه کنید",
+    "@addProblemHint": {
+        "description": "متن جایگزین برای فیلد متنی افزودن مشکل"
+    },
+    "addProblemButton": "افزودن",
+    "@addProblemButton": {
+        "description": "برچسب دکمه افزودن مشکل"
+    },
+    "addProblemTooltip": "مشکل خود را در لیست قرار دهید",
+    "@addProblemTooltip": {
+        "description": "راهنمای دکمه افزودن مشکل"
+    },
+    "editProblemHint": "ویرایش توضیحات مشکل",
+    "@editProblemHint": {
+        "description": "متن جایگزین برای فیلد متنی ویرایش درون‌خطی"
+    },
+    "editProblemButton": "ویرایش این مشکل",
+    "@editProblemButton": {
+        "description": "راهنمای دکمه ویرایش در یک آیتم لیست مشکلات"
+    },
+    "flagProblemButton": "گزارش این مشکل به عنوان سوءاستفاده",
+    "@flagProblemButton": {
+        "description": "راهنمای دکمه گزارش در یک آیتم لیست مشکلات"
+    },
+    "feedbackButton": "ارسال بازخورد",
+    "@feedbackButton": {
+        "description": "راهنمای دکمه بازخورد در نوار برنامه"
+    },
+    "feedbackSuccess": "از بازخورد شما متشکریم!",
+    "@feedbackSuccess": {
+        "description": "پیام اسنک‌بار پس از ارسال موفق بازخورد"
+    },
+    "feedbackError": "بازخورد ارسال نشد. لطفاً دوباره تلاش کنید.",
+    "@feedbackError": {
+        "description": "پیام اسنک‌بار هنگام شکست ارسال بازخورد"
+    },
+    "geoscopeGlobal": "جهانی",
+    "@geoscopeGlobal": {
+        "description": "برچسب گزینه جهانی در انتخابگر مکان"
+    },
+    "geoscopeChangeMenuItem": "تغییر مکان",
+    "@geoscopeChangeMenuItem": {
+        "description": "برچسب آیتم منو برای باز کردن انتخابگر مکان"
+    },
+    "showOnlyOwnedMenuItem": "فقط مشکلات من نمایش داده شود",
+    "@showOnlyOwnedMenuItem": {
+        "description": "برچسب آیتم منو برای نمایش فقط مشکلات کاربر فعلی"
+    },
+    "problemDetailPageTitle": "جزئیات مشکل",
+    "@problemDetailPageTitle": {
+        "description": "عنوان در نوار برنامه صفحه جزئیات مشکل"
+    },
+    "problemNotFound": "مشکل یافت نشد",
+    "@problemNotFound": {
+        "description": "پیام خطا هنگامی که مشکلی با شناسه یافت نمی‌شود"
+    },
+    "problemDetailSaveButton": "ذخیره",
+    "@problemDetailSaveButton": {
+        "description": "برچسب دکمه ذخیره در صفحه جزئیات مشکل"
+    },
+    "problemDetailBackButton": "بازگشت",
+    "@problemDetailBackButton": {
+        "description": "برچسب دکمه بازگشت در صفحه جزئیات مشکل"
+    },
+    "geoscopeLabel": "محدوده جغرافیایی:",
+    "@geoscopeLabel": {
+        "description": "برچسب کنار منوی کشویی محدوده جغرافیایی در صفحه جزئیات مشکل"
+    },
+    "copyProblemLink": "کپی لینک این مشکل",
+    "@copyProblemLink": {
+        "description": "راهنمای دکمه کپی لینک در یک آیتم لیست مشکلات"
+    },
+    "problemLinkCopied": "لینک در کلیپ‌بورد کپی شد",
+    "@problemLinkCopied": {
+        "description": "پیام اسنک‌بار پس از کپی لینک مشکل"
+    },
+    "geoscopeDropdownTooltip": "محدوده جغرافیایی مشکل خود را انتخاب کنید",
+    "@geoscopeDropdownTooltip": {
+        "description": "راهنمایی که هنگام قرار گرفتن ماوس روی منوی کشویی محدوده جغرافیایی نمایش داده می‌شود"
+    },
+    "autoTranslateMenuItem": "ترجمه خودکار متن",
+    "@autoTranslateMenuItem": {
+        "description": "برچسب آیتم منو برای فعال‌سازی ترجمه خودکار مشکلات به زبان‌های خارجی"
+    }
+}

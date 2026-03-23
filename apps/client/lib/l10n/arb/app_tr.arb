@@ -1,0 +1,99 @@
+{
+    "@@locale": "tr",
+    "problemsAppBarTitle": "Birlikte çözebileceğimiz sorunlar",
+    "@problemsAppBarTitle": {
+        "description": "Sorunlar sayfasının AppBar'ında gösterilen metin"
+    },
+    "signInButton": "Giriş Yap",
+    "@signInButton": {
+        "description": "Giriş düğmesi etiketi"
+    },
+    "signOutButton": "Çıkış Yap",
+    "@signOutButton": {
+        "description": "Çıkış düğmesi araç ipucu"
+    },
+    "addProblemHint": "Kendi sorununuzu buraya ekleyin",
+    "@addProblemHint": {
+        "description": "Sorun ekleme metin alanı için yer tutucu metin"
+    },
+    "addProblemButton": "Ekle",
+    "@addProblemButton": {
+        "description": "Sorun ekleme düğmesi etiketi"
+    },
+    "addProblemTooltip": "Sorununuzu listeye ekleyin",
+    "@addProblemTooltip": {
+        "description": "Sorun ekleme düğmesi araç ipucu"
+    },
+    "editProblemHint": "Sorun açıklamasını düzenle",
+    "@editProblemHint": {
+        "description": "Satır içi düzenleme metin alanı için yer tutucu metin"
+    },
+    "editProblemButton": "Bu sorunu düzenle",
+    "@editProblemButton": {
+        "description": "Sorun listesi öğesindeki düzenleme düğmesi araç ipucu"
+    },
+    "flagProblemButton": "Bu sorunu kötüye kullanım olarak bildir",
+    "@flagProblemButton": {
+        "description": "Sorun listesi öğesindeki bildirme düğmesi araç ipucu"
+    },
+    "feedbackButton": "Geri bildirim gönder",
+    "@feedbackButton": {
+        "description": "Uygulama çubuğundaki geri bildirim düğmesi araç ipucu"
+    },
+    "feedbackSuccess": "Geri bildiriminiz için teşekkürler!",
+    "@feedbackSuccess": {
+        "description": "Başarılı geri bildirim gönderimi sonrası SnackBar mesajı"
+    },
+    "feedbackError": "Geri bildirim gönderilemedi. Lütfen tekrar deneyin.",
+    "@feedbackError": {
+        "description": "Geri bildirim gönderimi başarısız olduğunda SnackBar mesajı"
+    },
+    "geoscopeGlobal": "Küresel",
+    "@geoscopeGlobal": {
+        "description": "Konum seçicideki küresel seçenek etiketi"
+    },
+    "geoscopeChangeMenuItem": "Konumu değiştir",
+    "@geoscopeChangeMenuItem": {
+        "description": "Konum seçiciyi açmak için menü öğesi etiketi"
+    },
+    "showOnlyOwnedMenuItem": "Yalnızca benim sorunlarımı göster",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Yalnızca mevcut kullanıcının sorunlarını göstermek için menü öğesi etiketi"
+    },
+    "problemDetailPageTitle": "Sorun Detayları",
+    "@problemDetailPageTitle": {
+        "description": "Sorun detay sayfasının AppBar'ındaki başlık"
+    },
+    "problemNotFound": "Sorun bulunamadı",
+    "@problemNotFound": {
+        "description": "Bir sorun ID ile bulunamadığında hata mesajı"
+    },
+    "problemDetailSaveButton": "Kaydet",
+    "@problemDetailSaveButton": {
+        "description": "Sorun detay sayfasındaki kaydet düğmesi etiketi"
+    },
+    "problemDetailBackButton": "Geri",
+    "@problemDetailBackButton": {
+        "description": "Sorun detay sayfasındaki geri düğmesi etiketi"
+    },
+    "geoscopeLabel": "Coğrafi kapsam:",
+    "@geoscopeLabel": {
+        "description": "Sorun detay sayfasındaki coğrafi kapsam açılır menüsü yanındaki etiket"
+    },
+    "copyProblemLink": "Bu sorunun bağlantısını kopyala",
+    "@copyProblemLink": {
+        "description": "Sorun listesi öğesindeki bağlantı kopyalama düğmesi araç ipucu"
+    },
+    "problemLinkCopied": "Bağlantı panoya kopyalandı",
+    "@problemLinkCopied": {
+        "description": "Sorun bağlantısı kopyalandıktan sonra SnackBar mesajı"
+    },
+    "geoscopeDropdownTooltip": "Sorununuz için coğrafi kapsamı seçin",
+    "@geoscopeDropdownTooltip": {
+        "description": "Coğrafi kapsam açılır menüsü üzerine gelindiğinde gösterilen araç ipucu"
+    },
+    "autoTranslateMenuItem": "Metni otomatik çevir",
+    "@autoTranslateMenuItem": {
+        "description": "Yabancı dillerdeki sorunların otomatik cihaz üzerinde çevirisini açmak için menü öğesi etiketi"
+    }
+}

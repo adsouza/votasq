@@ -1,0 +1,99 @@
+{
+    "@@locale": "ru",
+    "problemsAppBarTitle": "Проблемы, которые мы можем решить вместе",
+    "@problemsAppBarTitle": {
+        "description": "Текст в AppBar страницы проблем"
+    },
+    "signInButton": "Войти",
+    "@signInButton": {
+        "description": "Метка кнопки входа"
+    },
+    "signOutButton": "Выйти",
+    "@signOutButton": {
+        "description": "Подсказка кнопки выхода"
+    },
+    "addProblemHint": "Добавьте свою проблему здесь",
+    "@addProblemHint": {
+        "description": "Текст-заполнитель для поля добавления проблемы"
+    },
+    "addProblemButton": "Добавить",
+    "@addProblemButton": {
+        "description": "Метка кнопки добавления проблемы"
+    },
+    "addProblemTooltip": "Включить вашу проблему в список",
+    "@addProblemTooltip": {
+        "description": "Подсказка кнопки добавления проблемы"
+    },
+    "editProblemHint": "Редактировать описание проблемы",
+    "@editProblemHint": {
+        "description": "Текст-заполнитель для поля встроенного редактирования"
+    },
+    "editProblemButton": "Редактировать эту проблему",
+    "@editProblemButton": {
+        "description": "Подсказка кнопки редактирования в элементе списка проблем"
+    },
+    "flagProblemButton": "Пожаловаться на эту проблему",
+    "@flagProblemButton": {
+        "description": "Подсказка кнопки жалобы в элементе списка проблем"
+    },
+    "feedbackButton": "Отправить отзыв",
+    "@feedbackButton": {
+        "description": "Подсказка кнопки отзыва в панели приложения"
+    },
+    "feedbackSuccess": "Спасибо за ваш отзыв!",
+    "@feedbackSuccess": {
+        "description": "Сообщение SnackBar после успешной отправки отзыва"
+    },
+    "feedbackError": "Не удалось отправить отзыв. Пожалуйста, попробуйте снова.",
+    "@feedbackError": {
+        "description": "Сообщение SnackBar при неудачной отправке отзыва"
+    },
+    "geoscopeGlobal": "Глобально",
+    "@geoscopeGlobal": {
+        "description": "Метка глобальной опции в выборе местоположения"
+    },
+    "geoscopeChangeMenuItem": "Изменить местоположение",
+    "@geoscopeChangeMenuItem": {
+        "description": "Метка пункта меню для открытия выбора местоположения"
+    },
+    "showOnlyOwnedMenuItem": "Показать только мои проблемы",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Метка пункта меню для отображения только проблем текущего пользователя"
+    },
+    "problemDetailPageTitle": "Детали проблемы",
+    "@problemDetailPageTitle": {
+        "description": "Заголовок в AppBar страницы деталей проблемы"
+    },
+    "problemNotFound": "Проблема не найдена",
+    "@problemNotFound": {
+        "description": "Сообщение об ошибке, когда проблема не найдена по ID"
+    },
+    "problemDetailSaveButton": "Сохранить",
+    "@problemDetailSaveButton": {
+        "description": "Метка кнопки сохранения на странице деталей проблемы"
+    },
+    "problemDetailBackButton": "Назад",
+    "@problemDetailBackButton": {
+        "description": "Метка кнопки назад на странице деталей проблемы"
+    },
+    "geoscopeLabel": "Географический охват:",
+    "@geoscopeLabel": {
+        "description": "Метка рядом с выпадающим списком географического охвата на странице деталей проблемы"
+    },
+    "copyProblemLink": "Копировать ссылку на эту проблему",
+    "@copyProblemLink": {
+        "description": "Подсказка кнопки копирования ссылки в элементе списка проблем"
+    },
+    "problemLinkCopied": "Ссылка скопирована в буфер обмена",
+    "@problemLinkCopied": {
+        "description": "Сообщение SnackBar после копирования ссылки на проблему"
+    },
+    "geoscopeDropdownTooltip": "Выберите географический охват для вашей проблемы",
+    "@geoscopeDropdownTooltip": {
+        "description": "Подсказка при наведении на выпадающий список географического охвата"
+    },
+    "autoTranslateMenuItem": "Автоматический перевод текста",
+    "@autoTranslateMenuItem": {
+        "description": "Метка пункта меню для включения автоматического перевода проблем на иностранных языках"
+    }
+}
