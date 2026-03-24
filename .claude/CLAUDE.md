@@ -26,10 +26,11 @@ melos gen                  # Runs build_runner across all packages that need it
 
 ### Format, Analyze, Test (mirrors CI)
 
-Always do this after making nontrivial changes:
+Run `dart format --set-exit-if-changed apps packages` after every change.
+
+Also do this after making nontrivial changes:
 
 ```sh
-dart format --set-exit-if-changed apps packages
 flutter analyze apps packages
 very_good test --recursive --no-optimization --coverage --test-randomize-ordering-seed random
 ```
