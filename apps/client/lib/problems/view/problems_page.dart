@@ -432,6 +432,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     return ListTile(
+      contentPadding: const EdgeInsets.only(left: 16, right: 4),
       title: ProblemTranslation(
         problemId: problem.id,
         lang: problem.lang,
