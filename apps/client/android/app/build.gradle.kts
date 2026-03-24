@@ -101,7 +101,7 @@ configurations.all {
         // Use the thin/unbundled Play Services variant of ML Kit Language ID
         // so the model is downloaded via Play Services instead of bundled in the AAB.
         substitute(module("com.google.mlkit:language-id"))
-            .using(module("com.google.android.gms:play-services-mlkit-language-id:17.0.6"))
+            .using(module("com.google.android.gms:play-services-mlkit-language-id:17.0.0"))
     }
 }
 
