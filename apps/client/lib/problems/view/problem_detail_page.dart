@@ -210,12 +210,12 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   children: [
                     if (problem.geoscope != '/')
                       Tooltip(
-                        message: '${l10n.geoscopeLabel}'
+                        message:
+                            '${l10n.geoscopeLabel}'
                             ' ${_geoscopeLabel(problem.geoscope)}',
                         child: Chip(
                           label: Text(_geoscopeLabel(problem.geoscope)),
-                          backgroundColor:
-                              theme.colorScheme.tertiaryContainer,
+                          backgroundColor: theme.colorScheme.tertiaryContainer,
                         ),
                       ),
                     Tooltip(

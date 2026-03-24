@@ -73,8 +73,7 @@ class _ProblemsViewState extends State<ProblemsView> {
 
   String _geoscopeLabel(String geoscope) {
     if (geoscope == '/') return context.l10n.geoscopeGlobal;
-    final available =
-        context.read<GeoscopeCubit>().state.availableGeoscopes;
+    final available = context.read<GeoscopeCubit>().state.availableGeoscopes;
     for (final g in available) {
       if (g.id == geoscope) return g.label;
     }
@@ -477,18 +476,17 @@ class _ProblemsViewState extends State<ProblemsView> {
             ),
             if (problem.geoscope != '/')
               Tooltip(
-                message: '${l10n.geoscopeLabel}'
+                message:
+                    '${l10n.geoscopeLabel}'
                     ' ${_geoscopeLabel(problem.geoscope)}',
                 child: Chip(
                   label: Text(
                     problem.geoscope.split('/').last,
                     style: const TextStyle(fontSize: 12),
                   ),
-                  backgroundColor:
-                      theme.colorScheme.tertiaryContainer,
+                  backgroundColor: theme.colorScheme.tertiaryContainer,
                   visualDensity: VisualDensity.compact,
-                  materialTapTargetSize:
-                      MaterialTapTargetSize.shrinkWrap,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             Tooltip(
@@ -676,8 +674,7 @@ class _ProblemsViewState extends State<ProblemsView> {
       appBar: AppBar(
         title: BlocBuilder<ProblemsCubit, ProblemsState>(
           builder: (context, state) {
-            final userId =
-                context.read<AuthCubit>().state.userId;
+            final userId = context.read<AuthCubit>().state.userId;
             var filtered = state.problems;
             if (userId != null) {
               filtered = filtered
@@ -687,14 +684,10 @@ class _ProblemsViewState extends State<ProblemsView> {
                   .toList();
             }
             if (_showOnlyOwned && userId != null) {
-              filtered = filtered
-                  .where((p) => p.ownerId == userId)
-                  .toList();
+              filtered = filtered.where((p) => p.ownerId == userId).toList();
             }
             if (_showOnlyWithGoals) {
-              filtered = filtered
-                  .where((p) => p.goal.isNotEmpty)
-                  .toList();
+              filtered = filtered.where((p) => p.goal.isNotEmpty).toList();
             }
             return Text(
               '${filtered.length} ${l10n.problemsAppBarTitle}',
