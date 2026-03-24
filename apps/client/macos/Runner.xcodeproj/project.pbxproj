@@ -645,6 +645,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.quikchange.votasq.client;
 				PRODUCT_NAME = "$(FLAVOR_APP_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -777,6 +778,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.quikchange.votasq.client;
 				PRODUCT_NAME = "$(FLAVOR_APP_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -801,6 +803,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.quikchange.votasq.client;
 				PRODUCT_NAME = "$(FLAVOR_APP_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -1420,7 +1423,7 @@
 				4D081BA02AEE0EF8009C4C7F /* Profile-staging */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-production";
+			defaultConfigurationName = "Debug-development";
 		};
 		33CC10E82044A3C60003C045 /* Build configuration list for PBXProject "Runner" */ = {
 			isa = XCConfigurationList;
@@ -1436,7 +1439,7 @@
 				4D081B9E2AEE0EF8009C4C7F /* Profile-staging */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-production";
+			defaultConfigurationName = "Debug-development";
 		};
 		33CC10FB2044A3C60003C045 /* Build configuration list for PBXNativeTarget "Runner" */ = {
 			isa = XCConfigurationList;
@@ -1452,7 +1455,7 @@
 				4D081B9F2AEE0EF8009C4C7F /* Profile-staging */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-production";
+			defaultConfigurationName = "Debug-development";
 		};
 		33CC111B2044C6BA0003C045 /* Build configuration list for PBXAggregateTarget "Flutter Assemble" */ = {
 			isa = XCConfigurationList;
@@ -1468,7 +1471,7 @@
 				4D081BA12AEE0EF8009C4C7F /* Profile-staging */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-production";
+			defaultConfigurationName = "Debug-development";
 		};
 /* End XCConfigurationList section */
 	};
