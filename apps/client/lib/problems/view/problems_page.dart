@@ -674,7 +674,33 @@ class _ProblemsViewState extends State<ProblemsView> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.problemsAppBarTitle),
+        title: BlocBuilder<ProblemsCubit, ProblemsState>(
+          builder: (context, state) {
+            final userId =
+                context.read<AuthCubit>().state.userId;
+            var filtered = state.problems;
+            if (userId != null) {
+              filtered = filtered
+                  .where(
+                    (p) => !p.complaints.contains(userId),
+                  )
+                  .toList();
+            }
+            if (_showOnlyOwned && userId != null) {
+              filtered = filtered
+                  .where((p) => p.ownerId == userId)
+                  .toList();
+            }
+            if (_showOnlyWithGoals) {
+              filtered = filtered
+                  .where((p) => p.goal.isNotEmpty)
+                  .toList();
+            }
+            return Text(
+              '${filtered.length} ${l10n.problemsAppBarTitle}',
+            );
+          },
+        ),
         leading: PopupMenuButton<String>(
           icon: const Icon(Icons.menu),
           onSelected: (value) {
