@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Elemento de menú para mostrar solo los problemas del usuario actual"
     },
+    "showOnlyWithGoalsMenuItem": "Mostrar solo problemas con metas",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Elemento de menú para mostrar solo los problemas que tienen una meta definida"
+    },
     "problemDetailPageTitle": "Detalles del problema",
     "@problemDetailPageTitle": {
         "description": "Título en la AppBar de la página de detalles del problema"

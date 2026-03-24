@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "ป้ายกำกับรายการเมนูแสดงเฉพาะปัญหาของผู้ใช้ปัจจุบัน"
     },
+    "showOnlyWithGoalsMenuItem": "แสดงเฉพาะปัญหาที่มีเป้าหมาย",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "ป้ายกำกับรายการเมนูแสดงเฉพาะปัญหาที่มีเป้าหมายกำหนดไว้"
+    },
     "problemDetailPageTitle": "รายละเอียดปัญหา",
     "@problemDetailPageTitle": {
         "description": "ชื่อใน AppBar ของหน้ารายละเอียดปัญหา"

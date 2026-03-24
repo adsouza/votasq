@@ -67,6 +67,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   String? _addProblemGeoscope;
   String? _editProblemGeoscope;
   bool _showOnlyOwned = false;
+  bool _showOnlyWithGoals = false;
   bool _addGoalVisible = false;
   bool _submitting = false;
 
@@ -664,6 +665,10 @@ class _ProblemsViewState extends State<ProblemsView> {
               setState(() {
                 _showOnlyOwned = !_showOnlyOwned;
               });
+            } else if (value == 'toggle_with_goals') {
+              setState(() {
+                _showOnlyWithGoals = !_showOnlyWithGoals;
+              });
             } else if (value == 'toggle_auto_translate') {
               unawaited(context.read<AutoTranslateCubit>().toggle());
             }
@@ -678,6 +683,18 @@ class _ProblemsViewState extends State<ProblemsView> {
                       : Icons.check_box_outline_blank,
                 ),
                 title: Text(l10n.showOnlyOwnedMenuItem),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
+              value: 'toggle_with_goals',
+              child: ListTile(
+                leading: Icon(
+                  _showOnlyWithGoals
+                      ? Icons.check_box
+                      : Icons.check_box_outline_blank,
+                ),
+                title: Text(l10n.showOnlyWithGoalsMenuItem),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -808,6 +825,11 @@ class _ProblemsViewState extends State<ProblemsView> {
                       if (_showOnlyOwned && userId != null) {
                         filtered = filtered
                             .where((p) => p.ownerId == userId)
+                            .toList();
+                      }
+                      if (_showOnlyWithGoals) {
+                        filtered = filtered
+                            .where((p) => p.goal.isNotEmpty)
                             .toList();
                       }
                       final visible = filtered;

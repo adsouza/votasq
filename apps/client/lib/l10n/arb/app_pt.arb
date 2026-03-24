@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Rótulo do item de menu para alternar a exibição apenas dos problemas do usuário atual"
     },
+    "showOnlyWithGoalsMenuItem": "Mostrar apenas problemas com objetivos",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Rótulo do item de menu para exibir apenas problemas com objetivo definido"
+    },
     "problemDetailPageTitle": "Detalhes do Problema",
     "@problemDetailPageTitle": {
         "description": "Título na AppBar da página de detalhes do problema"

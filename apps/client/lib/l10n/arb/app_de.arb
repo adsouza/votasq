@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Menüpunkt zum Umschalten auf die Anzeige nur eigener Probleme"
     },
+    "showOnlyWithGoalsMenuItem": "Nur Probleme mit Zielen anzeigen",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Menüpunkt zum Anzeigen nur von Problemen mit definiertem Ziel"
+    },
     "problemDetailPageTitle": "Problemdetails",
     "@problemDetailPageTitle": {
         "description": "Titel in der AppBar der Problemdetailseite"

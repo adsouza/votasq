@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Nhãn mục menu để chuyển đổi hiển thị chỉ vấn đề của người dùng hiện tại"
     },
+    "showOnlyWithGoalsMenuItem": "Chỉ hiển thị vấn đề có mục tiêu",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Nhãn mục menu để hiển thị chỉ vấn đề có mục tiêu xác định"
+    },
     "problemDetailPageTitle": "Chi tiết vấn đề",
     "@problemDetailPageTitle": {
         "description": "Tiêu đề trên thanh ứng dụng của trang chi tiết vấn đề"

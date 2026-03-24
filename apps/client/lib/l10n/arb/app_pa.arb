@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "ਸਿਰਫ਼ ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ ਦੀਆਂ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਉਣ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"
     },
+    "showOnlyWithGoalsMenuItem": "ਸਿਰਫ਼ ਟੀਚੇ ਵਾਲੀਆਂ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਓ",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "ਸਿਰਫ਼ ਟੀਚਾ ਨਿਰਧਾਰਤ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਉਣ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"
+    },
     "problemDetailPageTitle": "ਸਮੱਸਿਆ ਦੇ ਵੇਰਵੇ",
     "@problemDetailPageTitle": {
         "description": "ਸਮੱਸਿਆ ਵੇਰਵੇ ਪੰਨੇ ਦੀ ਐਪਬਾਰ ਵਿੱਚ ਸਿਰਲੇਖ"

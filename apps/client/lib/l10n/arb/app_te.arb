@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "ప్రస్తుత వినియోగదారు సమస్యలు మాత్రమే చూపించడానికి మెనూ అంశం లేబుల్"
     },
+    "showOnlyWithGoalsMenuItem": "లక్ష్యాలు ఉన్న సమస్యలను మాత్రమే చూపించు",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "లక్ష్యం నిర్ణయించిన సమస్యలను మాత్రమే చూపించడానికి మెనూ అంశం లేబుల్"
+    },
     "problemDetailPageTitle": "సమస్య వివరాలు",
     "@problemDetailPageTitle": {
         "description": "సమస్య వివరాల పేజీ యాప్‌బార్‌లో శీర్షిక"

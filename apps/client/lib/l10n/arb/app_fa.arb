@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "برچسب آیتم منو برای نمایش فقط مشکلات کاربر فعلی"
     },
+    "showOnlyWithGoalsMenuItem": "فقط مشکلات دارای هدف نمایش داده شود",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "برچسب آیتم منو برای نمایش فقط مشکلات دارای هدف مشخص"
+    },
     "problemDetailPageTitle": "جزئیات مشکل",
     "@problemDetailPageTitle": {
         "description": "عنوان در نوار برنامه صفحه جزئیات مشکل"

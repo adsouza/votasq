@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Menu item label to toggle showing only problems owned by the current user"
     },
+    "showOnlyWithGoalsMenuItem": "Show only problems with goals",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Menu item label to toggle showing only problems that have a non-empty goal"
+    },
     "problemDetailPageTitle": "Problem Details",
     "@problemDetailPageTitle": {
         "description": "Title in the AppBar of the problem detail page"

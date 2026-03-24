@@ -9,10 +9,10 @@ part of 'problem.dart';
 _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
   id: json['id'] as String,
   description: json['description'] as String,
-  goal: json['goal'] as String? ?? '',
   createdAt: DateTime.parse(json['createdAt'] as String),
   lastUpdatedAt: DateTime.parse(json['lastUpdatedAt'] as String),
   ownerId: json['ownerId'] as String,
+  goal: json['goal'] as String? ?? '',
   geoscope: json['geoscope'] as String? ?? '/',
   lang: json['lang'] as String?,
   votes: (json['votes'] as num?)?.toInt() ?? 1,
@@ -28,10 +28,10 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
 Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
   'id': instance.id,
   'description': instance.description,
-  'goal': instance.goal,
   'createdAt': instance.createdAt.toIso8601String(),
   'lastUpdatedAt': instance.lastUpdatedAt.toIso8601String(),
   'ownerId': instance.ownerId,
+  'goal': instance.goal,
   'geoscope': instance.geoscope,
   'lang': instance.lang,
   'votes': instance.votes,

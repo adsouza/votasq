@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "फक्त सध्याच्या वापरकर्त्याच्या समस्या दाखवण्यासाठी मेनू आयटम लेबल"
     },
+    "showOnlyWithGoalsMenuItem": "फक्त ध्येय असलेल्या समस्या दाखवा",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "फक्त ध्येय निर्धारित समस्या दाखवण्यासाठी मेनू आयटम लेबल"
+    },
     "problemDetailPageTitle": "समस्या तपशील",
     "@problemDetailPageTitle": {
         "description": "समस्या तपशील पृष्ठाच्या अ‍ॅपबारमधील शीर्षक"

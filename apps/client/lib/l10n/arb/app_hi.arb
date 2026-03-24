@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Menu item label to toggle showing only problems owned by the current user"
     },
+    "showOnlyWithGoalsMenuItem": "केवल लक्ष्य वाली समस्याएँ दिखाएँ",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "केवल लक्ष्य निर्धारित समस्याएँ दिखाने के लिए मेनू आइटम लेबल"
+    },
     "problemDetailPageTitle": "समस्या विवरण",
     "@problemDetailPageTitle": {
         "description": "Title in the AppBar of the problem detail page"

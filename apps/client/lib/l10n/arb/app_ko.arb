@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "현재 사용자의 문제만 표시하는 메뉴 항목 라벨"
     },
+    "showOnlyWithGoalsMenuItem": "목표가 있는 문제만 보기",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "목표가 설정된 문제만 표시하는 메뉴 항목 라벨"
+    },
     "problemDetailPageTitle": "문제 상세",
     "@problemDetailPageTitle": {
         "description": "문제 상세 페이지 앱바의 제목"

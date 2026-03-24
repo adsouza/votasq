@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Yalnızca mevcut kullanıcının sorunlarını göstermek için menü öğesi etiketi"
     },
+    "showOnlyWithGoalsMenuItem": "Yalnızca hedefi olan sorunları göster",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Yalnızca hedefi belirlenmiş sorunları göstermek için menü öğesi etiketi"
+    },
     "problemDetailPageTitle": "Sorun Detayları",
     "@problemDetailPageTitle": {
         "description": "Sorun detay sayfasının AppBar'ındaki başlık"

@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "தற்போதைய பயனரின் பிரச்சனைகளை மட்டும் காட்ட மெனு உருப்படி லேபிள்"
     },
+    "showOnlyWithGoalsMenuItem": "இலக்குகள் உள்ள பிரச்சனைகளை மட்டும் காட்டு",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "இலக்கு நிர்ணயிக்கப்பட்ட பிரச்சனைகளை மட்டும் காட்ட மெனு உருப்படி லேபிள்"
+    },
     "problemDetailPageTitle": "பிரச்சனை விவரங்கள்",
     "@problemDetailPageTitle": {
         "description": "பிரச்சனை விவரப் பக்கத்தின் ஆப்பார்-ல் தலைப்பு"

@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "صرف موجودہ صارف کے مسائل دکھانے کے لیے مینو آئٹم لیبل"
     },
+    "showOnlyWithGoalsMenuItem": "صرف مقاصد والے مسائل دکھائیں",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "صرف مقصد مقرر مسائل دکھانے کے لیے مینو آئٹم لیبل"
+    },
     "problemDetailPageTitle": "مسئلے کی تفصیلات",
     "@problemDetailPageTitle": {
         "description": "مسئلے کی تفصیلات کے صفحے کی ایپ بار میں عنوان"

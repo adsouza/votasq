@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "শুধুমাত্র বর্তমান ব্যবহারকারীর সমস্যা দেখানোর মেনু আইটেম লেবেল"
     },
+    "showOnlyWithGoalsMenuItem": "শুধুমাত্র লক্ষ্যযুক্ত সমস্যাগুলো দেখান",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "শুধুমাত্র লক্ষ্য নির্ধারিত সমস্যা দেখানোর মেনু আইটেম লেবেল"
+    },
     "problemDetailPageTitle": "সমস্যার বিবরণ",
     "@problemDetailPageTitle": {
         "description": "সমস্যার বিবরণ পৃষ্ঠার অ্যাপবারে শিরোনাম"

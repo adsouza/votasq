@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Label item menu untuk menampilkan hanya masalah pengguna saat ini"
     },
+    "showOnlyWithGoalsMenuItem": "Tampilkan hanya masalah dengan tujuan",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Label item menu untuk menampilkan hanya masalah yang memiliki tujuan"
+    },
     "problemDetailPageTitle": "Detail Masalah",
     "@problemDetailPageTitle": {
         "description": "Judul di AppBar halaman detail masalah"

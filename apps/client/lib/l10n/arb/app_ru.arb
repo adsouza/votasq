@@ -60,6 +60,10 @@
     "@showOnlyOwnedMenuItem": {
         "description": "Метка пункта меню для отображения только проблем текущего пользователя"
     },
+    "showOnlyWithGoalsMenuItem": "Показать только проблемы с целями",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Пункт меню для отображения только проблем с определённой целью"
+    },
     "problemDetailPageTitle": "Детали проблемы",
     "@problemDetailPageTitle": {
         "description": "Заголовок в AppBar страницы деталей проблемы"

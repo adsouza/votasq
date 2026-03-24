@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProblemRevision {
 
- String get description; String get goal; int get version; DateTime get archivedAt; int? get restoredFrom;
+ String get description; int get version; DateTime get archivedAt; String get goal; int? get restoredFrom;
 /// Create a copy of ProblemRevision
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProblemRevisionCopyWith<ProblemRevision> get copyWith => _$ProblemRevisionCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProblemRevision&&(identical(other.description, description) || other.description == description)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.version, version) || other.version == version)&&(identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt)&&(identical(other.restoredFrom, restoredFrom) || other.restoredFrom == restoredFrom));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProblemRevision&&(identical(other.description, description) || other.description == description)&&(identical(other.version, version) || other.version == version)&&(identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.restoredFrom, restoredFrom) || other.restoredFrom == restoredFrom));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,description,goal,version,archivedAt,restoredFrom);
+int get hashCode => Object.hash(runtimeType,description,version,archivedAt,goal,restoredFrom);
 
 @override
 String toString() {
-  return 'ProblemRevision(description: $description, goal: $goal, version: $version, archivedAt: $archivedAt, restoredFrom: $restoredFrom)';
+  return 'ProblemRevision(description: $description, version: $version, archivedAt: $archivedAt, goal: $goal, restoredFrom: $restoredFrom)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProblemRevisionCopyWith<$Res>  {
   factory $ProblemRevisionCopyWith(ProblemRevision value, $Res Function(ProblemRevision) _then) = _$ProblemRevisionCopyWithImpl;
 @useResult
 $Res call({
- String description, String goal, int version, DateTime archivedAt, int? restoredFrom
+ String description, int version, DateTime archivedAt, String goal, int? restoredFrom
 });
 
 
@@ -65,13 +65,13 @@ class _$ProblemRevisionCopyWithImpl<$Res>
 
 /// Create a copy of ProblemRevision
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? description = null,Object? goal = null,Object? version = null,Object? archivedAt = null,Object? restoredFrom = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? description = null,Object? version = null,Object? archivedAt = null,Object? goal = null,Object? restoredFrom = freezed,}) {
   return _then(_self.copyWith(
 description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,goal: null == goal ? _self.goal : goal // ignore: cast_nullable_to_non_nullable
 as String,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,archivedAt: null == archivedAt ? _self.archivedAt : archivedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,restoredFrom: freezed == restoredFrom ? _self.restoredFrom : restoredFrom // ignore: cast_nullable_to_non_nullable
+as DateTime,goal: null == goal ? _self.goal : goal // ignore: cast_nullable_to_non_nullable
+as String,restoredFrom: freezed == restoredFrom ? _self.restoredFrom : restoredFrom // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }
@@ -157,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String description,  String goal,  int version,  DateTime archivedAt,  int? restoredFrom)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String description,  int version,  DateTime archivedAt,  String goal,  int? restoredFrom)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProblemRevision() when $default != null:
-return $default(_that.description,_that.goal,_that.version,_that.archivedAt,_that.restoredFrom);case _:
+return $default(_that.description,_that.version,_that.archivedAt,_that.goal,_that.restoredFrom);case _:
   return orElse();
 
 }
@@ -178,10 +178,10 @@ return $default(_that.description,_that.goal,_that.version,_that.archivedAt,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String description,  String goal,  int version,  DateTime archivedAt,  int? restoredFrom)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String description,  int version,  DateTime archivedAt,  String goal,  int? restoredFrom)  $default,) {final _that = this;
 switch (_that) {
 case _ProblemRevision():
-return $default(_that.description,_that.goal,_that.version,_that.archivedAt,_that.restoredFrom);case _:
+return $default(_that.description,_that.version,_that.archivedAt,_that.goal,_that.restoredFrom);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +198,10 @@ return $default(_that.description,_that.goal,_that.version,_that.archivedAt,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String description,  String goal,  int version,  DateTime archivedAt,  int? restoredFrom)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String description,  int version,  DateTime archivedAt,  String goal,  int? restoredFrom)?  $default,) {final _that = this;
 switch (_that) {
 case _ProblemRevision() when $default != null:
-return $default(_that.description,_that.goal,_that.version,_that.archivedAt,_that.restoredFrom);case _:
+return $default(_that.description,_that.version,_that.archivedAt,_that.goal,_that.restoredFrom);case _:
   return null;
 
 }
@@ -213,13 +213,13 @@ return $default(_that.description,_that.goal,_that.version,_that.archivedAt,_tha
 @JsonSerializable()
 
 class _ProblemRevision implements ProblemRevision {
-  const _ProblemRevision({required this.description, this.goal = '', required this.version, required this.archivedAt, this.restoredFrom});
+  const _ProblemRevision({required this.description, required this.version, required this.archivedAt, this.goal = '', this.restoredFrom});
   factory _ProblemRevision.fromJson(Map<String, dynamic> json) => _$ProblemRevisionFromJson(json);
 
 @override final  String description;
-@override@JsonKey() final  String goal;
 @override final  int version;
 @override final  DateTime archivedAt;
+@override@JsonKey() final  String goal;
 @override final  int? restoredFrom;
 
 /// Create a copy of ProblemRevision
@@ -235,16 +235,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProblemRevision&&(identical(other.description, description) || other.description == description)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.version, version) || other.version == version)&&(identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt)&&(identical(other.restoredFrom, restoredFrom) || other.restoredFrom == restoredFrom));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProblemRevision&&(identical(other.description, description) || other.description == description)&&(identical(other.version, version) || other.version == version)&&(identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.restoredFrom, restoredFrom) || other.restoredFrom == restoredFrom));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,description,goal,version,archivedAt,restoredFrom);
+int get hashCode => Object.hash(runtimeType,description,version,archivedAt,goal,restoredFrom);
 
 @override
 String toString() {
-  return 'ProblemRevision(description: $description, goal: $goal, version: $version, archivedAt: $archivedAt, restoredFrom: $restoredFrom)';
+  return 'ProblemRevision(description: $description, version: $version, archivedAt: $archivedAt, goal: $goal, restoredFrom: $restoredFrom)';
 }
 
 
@@ -255,7 +255,7 @@ abstract mixin class _$ProblemRevisionCopyWith<$Res> implements $ProblemRevision
   factory _$ProblemRevisionCopyWith(_ProblemRevision value, $Res Function(_ProblemRevision) _then) = __$ProblemRevisionCopyWithImpl;
 @override @useResult
 $Res call({
- String description, String goal, int version, DateTime archivedAt, int? restoredFrom
+ String description, int version, DateTime archivedAt, String goal, int? restoredFrom
 });
 
 
@@ -272,13 +272,13 @@ class __$ProblemRevisionCopyWithImpl<$Res>
 
 /// Create a copy of ProblemRevision
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? description = null,Object? goal = null,Object? version = null,Object? archivedAt = null,Object? restoredFrom = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? description = null,Object? version = null,Object? archivedAt = null,Object? goal = null,Object? restoredFrom = freezed,}) {
   return _then(_ProblemRevision(
 description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,goal: null == goal ? _self.goal : goal // ignore: cast_nullable_to_non_nullable
 as String,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,archivedAt: null == archivedAt ? _self.archivedAt : archivedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,restoredFrom: freezed == restoredFrom ? _self.restoredFrom : restoredFrom // ignore: cast_nullable_to_non_nullable
+as DateTime,goal: null == goal ? _self.goal : goal // ignore: cast_nullable_to_non_nullable
+as String,restoredFrom: freezed == restoredFrom ? _self.restoredFrom : restoredFrom // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }
