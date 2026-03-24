@@ -77,7 +77,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     for (final g in available) {
       if (g.id == geoscope) return g.label;
     }
-    return geoscope.split('/').last;
+    return geoscope.split('/').last.toUpperCase();
   }
 
   @override
@@ -296,7 +296,9 @@ class _ProblemsViewState extends State<ProblemsView> {
     };
 
     final items = ancestorIds.map((id) {
-      final label = id == '/' ? '🌐 ${l10n.geoscopeGlobal}' : (labelMap[id] ?? id);
+      final label = id == '/'
+          ? '🌐 ${l10n.geoscopeGlobal}'
+          : (labelMap[id] ?? id.split('/').last.toUpperCase());
       return DropdownMenuItem(value: id, child: Text(label));
     }).toList();
 
