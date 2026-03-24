@@ -263,7 +263,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
       // Both menu items should be visible.
-      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(find.byIcon(Icons.check_box_outline_blank), findsNWidgets(2));
       expect(find.byIcon(Icons.location_on), findsOneWidget);
     });
 
