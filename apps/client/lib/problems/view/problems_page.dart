@@ -314,7 +314,7 @@ class _ProblemsViewState extends State<ProblemsView> {
           value: effectiveValue,
           items: items,
           selectedItemBuilder: (_) => ancestorIds.map((id) {
-            if (id == '/') return Text(l10n.geoscopeGlobal);
+            if (id == '/') return const Text('🌐');
             return Text(id.split('/').last);
           }).toList(),
           onChanged: enabled
