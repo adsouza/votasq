@@ -72,7 +72,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   bool _submitting = false;
 
   String _geoscopeLabel(String geoscope) {
-    if (geoscope == '/') return context.l10n.geoscopeGlobal;
+    if (geoscope == '/') return '🌐 ${context.l10n.geoscopeGlobal}';
     final available = context.read<GeoscopeCubit>().state.availableGeoscopes;
     for (final g in available) {
       if (g.id == geoscope) return g.label;
@@ -296,7 +296,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     };
 
     final items = ancestorIds.map((id) {
-      final label = id == '/' ? l10n.geoscopeGlobal : (labelMap[id] ?? id);
+      final label = id == '/' ? '🌐 ${l10n.geoscopeGlobal}' : (labelMap[id] ?? id);
       return DropdownMenuItem(value: id, child: Text(label));
     }).toList();
 
@@ -638,7 +638,7 @@ class _ProblemsViewState extends State<ProblemsView> {
         context: context,
         builder: (_) {
           final items = [
-            (id: '/', label: l10n.geoscopeGlobal),
+            (id: '/', label: '🌐 ${l10n.geoscopeGlobal}'),
             ...geoState.availableGeoscopes,
           ];
           return ListView.builder(

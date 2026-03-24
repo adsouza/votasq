@@ -135,7 +135,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     };
 
     final items = ancestorIds.map((id) {
-      final label = id == '/' ? l10n.geoscopeGlobal : (labelMap[id] ?? id);
+      final label = id == '/' ? '🌐 ${l10n.geoscopeGlobal}' : (labelMap[id] ?? id);
       return DropdownMenuItem(value: id, child: Text(label));
     }).toList();
 
@@ -149,7 +149,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         value: effectiveValue,
         items: items,
         selectedItemBuilder: (_) => ancestorIds.map((id) {
-          final label = id == '/' ? l10n.geoscopeGlobal : (labelMap[id] ?? id);
+          final label = id == '/' ? '🌐 ${l10n.geoscopeGlobal}' : (labelMap[id] ?? id);
           return Text(label);
         }).toList(),
         onChanged: enabled
@@ -163,7 +163,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   }
 
   String _geoscopeLabel(String geoscope) {
-    if (geoscope == '/') return context.l10n.geoscopeGlobal;
+    if (geoscope == '/') return '🌐 ${context.l10n.geoscopeGlobal}';
     final available = context.read<GeoscopeCubit>().state.availableGeoscopes;
     for (final g in available) {
       if (g.id == geoscope) return g.label;
