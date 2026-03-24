@@ -96,6 +96,15 @@ flutter {
     source = "../.."
 }
 
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        // Use the thin/unbundled Play Services variant of ML Kit Language ID
+        // so the model is downloaded via Play Services instead of bundled in the AAB.
+        substitute(module("com.google.mlkit:language-id"))
+            .using(module("com.google.android.gms:play-services-mlkit-language-id:17.0.6"))
+    }
+}
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.10")
 }
