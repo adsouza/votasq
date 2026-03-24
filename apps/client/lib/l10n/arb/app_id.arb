@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip yang ditampilkan saat mengarahkan kursor ke dropdown cakupan geografis"
     },
+    "votesChipTooltip": "Suara",
+    "@votesChipTooltip": {
+        "description": "Tooltip yang ditampilkan saat mengarahkan kursor ke chip suara pada kartu masalah"
+    },
     "autoTranslateMenuItem": "Terjemahkan teks secara otomatis",
     "@autoTranslateMenuItem": {
         "description": "Label item menu untuk mengaktifkan terjemahan otomatis masalah dalam bahasa asing"

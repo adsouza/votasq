@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "புவியியல் நோக்க கீழ்தோன்றல் மீது நகரும்போது காட்டப்படும் டூல்டிப்"
     },
+    "votesChipTooltip": "வாக்குகள்",
+    "@votesChipTooltip": {
+        "description": "பிரச்சனை அட்டையில் வாக்குகள் சிப் மீது நகரும்போது காட்டப்படும் டூல்டிப்"
+    },
     "autoTranslateMenuItem": "உரையை தானாகவே மொழிபெயர்",
     "@autoTranslateMenuItem": {
         "description": "வெளிநாட்டு மொழிகளில் உள்ள பிரச்சனைகளின் தானியங்கி மொழிபெயர்ப்பை இயக்க மெனு உருப்படி லேபிள்"

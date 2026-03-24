@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "భౌగోళిక పరిధి డ్రాప్‌డౌన్‌పై మౌస్ ఉంచినప్పుడు చూపించే టూల్‌టిప్"
     },
+    "votesChipTooltip": "ఓట్లు",
+    "@votesChipTooltip": {
+        "description": "సమస్య కార్డ్‌లో ఓట్ల చిప్‌పై మౌస్ ఉంచినప్పుడు చూపించే టూల్‌టిప్"
+    },
     "autoTranslateMenuItem": "వచనాన్ని స్వయంచాలకంగా అనువదించు",
     "@autoTranslateMenuItem": {
         "description": "విదేశీ భాషల్లో సమస్యల స్వయంచాలక అనువాదాన్ని ప్రారంభించడానికి మెనూ అంశం లేబుల్"

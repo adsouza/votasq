@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
     },
+    "votesChipTooltip": "Votes",
+    "@votesChipTooltip": {
+        "description": "Tooltip shown when hovering over the votes chip on a problem card"
+    },
     "autoTranslateMenuItem": "Translate text automatically",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"

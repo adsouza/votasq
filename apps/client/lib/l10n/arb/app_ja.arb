@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
     },
+    "votesChipTooltip": "投票数",
+    "@votesChipTooltip": {
+        "description": "問題カードの投票数チップにマウスを置いたときに表示されるツールチップ"
+    },
     "autoTranslateMenuItem": "テキストを自動翻訳",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"

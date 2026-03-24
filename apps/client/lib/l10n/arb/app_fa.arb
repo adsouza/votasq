@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "راهنمایی که هنگام قرار گرفتن ماوس روی منوی کشویی محدوده جغرافیایی نمایش داده می‌شود"
     },
+    "votesChipTooltip": "آرا",
+    "@votesChipTooltip": {
+        "description": "راهنمایی که هنگام قرار گرفتن ماوس روی برچسب آرا در کارت مشکل نمایش داده می‌شود"
+    },
     "autoTranslateMenuItem": "ترجمه خودکار متن",
     "@autoTranslateMenuItem": {
         "description": "برچسب آیتم منو برای فعال‌سازی ترجمه خودکار مشکلات به زبان‌های خارجی"

@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip que se muestra al pasar el cursor sobre el selector de ámbito geográfico"
     },
+    "votesChipTooltip": "Votos",
+    "@votesChipTooltip": {
+        "description": "Tooltip que se muestra al pasar el cursor sobre la etiqueta de votos en una tarjeta de problema"
+    },
     "autoTranslateMenuItem": "Traducir texto automáticamente",
     "@autoTranslateMenuItem": {
         "description": "Elemento de menú para activar la traducción automática de problemas en otros idiomas"

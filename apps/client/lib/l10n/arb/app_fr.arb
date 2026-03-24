@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
     },
+    "votesChipTooltip": "Votes",
+    "@votesChipTooltip": {
+        "description": "Info-bulle affichée au survol de la puce de votes sur une carte de problème"
+    },
     "autoTranslateMenuItem": "Traduire le texte automatiquement",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"

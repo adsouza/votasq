@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "جغرافیائی دائرے کے ڈراپ ڈاؤن پر ماؤس رکھنے پر دکھایا جانے والا ٹول ٹپ"
     },
+    "votesChipTooltip": "ووٹ",
+    "@votesChipTooltip": {
+        "description": "مسئلے کے کارڈ پر ووٹ کی چپ پر ماؤس رکھنے پر دکھایا جانے والا ٹول ٹپ"
+    },
     "autoTranslateMenuItem": "خودکار طور پر متن کا ترجمہ کریں",
     "@autoTranslateMenuItem": {
         "description": "غیر ملکی زبانوں میں مسائل کے خودکار ترجمے کو فعال کرنے کے لیے مینو آئٹم لیبل"

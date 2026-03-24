@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
     },
+    "votesChipTooltip": "الأصوات",
+    "@votesChipTooltip": {
+        "description": "تلميح يظهر عند تمرير المؤشر فوق شريحة الأصوات في بطاقة المشكلة"
+    },
     "autoTranslateMenuItem": "ترجمة النص تلقائيًا",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"

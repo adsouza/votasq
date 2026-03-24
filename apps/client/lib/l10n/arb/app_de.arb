@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip beim Überfahren des Dropdown-Menüs für den geografischen Bereich"
     },
+    "votesChipTooltip": "Stimmen",
+    "@votesChipTooltip": {
+        "description": "Tooltip beim Überfahren des Stimmen-Chips auf einer Problemkarte"
+    },
     "autoTranslateMenuItem": "Text automatisch übersetzen",
     "@autoTranslateMenuItem": {
         "description": "Menüpunkt zum Aktivieren der automatischen Übersetzung von Problemen in Fremdsprachen"

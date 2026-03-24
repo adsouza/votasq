@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Подсказка при наведении на выпадающий список географического охвата"
     },
+    "votesChipTooltip": "Голоса",
+    "@votesChipTooltip": {
+        "description": "Подсказка при наведении на чип голосов на карточке проблемы"
+    },
     "autoTranslateMenuItem": "Автоматический перевод текста",
     "@autoTranslateMenuItem": {
         "description": "Метка пункта меню для включения автоматического перевода проблем на иностранных языках"

@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "ভৌগোলিক পরিসর ড্রপডাউনের উপর মাউস রাখলে প্রদর্শিত টুলটিপ"
     },
+    "votesChipTooltip": "ভোট",
+    "@votesChipTooltip": {
+        "description": "সমস্যা কার্ডে ভোট চিপের উপর মাউস রাখলে প্রদর্শিত টুলটিপ"
+    },
     "autoTranslateMenuItem": "স্বয়ংক্রিয়ভাবে পাঠ্য অনুবাদ করুন",
     "@autoTranslateMenuItem": {
         "description": "বিদেশী ভাষায় সমস্যার স্বয়ংক্রিয় অনুবাদ সক্রিয় করার মেনু আইটেম লেবেল"

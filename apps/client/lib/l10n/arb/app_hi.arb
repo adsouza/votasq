@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Tooltip shown when hovering over the geoscope dropdown"
     },
+    "votesChipTooltip": "वोट",
+    "@votesChipTooltip": {
+        "description": "समस्या कार्ड पर वोट चिप पर माउस रखने पर दिखाई गई टूलटिप"
+    },
     "autoTranslateMenuItem": "पाठ स्वचालित रूप से अनुवाद करें",
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"

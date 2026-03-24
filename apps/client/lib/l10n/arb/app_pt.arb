@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Dica exibida ao passar o cursor sobre o menu suspenso de abrangência geográfica"
     },
+    "votesChipTooltip": "Votos",
+    "@votesChipTooltip": {
+        "description": "Dica exibida ao passar o cursor sobre o chip de votos em um cartão de problema"
+    },
     "autoTranslateMenuItem": "Traduzir texto automaticamente",
     "@autoTranslateMenuItem": {
         "description": "Rótulo do item de menu para ativar a tradução automática de problemas em idiomas estrangeiros"

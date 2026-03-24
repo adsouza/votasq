@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Chú thích hiển thị khi di chuột qua menu thả xuống phạm vi địa lý"
     },
+    "votesChipTooltip": "Bình chọn",
+    "@votesChipTooltip": {
+        "description": "Chú thích hiển thị khi di chuột qua chip bình chọn trên thẻ vấn đề"
+    },
     "autoTranslateMenuItem": "Tự động dịch văn bản",
     "@autoTranslateMenuItem": {
         "description": "Nhãn mục menu để bật dịch tự động vấn đề bằng ngôn ngữ nước ngoài"

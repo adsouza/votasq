@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "ਭੂਗੋਲਿਕ ਦਾਇਰੇ ਦੇ ਡ੍ਰੌਪਡਾਊਨ ਉੱਤੇ ਮਾਊਸ ਰੱਖਣ ਤੇ ਦਿਖਾਈ ਗਈ ਟੂਲਟਿੱਪ"
     },
+    "votesChipTooltip": "ਵੋਟ",
+    "@votesChipTooltip": {
+        "description": "ਸਮੱਸਿਆ ਕਾਰਡ ਉੱਤੇ ਵੋਟ ਚਿੱਪ ਉੱਤੇ ਮਾਊਸ ਰੱਖਣ ਤੇ ਦਿਖਾਈ ਗਈ ਟੂਲਟਿੱਪ"
+    },
     "autoTranslateMenuItem": "ਟੈਕਸਟ ਦਾ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਕਰੋ",
     "@autoTranslateMenuItem": {
         "description": "ਵਿਦੇਸ਼ੀ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਸਮੱਸਿਆਵਾਂ ਦੇ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਮੀਨੂ ਆਈਟਮ ਲੇਬਲ"

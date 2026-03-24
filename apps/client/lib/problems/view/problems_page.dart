@@ -71,6 +71,16 @@ class _ProblemsViewState extends State<ProblemsView> {
   bool _addGoalVisible = false;
   bool _submitting = false;
 
+  String _geoscopeLabel(String geoscope) {
+    if (geoscope == '/') return context.l10n.geoscopeGlobal;
+    final available =
+        context.read<GeoscopeCubit>().state.availableGeoscopes;
+    for (final g in available) {
+      if (g.id == geoscope) return g.label;
+    }
+    return geoscope.split('/').last;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -466,23 +476,32 @@ class _ProblemsViewState extends State<ProblemsView> {
               ),
             ),
             if (problem.geoscope != '/')
-              Chip(
+              Tooltip(
+                message: '${l10n.geoscopeLabel}'
+                    ' ${_geoscopeLabel(problem.geoscope)}',
+                child: Chip(
+                  label: Text(
+                    problem.geoscope.split('/').last,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  backgroundColor:
+                      theme.colorScheme.tertiaryContainer,
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize:
+                      MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            Tooltip(
+              message: l10n.votesChipTooltip,
+              child: Chip(
                 label: Text(
-                  problem.geoscope.split('/').last,
+                  '${problem.votes}',
                   style: const TextStyle(fontSize: 12),
                 ),
-                backgroundColor: theme.colorScheme.tertiaryContainer,
+                backgroundColor: theme.colorScheme.secondaryContainer,
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-            Chip(
-              label: Text(
-                '${problem.votes}',
-                style: const TextStyle(fontSize: 12),
-              ),
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             const ProblemTranslateButton(),
           ],

@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "지리적 범위 드롭다운에 마우스를 올렸을 때 표시되는 툴팁"
     },
+    "votesChipTooltip": "투표",
+    "@votesChipTooltip": {
+        "description": "문제 카드의 투표 칩에 마우스를 올렸을 때 표시되는 툴팁"
+    },
     "autoTranslateMenuItem": "텍스트 자동 번역",
     "@autoTranslateMenuItem": {
         "description": "외국어 문제의 자동 번역을 활성화하는 메뉴 항목 라벨"

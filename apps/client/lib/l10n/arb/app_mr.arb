@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "भौगोलिक व्याप्ती ड्रॉपडाउनवर माउस ठेवल्यावर दाखवलेले टूलटिप"
     },
+    "votesChipTooltip": "मते",
+    "@votesChipTooltip": {
+        "description": "समस्या कार्डवरील मते चिपवर माउस ठेवल्यावर दाखवलेले टूलटिप"
+    },
     "autoTranslateMenuItem": "मजकूर आपोआप भाषांतर करा",
     "@autoTranslateMenuItem": {
         "description": "परदेशी भाषांमधील समस्यांचे स्वयंचलित भाषांतर सुरू करण्यासाठी मेनू आयटम लेबल"

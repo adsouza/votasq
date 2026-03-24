@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "Coğrafi kapsam açılır menüsü üzerine gelindiğinde gösterilen araç ipucu"
     },
+    "votesChipTooltip": "Oylar",
+    "@votesChipTooltip": {
+        "description": "Sorun kartındaki oy çipinin üzerine gelindiğinde gösterilen araç ipucu"
+    },
     "autoTranslateMenuItem": "Metni otomatik çevir",
     "@autoTranslateMenuItem": {
         "description": "Yabancı dillerdeki sorunların otomatik cihaz üzerinde çevirisini açmak için menü öğesi etiketi"

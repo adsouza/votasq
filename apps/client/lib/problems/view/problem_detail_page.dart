@@ -209,13 +209,21 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     if (problem.geoscope != '/')
-                      Chip(
-                        label: Text(_geoscopeLabel(problem.geoscope)),
-                        backgroundColor: theme.colorScheme.tertiaryContainer,
+                      Tooltip(
+                        message: '${l10n.geoscopeLabel}'
+                            ' ${_geoscopeLabel(problem.geoscope)}',
+                        child: Chip(
+                          label: Text(_geoscopeLabel(problem.geoscope)),
+                          backgroundColor:
+                              theme.colorScheme.tertiaryContainer,
+                        ),
                       ),
-                    Chip(
-                      label: Text('${problem.votes}'),
-                      backgroundColor: theme.colorScheme.secondaryContainer,
+                    Tooltip(
+                      message: l10n.votesChipTooltip,
+                      child: Chip(
+                        label: Text('${problem.votes}'),
+                        backgroundColor: theme.colorScheme.secondaryContainer,
+                      ),
                     ),
                     const ProblemTranslateButton(),
                   ],

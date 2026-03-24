@@ -96,6 +96,10 @@
     "@geoscopeDropdownTooltip": {
         "description": "คำแนะนำที่แสดงเมื่อวางเมาส์เหนือเมนูแบบเลื่อนลงขอบเขตทางภูมิศาสตร์"
     },
+    "votesChipTooltip": "คะแนนโหวต",
+    "@votesChipTooltip": {
+        "description": "คำแนะนำที่แสดงเมื่อวางเมาส์เหนือชิปคะแนนโหวตบนการ์ดปัญหา"
+    },
     "autoTranslateMenuItem": "แปลข้อความอัตโนมัติ",
     "@autoTranslateMenuItem": {
         "description": "ป้ายกำกับรายการเมนูเปิดการแปลอัตโนมัติของปัญหาในภาษาต่างประเทศ"
