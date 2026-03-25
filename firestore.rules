@@ -96,9 +96,28 @@ service cloud.firestore {
         request.auth != null
         && request.auth.uid == userId
         && request.resource.data.uid == resource.data.uid
-        && request.resource.data.votes is int
-        && request.resource.data.votes == resource.data.votes - 1
-        && request.resource.data.votes >= 0;
+        && (
+          // Vote decrement
+          (
+            request.resource.data.votes is int
+            && request.resource.data.votes == resource.data.votes - 1
+            && request.resource.data.votes >= 0
+          )
+          ||
+          // Vote grant on resume (time-based, with lastActiveAt update)
+          (
+            request.resource.data.votes is int
+            && request.resource.data.lastActiveAt is timestamp
+            && request.resource.data.votes > resource.data.votes 
+            && request.resource.data.votes - resource.data.votes < 10
+          )
+          ||
+          // lastActiveAt touch (votes unchanged)
+          (
+            request.resource.data.votes == resource.data.votes
+            && request.resource.data.lastActiveAt is timestamp
+          )
+        );
     }
 
     match /feedback/{feedbackId} {

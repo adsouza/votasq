@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
@@ -428,6 +429,34 @@ class FirestoreRepository {
       votes: (data['votes'] as num).toInt(),
       lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
     );
+  }
+
+  /// Grant votes based on log₃(hoursElapsed) and update the timestamp.
+  Future<void> grantVotesAndTouch(String userId) async {
+    final now = DateTime.now().toUtc();
+    final doc = await _firestore.collection('users').doc(userId).get();
+    if (!doc.exists) return;
+    final data = doc.data()!;
+    final lastActive = (data['lastActiveAt'] as Timestamp).toDate();
+    final hoursElapsed = now.difference(lastActive).inHours;
+    final grant = hoursElapsed >= 3
+        ? (math.log(hoursElapsed) / math.log(3)).floor()
+        : 0;
+    if (grant > 0) {
+      await doc.reference.update({
+        'votes': FieldValue.increment(grant),
+        'lastActiveAt': now,
+      });
+    } else {
+      await doc.reference.update({'lastActiveAt': now});
+    }
+  }
+
+  /// Update the user's `lastActiveAt` timestamp.
+  Future<void> touchLastActiveAt(String userId) async {
+    await _firestore.collection('users').doc(userId).update({
+      'lastActiveAt': DateTime.now().toUtc(),
+    });
   }
 
   /// Real-time stream of a user's remaining vote budget.
