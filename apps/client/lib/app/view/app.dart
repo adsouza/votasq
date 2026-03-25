@@ -83,7 +83,12 @@ class _AppState extends State<App> {
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => AuthCubit(authRepo)),
+          BlocProvider(
+            create: (context) => AuthCubit(
+              authRepo,
+              context.read<FirestoreRepository>(),
+            ),
+          ),
           BlocProvider(create: (_) => AutoTranslateCubit()),
           BlocProvider(
             create: (context) {

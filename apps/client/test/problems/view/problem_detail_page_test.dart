@@ -32,7 +32,7 @@ Problem _problem({
   String goal = '',
   String ownerId = 'owner1',
   String geoscope = '/',
-  int votes = 5,
+  int votes = 7,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -146,7 +146,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
       expect(find.text('test problem description'), findsOneWidget);
-      expect(find.text('5'), findsOneWidget);
+      expect(find.text('7'), findsOneWidget);
       // No text field in read-only view.
       expect(find.byType(TextField), findsNothing);
     });
@@ -226,6 +226,7 @@ void main() {
         const AuthState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
+          remainingVotes: initialVoteBudget,
         ),
       );
       await tester.pumpWidget(buildSubject());
@@ -256,7 +257,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
       expect(find.byType(ActionChip), findsNothing);
-      expect(find.text('5'), findsOneWidget);
+      expect(find.text('7'), findsOneWidget);
     });
 
     testWidgets('shows goal in read-only view when non-empty', (

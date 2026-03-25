@@ -407,9 +407,42 @@ class FirestoreRepository {
     });
   }
 
+  /// Ensure a user document exists in the `users` collection.
+  /// Creates one from [user] if missing. Returns the stored [User].
+  Future<User> ensureUserDoc(User user) async {
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    if (doc.exists) return _docToUser(doc);
+    final data = {
+      'uid': user.uid,
+      'votes': user.votes,
+      'lastActiveAt': user.lastActiveAt,
+    };
+    await _firestore.collection('users').doc(user.uid).set(data);
+    return user;
+  }
+
+  User _docToUser(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
+    return User(
+      uid: doc.id,
+      votes: (data['votes'] as num).toInt(),
+      lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
+    );
+  }
+
+  /// Real-time stream of a user's remaining vote budget.
+  Stream<int> watchUserVotes(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.exists ? (doc.data()!['votes'] as num).toInt() : 0);
+  }
+
   /// Atomically increment a user's vote on a problem.
   /// Creates the voter doc if it doesn't exist, or increments votes.
-  /// Also increments the problem's denormalized `votes` field.
+  /// Also increments the problem's denormalized `votes` field
+  /// and decrements the user's vote budget.
   Future<void> vote({
     required String problemId,
     required String userId,
@@ -423,6 +456,10 @@ class FirestoreRepository {
       ..update(
         _problemsRef.doc(problemId),
         {'votes': FieldValue.increment(1)},
+      )
+      ..update(
+        _firestore.collection('users').doc(userId),
+        {'votes': FieldValue.increment(-1)},
       );
     await batch.commit();
   }

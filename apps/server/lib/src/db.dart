@@ -6,6 +6,23 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared/shared.dart';
 
+/// HTTP client that adds the `Bearer owner` token to bypass Firestore
+/// security rules in the emulator.
+class _EmulatorAdminClient extends http.BaseClient {
+  _EmulatorAdminClient(this._inner);
+
+  final http.Client _inner;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    request.headers['Authorization'] = 'Bearer owner';
+    return _inner.send(request);
+  }
+
+  @override
+  void close() => _inner.close();
+}
+
 /// Storage via Firestore using the official googleapis client.
 /// Authenticates automatically via App Default Creds on Cloud Run.
 /// When the FIRESTORE_EMULATOR_HOST env var is set, connects to the local
@@ -25,7 +42,7 @@ class Db {
     final String? rootUrl;
 
     if (emulatorHost != null) {
-      client = http.Client();
+      client = _EmulatorAdminClient(http.Client());
       rootUrl = 'http://$emulatorHost/';
     } else {
       client = await clientViaApplicationDefaultCredentials(
@@ -308,6 +325,42 @@ class Db {
     } while (pageToken != null);
   }
 
+  /// Ensure a user document exists in the `users` collection.
+  /// Creates one from [user] if missing. Returns the stored [User].
+  Future<User> ensureUserDoc(User user) async {
+    try {
+      final doc = await _firestore.projects.databases.documents.get(
+        '$_basePath/users/${user.uid}',
+      );
+      return User(
+        uid: user.uid,
+        votes: int.parse(doc.fields?['votes']?.integerValue ?? '0'),
+        lastActiveAt: _parseTimestamp(doc.fields!['lastActiveAt']!),
+      );
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status != 404) rethrow;
+    }
+    final userDoc = _userToDocument(user)
+      ..name = '$_basePath/users/${user.uid}';
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(writes: [fs.Write(update: userDoc)]),
+      _databasePath,
+    );
+    return user;
+  }
+
+  fs.Document _userToDocument(User user) {
+    return fs.Document(
+      fields: {
+        'uid': fs.Value(stringValue: user.uid),
+        'votes': fs.Value(integerValue: '${user.votes}'),
+        'lastActiveAt': fs.Value(
+          timestampValue: user.lastActiveAt.toIso8601String(),
+        ),
+      },
+    );
+  }
+
   /// Write a voter doc without modifying the problem's vote count.
   /// Used during problem creation where the problem already has the
   /// correct vote total.
@@ -377,11 +430,37 @@ class Db {
     final problemDoc = _problemToDocument(updatedProblem)
       ..name = '$_basePath/problems/$problemId';
 
+    // Read user doc to decrement vote budget.
+    int userVotes;
+    try {
+      final userDoc = await _firestore.projects.databases.documents.get(
+        '$_basePath/users/$voterId',
+      );
+      userVotes = int.parse(
+        userDoc.fields?['votes']?.integerValue ?? '0',
+      );
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status == 404) {
+        userVotes = 0;
+      } else {
+        rethrow;
+      }
+    }
+
+    final updatedUserDoc = fs.Document(
+      name: '$_basePath/users/$voterId',
+      fields: {
+        'uid': fs.Value(stringValue: voterId),
+        'votes': fs.Value(integerValue: '${userVotes - 1}'),
+      },
+    );
+
     await _firestore.projects.databases.documents.commit(
       fs.CommitRequest(
         writes: [
           fs.Write(update: voterDoc),
           fs.Write(update: problemDoc),
+          fs.Write(update: updatedUserDoc),
         ],
       ),
       _databasePath,

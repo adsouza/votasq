@@ -246,11 +246,15 @@ void main() {
       expect(find.text('42'), findsOneWidget);
     });
 
-    testWidgets('vote chip is ActionChip when authenticated', (
+    testWidgets('vote chip is ActionChip when authenticated with votes', (
       tester,
     ) async {
       when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: initialVoteBudget,
+        ),
       );
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
@@ -261,6 +265,27 @@ void main() {
       await tester.pumpWidget(buildSubject());
       expect(find.byType(ActionChip), findsOneWidget);
       expect(find.byIcon(Icons.arrow_circle_up_rounded), findsOneWidget);
+    });
+
+    testWidgets('vote chip is plain Chip when no remaining votes', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: 0,
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem()],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.byType(ActionChip), findsNothing);
+      expect(find.byType(Chip), findsOneWidget);
     });
 
     testWidgets('vote chip is plain Chip when not authenticated', (
@@ -282,12 +307,16 @@ void main() {
 
     testWidgets('tapping vote chip calls cubit.vote', (tester) async {
       when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: initialVoteBudget,
+        ),
       );
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
           status: ProblemsStatus.success,
-          problems: [_problem(id: 'p1', ownerId: 'other', votes: 5)],
+          problems: [_problem(id: 'p1', ownerId: 'other')],
         ),
       );
       when(

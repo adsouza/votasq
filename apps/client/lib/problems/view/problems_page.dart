@@ -493,8 +493,9 @@ class _ProblemsViewState extends State<ProblemsView> {
               ),
             Builder(
               builder: (context) {
-                final userId = context.read<AuthCubit>().state.userId;
-                if (userId != null) {
+                final authState = context.watch<AuthCubit>().state;
+                final userId = authState.userId;
+                if (userId != null && (authState.remainingVotes ?? 0) > 0) {
                   return Tooltip(
                     message: l10n.voteButtonTooltip,
                     child: ActionChip(

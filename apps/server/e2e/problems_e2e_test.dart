@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:shared/shared.dart';
 import 'package:test/test.dart';
 
 /// End-to-end integration test that exercises the /problems endpoints
@@ -316,7 +317,30 @@ void main() {
     final problemId = problem['id'] as String;
     expect(problem['votes'], 1);
 
-    // ── 2. Vote via the voters endpoint ──
+    // ── 2. Seed a user doc for the voter via the emulator ──
+    const emulatorHost = 'localhost:8081';
+    final userDocUrl = Uri.parse(
+      'http://$emulatorHost/v1/projects/votasq-test'
+      '/databases/(default)/documents/users/voter-2',
+    );
+    await client.patch(
+      userDocUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer owner',
+      },
+      body: jsonEncode({
+        'fields': {
+          'uid': {'stringValue': 'voter-2'},
+          'votes': {'integerValue': '$initialVoteBudget'},
+          'lastActiveAt': {
+            'timestampValue': DateTime.now().toUtc().toIso8601String(),
+          },
+        },
+      }),
+    );
+
+    // ── 3. Vote via the voters endpoint ──
     final voteResponse = await client.post(
       baseUrl.resolve('/api/problems/$problemId/voters'),
       headers: {'Content-Type': 'application/json'},
@@ -324,7 +348,7 @@ void main() {
     );
     expect(voteResponse.statusCode, 200);
 
-    // ── 3. Fetch problem to verify vote count increased ──
+    // ── 4. Fetch problem to verify vote count increased ──
     final fetchResponse = await client.get(
       baseUrl.resolve('/api/problems/$problemId'),
     );
@@ -332,7 +356,7 @@ void main() {
     final fetched = jsonDecode(fetchResponse.body) as Map<String, dynamic>;
     expect(fetched['votes'], 2);
 
-    // ── 4. Vote again from same user — should increment again ──
+    // ── 5. Vote again from same user — should increment again ──
     final voteAgain = await client.post(
       baseUrl.resolve('/api/problems/$problemId/voters'),
       headers: {'Content-Type': 'application/json'},
@@ -346,8 +370,7 @@ void main() {
     final refetched = jsonDecode(fetchAgain.body) as Map<String, dynamic>;
     expect(refetched['votes'], 3);
 
-    // ── 5. Verify voter doc via emulator ──
-    const emulatorHost = 'localhost:8081';
+    // ── 6. Verify voter doc via emulator ──
     final voterDocUrl = Uri.parse(
       'http://$emulatorHost/v1/projects/votasq-test'
       '/databases/(default)/documents'
@@ -361,6 +384,23 @@ void main() {
     final votesField = fields['votes'] as Map<String, dynamic>;
     expect(uidField['stringValue'], 'voter-2');
     expect(votesField['integerValue'], '2');
+
+    // ── 7. Verify user vote budget was decremented ──
+    final userResponse = await client.get(
+      userDocUrl,
+      headers: {'Authorization': 'Bearer owner'},
+    );
+    expect(userResponse.statusCode, 200);
+    final userDoc = jsonDecode(userResponse.body) as Map<String, dynamic>;
+    final userFields = userDoc['fields'] as Map<String, dynamic>;
+    final userVotesField = userFields['votes'] as Map<String, dynamic>;
+    expect(
+      userVotesField['integerValue'],
+      '${initialVoteBudget - 2}',
+      reason:
+          'Started with $initialVoteBudget votes, cast 2, '
+          'should have ${initialVoteBudget - 2} remaining',
+    );
   });
 
   test('translation cache: hit, invalidation on description change', () async {
