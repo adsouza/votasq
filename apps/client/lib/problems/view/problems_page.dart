@@ -314,6 +314,7 @@ class _ProblemsViewState extends State<ProblemsView> {
         message: l10n.geoscopeDropdownTooltip,
         child: DropdownButton<String>(
           value: effectiveValue,
+          menuWidth: 240,
           items: items,
           selectedItemBuilder: (_) => ancestorIds.map((id) {
             if (id == '/') return const Text('🌐');
