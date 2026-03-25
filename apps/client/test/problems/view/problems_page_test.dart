@@ -312,15 +312,33 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('hamburger menu renders both items', (tester) async {
+    testWidgets('hamburger menu hides owned filter when not authenticated', (
+      tester,
+    ) async {
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
       );
       await tester.pumpWidget(buildSubject());
-      // Tap the hamburger menu icon.
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
-      // Both menu items should be visible.
+      // Only "with goals" checkbox visible, not "my problems".
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(find.byIcon(Icons.location_on), findsOneWidget);
+    });
+
+    testWidgets('hamburger menu shows owned filter when authenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      // Both checkboxes visible.
       expect(find.byIcon(Icons.check_box_outline_blank), findsNWidgets(2));
       expect(find.byIcon(Icons.location_on), findsOneWidget);
     });

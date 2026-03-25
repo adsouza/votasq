@@ -745,18 +745,19 @@ class _ProblemsViewState extends State<ProblemsView> {
             }
           },
           itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'toggle_owned',
-              child: ListTile(
-                leading: Icon(
-                  _showOnlyOwned
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank,
+            if (context.read<AuthCubit>().state.userId != null)
+              PopupMenuItem(
+                value: 'toggle_owned',
+                child: ListTile(
+                  leading: Icon(
+                    _showOnlyOwned
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
+                  ),
+                  title: Text(l10n.showOnlyOwnedMenuItem),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                title: Text(l10n.showOnlyOwnedMenuItem),
-                contentPadding: EdgeInsets.zero,
               ),
-            ),
             PopupMenuItem(
               value: 'toggle_with_goals',
               child: ListTile(
