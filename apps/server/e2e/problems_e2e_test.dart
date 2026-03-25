@@ -179,20 +179,24 @@ void main() {
     expect(fetched['description'], descriptions.first);
     expect(fetched['votes'], 1);
 
-    // ── 4. Update: change description & increment votes ──
+    // ── 4. Update: change description (votes preserved from existing) ──
     const updatedDescription = 'Fix login timeout on all network conditions';
     final putResponse = await client.put(
       baseUrl.resolve('/api/problems/$targetId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'description': updatedDescription,
-        'votes': 3,
+        'votes': 99,
       }),
     );
     expect(putResponse.statusCode, 200);
     final updated = jsonDecode(putResponse.body) as Map<String, dynamic>;
     expect(updated['description'], updatedDescription);
-    expect(updated['votes'], 3);
+    expect(
+      updated['votes'],
+      1,
+      reason: 'PUT should preserve existing votes, not accept client value',
+    );
     expect(updated['version'], 2, reason: 'Version should increment on update');
 
     // ── 5. Fetch again to verify persistence ──
@@ -203,7 +207,7 @@ void main() {
     final verified = jsonDecode(verifyResponse.body) as Map<String, dynamic>;
     expect(verified['id'], targetId);
     expect(verified['description'], updatedDescription);
-    expect(verified['votes'], 3);
+    expect(verified['votes'], 1);
     expect(verified['version'], 2);
 
     // ── 6. Fetch version history ──
@@ -297,6 +301,68 @@ void main() {
     expect(londonResults, isNot(contains(cityId)));
   });
 
+  test('vote endpoint creates voter doc and increments votes', () async {
+    // ── 1. Create a problem ──
+    final createResponse = await client.post(
+      baseUrl.resolve('/api/problems'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'description': 'Improve public transport',
+        'ownerId': uid,
+      }),
+    );
+    expect(createResponse.statusCode, 201);
+    final problem = jsonDecode(createResponse.body) as Map<String, dynamic>;
+    final problemId = problem['id'] as String;
+    expect(problem['votes'], 1);
+
+    // ── 2. Vote via the voters endpoint ──
+    final voteResponse = await client.post(
+      baseUrl.resolve('/api/problems/$problemId/voters'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': 'voter-2'}),
+    );
+    expect(voteResponse.statusCode, 200);
+
+    // ── 3. Fetch problem to verify vote count increased ──
+    final fetchResponse = await client.get(
+      baseUrl.resolve('/api/problems/$problemId'),
+    );
+    expect(fetchResponse.statusCode, 200);
+    final fetched = jsonDecode(fetchResponse.body) as Map<String, dynamic>;
+    expect(fetched['votes'], 2);
+
+    // ── 4. Vote again from same user — should increment again ──
+    final voteAgain = await client.post(
+      baseUrl.resolve('/api/problems/$problemId/voters'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'uid': 'voter-2'}),
+    );
+    expect(voteAgain.statusCode, 200);
+
+    final fetchAgain = await client.get(
+      baseUrl.resolve('/api/problems/$problemId'),
+    );
+    final refetched = jsonDecode(fetchAgain.body) as Map<String, dynamic>;
+    expect(refetched['votes'], 3);
+
+    // ── 5. Verify voter doc via emulator ──
+    const emulatorHost = 'localhost:8081';
+    final voterDocUrl = Uri.parse(
+      'http://$emulatorHost/v1/projects/votasq-test'
+      '/databases/(default)/documents'
+      '/problems/$problemId/voters/voter-2',
+    );
+    final voterResponse = await client.get(voterDocUrl);
+    expect(voterResponse.statusCode, 200);
+    final voterDoc = jsonDecode(voterResponse.body) as Map<String, dynamic>;
+    final fields = voterDoc['fields'] as Map<String, dynamic>;
+    final uidField = fields['uid'] as Map<String, dynamic>;
+    final votesField = fields['votes'] as Map<String, dynamic>;
+    expect(uidField['stringValue'], 'voter-2');
+    expect(votesField['integerValue'], '2');
+  });
+
   test('translation cache: hit, invalidation on description change', () async {
     // ── 1. Create a problem ──
     final createResponse = await client.post(
@@ -348,7 +414,6 @@ void main() {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'description': 'Reparar las aceras',
-        'votes': 1,
       }),
     );
     expect(putResponse.statusCode, 200);

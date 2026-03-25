@@ -223,12 +223,45 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                           backgroundColor: theme.colorScheme.tertiaryContainer,
                         ),
                       ),
-                    Tooltip(
-                      message: l10n.votesChipTooltip,
-                      child: Chip(
-                        label: Text('${problem.votes}'),
-                        backgroundColor: theme.colorScheme.secondaryContainer,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final userId = context.read<AuthCubit>().state.userId;
+                        if (userId != null) {
+                          return Tooltip(
+                            message: l10n.voteButtonTooltip,
+                            child: ActionChip(
+                              avatar: const Icon(
+                                Icons.arrow_circle_up_rounded,
+                                size: 16,
+                              ),
+                              label: Text('${problem.votes}'),
+                              backgroundColor:
+                                  theme.colorScheme.secondaryContainer,
+                              onPressed: () async {
+                                await context.read<FirestoreRepository>().vote(
+                                  problemId: problem.id,
+                                  userId: userId,
+                                );
+                                if (mounted) {
+                                  setState(() {
+                                    _problem = problem.copyWith(
+                                      votes: problem.votes + 1,
+                                    );
+                                  });
+                                }
+                              },
+                            ),
+                          );
+                        }
+                        return Tooltip(
+                          message: l10n.votesChipTooltip,
+                          child: Chip(
+                            label: Text('${problem.votes}'),
+                            backgroundColor:
+                                theme.colorScheme.secondaryContainer,
+                          ),
+                        );
+                      },
                     ),
                     const ProblemTranslateButton(),
                   ],

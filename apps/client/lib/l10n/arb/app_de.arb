@@ -120,8 +120,13 @@
     "@languageMismatchError": {
         "description": "Fehlermeldung wenn Beschreibung und Ziel in verschiedenen Sprachen erkannt werden",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
-    }
+    },
+    "voteButtonTooltip": "Für dieses Problem stimmen"
 }

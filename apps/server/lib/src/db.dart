@@ -308,6 +308,118 @@ class Db {
     } while (pageToken != null);
   }
 
+  /// Write a voter doc without modifying the problem's vote count.
+  /// Used during problem creation where the problem already has the
+  /// correct vote total.
+  Future<void> saveVoterDoc({
+    required String problemId,
+    required String voterId,
+    required int votes,
+  }) async {
+    final voterDoc = fs.Document(
+      name: '$_basePath/problems/$problemId/voters/$voterId',
+      fields: {
+        'uid': fs.Value(stringValue: voterId),
+        'votes': fs.Value(integerValue: '$votes'),
+      },
+    );
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(writes: [fs.Write(update: voterDoc)]),
+      _databasePath,
+    );
+  }
+
+  /// Atomically write a voter doc and increment the problem's vote count.
+  Future<void> voteForProblem({
+    required String problemId,
+    required String voterId,
+  }) async {
+    // Read existing voter doc to determine current vote count.
+    int currentVotes;
+    try {
+      final existing = await _firestore.projects.databases.documents.get(
+        '$_basePath/problems/$problemId/voters/$voterId',
+      );
+      currentVotes = int.parse(existing.fields?['votes']?.integerValue ?? '0');
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status == 404) {
+        currentVotes = 0;
+      } else {
+        rethrow;
+      }
+    }
+
+    final newVotes = currentVotes + 1;
+    final voterDoc = fs.Document(
+      name: '$_basePath/problems/$problemId/voters/$voterId',
+      fields: {
+        'uid': fs.Value(stringValue: voterId),
+        'votes': fs.Value(integerValue: '$newVotes'),
+      },
+    );
+
+    // Read problem to compute new total.
+    final problem = await getProblem(problemId);
+    final updatedProblem = Problem(
+      id: problem.id,
+      description: problem.description,
+      goal: problem.goal,
+      ownerId: problem.ownerId,
+      geoscope: problem.geoscope,
+      lang: problem.lang,
+      votes: problem.votes + 1,
+      complaints: problem.complaints,
+      solved: problem.solved,
+      version: problem.version,
+      createdAt: problem.createdAt,
+      lastUpdatedAt: problem.lastUpdatedAt,
+    );
+    final problemDoc = _problemToDocument(updatedProblem)
+      ..name = '$_basePath/problems/$problemId';
+
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(
+        writes: [
+          fs.Write(update: voterDoc),
+          fs.Write(update: problemDoc),
+        ],
+      ),
+      _databasePath,
+    );
+  }
+
+  /// Fetch all problem IDs that a user has voted for
+  /// via collection group query.
+  Future<List<String>> getVotedProblemIds(String userId) async {
+    final results = await _firestore.projects.databases.documents.runQuery(
+      fs.RunQueryRequest(
+        structuredQuery: fs.StructuredQuery(
+          from: [
+            fs.CollectionSelector(
+              collectionId: 'voters',
+              allDescendants: true,
+            ),
+          ],
+          where: fs.Filter(
+            fieldFilter: fs.FieldFilter(
+              field: fs.FieldReference(fieldPath: 'uid'),
+              op: 'EQUAL',
+              value: fs.Value(stringValue: userId),
+            ),
+          ),
+        ),
+      ),
+      _basePath,
+    );
+
+    return results.where((r) => r.document != null).map((r) {
+      // Path: .../problems/{problemId}/voters/{voterId}
+      final parts = r.document!.name!.split('/');
+      final problemsIndex = parts.lastIndexOf('problems');
+      return parts[problemsIndex + 1];
+    }).toList();
+  }
+
   fs.Document _problemToDocument(Problem problem) {
     return fs.Document(
       fields: {

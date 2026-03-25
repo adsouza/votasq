@@ -120,8 +120,13 @@
     "@languageMismatchError": {
         "description": "Pesan kesalahan saat deskripsi dan tujuan terdeteksi dalam bahasa berbeda",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
-    }
+    },
+    "voteButtonTooltip": "Pilih masalah ini"
 }

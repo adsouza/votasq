@@ -120,8 +120,13 @@
     "@languageMismatchError": {
         "description": "説明と目標が異なる言語で検出された場合のエラートースト",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
-    }
+    },
+    "voteButtonTooltip": "この問題に投票する"
 }

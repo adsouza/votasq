@@ -210,6 +210,55 @@ void main() {
       expect(find.text('home'), findsOneWidget);
     });
 
+    testWidgets('vote chip is tappable for authenticated non-owner', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer(
+        (_) async => _problem(),
+      );
+      when(
+        () => repo.vote(
+          problemId: any(named: 'problemId'),
+          userId: any(named: 'userId'),
+        ),
+      ).thenAnswer((_) async {});
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Should show ActionChip with vote icon.
+      expect(find.byType(ActionChip), findsOneWidget);
+      expect(
+        find.byIcon(Icons.arrow_circle_up_rounded),
+        findsOneWidget,
+      );
+
+      // Tap the vote chip.
+      await tester.tap(find.byType(ActionChip));
+      await tester.pump();
+      verify(
+        () => repo.vote(problemId: 'test-id', userId: 'other-user'),
+      ).called(1);
+    });
+
+    testWidgets('vote chip is plain Chip when not authenticated', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer(
+        (_) async => _problem(),
+      );
+      when(() => authCubit.state).thenReturn(const AuthState());
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(find.byType(ActionChip), findsNothing);
+      expect(find.text('5'), findsOneWidget);
+    });
+
     testWidgets('shows goal in read-only view when non-empty', (
       tester,
     ) async {

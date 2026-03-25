@@ -299,6 +299,40 @@ void main() {
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
+      'vote calls repo',
+      build: () {
+        when(
+          () => repo.vote(
+            problemId: any(named: 'problemId'),
+            userId: any(named: 'userId'),
+          ),
+        ).thenAnswer((_) async {});
+        return ProblemsCubit(repo);
+      },
+      act: (cubit) => cubit.vote(problemId: '1', userId: 'user1'),
+      verify: (_) {
+        verify(
+          () => repo.vote(problemId: '1', userId: 'user1'),
+        ).called(1);
+      },
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'vote handles repo exception gracefully',
+      build: () {
+        when(
+          () => repo.vote(
+            problemId: any(named: 'problemId'),
+            userId: any(named: 'userId'),
+          ),
+        ).thenThrow(Exception('fail'));
+        return ProblemsCubit(repo);
+      },
+      act: (cubit) => cubit.vote(problemId: '1', userId: 'user1'),
+      expect: () => <ProblemsState>[],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
       'updateProblem calls repo',
       build: () {
         when(() => repo.updateProblem(any())).thenAnswer((_) async {});

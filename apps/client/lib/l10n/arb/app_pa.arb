@@ -120,8 +120,13 @@
     "@languageMismatchError": {
         "description": "ਜਦੋਂ ਵਰਣਨ ਅਤੇ ਟੀਚਾ ਵੱਖ-ਵੱਖ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਖੋਜੇ ਜਾਂਦੇ ਹਨ ਤਾਂ ਦਿਖਾਈ ਜਾਣ ਵਾਲੀ ਗਲਤੀ",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
-    }
+    },
+    "voteButtonTooltip": "ਇਸ ਸਮੱਸਿਆ ਲਈ ਵੋਟ ਕਰੋ"
 }

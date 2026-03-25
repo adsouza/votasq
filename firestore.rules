@@ -18,19 +18,29 @@ service cloud.firestore {
         && request.resource.data.version is int
         && request.resource.data.version == 1;
       allow update: if
-        request.resource.data.description is string
-        && request.resource.data.description.size() > 0
-        && request.resource.data.description.size() <= 80
-        && request.resource.data.geoscope is string
-        && request.resource.data.geoscope.size() > 0
-        && request.resource.data.geoscope.size() <= 72
-        && (request.resource.data.geoscope == resource.data.geoscope
-            || (request.auth != null && request.auth.uid == resource.data.ownerId))
-        && request.resource.data.votes is int
-        && request.resource.data.votes >= 0
-        && request.resource.data.solved is bool
-        && request.resource.data.version is int
-        && request.resource.data.version > resource.data.version;
+        // Vote-only update (auth required, votes +1, version unchanged)
+        (
+          request.auth != null
+          && request.resource.data.votes == resource.data.votes + 1
+          && request.resource.data.version == resource.data.version
+        )
+        ||
+        // Full problem update
+        (
+          request.resource.data.description is string
+          && request.resource.data.description.size() > 0
+          && request.resource.data.description.size() <= 80
+          && request.resource.data.geoscope is string
+          && request.resource.data.geoscope.size() > 0
+          && request.resource.data.geoscope.size() <= 72
+          && (request.resource.data.geoscope == resource.data.geoscope
+              || (request.auth != null && request.auth.uid == resource.data.ownerId))
+          && request.resource.data.votes is int
+          && request.resource.data.votes >= 0
+          && request.resource.data.solved is bool
+          && request.resource.data.version is int
+          && request.resource.data.version > resource.data.version
+        );
 
       match /versions/{versionId} {
         allow read: if true;
@@ -39,6 +49,23 @@ service cloud.firestore {
           && request.resource.data.description is string
           && request.resource.data.version is int
           && request.resource.data.archivedAt is timestamp;
+      }
+
+      match /voters/{voterId} {
+        allow read: if true;
+        allow create: if
+          request.auth != null
+          && request.auth.uid == voterId
+          && request.resource.data.keys().hasAll(['uid', 'votes'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.votes is int
+          && request.resource.data.votes == 1;
+        allow update: if
+          request.auth != null
+          && request.auth.uid == voterId
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.votes is int
+          && request.resource.data.votes > resource.data.votes;
       }
 
       match /translations/{langCode} {

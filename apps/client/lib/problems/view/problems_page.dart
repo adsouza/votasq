@@ -491,17 +491,48 @@ class _ProblemsViewState extends State<ProblemsView> {
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
-            Tooltip(
-              message: l10n.votesChipTooltip,
-              child: Chip(
-                label: Text(
-                  '${problem.votes}',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                backgroundColor: theme.colorScheme.secondaryContainer,
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
+            Builder(
+              builder: (context) {
+                final userId = context.read<AuthCubit>().state.userId;
+                if (userId != null) {
+                  return Tooltip(
+                    message: l10n.voteButtonTooltip,
+                    child: ActionChip(
+                      avatar: const Icon(
+                        Icons.arrow_circle_up_rounded,
+                        size: 16,
+                      ),
+                      label: Text(
+                        '${problem.votes}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onPressed: () {
+                        unawaited(
+                          context.read<ProblemsCubit>().vote(
+                            problemId: problem.id,
+                            userId: userId,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+                return Tooltip(
+                  message: l10n.votesChipTooltip,
+                  child: Chip(
+                    label: Text(
+                      '${problem.votes}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    backgroundColor: theme.colorScheme.secondaryContainer,
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                );
+              },
             ),
             const ProblemTranslateButton(),
           ],

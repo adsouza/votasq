@@ -120,8 +120,13 @@
     "@languageMismatchError": {
         "description": "விளக்கம் மற்றும் இலக்கு வெவ்வேறு மொழிகளில் கண்டறியப்பட்டால் காட்டப்படும் பிழை",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
-    }
+    },
+    "voteButtonTooltip": "இந்தப் பிரச்சனைக்கு வாக்களியுங்கள்"
 }

@@ -53,6 +53,11 @@ Future<Response> _post(RequestContext context) async {
       'lastUpdatedAt': now,
     });
     await db.saveProblem(problem);
+    await db.saveVoterDoc(
+      problemId: problem.id,
+      voterId: problem.ownerId,
+      votes: 1,
+    );
     return Response.json(statusCode: 201, body: problem.toJson());
   } on Exception {
     return Response(statusCode: 400);

@@ -37,6 +37,7 @@ Future<Response> _put(RequestContext context, String id) async {
       ...body,
       'id': id,
       'ownerId': existing.ownerId,
+      'votes': existing.votes,
       'version': existing.version + 1,
       'createdAt': existing.createdAt.toIso8601String(),
       'lastUpdatedAt': DateTime.now().toUtc().toIso8601String(),

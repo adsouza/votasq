@@ -246,6 +246,64 @@ void main() {
       expect(find.text('42'), findsOneWidget);
     });
 
+    testWidgets('vote chip is ActionChip when authenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(ownerId: 'other', votes: 7)],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.byType(ActionChip), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_circle_up_rounded), findsOneWidget);
+    });
+
+    testWidgets('vote chip is plain Chip when not authenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.unauthenticated),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem()],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.byType(ActionChip), findsNothing);
+      expect(find.byType(Chip), findsOneWidget);
+    });
+
+    testWidgets('tapping vote chip calls cubit.vote', (tester) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(id: 'p1', ownerId: 'other', votes: 5)],
+        ),
+      );
+      when(
+        () => problemsCubit.vote(
+          problemId: any(named: 'problemId'),
+          userId: any(named: 'userId'),
+        ),
+      ).thenAnswer((_) async {});
+      await tester.pumpWidget(buildSubject());
+      await tester.tap(find.byType(ActionChip));
+      await tester.pump();
+      verify(
+        () => problemsCubit.vote(problemId: 'p1', userId: 'user1'),
+      ).called(1);
+    });
+
     testWidgets('loading indicator shown during initial load', (tester) async {
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.loading),

@@ -120,8 +120,13 @@
     "@languageMismatchError": {
         "description": "বিবরণ এবং লক্ষ্য ভিন্ন ভাষায় শনাক্ত হলে দেখানো ত্রুটি বার্তা",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
-    }
+    },
+    "voteButtonTooltip": "এই সমস্যার জন্য ভোট দিন"
 }

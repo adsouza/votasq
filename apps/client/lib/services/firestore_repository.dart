@@ -150,6 +150,10 @@ class FirestoreRepository {
       ..set(
         _problemsRef.doc(id).collection('versions').doc('$version'),
         revisionData,
+      )
+      ..set(
+        _problemsRef.doc(id).collection('voters').doc(ownerId),
+        {'uid': ownerId, 'votes': 1},
       );
     await batch.commit();
 
@@ -401,6 +405,36 @@ class FirestoreRepository {
     await _problemsRef.doc(problemId).update({
       'complaints': FieldValue.arrayUnion([userId]),
     });
+  }
+
+  /// Atomically increment a user's vote on a problem.
+  /// Creates the voter doc if it doesn't exist, or increments votes.
+  /// Also increments the problem's denormalized `votes` field.
+  Future<void> vote({
+    required String problemId,
+    required String userId,
+  }) async {
+    final batch = _firestore.batch()
+      ..set(
+        _problemsRef.doc(problemId).collection('voters').doc(userId),
+        {'uid': userId, 'votes': FieldValue.increment(1)},
+        SetOptions(merge: true),
+      )
+      ..update(
+        _problemsRef.doc(problemId),
+        {'votes': FieldValue.increment(1)},
+      );
+    await batch.commit();
+  }
+
+  /// Fetch all problem IDs that a user has voted for.
+  /// Uses a collection group query across all `voters` subcollections.
+  Future<Set<String>> getVotedProblemIds(String userId) async {
+    final snapshot = await _firestore
+        .collectionGroup('voters')
+        .where('uid', isEqualTo: userId)
+        .get();
+    return snapshot.docs.map((doc) => doc.reference.parent.parent!.id).toSet();
   }
 
   /// Fetch available geoscopes from the `geoscopes` collection,
