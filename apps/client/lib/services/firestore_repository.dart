@@ -412,11 +412,21 @@ class FirestoreRepository {
   /// Creates one from [user] if missing. Returns the stored [User].
   Future<User> ensureUserDoc(User user) async {
     final doc = await _firestore.collection('users').doc(user.uid).get();
-    if (doc.exists) return _docToUser(doc);
+    if (doc.exists) {
+      // Update displayName and lastActiveAt but preserve votes budget.
+      await doc.reference.update({
+        if (user.displayName != null) 'displayName': user.displayName,
+        'lastActiveAt': user.lastActiveAt,
+      });
+      return _docToUser(
+        await _firestore.collection('users').doc(user.uid).get(),
+      );
+    }
     final data = {
       'uid': user.uid,
       'votes': user.votes,
       'lastActiveAt': user.lastActiveAt,
+      if (user.displayName != null) 'displayName': user.displayName,
     };
     await _firestore.collection('users').doc(user.uid).set(data);
     return user;
@@ -428,6 +438,7 @@ class FirestoreRepository {
       uid: doc.id,
       votes: (data['votes'] as num).toInt(),
       lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
+      displayName: data['displayName'] as String?,
     );
   }
 
@@ -501,6 +512,54 @@ class FirestoreRepository {
         .where('uid', isEqualTo: userId)
         .get();
     return snapshot.docs.map((doc) => doc.reference.parent.parent!.id).toSet();
+  }
+
+  /// Fetch the voter leaderboard for a problem.
+  /// Returns voters sorted by votes DESC, then display name ASC.
+  Future<List<({String name, int votes})>> getVotersForProblem(
+    String problemId, {
+    String? excludeUid,
+    String anonymous = 'Anonymous',
+  }) async {
+    final voterSnapshot = await _problemsRef
+        .doc(problemId)
+        .collection('voters')
+        .get();
+    final entries = <({String uid, int votes})>[];
+    for (final doc in voterSnapshot.docs) {
+      final data = doc.data();
+      final uid = data['uid'] as String;
+      if (uid == excludeUid) continue;
+      entries.add((
+        uid: uid,
+        votes: (data['votes'] as num).toInt(),
+      ));
+    }
+    // Batch-fetch user docs for display names.
+    final uids = entries.map((e) => e.uid).toList();
+    final nameMap = <String, String?>{};
+    // Firestore whereIn supports up to 30 items.
+    for (var i = 0; i < uids.length; i += 30) {
+      final end = i + 30 > uids.length ? uids.length : i + 30;
+      final batch = uids.sublist(i, end);
+      final snapshot = await _firestore
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: batch)
+          .get();
+      for (final doc in snapshot.docs) {
+        nameMap[doc.id] = doc.data()['displayName'] as String?;
+      }
+    }
+    final result =
+        entries.map((e) {
+          final name = nameMap[e.uid] ?? anonymous;
+          return (name: name, votes: e.votes);
+        }).toList()..sort((a, b) {
+          final cmp = b.votes.compareTo(a.votes);
+          if (cmp != 0) return cmp;
+          return a.name.compareTo(b.name);
+        });
+    return result;
   }
 
   /// Fetch available geoscopes from the `geoscopes` collection,

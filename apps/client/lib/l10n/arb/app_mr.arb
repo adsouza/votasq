@@ -131,5 +131,13 @@
     "voteButtonTooltip": "या समस्येसाठी मत द्या",
     "signInButtonTooltip": "समस्यांवर मतदान करण्यासाठी किंवा यादीत आपल्या समस्या जोडण्यासाठी लॉग इन करा",
     "menuVotesRemaining": "{count, plural, one{1 मत शिल्लक} other{{count} मते शिल्लक}}",
-    "menuVotesReplenishHint": "3 तास दूर राहिल्यावर मते पुन्हा मिळतात"
+    "menuVotesReplenishHint": "3 तास दूर राहिल्यावर मते पुन्हा मिळतात",
+    "votersHeading": "मतदार",
+    "@votersHeading": {
+        "description": "समस्या तपशील पृष्ठावरील मतदार लीडरबोर्डचे विभाग शीर्षक"
+    },
+    "voterAnonymous": "अनामिक",
+    "@voterAnonymous": {
+        "description": "प्रदर्शन नाव नसलेल्या मतदारांसाठी पर्यायी नाव"
+    }
 }

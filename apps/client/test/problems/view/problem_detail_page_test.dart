@@ -68,6 +68,13 @@ void main() {
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
     when(
+      () => repo.getVotersForProblem(
+        any(),
+        excludeUid: any(named: 'excludeUid'),
+        anonymous: any(named: 'anonymous'),
+      ),
+    ).thenAnswer((_) async => []);
+    when(
       () => languageDetectionService.needsTranslation(
         text: any(named: 'text'),
         userLanguage: any(named: 'userLanguage'),
@@ -291,6 +298,127 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('test problem description'), findsOneWidget);
       expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('excludes owner from voter list', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Verify excludeUid is the owner's ID.
+      verify(
+        () => repo.getVotersForProblem(
+          any(),
+          excludeUid: 'owner1',
+          anonymous: any(named: 'anonymous'),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('shows voter list sorted by votes then name', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(
+        () => repo.getVotersForProblem(
+          any(),
+          excludeUid: any(named: 'excludeUid'),
+          anonymous: any(named: 'anonymous'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          (name: 'Alice', votes: 5),
+          (name: 'Bob', votes: 3),
+          (name: 'Charlie', votes: 1),
+        ],
+      );
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Voters'), findsOneWidget);
+      expect(find.text('Alice'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
+      expect(find.text('Bob'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('Charlie'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+    });
+
+    testWidgets('hides voter list when empty', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Voters'), findsNothing);
+    });
+
+    testWidgets('refreshes voter list after voting', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(
+        () => repo.vote(
+          problemId: any(named: 'problemId'),
+          userId: any(named: 'userId'),
+        ),
+      ).thenAnswer((_) async {});
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+          remainingVotes: initialVoteBudget,
+        ),
+      );
+
+      var callCount = 0;
+      when(
+        () => repo.getVotersForProblem(
+          any(),
+          excludeUid: any(named: 'excludeUid'),
+          anonymous: any(named: 'anonymous'),
+        ),
+      ).thenAnswer((_) async {
+        callCount++;
+        if (callCount == 1) return [];
+        return [(name: 'Voter', votes: 1)];
+      });
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Initially no voters.
+      expect(find.text('Voters'), findsNothing);
+
+      // Tap the vote chip.
+      await tester.tap(find.byType(ActionChip));
+      await tester.pumpAndSettle();
+
+      // Voter list should now appear after refresh.
+      expect(find.text('Voters'), findsOneWidget);
+      expect(find.text('Voter'), findsOneWidget);
+      verify(
+        () => repo.getVotersForProblem(
+          any(),
+          excludeUid: any(named: 'excludeUid'),
+          anonymous: any(named: 'anonymous'),
+        ),
+      ).called(2);
     });
   });
 }

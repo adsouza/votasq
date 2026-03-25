@@ -336,6 +336,7 @@ class Db {
         uid: user.uid,
         votes: int.parse(doc.fields?['votes']?.integerValue ?? '0'),
         lastActiveAt: _parseTimestamp(doc.fields!['lastActiveAt']!),
+        displayName: doc.fields?['displayName']?.stringValue,
       );
     } on fs.DetailedApiRequestError catch (e) {
       if (e.status != 404) rethrow;
@@ -357,6 +358,8 @@ class Db {
         'lastActiveAt': fs.Value(
           timestampValue: user.lastActiveAt.toIso8601String(),
         ),
+        if (user.displayName != null)
+          'displayName': fs.Value(stringValue: user.displayName),
       },
     );
   }

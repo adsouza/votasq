@@ -148,5 +148,13 @@
     "menuVotesReplenishHint": "Votes replenish after 3 hours away",
     "@menuVotesReplenishHint": {
         "description": "Label in the hamburger menu shown when the user has no votes remaining"
+    },
+    "votersHeading": "Voters",
+    "@votersHeading": {
+        "description": "Section heading for the voter leaderboard on the problem detail page"
+    },
+    "voterAnonymous": "Anonymous",
+    "@voterAnonymous": {
+        "description": "Fallback name for voters who have no display name"
     }
 }

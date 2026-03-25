@@ -131,5 +131,13 @@
     "voteButtonTooltip": "اس مسئلے کے لیے ووٹ کریں",
     "signInButtonTooltip": "مسائل پر ووٹ کرنے یا فہرست میں اپنے مسائل شامل کرنے کے لیے لاگ ان کریں",
     "menuVotesRemaining": "{count, plural, one{1 ووٹ باقی} other{{count} ووٹ باقی}}",
-    "menuVotesReplenishHint": "3 گھنٹے دور رہنے کے بعد ووٹ دوبارہ ملتے ہیں"
+    "menuVotesReplenishHint": "3 گھنٹے دور رہنے کے بعد ووٹ دوبارہ ملتے ہیں",
+    "votersHeading": "ووٹرز",
+    "@votersHeading": {
+        "description": "مسئلے کی تفصیلات کے صفحے پر ووٹرز کی درجہ بندی کا سیکشن عنوان"
+    },
+    "voterAnonymous": "گمنام",
+    "@voterAnonymous": {
+        "description": "ان ووٹرز کے لیے متبادل نام جن کا ڈسپلے نام نہیں ہے"
+    }
 }

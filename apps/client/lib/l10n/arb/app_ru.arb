@@ -131,5 +131,13 @@
     "voteButtonTooltip": "Проголосовать за эту проблему",
     "signInButtonTooltip": "Войдите, чтобы голосовать за проблемы или добавлять свои проблемы в список",
     "menuVotesRemaining": "{count, plural, one{1 голос остался} few{{count} голоса осталось} many{{count} голосов осталось} other{{count} голосов осталось}}",
-    "menuVotesReplenishHint": "Голоса обновляются после 3 часов отсутствия"
+    "menuVotesReplenishHint": "Голоса обновляются после 3 часов отсутствия",
+    "votersHeading": "Голосовавшие",
+    "@votersHeading": {
+        "description": "Заголовок раздела рейтинга голосовавших на странице деталей проблемы"
+    },
+    "voterAnonymous": "Аноним",
+    "@voterAnonymous": {
+        "description": "Имя по умолчанию для голосовавших без отображаемого имени"
+    }
 }

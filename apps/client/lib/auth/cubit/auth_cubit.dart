@@ -19,7 +19,7 @@ class AuthCubit extends Cubit<AuthState> {
               userId: () => user.uid,
             ),
           );
-          unawaited(_initUserVotes(user.uid));
+          unawaited(_initUserVotes(user.uid, user.displayName));
         } else {
           unawaited(_userVotesSubscription?.cancel());
           _userVotesSubscription = null;
@@ -52,13 +52,14 @@ class AuthCubit extends Cubit<AuthState> {
   StreamSubscription<dynamic>? _subscription;
   StreamSubscription<int>? _userVotesSubscription;
 
-  Future<void> _initUserVotes(String userId) async {
+  Future<void> _initUserVotes(String userId, String? displayName) async {
     try {
       await _firestoreRepository.ensureUserDoc(
         shared.User(
           uid: userId,
           votes: shared.initialVoteBudget,
           lastActiveAt: DateTime.now().toUtc(),
+          displayName: displayName,
         ),
       );
       await _userVotesSubscription?.cancel();

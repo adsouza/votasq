@@ -131,5 +131,13 @@
     "voteButtonTooltip": "Voter pour ce problème",
     "signInButtonTooltip": "Connectez-vous pour voter sur les problèmes ou ajouter vos propres problèmes à la liste",
     "menuVotesRemaining": "{count, plural, one{1 vote restant} other{{count} votes restants}}",
-    "menuVotesReplenishHint": "Les votes se renouvellent après 3 heures d'absence"
+    "menuVotesReplenishHint": "Les votes se renouvellent après 3 heures d'absence",
+    "votersHeading": "Votants",
+    "@votersHeading": {
+        "description": "En-tête de section pour le classement des votants sur la page de détails du problème"
+    },
+    "voterAnonymous": "Anonyme",
+    "@voterAnonymous": {
+        "description": "Nom de remplacement pour les votants sans nom affiché"
+    }
 }

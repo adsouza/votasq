@@ -11,6 +11,7 @@ abstract class User with _$User {
     required String uid,
     required DateTime lastActiveAt,
     required int votes,
+    String? displayName,
   }) = _User;
 
   /// Deserializes a [User] from JSON.

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get uid; DateTime get lastActiveAt; int get votes;
+ String get uid; DateTime get lastActiveAt; int get votes; String? get displayName;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.lastActiveAt, lastActiveAt) || other.lastActiveAt == lastActiveAt)&&(identical(other.votes, votes) || other.votes == votes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.lastActiveAt, lastActiveAt) || other.lastActiveAt == lastActiveAt)&&(identical(other.votes, votes) || other.votes == votes)&&(identical(other.displayName, displayName) || other.displayName == displayName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,lastActiveAt,votes);
+int get hashCode => Object.hash(runtimeType,uid,lastActiveAt,votes,displayName);
 
 @override
 String toString() {
-  return 'User(uid: $uid, lastActiveAt: $lastActiveAt, votes: $votes)';
+  return 'User(uid: $uid, lastActiveAt: $lastActiveAt, votes: $votes, displayName: $displayName)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String uid, DateTime lastActiveAt, int votes
+ String uid, DateTime lastActiveAt, int votes, String? displayName
 });
 
 
@@ -65,12 +65,13 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? lastActiveAt = null,Object? votes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? lastActiveAt = null,Object? votes = null,Object? displayName = freezed,}) {
   return _then(_self.copyWith(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,lastActiveAt: null == lastActiveAt ? _self.lastActiveAt : lastActiveAt // ignore: cast_nullable_to_non_nullable
 as DateTime,votes: null == votes ? _self.votes : votes // ignore: cast_nullable_to_non_nullable
-as int,
+as int,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  DateTime lastActiveAt,  int votes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  DateTime lastActiveAt,  int votes,  String? displayName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.uid,_that.lastActiveAt,_that.votes);case _:
+return $default(_that.uid,_that.lastActiveAt,_that.votes,_that.displayName);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.uid,_that.lastActiveAt,_that.votes);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  DateTime lastActiveAt,  int votes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  DateTime lastActiveAt,  int votes,  String? displayName)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.uid,_that.lastActiveAt,_that.votes);case _:
+return $default(_that.uid,_that.lastActiveAt,_that.votes,_that.displayName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.uid,_that.lastActiveAt,_that.votes);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  DateTime lastActiveAt,  int votes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  DateTime lastActiveAt,  int votes,  String? displayName)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.uid,_that.lastActiveAt,_that.votes);case _:
+return $default(_that.uid,_that.lastActiveAt,_that.votes,_that.displayName);case _:
   return null;
 
 }
@@ -211,12 +212,13 @@ return $default(_that.uid,_that.lastActiveAt,_that.votes);case _:
 @JsonSerializable()
 
 class _User implements User {
-  const _User({required this.uid, required this.lastActiveAt, required this.votes});
+  const _User({required this.uid, required this.lastActiveAt, required this.votes, this.displayName});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String uid;
 @override final  DateTime lastActiveAt;
 @override final  int votes;
+@override final  String? displayName;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +233,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.lastActiveAt, lastActiveAt) || other.lastActiveAt == lastActiveAt)&&(identical(other.votes, votes) || other.votes == votes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.lastActiveAt, lastActiveAt) || other.lastActiveAt == lastActiveAt)&&(identical(other.votes, votes) || other.votes == votes)&&(identical(other.displayName, displayName) || other.displayName == displayName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uid,lastActiveAt,votes);
+int get hashCode => Object.hash(runtimeType,uid,lastActiveAt,votes,displayName);
 
 @override
 String toString() {
-  return 'User(uid: $uid, lastActiveAt: $lastActiveAt, votes: $votes)';
+  return 'User(uid: $uid, lastActiveAt: $lastActiveAt, votes: $votes, displayName: $displayName)';
 }
 
 
@@ -251,7 +253,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, DateTime lastActiveAt, int votes
+ String uid, DateTime lastActiveAt, int votes, String? displayName
 });
 
 
@@ -268,12 +270,13 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? lastActiveAt = null,Object? votes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? lastActiveAt = null,Object? votes = null,Object? displayName = freezed,}) {
   return _then(_User(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,lastActiveAt: null == lastActiveAt ? _self.lastActiveAt : lastActiveAt // ignore: cast_nullable_to_non_nullable
 as DateTime,votes: null == votes ? _self.votes : votes // ignore: cast_nullable_to_non_nullable
-as int,
+as int,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
