@@ -128,5 +128,6 @@
             }
         }
     },
-    "voteButtonTooltip": "为此问题投票"
+    "voteButtonTooltip": "为此问题投票",
+    "signInButtonTooltip": "登录以对问题投票或将您自己的问题添加到列表中"
 }

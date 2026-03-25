@@ -128,5 +128,6 @@
             }
         }
     },
-    "voteButtonTooltip": "Voter pour ce problème"
+    "voteButtonTooltip": "Voter pour ce problème",
+    "signInButtonTooltip": "Connectez-vous pour voter sur les problèmes ou ajouter vos propres problèmes à la liste"
 }

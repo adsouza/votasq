@@ -131,5 +131,9 @@
     "voteButtonTooltip": "Vote for this problem",
     "@voteButtonTooltip": {
         "description": "Tooltip shown when hovering over the tappable vote chip for authenticated users"
+    },
+    "signInButtonTooltip": "Log in to vote on problems or add your own problems to the list",
+    "@signInButtonTooltip": {
+        "description": "Tooltip for the sign-in button explaining what signing in enables"
     }
 }

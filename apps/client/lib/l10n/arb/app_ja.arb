@@ -128,5 +128,6 @@
             }
         }
     },
-    "voteButtonTooltip": "この問題に投票する"
+    "voteButtonTooltip": "この問題に投票する",
+    "signInButtonTooltip": "問題に投票したり、自分の問題をリストに追加するにはログインしてください"
 }

@@ -128,5 +128,6 @@
             }
         }
     },
-    "voteButtonTooltip": "Bu sorun için oy ver"
+    "voteButtonTooltip": "Bu sorun için oy ver",
+    "signInButtonTooltip": "Sorunlara oy vermek veya kendi sorunlarınızı listeye eklemek için giriş yapın"
 }

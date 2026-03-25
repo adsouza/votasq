@@ -128,5 +128,6 @@
             }
         }
     },
-    "voteButtonTooltip": "Bình chọn cho vấn đề này"
+    "voteButtonTooltip": "Bình chọn cho vấn đề này",
+    "signInButtonTooltip": "Đăng nhập để bình chọn vấn đề hoặc thêm vấn đề của bạn vào danh sách"
 }

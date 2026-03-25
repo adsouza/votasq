@@ -128,5 +128,6 @@
             }
         }
     },
-    "voteButtonTooltip": "Pilih masalah ini"
+    "voteButtonTooltip": "Pilih masalah ini",
+    "signInButtonTooltip": "Masuk untuk memilih masalah atau menambahkan masalah Anda sendiri ke daftar"
 }

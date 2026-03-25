@@ -845,9 +845,12 @@ class _ProblemsViewState extends State<ProblemsView> {
                   onPressed: () => context.read<AuthCubit>().signOut(),
                 );
               }
-              return TextButton(
-                onPressed: () => context.read<AuthCubit>().signIn(),
-                child: Text(l10n.signInButton),
+              return Tooltip(
+                message: l10n.signInButtonTooltip,
+                child: TextButton(
+                  onPressed: () => context.read<AuthCubit>().signIn(),
+                  child: Text(l10n.signInButton),
+                ),
               );
             },
           ),
