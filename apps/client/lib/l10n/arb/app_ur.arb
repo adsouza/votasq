@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "اس مسئلے کے لیے ووٹ کریں",
-    "signInButtonTooltip": "مسائل پر ووٹ کرنے یا فہرست میں اپنے مسائل شامل کرنے کے لیے لاگ ان کریں"
+    "signInButtonTooltip": "مسائل پر ووٹ کرنے یا فہرست میں اپنے مسائل شامل کرنے کے لیے لاگ ان کریں",
+    "menuVotesRemaining": "{count, plural, one{1 ووٹ باقی} other{{count} ووٹ باقی}}",
+    "menuVotesReplenishHint": "3 گھنٹے دور رہنے کے بعد ووٹ دوبارہ ملتے ہیں"
 }

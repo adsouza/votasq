@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "ਇਸ ਸਮੱਸਿਆ ਲਈ ਵੋਟ ਕਰੋ",
-    "signInButtonTooltip": "ਸਮੱਸਿਆਵਾਂ ਤੇ ਵੋਟ ਕਰਨ ਜਾਂ ਸੂਚੀ ਵਿੱਚ ਆਪਣੀਆਂ ਸਮੱਸਿਆਵਾਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਲੌਗ ਇਨ ਕਰੋ"
+    "signInButtonTooltip": "ਸਮੱਸਿਆਵਾਂ ਤੇ ਵੋਟ ਕਰਨ ਜਾਂ ਸੂਚੀ ਵਿੱਚ ਆਪਣੀਆਂ ਸਮੱਸਿਆਵਾਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਲੌਗ ਇਨ ਕਰੋ",
+    "menuVotesRemaining": "{count, plural, one{1 ਵੋਟ ਬਾਕੀ} other{{count} ਵੋਟ ਬਾਕੀ}}",
+    "menuVotesReplenishHint": "3 ਘੰਟੇ ਦੂਰ ਰਹਿਣ ਤੋਂ ਬਾਅਦ ਵੋਟ ਦੁਬਾਰਾ ਮਿਲਦੇ ਹਨ"
 }

@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "এই সমস্যার জন্য ভোট দিন",
-    "signInButtonTooltip": "সমস্যায় ভোট দিতে বা তালিকায় নিজের সমস্যা যোগ করতে লগ ইন করুন"
+    "signInButtonTooltip": "সমস্যায় ভোট দিতে বা তালিকায় নিজের সমস্যা যোগ করতে লগ ইন করুন",
+    "menuVotesRemaining": "{count, plural, one{১টি ভোট বাকি} other{{count}টি ভোট বাকি}}",
+    "menuVotesReplenishHint": "৩ ঘণ্টা দূরে থাকলে ভোট পুনরায় পূরণ হয়"
 }

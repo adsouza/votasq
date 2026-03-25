@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "Bu sorun için oy ver",
-    "signInButtonTooltip": "Sorunlara oy vermek veya kendi sorunlarınızı listeye eklemek için giriş yapın"
+    "signInButtonTooltip": "Sorunlara oy vermek veya kendi sorunlarınızı listeye eklemek için giriş yapın",
+    "menuVotesRemaining": "{count, plural, one{1 oy kaldı} other{{count} oy kaldı}}",
+    "menuVotesReplenishHint": "Oylar 3 saat uzak kaldıktan sonra yenilenir"
 }

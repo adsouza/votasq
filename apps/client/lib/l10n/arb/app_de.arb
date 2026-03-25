@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "Für dieses Problem stimmen",
-    "signInButtonTooltip": "Melden Sie sich an, um über Probleme abzustimmen oder eigene Probleme zur Liste hinzuzufügen"
+    "signInButtonTooltip": "Melden Sie sich an, um über Probleme abzustimmen oder eigene Probleme zur Liste hinzuzufügen",
+    "menuVotesRemaining": "{count, plural, one{1 Stimme übrig} other{{count} Stimmen übrig}}",
+    "menuVotesReplenishHint": "Stimmen erneuern sich nach 3 Stunden Abwesenheit"
 }

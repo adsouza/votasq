@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "この問題に投票する",
-    "signInButtonTooltip": "問題に投票したり、自分の問題をリストに追加するにはログインしてください"
+    "signInButtonTooltip": "問題に投票したり、自分の問題をリストに追加するにはログインしてください",
+    "menuVotesRemaining": "{count, plural, other{残り{count}票}}",
+    "menuVotesReplenishHint": "3時間離れると投票が補充されます"
 }

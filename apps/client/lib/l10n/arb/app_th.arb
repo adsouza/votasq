@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "โหวตให้ปัญหานี้",
-    "signInButtonTooltip": "เข้าสู่ระบบเพื่อโหวตปัญหาหรือเพิ่มปัญหาของคุณลงในรายการ"
+    "signInButtonTooltip": "เข้าสู่ระบบเพื่อโหวตปัญหาหรือเพิ่มปัญหาของคุณลงในรายการ",
+    "menuVotesRemaining": "{count, plural, other{เหลือ {count} โหวต}}",
+    "menuVotesReplenishHint": "โหวตจะเติมหลังจากไม่ใช้งาน 3 ชั่วโมง"
 }

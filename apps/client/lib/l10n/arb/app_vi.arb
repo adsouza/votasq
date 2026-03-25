@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "Bình chọn cho vấn đề này",
-    "signInButtonTooltip": "Đăng nhập để bình chọn vấn đề hoặc thêm vấn đề của bạn vào danh sách"
+    "signInButtonTooltip": "Đăng nhập để bình chọn vấn đề hoặc thêm vấn đề của bạn vào danh sách",
+    "menuVotesRemaining": "{count, plural, one{Còn 1 lượt bình chọn} other{Còn {count} lượt bình chọn}}",
+    "menuVotesReplenishHint": "Lượt bình chọn được bổ sung sau 3 giờ không hoạt động"
 }

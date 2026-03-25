@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "Voter pour ce problème",
-    "signInButtonTooltip": "Connectez-vous pour voter sur les problèmes ou ajouter vos propres problèmes à la liste"
+    "signInButtonTooltip": "Connectez-vous pour voter sur les problèmes ou ajouter vos propres problèmes à la liste",
+    "menuVotesRemaining": "{count, plural, one{1 vote restant} other{{count} votes restants}}",
+    "menuVotesReplenishHint": "Les votes se renouvellent après 3 heures d'absence"
 }

@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "صوّت لهذه المشكلة",
-    "signInButtonTooltip": "سجّل الدخول للتصويت على المشاكل أو إضافة مشاكلك إلى القائمة"
+    "signInButtonTooltip": "سجّل الدخول للتصويت على المشاكل أو إضافة مشاكلك إلى القائمة",
+    "menuVotesRemaining": "{count, plural, one{صوت واحد متبقٍ} other{{count} أصوات متبقية}}",
+    "menuVotesReplenishHint": "تتجدد الأصوات بعد ٣ ساعات من عدم الاستخدام"
 }

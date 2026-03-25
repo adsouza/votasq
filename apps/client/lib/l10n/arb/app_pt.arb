@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "Votar neste problema",
-    "signInButtonTooltip": "Entre para votar em problemas ou adicionar seus próprios problemas à lista"
+    "signInButtonTooltip": "Entre para votar em problemas ou adicionar seus próprios problemas à lista",
+    "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
+    "menuVotesReplenishHint": "Votos se renovam após 3 horas de ausência"
 }

@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "为此问题投票",
-    "signInButtonTooltip": "登录以对问题投票或将您自己的问题添加到列表中"
+    "signInButtonTooltip": "登录以对问题投票或将您自己的问题添加到列表中",
+    "menuVotesRemaining": "{count, plural, other{剩余 {count} 票}}",
+    "menuVotesReplenishHint": "离开 3 小时后投票会自动补充"
 }

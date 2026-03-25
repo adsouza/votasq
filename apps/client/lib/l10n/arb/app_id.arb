@@ -129,5 +129,7 @@
         }
     },
     "voteButtonTooltip": "Pilih masalah ini",
-    "signInButtonTooltip": "Masuk untuk memilih masalah atau menambahkan masalah Anda sendiri ke daftar"
+    "signInButtonTooltip": "Masuk untuk memilih masalah atau menambahkan masalah Anda sendiri ke daftar",
+    "menuVotesRemaining": "{count, plural, one{1 suara tersisa} other{{count} suara tersisa}}",
+    "menuVotesReplenishHint": "Suara diperbarui setelah 3 jam tidak aktif"
 }

@@ -792,6 +792,19 @@ class _ProblemsViewState extends State<ProblemsView> {
                 contentPadding: EdgeInsets.zero,
               ),
             ),
+            if (context.read<AuthCubit>().state.userId != null) ...[
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                enabled: false,
+                child: Text(
+                  (context.read<AuthCubit>().state.remainingVotes ?? 0) > 0
+                      ? l10n.menuVotesRemaining(
+                          context.read<AuthCubit>().state.remainingVotes!,
+                        )
+                      : l10n.menuVotesReplenishHint,
+                ),
+              ),
+            ],
           ],
         ),
         actions: [
