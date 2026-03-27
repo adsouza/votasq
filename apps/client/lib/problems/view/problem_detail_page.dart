@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository, LanguageMismatchException;
@@ -128,63 +129,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     if (mounted) context.pop();
   }
 
-  List<Widget> _buildGeoscopeDropdown({
-    required String geoscope,
-    required String currentValue,
-    required ValueChanged<String> onChanged,
-    bool enabled = true,
-  }) {
-    if (geoscope == '/') return [];
-    final l10n = context.l10n;
-    final geoState = context.read<GeoscopeCubit>().state;
-    final ancestorIds = FirestoreRepository.geoscopeAncestors(
-      geoscope,
-    ).reversed.toList();
-    final labelMap = {
-      for (final g in geoState.availableGeoscopes) g.id: g.label,
-    };
-
-    final items = ancestorIds.map((id) {
-      final label = id == '/'
-          ? '🌐 ${l10n.geoscopeGlobal}'
-          : (labelMap[id] ?? id.split('/').last.toUpperCase());
-      return DropdownMenuItem(value: id, child: Text(label));
-    }).toList();
-
-    final effectiveValue = ancestorIds.contains(currentValue)
-        ? currentValue
-        : ancestorIds.first;
-
-    return [
-      const SizedBox(width: 8),
-      DropdownButton<String>(
-        value: effectiveValue,
-        items: items,
-        selectedItemBuilder: (_) => ancestorIds.map((id) {
-          final label = id == '/'
-              ? '🌐 ${l10n.geoscopeGlobal}'
-              : (labelMap[id] ?? id);
-          return Text(label);
-        }).toList(),
-        onChanged: enabled
-            ? (value) {
-                if (value == null) return;
-                onChanged(value);
-              }
-            : null,
-      ),
-    ];
-  }
-
-  String _geoscopeLabel(String geoscope) {
-    if (geoscope == '/') return '🌐 ${context.l10n.geoscopeGlobal}';
-    final available = context.read<GeoscopeCubit>().state.availableGeoscopes;
-    for (final g in available) {
-      if (g.id == geoscope) return g.label;
-    }
-    return geoscope.split('/').last.toUpperCase();
-  }
-
   Widget _buildVoterList() {
     final voters = _voters;
     if (voters == null || voters.isEmpty) return const SizedBox.shrink();
@@ -271,7 +215,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                           '',
                         ),
                         child: Chip(
-                          label: Text(_geoscopeLabel(problem.geoscope)),
+                          label: Text(geoscopeLabel(context, problem.geoscope)),
                           backgroundColor: theme.colorScheme.tertiaryContainer,
                         ),
                       ),
@@ -388,9 +332,11 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(l10n.geoscopeLabel),
-              ..._buildGeoscopeDropdown(
+              ...buildGeoscopeDropdown(
+                context,
                 geoscope: context.read<GeoscopeCubit>().state.selectedGeoscope,
                 currentValue: _geoscope ?? problem.geoscope,
+                compact: false,
                 onChanged: (value) => setState(() {
                   _geoscope = value;
                 }),

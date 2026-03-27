@@ -7,6 +7,7 @@ import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
+import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart'
@@ -86,15 +87,6 @@ class _ProblemsViewState extends State<ProblemsView> {
   bool _showOnlyWithGoals = false;
   bool _addGoalVisible = false;
   bool _submitting = false;
-
-  String _geoscopeLabel(String geoscope) {
-    if (geoscope == '/') return '🌐 ${context.l10n.geoscopeGlobal}';
-    final available = context.read<GeoscopeCubit>().state.availableGeoscopes;
-    for (final g in available) {
-      if (g.id == geoscope) return g.label;
-    }
-    return geoscope.split('/').last.toUpperCase();
-  }
 
   @override
   void initState() {
@@ -254,7 +246,8 @@ class _ProblemsViewState extends State<ProblemsView> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ..._buildGeoscopeDropdown(
+                      ...buildGeoscopeDropdown(
+                        context,
                         geoscope: context
                             .read<GeoscopeCubit>()
                             .state
@@ -289,62 +282,6 @@ class _ProblemsViewState extends State<ProblemsView> {
         ),
       ),
     );
-  }
-
-  /// Build a geoscope dropdown for the given [geoscope] value.
-  /// [currentValue] is the currently selected ID, [onChanged] is called when
-  /// the user picks a new level. Returns an empty list if the geoscope is
-  /// global (`"/"`), hiding the dropdown entirely.
-  List<Widget> _buildGeoscopeDropdown({
-    required String geoscope,
-    required String currentValue,
-    required ValueChanged<String> onChanged,
-    bool enabled = true,
-  }) {
-    if (geoscope == '/') return [];
-    final l10n = context.l10n;
-    final geoState = context.read<GeoscopeCubit>().state;
-    final ancestorIds = FirestoreRepository.geoscopeAncestors(
-      geoscope,
-    ).reversed.toList();
-    final labelMap = {
-      for (final g in geoState.availableGeoscopes) g.id: g.label,
-    };
-
-    final items = ancestorIds.map((id) {
-      final label = id == '/'
-          ? '🌐 ${l10n.geoscopeGlobal}'
-          : (labelMap[id] ?? id.split('/').last.toUpperCase());
-      return DropdownMenuItem(value: id, child: Text(label));
-    }).toList();
-
-    // If currentValue isn't in the ancestor list (e.g. problem was created
-    // under a different geoscope), fall back to the most granular ancestor.
-    final effectiveValue = ancestorIds.contains(currentValue)
-        ? currentValue
-        : ancestorIds.first;
-
-    return [
-      const SizedBox(width: 8),
-      Tooltip(
-        message: l10n.geoscopeDropdownTooltip,
-        child: DropdownButton<String>(
-          value: effectiveValue,
-          menuWidth: 240,
-          items: items,
-          selectedItemBuilder: (_) => ancestorIds.map((id) {
-            if (id == '/') return const Text('🌐');
-            return Text(id.split('/').last);
-          }).toList(),
-          onChanged: enabled
-              ? (value) {
-                  if (value == null) return;
-                  onChanged(value);
-                }
-              : null,
-        ),
-      ),
-    ];
   }
 
   void _copyProblemLink(Problem problem) {
@@ -497,7 +434,7 @@ class _ProblemsViewState extends State<ProblemsView> {
               Tooltip(
                 message:
                     '${l10n.geoscopeLabel}'
-                    ' ${_geoscopeLabel(problem.geoscope)}',
+                    ' ${geoscopeLabel(context, problem.geoscope)}',
                 child: Chip(
                   label: Text(
                     problem.geoscope.split('/').last,
@@ -651,7 +588,8 @@ class _ProblemsViewState extends State<ProblemsView> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ..._buildGeoscopeDropdown(
+                      ...buildGeoscopeDropdown(
+                        context,
                         geoscope: context
                             .read<GeoscopeCubit>()
                             .state

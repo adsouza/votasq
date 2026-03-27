@@ -84,17 +84,6 @@ class Db {
     );
   }
 
-  /// Compute all ancestor geoscopes for a given geoscope string.
-  /// E.g. `"na/us/ny/nyc"` → `['/', 'na', 'na/us', 'na/us/ny', 'na/us/ny/nyc']`.
-  static List<String> _geoscopeAncestors(String geoscope) {
-    if (geoscope == '/') return ['/'];
-    final parts = geoscope.split('/');
-    return [
-      '/',
-      for (var i = 0; i < parts.length; i++) parts.sublist(0, i + 1).join('/'),
-    ];
-  }
-
   /// Fetch a page of problems, sorted by votes descending.
   /// When [geoscope] is provided, filters to problems matching that geoscope
   /// or any of its ancestors (e.g. country-level and global problems).
@@ -127,7 +116,7 @@ class Db {
 
     final fs.Filter whereFilter;
     if (geoscope != null) {
-      final ancestors = _geoscopeAncestors(geoscope);
+      final ancestors = geoscopeAncestors(geoscope);
       final geoscopeFilter = fs.Filter(
         compositeFilter: fs.CompositeFilter(
           op: 'OR',
