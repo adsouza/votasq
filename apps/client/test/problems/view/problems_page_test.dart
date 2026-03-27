@@ -16,6 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
 
+import '../../helpers/helpers.dart';
+
 class _MockProblemsCubit extends MockCubit<ProblemsState>
     implements ProblemsCubit {}
 
@@ -65,8 +67,10 @@ void main() {
   late FeedbackRepository feedbackRepo;
   late LanguageDetectionService languageDetectionService;
   late TranslationRepository translationRepo;
+  late MockSharedPreferencesWithCache mockPrefs;
 
   setUp(() {
+    mockPrefs = createMockSharedPreferences();
     problemsCubit = _MockProblemsCubit();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
@@ -95,7 +99,7 @@ void main() {
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
         BlocProvider<AutoTranslateCubit>(
-          create: (_) => AutoTranslateCubit(),
+          create: (_) => AutoTranslateCubit(prefsForTesting: mockPrefs),
         ),
       ],
       child: MultiRepositoryProvider(

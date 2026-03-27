@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
 
+import '../../helpers/helpers.dart';
+
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
 class _MockTranslationRepository extends Mock
@@ -16,12 +18,14 @@ class _MockTranslationRepository extends Mock
 void main() {
   late FirestoreRepository firestoreRepo;
   late TranslationRepository translationRepo;
+  late MockSharedPreferencesWithCache mockPrefs;
 
   setUpAll(() {
     registerFallbackValue(const TranslatedProblem(description: ''));
   });
 
   setUp(() {
+    mockPrefs = createMockSharedPreferences();
     firestoreRepo = _MockFirestoreRepository();
     translationRepo = _MockTranslationRepository();
   });
@@ -37,7 +41,10 @@ void main() {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AutoTranslateCubit>(
-          create: (_) => AutoTranslateCubit(initial: autoTranslate),
+          create: (_) => AutoTranslateCubit(
+            initial: autoTranslate,
+            prefsForTesting: mockPrefs,
+          ),
         ),
       ],
       child: MultiRepositoryProvider(

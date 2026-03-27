@@ -3,34 +3,43 @@ import 'package:client/auto_translate/auto_translate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../helpers/helpers.dart';
+
 void main() {
   group('AutoTranslateCubit', () {
+    late MockSharedPreferencesWithCache mockPrefs;
+
     setUp(() {
-      SharedPreferences.setMockInitialValues({});
+      mockPrefs = createMockSharedPreferences();
     });
 
     test('initial state is false', () {
-      expect(AutoTranslateCubit().state, isFalse);
+      expect(
+        AutoTranslateCubit(prefsForTesting: mockPrefs).state,
+        isFalse,
+      );
     });
 
     test('initial state respects parameter', () {
-      expect(AutoTranslateCubit(initial: true).state, isTrue);
+      expect(
+        AutoTranslateCubit(initial: true, prefsForTesting: mockPrefs).state,
+        isTrue,
+      );
     });
 
     blocTest<AutoTranslateCubit, bool>(
       'toggle flips state and persists',
-      build: AutoTranslateCubit.new,
+      build: () => AutoTranslateCubit(prefsForTesting: mockPrefs),
       act: (cubit) => cubit.toggle(),
       expect: () => [true],
       verify: (_) async {
-        final prefs = await SharedPreferences.getInstance();
-        expect(prefs.getBool('auto_translate'), isTrue);
+        expect(mockPrefs.getBool('auto_translate'), isTrue);
       },
     );
 
     blocTest<AutoTranslateCubit, bool>(
       'double toggle returns to false',
-      build: AutoTranslateCubit.new,
+      build: () => AutoTranslateCubit(prefsForTesting: mockPrefs),
       act: (cubit) async {
         await cubit.toggle();
         await cubit.toggle();
@@ -39,8 +48,10 @@ void main() {
     );
 
     test('loads persisted value on creation', () async {
-      SharedPreferences.setMockInitialValues({'auto_translate': true});
-      final cubit = AutoTranslateCubit();
+      final mockPrefsWithValue = createMockSharedPreferences(
+        initialValues: {'auto_translate': true},
+      );
+      final cubit = AutoTranslateCubit(prefsForTesting: mockPrefsWithValue);
       // Wait for _load() to complete.
       await Future<void>.delayed(Duration.zero);
       expect(cubit.state, isTrue);
