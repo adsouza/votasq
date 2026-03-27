@@ -25,7 +25,6 @@ class MockSharedPreferencesWithCache extends Mock
   @override
   List<String>? getStringList(String key) => _store[key] as List<String>?;
 
-  @override
   Set<String> getKeys() => _store.keys.toSet();
 
   @override
@@ -72,7 +71,7 @@ class MockSharedPreferencesWithCache extends Mock
 }
 
 // Store the mock instance globally so it can be reused
-MockSharedPreferencesWithCache? _mockInstance;
+late MockSharedPreferencesWithCache _mockInstance;
 
 /// Creates and returns a mock SharedPreferencesWithCache for use in tests.
 /// Should be passed to AutoTranslateCubit constructor when testing.
@@ -80,8 +79,8 @@ MockSharedPreferencesWithCache createMockSharedPreferences({
   Map<String, Object> initialValues = const {},
 }) {
   _mockInstance = MockSharedPreferencesWithCache();
-  _mockInstance!._initialize(initialValues: initialValues);
-  return _mockInstance!;
+  _mockInstance._initialize(initialValues: initialValues);
+  return _mockInstance;
 }
 
 /// Sets up mocks for SharedPreferences in tests.
