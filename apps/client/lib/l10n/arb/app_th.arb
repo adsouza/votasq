@@ -139,5 +139,9 @@
     "voterAnonymous": "ไม่ระบุชื่อ",
     "@voterAnonymous": {
         "description": "ชื่อสำรองสำหรับผู้โหวตที่ไม่มีชื่อแสดง"
+    },
+    "signInHintToast": "ลงชื่อเข้าใช้ผ่านไอคอนในมุมขวาบน เพื่อปลดล็อคการโหวตและเสนอปัญหาของคุณเอง",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

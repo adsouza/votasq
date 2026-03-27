@@ -142,21 +142,44 @@ class _LastActiveTrackerState extends State<_LastActiveTracker> {
     );
   }
 
+  bool _hasShownSignInToast = false;
+
   @override
   void dispose() {
     _lifecycleListener.dispose();
     super.dispose();
   }
 
+  void _showSignInToast() {
+    if (_hasShownSignInToast) return;
+    _hasShownSignInToast = true;
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.signInHintToast),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   void _onResume() {
     final userId = context.read<AuthCubit>().state.userId;
-    if (userId == null) return;
+    if (userId == null) {
+      _showSignInToast();
+      return;
+    }
     unawaited(context.read<FirestoreRepository>().grantVotesAndTouch(userId));
   }
 
   void _bumpUserLastActiveTS() {
     final userId = context.read<AuthCubit>().state.userId;
-    if (userId == null) return;
+    if (userId == null) {
+      _showSignInToast();
+      return;
+    }
     unawaited(context.read<FirestoreRepository>().touchLastActiveAt(userId));
   }
 

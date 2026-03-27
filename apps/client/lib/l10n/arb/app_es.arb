@@ -130,6 +130,10 @@
     },
     "voteButtonTooltip": "Votar por este problema",
     "signInButtonTooltip": "Inicia sesión para votar por problemas o agregar tus propios problemas a la lista",
+    "signInHintToast": "Inicia sesión usando el icono en la esquina superior derecha para desbloquear votación y proponer tus propios problemas.",
+    "@signInHintToast": {
+        "description": "Mensaje de SnackBar mostrado a usuarios anónimos cuando se comprueba el ciclo de vida"
+    },
     "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
     "menuVotesReplenishHint": "Los votos se reponen tras 3 horas de ausencia",
     "votersHeading": "Votantes",

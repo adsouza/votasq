@@ -139,5 +139,9 @@
     "voterAnonymous": "அநாமதேய",
     "@voterAnonymous": {
         "description": "காட்சிப் பெயர் இல்லாத வாக்காளர்களுக்கான மாற்று பெயர்"
+    },
+    "signInHintToast": "வலது மேல் மூலையில் உள்ள ஐகான் மூலம் சைன் இன் செய்து வாக்களிப்பை திறக்கவும் மற்றும் உங்கள் சொந்த சிக்கல்களை பரிந்துரை செய்யவும்.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

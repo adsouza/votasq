@@ -139,5 +139,9 @@
     "voterAnonymous": "Ẩn danh",
     "@voterAnonymous": {
         "description": "Tên thay thế cho người bỏ phiếu không có tên hiển thị"
+    },
+    "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

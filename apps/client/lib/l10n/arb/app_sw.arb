@@ -35,5 +35,9 @@
     "menuVotesRemaining": "{count, plural, one{Kura 1 imebaki} other{Kura {count} zimebaki}}",
     "menuVotesReplenishHint": "Kura zinarejeshwa baada ya masaa 3 bila shughuli",
     "votersHeading": "Wapiga kura",
-    "voterAnonymous": "Asiyejulikana"
+    "voterAnonymous": "Asiyejulikana",
+    "signInHintToast": "Ingia kupitia ikoni katika kona ya juu kulia ili kufungua upigaji kura na kupendekeza matatizo yako.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
+    }
 }

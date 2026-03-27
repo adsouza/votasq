@@ -139,5 +139,9 @@
     "voterAnonymous": "ਅਗਿਆਤ",
     "@voterAnonymous": {
         "description": "ਉਹਨਾਂ ਵੋਟਰਾਂ ਲਈ ਬਦਲਵਾਂ ਨਾਮ ਜਿਨ੍ਹਾਂ ਦਾ ਕੋਈ ਪ੍ਰਦਰਸ਼ਨ ਨਾਮ ਨਹੀਂ ਹੈ"
+    },
+    "signInHintToast": "ਸਿੱਖਰ ਸੱਜੇ ਕੋਣ ਵਿੱਚ ਆਈਕਨ ਰਾਹੀਂ ਸਾਈਨ ਇਨ ਕਰੋ ਵੋਟਿੰਗ ਨੂੰ ਅਨਲਾਕ ਕਰਨ ਅਤੇ ਆਪਣੀਆਂ ਸਮੱਸਿਆਵਾਂ ਦੀ ਪ੍ਰਸਤਾਵ ਕਰਨ ਲਈ।",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

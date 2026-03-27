@@ -139,5 +139,9 @@
     "voterAnonymous": "مجهول",
     "@voterAnonymous": {
         "description": "اسم بديل للمصوتين الذين ليس لديهم اسم عرض"
+    },
+    "signInHintToast": "سجل الدخول عبر الأيقونة في الزاوية العلوية اليمنى لفتح التصويت واقتراح مشاكلك الخاصة.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }
