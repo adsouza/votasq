@@ -1,124 +1,36 @@
 {
     "@@locale": "de",
     "problemsAppBarTitle": "Probleme, die wir gemeinsam lösen können",
-    "@problemsAppBarTitle": {
-        "description": "Text in der AppBar der Problemseite"
-    },
     "signInButton": "Anmelden",
-    "@signInButton": {
-        "description": "Beschriftung der Anmeldeschaltfläche"
-    },
     "signOutButton": "Abmelden",
-    "@signOutButton": {
-        "description": "Tooltip der Abmeldeschaltfläche"
-    },
     "addProblemHint": "Tragen Sie hier Ihr eigenes Problem ein",
-    "@addProblemHint": {
-        "description": "Platzhaltertext für das Textfeld zum Hinzufügen eines Problems"
-    },
     "addProblemButton": "Hinzufügen",
-    "@addProblemButton": {
-        "description": "Beschriftung der Schaltfläche zum Hinzufügen eines Problems"
-    },
     "addProblemTooltip": "Fügen Sie Ihr Problem der Liste hinzu",
-    "@addProblemTooltip": {
-        "description": "Tooltip der Schaltfläche zum Hinzufügen eines Problems"
-    },
     "editProblemHint": "Problembeschreibung bearbeiten",
-    "@editProblemHint": {
-        "description": "Platzhaltertext für das Inline-Bearbeitungstextfeld"
-    },
     "editProblemButton": "Dieses Problem bearbeiten",
-    "@editProblemButton": {
-        "description": "Tooltip der Bearbeitungsschaltfläche bei einem Problemlisteneintrag"
-    },
     "flagProblemButton": "Dieses Problem als Missbrauch melden",
-    "@flagProblemButton": {
-        "description": "Tooltip der Meldeschaltfläche bei einem Problemlisteneintrag"
-    },
     "feedbackButton": "Feedback senden",
-    "@feedbackButton": {
-        "description": "Tooltip der Feedback-Schaltfläche in der App-Leiste"
-    },
     "feedbackSuccess": "Vielen Dank für Ihr Feedback!",
-    "@feedbackSuccess": {
-        "description": "SnackBar-Nachricht nach erfolgreicher Feedback-Übermittlung"
-    },
     "feedbackError": "Feedback konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
-    "@feedbackError": {
-        "description": "SnackBar-Nachricht bei fehlgeschlagener Feedback-Übermittlung"
-    },
     "geoscopeGlobal": "Global",
-    "@geoscopeGlobal": {
-        "description": "Beschriftung der globalen Option im Standortauswähler"
-    },
     "geoscopeChangeMenuItem": "Standort ändern",
-    "@geoscopeChangeMenuItem": {
-        "description": "Menüpunkt zum Öffnen des Standortauswählers"
-    },
     "showOnlyOwnedMenuItem": "Nur meine Probleme anzeigen",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Menüpunkt zum Umschalten auf die Anzeige nur eigener Probleme"
-    },
     "showOnlyWithGoalsMenuItem": "Nur Probleme mit Zielen anzeigen",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "Menüpunkt zum Anzeigen nur von Problemen mit definiertem Ziel"
-    },
     "problemDetailPageTitle": "Problemdetails",
-    "@problemDetailPageTitle": {
-        "description": "Titel in der AppBar der Problemdetailseite"
-    },
     "problemNotFound": "Problem nicht gefunden",
-    "@problemNotFound": {
-        "description": "Fehlermeldung, wenn ein Problem anhand der ID nicht gefunden wird"
-    },
     "problemDetailSaveButton": "Speichern",
-    "@problemDetailSaveButton": {
-        "description": "Beschriftung der Speichern-Schaltfläche auf der Problemdetailseite"
-    },
     "problemDetailBackButton": "Zurück",
-    "@problemDetailBackButton": {
-        "description": "Beschriftung der Zurück-Schaltfläche auf der Problemdetailseite"
-    },
     "geoscopeLabel": "Geografischer Bereich:",
-    "@geoscopeLabel": {
-        "description": "Beschriftung neben dem Dropdown für den geografischen Bereich auf der Problemdetailseite"
-    },
     "copyProblemLink": "Link zu diesem Problem kopieren",
-    "@copyProblemLink": {
-        "description": "Tooltip der Schaltfläche zum Kopieren des Links bei einem Problemlisteneintrag"
-    },
     "problemLinkCopied": "Link in die Zwischenablage kopiert",
-    "@problemLinkCopied": {
-        "description": "SnackBar-Nachricht nach dem Kopieren eines Problemlinks"
-    },
     "geoscopeDropdownTooltip": "Wählen Sie den geografischen Bereich für Ihr Problem",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip beim Überfahren des Dropdown-Menüs für den geografischen Bereich"
-    },
     "votesChipTooltip": "Stimmen",
-    "@votesChipTooltip": {
-        "description": "Tooltip beim Überfahren des Stimmen-Chips auf einer Problemkarte"
-    },
     "autoTranslateMenuItem": "Text automatisch übersetzen",
-    "@autoTranslateMenuItem": {
-        "description": "Menüpunkt zum Aktivieren der automatischen Übersetzung von Problemen in Fremdsprachen"
-    },
     "addGoalHint": "Welches Ergebnis würde dies lösen?",
-    "@addGoalHint": {
-        "description": "Platzhaltertext für das Ziel-Eingabefeld"
-    },
     "editGoalHint": "Gewünschtes Ergebnis bearbeiten",
-    "@editGoalHint": {
-        "description": "Platzhaltertext für das Ziel-Bearbeitungsfeld"
-    },
     "goalLabel": "Ziel",
-    "@goalLabel": {
-        "description": "Beschriftung des Zielfelds"
-    },
     "languageMismatchError": "Sprachkonflikt: Die Beschreibung scheint auf {descLang} zu sein, aber das Ziel auf {goalLang}. Beide Felder müssen in derselben Sprache verfasst sein.",
     "@languageMismatchError": {
-        "description": "Fehlermeldung wenn Beschreibung und Ziel in verschiedenen Sprachen erkannt werden",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 Stimme übrig} other{{count} Stimmen übrig}}",
     "menuVotesReplenishHint": "Stimmen erneuern sich nach 3 Stunden Abwesenheit",
     "votersHeading": "Abstimmende",
-    "@votersHeading": {
-        "description": "Abschnittsüberschrift für die Abstimmenden-Rangliste auf der Problemdetailseite"
-    },
     "voterAnonymous": "Anonym",
-    "@voterAnonymous": {
-        "description": "Ersatzname für Abstimmende ohne Anzeigenamen"
-    },
-    "signInHintToast": "Melden Sie sich über das Symbol in der oberen rechten Ecke an, um Abstimmungen freizuschalten und Ihre eigenen Probleme vorzuschlagen.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Melden Sie sich über das Symbol in der oberen rechten Ecke an, um Abstimmungen freizuschalten und Ihre eigenen Probleme vorzuschlagen."
 }

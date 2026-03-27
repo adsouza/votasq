@@ -1,124 +1,36 @@
 {
     "@@locale": "ur",
     "problemsAppBarTitle": "مسائل جو ہم مل کر حل کر سکتے ہیں",
-    "@problemsAppBarTitle": {
-        "description": "مسائل کے صفحے کی ایپ بار میں دکھایا جانے والا متن"
-    },
     "signInButton": "سائن ان",
-    "@signInButton": {
-        "description": "سائن ان بٹن کا لیبل"
-    },
     "signOutButton": "سائن آؤٹ",
-    "@signOutButton": {
-        "description": "سائن آؤٹ بٹن کی ٹول ٹپ"
-    },
     "addProblemHint": "یہاں اپنا مسئلہ شامل کریں",
-    "@addProblemHint": {
-        "description": "مسئلہ شامل کرنے کے ٹیکسٹ فیلڈ کا پلیس ہولڈر متن"
-    },
     "addProblemButton": "شامل کریں",
-    "@addProblemButton": {
-        "description": "مسئلہ شامل کرنے کے بٹن کا لیبل"
-    },
     "addProblemTooltip": "اپنا مسئلہ فہرست میں شامل کریں",
-    "@addProblemTooltip": {
-        "description": "مسئلہ شامل کرنے کے بٹن کی ٹول ٹپ"
-    },
     "editProblemHint": "مسئلے کی تفصیل میں ترمیم کریں",
-    "@editProblemHint": {
-        "description": "ان لائن ترمیم ٹیکسٹ فیلڈ کا پلیس ہولڈر متن"
-    },
     "editProblemButton": "اس مسئلے میں ترمیم کریں",
-    "@editProblemButton": {
-        "description": "مسائل کی فہرست میں ترمیم بٹن کی ٹول ٹپ"
-    },
     "flagProblemButton": "اس مسئلے کی بدسلوکی کے طور پر اطلاع دیں",
-    "@flagProblemButton": {
-        "description": "مسائل کی فہرست میں اطلاع بٹن کی ٹول ٹپ"
-    },
     "feedbackButton": "رائے بھیجیں",
-    "@feedbackButton": {
-        "description": "ایپ بار میں رائے بٹن کی ٹول ٹپ"
-    },
     "feedbackSuccess": "آپ کی رائے کا شکریہ!",
-    "@feedbackSuccess": {
-        "description": "کامیاب رائے جمع کرانے کے بعد سنیک بار پیغام"
-    },
     "feedbackError": "رائے نہیں بھیجی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔",
-    "@feedbackError": {
-        "description": "رائے جمع کرانے میں ناکامی پر سنیک بار پیغام"
-    },
     "geoscopeGlobal": "عالمی",
-    "@geoscopeGlobal": {
-        "description": "مقام منتخب کرنے والے میں عالمی آپشن کا لیبل"
-    },
     "geoscopeChangeMenuItem": "مقام تبدیل کریں",
-    "@geoscopeChangeMenuItem": {
-        "description": "مقام منتخب کرنے والا کھولنے کے لیے مینو آئٹم لیبل"
-    },
     "showOnlyOwnedMenuItem": "صرف میرے مسائل دکھائیں",
-    "@showOnlyOwnedMenuItem": {
-        "description": "صرف موجودہ صارف کے مسائل دکھانے کے لیے مینو آئٹم لیبل"
-    },
     "showOnlyWithGoalsMenuItem": "صرف مقاصد والے مسائل دکھائیں",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "صرف مقصد مقرر مسائل دکھانے کے لیے مینو آئٹم لیبل"
-    },
     "problemDetailPageTitle": "مسئلے کی تفصیلات",
-    "@problemDetailPageTitle": {
-        "description": "مسئلے کی تفصیلات کے صفحے کی ایپ بار میں عنوان"
-    },
     "problemNotFound": "مسئلہ نہیں ملا",
-    "@problemNotFound": {
-        "description": "جب آئی ڈی سے مسئلہ نہ مل سکے تو غلطی کا پیغام"
-    },
     "problemDetailSaveButton": "محفوظ کریں",
-    "@problemDetailSaveButton": {
-        "description": "مسئلے کی تفصیلات کے صفحے پر محفوظ بٹن کا لیبل"
-    },
     "problemDetailBackButton": "واپس",
-    "@problemDetailBackButton": {
-        "description": "مسئلے کی تفصیلات کے صفحے پر واپس بٹن کا لیبل"
-    },
     "geoscopeLabel": "جغرافیائی دائرہ:",
-    "@geoscopeLabel": {
-        "description": "مسئلے کی تفصیلات کے صفحے پر جغرافیائی دائرے کے ڈراپ ڈاؤن کے ساتھ لیبل"
-    },
     "copyProblemLink": "اس مسئلے کا لنک کاپی کریں",
-    "@copyProblemLink": {
-        "description": "مسائل کی فہرست میں لنک کاپی بٹن کی ٹول ٹپ"
-    },
     "problemLinkCopied": "لنک کلپ بورڈ پر کاپی ہو گیا",
-    "@problemLinkCopied": {
-        "description": "مسئلے کا لنک کاپی کرنے کے بعد سنیک بار پیغام"
-    },
     "geoscopeDropdownTooltip": "اپنے مسئلے کے لیے جغرافیائی دائرہ منتخب کریں",
-    "@geoscopeDropdownTooltip": {
-        "description": "جغرافیائی دائرے کے ڈراپ ڈاؤن پر ماؤس رکھنے پر دکھایا جانے والا ٹول ٹپ"
-    },
     "votesChipTooltip": "ووٹ",
-    "@votesChipTooltip": {
-        "description": "مسئلے کے کارڈ پر ووٹ کی چپ پر ماؤس رکھنے پر دکھایا جانے والا ٹول ٹپ"
-    },
     "autoTranslateMenuItem": "خودکار طور پر متن کا ترجمہ کریں",
-    "@autoTranslateMenuItem": {
-        "description": "غیر ملکی زبانوں میں مسائل کے خودکار ترجمے کو فعال کرنے کے لیے مینو آئٹم لیبل"
-    },
     "addGoalHint": "کون سا نتیجہ اسے حل کرے گا؟",
-    "@addGoalHint": {
-        "description": "ہدف شامل کرنے کے ٹیکسٹ فیلڈ کا پلیس ہولڈر"
-    },
     "editGoalHint": "مطلوبہ نتیجے میں ترمیم کریں",
-    "@editGoalHint": {
-        "description": "ہدف ترمیم ٹیکسٹ فیلڈ کا پلیس ہولڈر"
-    },
     "goalLabel": "ہدف",
-    "@goalLabel": {
-        "description": "ہدف فیلڈ کا لیبل"
-    },
     "languageMismatchError": "زبان کی عدم مطابقت: تفصیل {descLang} میں لگتی ہے لیکن ہدف {goalLang} میں لگتا ہے۔ دونوں فیلڈز ایک ہی زبان میں ہونے چاہئیں۔",
     "@languageMismatchError": {
-        "description": "جب تفصیل اور ہدف مختلف زبانوں میں پائے جائیں تو دکھائی جانے والی غلطی",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 ووٹ باقی} other{{count} ووٹ باقی}}",
     "menuVotesReplenishHint": "3 گھنٹے دور رہنے کے بعد ووٹ دوبارہ ملتے ہیں",
     "votersHeading": "ووٹرز",
-    "@votersHeading": {
-        "description": "مسئلے کی تفصیلات کے صفحے پر ووٹرز کی درجہ بندی کا سیکشن عنوان"
-    },
     "voterAnonymous": "گمنام",
-    "@voterAnonymous": {
-        "description": "ان ووٹرز کے لیے متبادل نام جن کا ڈسپلے نام نہیں ہے"
-    },
-    "signInHintToast": "اپنے مسائل کو تجویز کرنے کے لیے اور ووٹنگ کو کھولنے کے لیے اوپری دائیں کونے میں آئیکن کے ذریعے سائن ان کریں۔",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "اپنے مسائل کو تجویز کرنے کے لیے اور ووٹنگ کو کھولنے کے لیے اوپری دائیں کونے میں آئیکن کے ذریعے سائن ان کریں۔"
 }

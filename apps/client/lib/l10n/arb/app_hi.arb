@@ -1,124 +1,36 @@
 {
     "@@locale": "hi",
     "problemsAppBarTitle": "समस्याएँ जो हम मिलकर हल कर सकते हैं",
-    "@problemsAppBarTitle": {
-        "description": "Text shown in the AppBar of the Problems Page"
-    },
     "signInButton": "साइन इन",
-    "@signInButton": {
-        "description": "Label for the sign-in button"
-    },
     "signOutButton": "साइन आउट",
-    "@signOutButton": {
-        "description": "Tooltip for the sign-out button"
-    },
     "addProblemHint": "यहाँ अपनी समस्या दर्ज करें",
-    "@addProblemHint": {
-        "description": "Placeholder text for the add-problem text field"
-    },
     "addProblemButton": "जोड़ें",
-    "@addProblemButton": {
-        "description": "Label for the add-problem button"
-    },
     "addProblemTooltip": "अपनी समस्या सूची में शामिल करें",
-    "@addProblemTooltip": {
-        "description": "Tooltip for the add-problem button"
-    },
     "editProblemHint": "समस्या का विवरण संपादित करें",
-    "@editProblemHint": {
-        "description": "Placeholder text for the inline edit text field"
-    },
     "editProblemButton": "इस समस्या को संपादित करें",
-    "@editProblemButton": {
-        "description": "Tooltip for the edit button on a problem list item"
-    },
     "flagProblemButton": "इस समस्या की दुरुपयोग के रूप में रिपोर्ट करें",
-    "@flagProblemButton": {
-        "description": "Tooltip for the flag/complaint button on a problem list item"
-    },
     "feedbackButton": "प्रतिक्रिया भेजें",
-    "@feedbackButton": {
-        "description": "Tooltip for the feedback button in the app bar"
-    },
     "feedbackSuccess": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
-    "@feedbackSuccess": {
-        "description": "SnackBar message shown after successful feedback submission"
-    },
     "feedbackError": "प्रतिक्रिया भेजी नहीं जा सकी। कृपया पुनः प्रयास करें।",
-    "@feedbackError": {
-        "description": "SnackBar message shown when feedback submission fails"
-    },
     "geoscopeGlobal": "वैश्विक",
-    "@geoscopeGlobal": {
-        "description": "Label for the global geoscope option in the picker"
-    },
     "geoscopeChangeMenuItem": "स्थान बदलें",
-    "@geoscopeChangeMenuItem": {
-        "description": "Menu item label to open the geoscope picker"
-    },
     "showOnlyOwnedMenuItem": "केवल मेरी समस्याएँ दिखाएँ",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Menu item label to toggle showing only problems owned by the current user"
-    },
     "showOnlyWithGoalsMenuItem": "केवल लक्ष्य वाली समस्याएँ दिखाएँ",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "केवल लक्ष्य निर्धारित समस्याएँ दिखाने के लिए मेनू आइटम लेबल"
-    },
     "problemDetailPageTitle": "समस्या विवरण",
-    "@problemDetailPageTitle": {
-        "description": "Title in the AppBar of the problem detail page"
-    },
     "problemNotFound": "समस्या नहीं मिली",
-    "@problemNotFound": {
-        "description": "Error message when a problem cannot be found by ID"
-    },
     "problemDetailSaveButton": "सहेजें",
-    "@problemDetailSaveButton": {
-        "description": "Label for the save button on the problem detail page"
-    },
     "problemDetailBackButton": "वापस",
-    "@problemDetailBackButton": {
-        "description": "Label for the back button on the problem detail page"
-    },
     "geoscopeLabel": "भौगोलिक दायरा:",
-    "@geoscopeLabel": {
-        "description": "Label shown next to the geoscope dropdown on the problem detail page"
-    },
     "copyProblemLink": "इस समस्या का लिंक कॉपी करें",
-    "@copyProblemLink": {
-        "description": "Tooltip for the copy-link button on a problem list item"
-    },
     "problemLinkCopied": "लिंक क्लिपबोर्ड पर कॉपी हो गया",
-    "@problemLinkCopied": {
-        "description": "SnackBar message shown after copying a problem link"
-    },
     "geoscopeDropdownTooltip": "अपनी समस्या का भौगोलिक दायरा चुनें",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip shown when hovering over the geoscope dropdown"
-    },
     "votesChipTooltip": "वोट",
-    "@votesChipTooltip": {
-        "description": "समस्या कार्ड पर वोट चिप पर माउस रखने पर दिखाई गई टूलटिप"
-    },
     "autoTranslateMenuItem": "पाठ स्वचालित रूप से अनुवाद करें",
-    "@autoTranslateMenuItem": {
-        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
-    },
     "addGoalHint": "कौन सा परिणाम इसे हल करेगा?",
-    "@addGoalHint": {
-        "description": "लक्ष्य जोड़ने के टेक्स्ट फ़ील्ड का प्लेसहोल्डर"
-    },
     "editGoalHint": "वांछित परिणाम संपादित करें",
-    "@editGoalHint": {
-        "description": "लक्ष्य संपादन टेक्स्ट फ़ील्ड का प्लेसहोल्डर"
-    },
     "goalLabel": "लक्ष्य",
-    "@goalLabel": {
-        "description": "लक्ष्य फ़ील्ड का लेबल"
-    },
     "languageMismatchError": "भाषा बेमेल: विवरण {descLang} में लगता है लेकिन लक्ष्य {goalLang} में लगता है। दोनों फ़ील्ड एक ही भाषा में होने चाहिए।",
     "@languageMismatchError": {
-        "description": "जब विवरण और लक्ष्य अलग-अलग भाषाओं में पाए जाते हैं तब दिखाई जाने वाली त्रुटि",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 वोट शेष} other{{count} वोट शेष}}",
     "menuVotesReplenishHint": "3 घंटे दूर रहने पर वोट फिर से मिलते हैं",
     "votersHeading": "मतदाता",
-    "@votersHeading": {
-        "description": "समस्या विवरण पृष्ठ पर मतदाता लीडरबोर्ड का अनुभाग शीर्षक"
-    },
     "voterAnonymous": "गुमनाम",
-    "@voterAnonymous": {
-        "description": "उन मतदाताओं के लिए वैकल्पिक नाम जिनका प्रदर्शन नाम नहीं है"
-    },
-    "signInHintToast": "शीर्ष दाईं ओर के आइकन के माध्यम से साइन इन करें मतदान को अनलॉक करने और अपनी समस्याएं प्रस्तावित करने के लिए।",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "शीर्ष दाईं ओर के आइकन के माध्यम से साइन इन करें मतदान को अनलॉक करने और अपनी समस्याएं प्रस्तावित करने के लिए।"
 }

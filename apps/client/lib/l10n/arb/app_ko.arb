@@ -1,124 +1,36 @@
 {
     "@@locale": "ko",
     "problemsAppBarTitle": "함께 해결할 수 있는 문제들",
-    "@problemsAppBarTitle": {
-        "description": "문제 페이지 앱바에 표시되는 텍스트"
-    },
     "signInButton": "로그인",
-    "@signInButton": {
-        "description": "로그인 버튼 라벨"
-    },
     "signOutButton": "로그아웃",
-    "@signOutButton": {
-        "description": "로그아웃 버튼 툴팁"
-    },
     "addProblemHint": "여기에 문제를 추가하세요",
-    "@addProblemHint": {
-        "description": "문제 추가 텍스트 필드의 플레이스홀더 텍스트"
-    },
     "addProblemButton": "추가",
-    "@addProblemButton": {
-        "description": "문제 추가 버튼 라벨"
-    },
     "addProblemTooltip": "목록에 문제를 추가합니다",
-    "@addProblemTooltip": {
-        "description": "문제 추가 버튼 툴팁"
-    },
     "editProblemHint": "문제 설명 수정",
-    "@editProblemHint": {
-        "description": "인라인 편집 텍스트 필드의 플레이스홀더 텍스트"
-    },
     "editProblemButton": "이 문제 수정",
-    "@editProblemButton": {
-        "description": "문제 목록 항목의 수정 버튼 툴팁"
-    },
     "flagProblemButton": "이 문제를 악용으로 신고",
-    "@flagProblemButton": {
-        "description": "문제 목록 항목의 신고 버튼 툴팁"
-    },
     "feedbackButton": "피드백 보내기",
-    "@feedbackButton": {
-        "description": "앱 바의 피드백 버튼 툴팁"
-    },
     "feedbackSuccess": "피드백을 보내주셔서 감사합니다!",
-    "@feedbackSuccess": {
-        "description": "피드백 전송 성공 후 스낵바 메시지"
-    },
     "feedbackError": "피드백을 보낼 수 없습니다. 다시 시도해 주세요.",
-    "@feedbackError": {
-        "description": "피드백 전송 실패 시 스낵바 메시지"
-    },
     "geoscopeGlobal": "전세계",
-    "@geoscopeGlobal": {
-        "description": "위치 선택기의 전세계 옵션 라벨"
-    },
     "geoscopeChangeMenuItem": "위치 변경",
-    "@geoscopeChangeMenuItem": {
-        "description": "위치 선택기를 여는 메뉴 항목 라벨"
-    },
     "showOnlyOwnedMenuItem": "내 문제만 보기",
-    "@showOnlyOwnedMenuItem": {
-        "description": "현재 사용자의 문제만 표시하는 메뉴 항목 라벨"
-    },
     "showOnlyWithGoalsMenuItem": "목표가 있는 문제만 보기",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "목표가 설정된 문제만 표시하는 메뉴 항목 라벨"
-    },
     "problemDetailPageTitle": "문제 상세",
-    "@problemDetailPageTitle": {
-        "description": "문제 상세 페이지 앱바의 제목"
-    },
     "problemNotFound": "문제를 찾을 수 없습니다",
-    "@problemNotFound": {
-        "description": "ID로 문제를 찾을 수 없을 때 오류 메시지"
-    },
     "problemDetailSaveButton": "저장",
-    "@problemDetailSaveButton": {
-        "description": "문제 상세 페이지의 저장 버튼 라벨"
-    },
     "problemDetailBackButton": "뒤로",
-    "@problemDetailBackButton": {
-        "description": "문제 상세 페이지의 뒤로 버튼 라벨"
-    },
     "geoscopeLabel": "지리적 범위:",
-    "@geoscopeLabel": {
-        "description": "문제 상세 페이지의 지리적 범위 드롭다운 옆 라벨"
-    },
     "copyProblemLink": "이 문제 링크 복사",
-    "@copyProblemLink": {
-        "description": "문제 목록 항목의 링크 복사 버튼 툴팁"
-    },
     "problemLinkCopied": "링크가 클립보드에 복사되었습니다",
-    "@problemLinkCopied": {
-        "description": "문제 링크 복사 후 스낵바 메시지"
-    },
     "geoscopeDropdownTooltip": "문제의 지리적 범위를 선택하세요",
-    "@geoscopeDropdownTooltip": {
-        "description": "지리적 범위 드롭다운에 마우스를 올렸을 때 표시되는 툴팁"
-    },
     "votesChipTooltip": "투표",
-    "@votesChipTooltip": {
-        "description": "문제 카드의 투표 칩에 마우스를 올렸을 때 표시되는 툴팁"
-    },
     "autoTranslateMenuItem": "텍스트 자동 번역",
-    "@autoTranslateMenuItem": {
-        "description": "외국어 문제의 자동 번역을 활성화하는 메뉴 항목 라벨"
-    },
     "addGoalHint": "어떤 결과가 이것을 해결할까요?",
-    "@addGoalHint": {
-        "description": "목표 추가 텍스트 필드의 플레이스홀더"
-    },
     "editGoalHint": "원하는 결과 편집",
-    "@editGoalHint": {
-        "description": "목표 편집 텍스트 필드의 플레이스홀더"
-    },
     "goalLabel": "목표",
-    "@goalLabel": {
-        "description": "목표 필드의 라벨"
-    },
     "languageMismatchError": "언어 불일치: 설명은 {descLang}로 보이지만 목표는 {goalLang}로 보입니다. 두 필드 모두 같은 언어여야 합니다.",
     "@languageMismatchError": {
-        "description": "설명과 목표가 다른 언어로 감지될 때 표시되는 오류 메시지",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, other{투표 {count}개 남음}}",
     "menuVotesReplenishHint": "3시간 후에 투표가 충전됩니다",
     "votersHeading": "투표자",
-    "@votersHeading": {
-        "description": "문제 상세 페이지의 투표자 리더보드 섹션 제목"
-    },
     "voterAnonymous": "익명",
-    "@voterAnonymous": {
-        "description": "표시 이름이 없는 투표자의 대체 이름"
-    },
-    "signInHintToast": "오른쪽 상단의 아이콘을 통해 로그인하여 투표를 잠금 해제하고 자신의 문제를 제안하세요.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "오른쪽 상단의 아이콘을 통해 로그인하여 투표를 잠금 해제하고 자신의 문제를 제안하세요."
 }

@@ -1,124 +1,36 @@
 {
     "@@locale": "ja",
     "problemsAppBarTitle": "一緒に解決できる問題",
-    "@problemsAppBarTitle": {
-        "description": "Text shown in the AppBar of the Problems Page"
-    },
     "signInButton": "ログイン",
-    "@signInButton": {
-        "description": "Label for the sign-in button"
-    },
     "signOutButton": "ログアウト",
-    "@signOutButton": {
-        "description": "Tooltip for the sign-out button"
-    },
     "addProblemHint": "あなたの問題をここに投稿してください",
-    "@addProblemHint": {
-        "description": "Placeholder text for the add-problem text field"
-    },
     "addProblemButton": "追加",
-    "@addProblemButton": {
-        "description": "Label for the add-problem button"
-    },
     "addProblemTooltip": "あなたの問題をリストに追加する",
-    "@addProblemTooltip": {
-        "description": "Tooltip for the add-problem button"
-    },
     "editProblemHint": "問題の説明を編集",
-    "@editProblemHint": {
-        "description": "Placeholder text for the inline edit text field"
-    },
     "editProblemButton": "この問題を編集",
-    "@editProblemButton": {
-        "description": "Tooltip for the edit button on a problem list item"
-    },
     "flagProblemButton": "この問題を不正として報告",
-    "@flagProblemButton": {
-        "description": "Tooltip for the flag/complaint button on a problem list item"
-    },
     "feedbackButton": "フィードバックを送信",
-    "@feedbackButton": {
-        "description": "Tooltip for the feedback button in the app bar"
-    },
     "feedbackSuccess": "フィードバックありがとうございます！",
-    "@feedbackSuccess": {
-        "description": "SnackBar message shown after successful feedback submission"
-    },
     "feedbackError": "フィードバックを送信できませんでした。もう一度お試しください。",
-    "@feedbackError": {
-        "description": "SnackBar message shown when feedback submission fails"
-    },
     "geoscopeGlobal": "グローバル",
-    "@geoscopeGlobal": {
-        "description": "Label for the global geoscope option in the picker"
-    },
     "geoscopeChangeMenuItem": "場所を変更",
-    "@geoscopeChangeMenuItem": {
-        "description": "Menu item label to open the geoscope picker"
-    },
     "showOnlyOwnedMenuItem": "自分の問題のみ表示",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Menu item label to toggle showing only problems owned by the current user"
-    },
     "showOnlyWithGoalsMenuItem": "目標のある問題のみ表示",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "目標が設定されている問題のみを表示するメニュー項目ラベル"
-    },
     "problemDetailPageTitle": "問題の詳細",
-    "@problemDetailPageTitle": {
-        "description": "Title in the AppBar of the problem detail page"
-    },
     "problemNotFound": "問題が見つかりません",
-    "@problemNotFound": {
-        "description": "Error message when a problem cannot be found by ID"
-    },
     "problemDetailSaveButton": "保存",
-    "@problemDetailSaveButton": {
-        "description": "Label for the save button on the problem detail page"
-    },
     "problemDetailBackButton": "戻る",
-    "@problemDetailBackButton": {
-        "description": "Label for the back button on the problem detail page"
-    },
     "geoscopeLabel": "地理的範囲：",
-    "@geoscopeLabel": {
-        "description": "Label shown next to the geoscope dropdown on the problem detail page"
-    },
     "copyProblemLink": "この問題のリンクをコピー",
-    "@copyProblemLink": {
-        "description": "Tooltip for the copy-link button on a problem list item"
-    },
     "problemLinkCopied": "リンクをクリップボードにコピーしました",
-    "@problemLinkCopied": {
-        "description": "SnackBar message shown after copying a problem link"
-    },
     "geoscopeDropdownTooltip": "問題の地理的範囲を選択してください",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip shown when hovering over the geoscope dropdown"
-    },
     "votesChipTooltip": "投票数",
-    "@votesChipTooltip": {
-        "description": "問題カードの投票数チップにマウスを置いたときに表示されるツールチップ"
-    },
     "autoTranslateMenuItem": "テキストを自動翻訳",
-    "@autoTranslateMenuItem": {
-        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
-    },
     "addGoalHint": "どんな結果がこれを解決しますか？",
-    "@addGoalHint": {
-        "description": "目標追加テキストフィールドのプレースホルダー"
-    },
     "editGoalHint": "望む結果を編集",
-    "@editGoalHint": {
-        "description": "目標編集テキストフィールドのプレースホルダー"
-    },
     "goalLabel": "目標",
-    "@goalLabel": {
-        "description": "目標フィールドのラベル"
-    },
     "languageMismatchError": "言語の不一致：説明は{descLang}のようですが、目標は{goalLang}のようです。両方のフィールドは同じ言語で記入してください。",
     "@languageMismatchError": {
-        "description": "説明と目標が異なる言語で検出された場合のエラートースト",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, other{残り{count}票}}",
     "menuVotesReplenishHint": "3時間離れると投票が補充されます",
     "votersHeading": "投票者",
-    "@votersHeading": {
-        "description": "問題詳細ページの投票者リーダーボードのセクション見出し"
-    },
     "voterAnonymous": "匿名",
-    "@voterAnonymous": {
-        "description": "表示名のない投票者の代替名"
-    },
-    "signInHintToast": "サインインするには右上のアイコンを使用して、投票をアンロックし、アナタの独自の問題を提案してください。",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "サインインするには右上のアイコンを使用して、投票をアンロックし、アナタの独自の問題を提案してください。"
 }

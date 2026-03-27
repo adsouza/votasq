@@ -30,14 +30,21 @@
     "editGoalHint": "Hariri matokeo yanayotarajiwa",
     "goalLabel": "Lengo",
     "languageMismatchError": "Lugha hazifanani: maelezo yanaonekana kuwa kwa {descLang} lakini lengo linaonekana kuwa kwa {goalLang}. Sehemu zote mbili lazima ziwe kwa lugha moja.",
+    "@languageMismatchError": {
+        "placeholders": {
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
+        }
+    },
     "voteButtonTooltip": "Pigia kura tatizo hili",
     "signInButtonTooltip": "Ingia ili kupiga kura au kuongeza matatizo yako kwenye orodha",
     "menuVotesRemaining": "{count, plural, one{Kura 1 imebaki} other{Kura {count} zimebaki}}",
     "menuVotesReplenishHint": "Kura zinarejeshwa baada ya masaa 3 bila shughuli",
     "votersHeading": "Wapiga kura",
     "voterAnonymous": "Asiyejulikana",
-    "signInHintToast": "Ingia kupitia ikoni katika kona ya juu kulia ili kufungua upigaji kura na kupendekeza matatizo yako.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Ingia kupitia ikoni katika kona ya juu kulia ili kufungua upigaji kura na kupendekeza matatizo yako."
 }

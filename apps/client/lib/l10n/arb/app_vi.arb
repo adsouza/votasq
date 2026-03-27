@@ -1,124 +1,36 @@
 {
     "@@locale": "vi",
     "problemsAppBarTitle": "Những vấn đề chúng ta có thể cùng giải quyết",
-    "@problemsAppBarTitle": {
-        "description": "Văn bản hiển thị trên thanh ứng dụng của trang vấn đề"
-    },
     "signInButton": "Đăng nhập",
-    "@signInButton": {
-        "description": "Nhãn nút đăng nhập"
-    },
     "signOutButton": "Đăng xuất",
-    "@signOutButton": {
-        "description": "Chú thích nút đăng xuất"
-    },
     "addProblemHint": "Đóng góp vấn đề của bạn tại đây",
-    "@addProblemHint": {
-        "description": "Văn bản giữ chỗ cho trường nhập vấn đề"
-    },
     "addProblemButton": "Thêm",
-    "@addProblemButton": {
-        "description": "Nhãn nút thêm vấn đề"
-    },
     "addProblemTooltip": "Thêm vấn đề của bạn vào danh sách",
-    "@addProblemTooltip": {
-        "description": "Chú thích nút thêm vấn đề"
-    },
     "editProblemHint": "Chỉnh sửa mô tả vấn đề",
-    "@editProblemHint": {
-        "description": "Văn bản giữ chỗ cho trường chỉnh sửa nội tuyến"
-    },
     "editProblemButton": "Chỉnh sửa vấn đề này",
-    "@editProblemButton": {
-        "description": "Chú thích nút chỉnh sửa trên mục danh sách vấn đề"
-    },
     "flagProblemButton": "Báo cáo vấn đề này là lạm dụng",
-    "@flagProblemButton": {
-        "description": "Chú thích nút báo cáo trên mục danh sách vấn đề"
-    },
     "feedbackButton": "Gửi phản hồi",
-    "@feedbackButton": {
-        "description": "Chú thích nút phản hồi trên thanh ứng dụng"
-    },
     "feedbackSuccess": "Cảm ơn phản hồi của bạn!",
-    "@feedbackSuccess": {
-        "description": "Thông báo SnackBar sau khi gửi phản hồi thành công"
-    },
     "feedbackError": "Không thể gửi phản hồi. Vui lòng thử lại.",
-    "@feedbackError": {
-        "description": "Thông báo SnackBar khi gửi phản hồi thất bại"
-    },
     "geoscopeGlobal": "Toàn cầu",
-    "@geoscopeGlobal": {
-        "description": "Nhãn cho tùy chọn toàn cầu trong bộ chọn vị trí"
-    },
     "geoscopeChangeMenuItem": "Thay đổi vị trí",
-    "@geoscopeChangeMenuItem": {
-        "description": "Nhãn mục menu để mở bộ chọn vị trí"
-    },
     "showOnlyOwnedMenuItem": "Chỉ hiển thị vấn đề của tôi",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Nhãn mục menu để chuyển đổi hiển thị chỉ vấn đề của người dùng hiện tại"
-    },
     "showOnlyWithGoalsMenuItem": "Chỉ hiển thị vấn đề có mục tiêu",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "Nhãn mục menu để hiển thị chỉ vấn đề có mục tiêu xác định"
-    },
     "problemDetailPageTitle": "Chi tiết vấn đề",
-    "@problemDetailPageTitle": {
-        "description": "Tiêu đề trên thanh ứng dụng của trang chi tiết vấn đề"
-    },
     "problemNotFound": "Không tìm thấy vấn đề",
-    "@problemNotFound": {
-        "description": "Thông báo lỗi khi không tìm thấy vấn đề theo ID"
-    },
     "problemDetailSaveButton": "Lưu",
-    "@problemDetailSaveButton": {
-        "description": "Nhãn nút lưu trên trang chi tiết vấn đề"
-    },
     "problemDetailBackButton": "Quay lại",
-    "@problemDetailBackButton": {
-        "description": "Nhãn nút quay lại trên trang chi tiết vấn đề"
-    },
     "geoscopeLabel": "Phạm vi địa lý:",
-    "@geoscopeLabel": {
-        "description": "Nhãn bên cạnh menu thả xuống phạm vi địa lý trên trang chi tiết vấn đề"
-    },
     "copyProblemLink": "Sao chép liên kết đến vấn đề này",
-    "@copyProblemLink": {
-        "description": "Chú thích nút sao chép liên kết trên mục danh sách vấn đề"
-    },
     "problemLinkCopied": "Đã sao chép liên kết vào bộ nhớ tạm",
-    "@problemLinkCopied": {
-        "description": "Thông báo SnackBar sau khi sao chép liên kết vấn đề"
-    },
     "geoscopeDropdownTooltip": "Chọn phạm vi địa lý cho vấn đề của bạn",
-    "@geoscopeDropdownTooltip": {
-        "description": "Chú thích hiển thị khi di chuột qua menu thả xuống phạm vi địa lý"
-    },
     "votesChipTooltip": "Bình chọn",
-    "@votesChipTooltip": {
-        "description": "Chú thích hiển thị khi di chuột qua chip bình chọn trên thẻ vấn đề"
-    },
     "autoTranslateMenuItem": "Tự động dịch văn bản",
-    "@autoTranslateMenuItem": {
-        "description": "Nhãn mục menu để bật dịch tự động vấn đề bằng ngôn ngữ nước ngoài"
-    },
     "addGoalHint": "Kết quả nào sẽ giải quyết vấn đề này?",
-    "@addGoalHint": {
-        "description": "Văn bản gợi ý cho trường thêm mục tiêu"
-    },
     "editGoalHint": "Chỉnh sửa kết quả mong muốn",
-    "@editGoalHint": {
-        "description": "Văn bản gợi ý cho trường chỉnh sửa mục tiêu"
-    },
     "goalLabel": "Mục tiêu",
-    "@goalLabel": {
-        "description": "Nhãn trường mục tiêu"
-    },
     "languageMismatchError": "Ngôn ngữ không khớp: mô tả có vẻ bằng {descLang} nhưng mục tiêu bằng {goalLang}. Cả hai trường phải cùng một ngôn ngữ.",
     "@languageMismatchError": {
-        "description": "Thông báo lỗi khi mô tả và mục tiêu được phát hiện bằng các ngôn ngữ khác nhau",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{Còn 1 lượt bình chọn} other{Còn {count} lượt bình chọn}}",
     "menuVotesReplenishHint": "Lượt bình chọn được bổ sung sau 3 giờ không hoạt động",
     "votersHeading": "Người bỏ phiếu",
-    "@votersHeading": {
-        "description": "Tiêu đề phần bảng xếp hạng người bỏ phiếu trên trang chi tiết vấn đề"
-    },
     "voterAnonymous": "Ẩn danh",
-    "@voterAnonymous": {
-        "description": "Tên thay thế cho người bỏ phiếu không có tên hiển thị"
-    },
-    "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn."
 }

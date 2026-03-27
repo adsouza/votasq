@@ -1,124 +1,36 @@
 {
     "@@locale": "zh",
     "problemsAppBarTitle": "我们可以一起解决的问题",
-    "@problemsAppBarTitle": {
-        "description": "Text shown in the AppBar of the Problems Page"
-    },
     "signInButton": "登录",
-    "@signInButton": {
-        "description": "Label for the sign-in button"
-    },
     "signOutButton": "退出",
-    "@signOutButton": {
-        "description": "Tooltip for the sign-out button"
-    },
     "addProblemHint": "在此提交你的问题",
-    "@addProblemHint": {
-        "description": "Placeholder text for the add-problem text field"
-    },
     "addProblemButton": "添加",
-    "@addProblemButton": {
-        "description": "Label for the add-problem button"
-    },
     "addProblemTooltip": "将你的问题加入列表",
-    "@addProblemTooltip": {
-        "description": "Tooltip for the add-problem button"
-    },
     "editProblemHint": "编辑问题描述",
-    "@editProblemHint": {
-        "description": "Placeholder text for the inline edit text field"
-    },
     "editProblemButton": "编辑此问题",
-    "@editProblemButton": {
-        "description": "Tooltip for the edit button on a problem list item"
-    },
     "flagProblemButton": "举报此问题为滥用",
-    "@flagProblemButton": {
-        "description": "Tooltip for the flag/complaint button on a problem list item"
-    },
     "feedbackButton": "发送反馈",
-    "@feedbackButton": {
-        "description": "Tooltip for the feedback button in the app bar"
-    },
     "feedbackSuccess": "感谢你的反馈！",
-    "@feedbackSuccess": {
-        "description": "SnackBar message shown after successful feedback submission"
-    },
     "feedbackError": "无法发送反馈，请重试。",
-    "@feedbackError": {
-        "description": "SnackBar message shown when feedback submission fails"
-    },
     "geoscopeGlobal": "全球",
-    "@geoscopeGlobal": {
-        "description": "Label for the global geoscope option in the picker"
-    },
     "geoscopeChangeMenuItem": "更改位置",
-    "@geoscopeChangeMenuItem": {
-        "description": "Menu item label to open the geoscope picker"
-    },
     "showOnlyOwnedMenuItem": "只显示我的问题",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Menu item label to toggle showing only problems owned by the current user"
-    },
     "showOnlyWithGoalsMenuItem": "只显示有目标的问题",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "仅显示设定了目标的问题的菜单项标签"
-    },
     "problemDetailPageTitle": "问题详情",
-    "@problemDetailPageTitle": {
-        "description": "Title in the AppBar of the problem detail page"
-    },
     "problemNotFound": "未找到问题",
-    "@problemNotFound": {
-        "description": "Error message when a problem cannot be found by ID"
-    },
     "problemDetailSaveButton": "保存",
-    "@problemDetailSaveButton": {
-        "description": "Label for the save button on the problem detail page"
-    },
     "problemDetailBackButton": "返回",
-    "@problemDetailBackButton": {
-        "description": "Label for the back button on the problem detail page"
-    },
     "geoscopeLabel": "地理范围：",
-    "@geoscopeLabel": {
-        "description": "Label shown next to the geoscope dropdown on the problem detail page"
-    },
     "copyProblemLink": "复制此问题的链接",
-    "@copyProblemLink": {
-        "description": "Tooltip for the copy-link button on a problem list item"
-    },
     "problemLinkCopied": "链接已复制到剪贴板",
-    "@problemLinkCopied": {
-        "description": "SnackBar message shown after copying a problem link"
-    },
     "geoscopeDropdownTooltip": "选择问题的地理范围",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip shown when hovering over the geoscope dropdown"
-    },
     "votesChipTooltip": "投票数",
-    "@votesChipTooltip": {
-        "description": "鼠标悬停在问题卡片投票标签上时显示的提示"
-    },
     "autoTranslateMenuItem": "自动翻译文本",
-    "@autoTranslateMenuItem": {
-        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
-    },
     "addGoalHint": "什么结果能解决这个问题？",
-    "@addGoalHint": {
-        "description": "添加目标文本框的占位文字"
-    },
     "editGoalHint": "编辑期望结果",
-    "@editGoalHint": {
-        "description": "编辑目标文本框的占位文字"
-    },
     "goalLabel": "目标",
-    "@goalLabel": {
-        "description": "目标字段的标签"
-    },
     "languageMismatchError": "语言不匹配：描述似乎是{descLang}，但目标似乎是{goalLang}。两个字段必须使用相同的语言。",
     "@languageMismatchError": {
-        "description": "当问题描述和目标被检测为不同语言时显示的错误提示",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, other{剩余 {count} 票}}",
     "menuVotesReplenishHint": "离开 3 小时后投票会自动补充",
     "votersHeading": "投票者",
-    "@votersHeading": {
-        "description": "问题详情页面投票者排行榜的分区标题"
-    },
     "voterAnonymous": "匿名",
-    "@voterAnonymous": {
-        "description": "没有显示名称的投票者的替代名称"
-    },
-    "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。"
 }

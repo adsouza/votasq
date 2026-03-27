@@ -1,124 +1,36 @@
 {
     "@@locale": "ar",
     "problemsAppBarTitle": "مشاكل يمكننا حلها معًا",
-    "@problemsAppBarTitle": {
-        "description": "Text shown in the AppBar of the Problems Page"
-    },
     "signInButton": "تسجيل الدخول",
-    "@signInButton": {
-        "description": "Label for the sign-in button"
-    },
     "signOutButton": "تسجيل الخروج",
-    "@signOutButton": {
-        "description": "Tooltip for the sign-out button"
-    },
     "addProblemHint": "أضف مشكلتك هنا",
-    "@addProblemHint": {
-        "description": "Placeholder text for the add-problem text field"
-    },
     "addProblemButton": "إضافة",
-    "@addProblemButton": {
-        "description": "Label for the add-problem button"
-    },
     "addProblemTooltip": "أضف مشكلتك إلى القائمة",
-    "@addProblemTooltip": {
-        "description": "Tooltip for the add-problem button"
-    },
     "editProblemHint": "تعديل وصف المشكلة",
-    "@editProblemHint": {
-        "description": "Placeholder text for the inline edit text field"
-    },
     "editProblemButton": "تعديل هذه المشكلة",
-    "@editProblemButton": {
-        "description": "Tooltip for the edit button on a problem list item"
-    },
     "flagProblemButton": "الإبلاغ عن هذه المشكلة كإساءة",
-    "@flagProblemButton": {
-        "description": "Tooltip for the flag/complaint button on a problem list item"
-    },
     "feedbackButton": "إرسال ملاحظات",
-    "@feedbackButton": {
-        "description": "Tooltip for the feedback button in the app bar"
-    },
     "feedbackSuccess": "شكرًا على ملاحظاتك!",
-    "@feedbackSuccess": {
-        "description": "SnackBar message shown after successful feedback submission"
-    },
     "feedbackError": "تعذّر إرسال الملاحظات. يرجى المحاولة مرة أخرى.",
-    "@feedbackError": {
-        "description": "SnackBar message shown when feedback submission fails"
-    },
     "geoscopeGlobal": "عالمي",
-    "@geoscopeGlobal": {
-        "description": "Label for the global geoscope option in the picker"
-    },
     "geoscopeChangeMenuItem": "تغيير الموقع",
-    "@geoscopeChangeMenuItem": {
-        "description": "Menu item label to open the geoscope picker"
-    },
     "showOnlyOwnedMenuItem": "إظهار مشاكلي فقط",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Menu item label to toggle showing only problems owned by the current user"
-    },
     "showOnlyWithGoalsMenuItem": "إظهار المشاكل ذات الأهداف فقط",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "عنصر قائمة لعرض المشاكل التي لها هدف محدد فقط"
-    },
     "problemDetailPageTitle": "تفاصيل المشكلة",
-    "@problemDetailPageTitle": {
-        "description": "Title in the AppBar of the problem detail page"
-    },
     "problemNotFound": "المشكلة غير موجودة",
-    "@problemNotFound": {
-        "description": "Error message when a problem cannot be found by ID"
-    },
     "problemDetailSaveButton": "حفظ",
-    "@problemDetailSaveButton": {
-        "description": "Label for the save button on the problem detail page"
-    },
     "problemDetailBackButton": "رجوع",
-    "@problemDetailBackButton": {
-        "description": "Label for the back button on the problem detail page"
-    },
     "geoscopeLabel": "النطاق الجغرافي:",
-    "@geoscopeLabel": {
-        "description": "Label shown next to the geoscope dropdown on the problem detail page"
-    },
     "copyProblemLink": "نسخ رابط هذه المشكلة",
-    "@copyProblemLink": {
-        "description": "Tooltip for the copy-link button on a problem list item"
-    },
     "problemLinkCopied": "تم نسخ الرابط إلى الحافظة",
-    "@problemLinkCopied": {
-        "description": "SnackBar message shown after copying a problem link"
-    },
     "geoscopeDropdownTooltip": "اختر النطاق الجغرافي لمشكلتك",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip shown when hovering over the geoscope dropdown"
-    },
     "votesChipTooltip": "الأصوات",
-    "@votesChipTooltip": {
-        "description": "تلميح يظهر عند تمرير المؤشر فوق شريحة الأصوات في بطاقة المشكلة"
-    },
     "autoTranslateMenuItem": "ترجمة النص تلقائيًا",
-    "@autoTranslateMenuItem": {
-        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
-    },
     "addGoalHint": "ما النتيجة التي تحل هذا؟",
-    "@addGoalHint": {
-        "description": "نص تلميحي لحقل إضافة الهدف"
-    },
     "editGoalHint": "تعديل النتيجة المطلوبة",
-    "@editGoalHint": {
-        "description": "نص تلميحي لحقل تعديل الهدف"
-    },
     "goalLabel": "الهدف",
-    "@goalLabel": {
-        "description": "تسمية حقل الهدف"
-    },
     "languageMismatchError": "عدم تطابق اللغة: يبدو أن الوصف بلغة {descLang} لكن الهدف بلغة {goalLang}. يجب أن يكون كلا الحقلين بنفس اللغة.",
     "@languageMismatchError": {
-        "description": "رسالة خطأ عند اكتشاف أن الوصف والهدف بلغات مختلفة",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{صوت واحد متبقٍ} other{{count} أصوات متبقية}}",
     "menuVotesReplenishHint": "تتجدد الأصوات بعد ٣ ساعات من عدم الاستخدام",
     "votersHeading": "المصوتون",
-    "@votersHeading": {
-        "description": "عنوان قسم لوحة المتصدرين للمصوتين في صفحة تفاصيل المشكلة"
-    },
     "voterAnonymous": "مجهول",
-    "@voterAnonymous": {
-        "description": "اسم بديل للمصوتين الذين ليس لديهم اسم عرض"
-    },
-    "signInHintToast": "سجل الدخول عبر الأيقونة في الزاوية العلوية اليمنى لفتح التصويت واقتراح مشاكلك الخاصة.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "سجل الدخول عبر الأيقونة في الزاوية العلوية اليمنى لفتح التصويت واقتراح مشاكلك الخاصة."
 }

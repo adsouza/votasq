@@ -1,124 +1,36 @@
 {
     "@@locale": "fr",
     "problemsAppBarTitle": "Des problèmes que nous pouvons résoudre ensemble",
-    "@problemsAppBarTitle": {
-        "description": "Text shown in the AppBar of the Problems Page"
-    },
     "signInButton": "Se connecter",
-    "@signInButton": {
-        "description": "Label for the sign-in button"
-    },
     "signOutButton": "Se déconnecter",
-    "@signOutButton": {
-        "description": "Tooltip for the sign-out button"
-    },
     "addProblemHint": "Proposez votre propre problème ici",
-    "@addProblemHint": {
-        "description": "Placeholder text for the add-problem text field"
-    },
     "addProblemButton": "Ajouter",
-    "@addProblemButton": {
-        "description": "Label for the add-problem button"
-    },
     "addProblemTooltip": "Ajouter votre problème à la liste",
-    "@addProblemTooltip": {
-        "description": "Tooltip for the add-problem button"
-    },
     "editProblemHint": "Modifier la description du problème",
-    "@editProblemHint": {
-        "description": "Placeholder text for the inline edit text field"
-    },
     "editProblemButton": "Modifier ce problème",
-    "@editProblemButton": {
-        "description": "Tooltip for the edit button on a problem list item"
-    },
     "flagProblemButton": "Signaler ce problème comme abusif",
-    "@flagProblemButton": {
-        "description": "Tooltip for the flag/complaint button on a problem list item"
-    },
     "feedbackButton": "Envoyer un commentaire",
-    "@feedbackButton": {
-        "description": "Tooltip for the feedback button in the app bar"
-    },
     "feedbackSuccess": "Merci pour votre commentaire !",
-    "@feedbackSuccess": {
-        "description": "SnackBar message shown after successful feedback submission"
-    },
     "feedbackError": "Impossible d'envoyer le commentaire. Veuillez réessayer.",
-    "@feedbackError": {
-        "description": "SnackBar message shown when feedback submission fails"
-    },
     "geoscopeGlobal": "Mondial",
-    "@geoscopeGlobal": {
-        "description": "Label for the global geoscope option in the picker"
-    },
     "geoscopeChangeMenuItem": "Changer de lieu",
-    "@geoscopeChangeMenuItem": {
-        "description": "Menu item label to open the geoscope picker"
-    },
     "showOnlyOwnedMenuItem": "Afficher uniquement mes problèmes",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Menu item label to toggle showing only problems owned by the current user"
-    },
     "showOnlyWithGoalsMenuItem": "Afficher uniquement les problèmes avec objectifs",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "Élément de menu pour afficher uniquement les problèmes ayant un objectif défini"
-    },
     "problemDetailPageTitle": "Détails du problème",
-    "@problemDetailPageTitle": {
-        "description": "Title in the AppBar of the problem detail page"
-    },
     "problemNotFound": "Problème introuvable",
-    "@problemNotFound": {
-        "description": "Error message when a problem cannot be found by ID"
-    },
     "problemDetailSaveButton": "Enregistrer",
-    "@problemDetailSaveButton": {
-        "description": "Label for the save button on the problem detail page"
-    },
     "problemDetailBackButton": "Retour",
-    "@problemDetailBackButton": {
-        "description": "Label for the back button on the problem detail page"
-    },
     "geoscopeLabel": "Portée géographique :",
-    "@geoscopeLabel": {
-        "description": "Label shown next to the geoscope dropdown on the problem detail page"
-    },
     "copyProblemLink": "Copier le lien vers ce problème",
-    "@copyProblemLink": {
-        "description": "Tooltip for the copy-link button on a problem list item"
-    },
     "problemLinkCopied": "Lien copié dans le presse-papiers",
-    "@problemLinkCopied": {
-        "description": "SnackBar message shown after copying a problem link"
-    },
     "geoscopeDropdownTooltip": "Sélectionnez la portée géographique de votre problème",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip shown when hovering over the geoscope dropdown"
-    },
     "votesChipTooltip": "Votes",
-    "@votesChipTooltip": {
-        "description": "Info-bulle affichée au survol de la puce de votes sur une carte de problème"
-    },
     "autoTranslateMenuItem": "Traduire le texte automatiquement",
-    "@autoTranslateMenuItem": {
-        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
-    },
     "addGoalHint": "Quel résultat résoudrait ce problème ?",
-    "@addGoalHint": {
-        "description": "Texte d'indice pour le champ d'ajout d'objectif"
-    },
     "editGoalHint": "Modifier le résultat souhaité",
-    "@editGoalHint": {
-        "description": "Texte d'indice pour le champ de modification d'objectif"
-    },
     "goalLabel": "Objectif",
-    "@goalLabel": {
-        "description": "Libellé du champ objectif"
-    },
     "languageMismatchError": "Langues différentes : la description semble être en {descLang} mais l'objectif semble être en {goalLang}. Les deux champs doivent être dans la même langue.",
     "@languageMismatchError": {
-        "description": "Toast d'erreur lorsque la description et l'objectif sont dans des langues différentes",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 vote restant} other{{count} votes restants}}",
     "menuVotesReplenishHint": "Les votes se renouvellent après 3 heures d'absence",
     "votersHeading": "Votants",
-    "@votersHeading": {
-        "description": "En-tête de section pour le classement des votants sur la page de détails du problème"
-    },
     "voterAnonymous": "Anonyme",
-    "@voterAnonymous": {
-        "description": "Nom de remplacement pour les votants sans nom affiché"
-    },
-    "signInHintToast": "Connectez-vous via l'icône en haut à droite pour déverrouiller le vote et proposer vos propres problèmes.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Connectez-vous via l'icône en haut à droite pour déverrouiller le vote et proposer vos propres problèmes."
 }

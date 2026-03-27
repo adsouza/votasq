@@ -1,124 +1,36 @@
 {
     "@@locale": "pt",
     "problemsAppBarTitle": "Problemas que podemos resolver juntos",
-    "@problemsAppBarTitle": {
-        "description": "Texto exibido na AppBar da página de problemas"
-    },
     "signInButton": "Entrar",
-    "@signInButton": {
-        "description": "Rótulo do botão de login"
-    },
     "signOutButton": "Sair",
-    "@signOutButton": {
-        "description": "Dica do botão de logout"
-    },
     "addProblemHint": "Contribua com seu próprio problema aqui",
-    "@addProblemHint": {
-        "description": "Texto de espaço reservado para o campo de texto de adicionar problema"
-    },
     "addProblemButton": "Adicionar",
-    "@addProblemButton": {
-        "description": "Rótulo do botão de adicionar problema"
-    },
     "addProblemTooltip": "Incluir seu problema na lista",
-    "@addProblemTooltip": {
-        "description": "Dica do botão de adicionar problema"
-    },
     "editProblemHint": "Editar descrição do problema",
-    "@editProblemHint": {
-        "description": "Texto de espaço reservado para o campo de texto de edição em linha"
-    },
     "editProblemButton": "Editar este problema",
-    "@editProblemButton": {
-        "description": "Dica do botão de edição em um item da lista de problemas"
-    },
     "flagProblemButton": "Denunciar este problema como abuso",
-    "@flagProblemButton": {
-        "description": "Dica do botão de denúncia em um item da lista de problemas"
-    },
     "feedbackButton": "Enviar feedback",
-    "@feedbackButton": {
-        "description": "Dica do botão de feedback na barra do aplicativo"
-    },
     "feedbackSuccess": "Obrigado pelo seu feedback!",
-    "@feedbackSuccess": {
-        "description": "Mensagem do SnackBar após envio bem-sucedido de feedback"
-    },
     "feedbackError": "Não foi possível enviar o feedback. Por favor, tente novamente.",
-    "@feedbackError": {
-        "description": "Mensagem do SnackBar quando o envio de feedback falha"
-    },
     "geoscopeGlobal": "Global",
-    "@geoscopeGlobal": {
-        "description": "Rótulo da opção global no seletor de localização"
-    },
     "geoscopeChangeMenuItem": "Alterar localização",
-    "@geoscopeChangeMenuItem": {
-        "description": "Rótulo do item de menu para abrir o seletor de localização"
-    },
     "showOnlyOwnedMenuItem": "Mostrar apenas meus problemas",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Rótulo do item de menu para alternar a exibição apenas dos problemas do usuário atual"
-    },
     "showOnlyWithGoalsMenuItem": "Mostrar apenas problemas com objetivos",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "Rótulo do item de menu para exibir apenas problemas com objetivo definido"
-    },
     "problemDetailPageTitle": "Detalhes do Problema",
-    "@problemDetailPageTitle": {
-        "description": "Título na AppBar da página de detalhes do problema"
-    },
     "problemNotFound": "Problema não encontrado",
-    "@problemNotFound": {
-        "description": "Mensagem de erro quando um problema não pode ser encontrado pelo ID"
-    },
     "problemDetailSaveButton": "Salvar",
-    "@problemDetailSaveButton": {
-        "description": "Rótulo do botão de salvar na página de detalhes do problema"
-    },
     "problemDetailBackButton": "Voltar",
-    "@problemDetailBackButton": {
-        "description": "Rótulo do botão de voltar na página de detalhes do problema"
-    },
     "geoscopeLabel": "Abrangência geográfica:",
-    "@geoscopeLabel": {
-        "description": "Rótulo ao lado do menu suspenso de abrangência geográfica na página de detalhes do problema"
-    },
     "copyProblemLink": "Copiar link deste problema",
-    "@copyProblemLink": {
-        "description": "Dica do botão de copiar link em um item da lista de problemas"
-    },
     "problemLinkCopied": "Link copiado para a área de transferência",
-    "@problemLinkCopied": {
-        "description": "Mensagem do SnackBar após copiar o link de um problema"
-    },
     "geoscopeDropdownTooltip": "Selecione a abrangência geográfica do seu problema",
-    "@geoscopeDropdownTooltip": {
-        "description": "Dica exibida ao passar o cursor sobre o menu suspenso de abrangência geográfica"
-    },
     "votesChipTooltip": "Votos",
-    "@votesChipTooltip": {
-        "description": "Dica exibida ao passar o cursor sobre o chip de votos em um cartão de problema"
-    },
     "autoTranslateMenuItem": "Traduzir texto automaticamente",
-    "@autoTranslateMenuItem": {
-        "description": "Rótulo do item de menu para ativar a tradução automática de problemas em idiomas estrangeiros"
-    },
     "addGoalHint": "Qual resultado resolveria isso?",
-    "@addGoalHint": {
-        "description": "Texto de dica para o campo de adicionar objetivo"
-    },
     "editGoalHint": "Editar resultado desejado",
-    "@editGoalHint": {
-        "description": "Texto de dica para o campo de edição de objetivo"
-    },
     "goalLabel": "Objetivo",
-    "@goalLabel": {
-        "description": "Rótulo do campo de objetivo"
-    },
     "languageMismatchError": "Idiomas diferentes: a descrição parece estar em {descLang} mas o objetivo em {goalLang}. Ambos os campos devem estar no mesmo idioma.",
     "@languageMismatchError": {
-        "description": "Mensagem de erro quando a descrição e o objetivo são detectados em idiomas diferentes",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
     "menuVotesReplenishHint": "Votos se renovam após 3 horas de ausência",
     "votersHeading": "Votantes",
-    "@votersHeading": {
-        "description": "Cabeçalho da seção para a classificação de votantes na página de detalhes do problema"
-    },
     "voterAnonymous": "Anônimo",
-    "@voterAnonymous": {
-        "description": "Nome alternativo para votantes sem nome de exibição"
-    },
-    "signInHintToast": "Entre por meio do ícone no canto superior direito para desbloquear votação e propor seus próprios problemas.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Entre por meio do ícone no canto superior direito para desbloquear votação e propor seus próprios problemas."
 }

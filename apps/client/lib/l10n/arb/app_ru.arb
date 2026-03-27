@@ -1,124 +1,36 @@
 {
     "@@locale": "ru",
     "problemsAppBarTitle": "Проблемы, которые мы можем решить вместе",
-    "@problemsAppBarTitle": {
-        "description": "Текст в AppBar страницы проблем"
-    },
     "signInButton": "Войти",
-    "@signInButton": {
-        "description": "Метка кнопки входа"
-    },
     "signOutButton": "Выйти",
-    "@signOutButton": {
-        "description": "Подсказка кнопки выхода"
-    },
     "addProblemHint": "Добавьте свою проблему здесь",
-    "@addProblemHint": {
-        "description": "Текст-заполнитель для поля добавления проблемы"
-    },
     "addProblemButton": "Добавить",
-    "@addProblemButton": {
-        "description": "Метка кнопки добавления проблемы"
-    },
     "addProblemTooltip": "Включить вашу проблему в список",
-    "@addProblemTooltip": {
-        "description": "Подсказка кнопки добавления проблемы"
-    },
     "editProblemHint": "Редактировать описание проблемы",
-    "@editProblemHint": {
-        "description": "Текст-заполнитель для поля встроенного редактирования"
-    },
     "editProblemButton": "Редактировать эту проблему",
-    "@editProblemButton": {
-        "description": "Подсказка кнопки редактирования в элементе списка проблем"
-    },
     "flagProblemButton": "Пожаловаться на эту проблему",
-    "@flagProblemButton": {
-        "description": "Подсказка кнопки жалобы в элементе списка проблем"
-    },
     "feedbackButton": "Отправить отзыв",
-    "@feedbackButton": {
-        "description": "Подсказка кнопки отзыва в панели приложения"
-    },
     "feedbackSuccess": "Спасибо за ваш отзыв!",
-    "@feedbackSuccess": {
-        "description": "Сообщение SnackBar после успешной отправки отзыва"
-    },
     "feedbackError": "Не удалось отправить отзыв. Пожалуйста, попробуйте снова.",
-    "@feedbackError": {
-        "description": "Сообщение SnackBar при неудачной отправке отзыва"
-    },
     "geoscopeGlobal": "Глобально",
-    "@geoscopeGlobal": {
-        "description": "Метка глобальной опции в выборе местоположения"
-    },
     "geoscopeChangeMenuItem": "Изменить местоположение",
-    "@geoscopeChangeMenuItem": {
-        "description": "Метка пункта меню для открытия выбора местоположения"
-    },
     "showOnlyOwnedMenuItem": "Показать только мои проблемы",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Метка пункта меню для отображения только проблем текущего пользователя"
-    },
     "showOnlyWithGoalsMenuItem": "Показать только проблемы с целями",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "Пункт меню для отображения только проблем с определённой целью"
-    },
     "problemDetailPageTitle": "Детали проблемы",
-    "@problemDetailPageTitle": {
-        "description": "Заголовок в AppBar страницы деталей проблемы"
-    },
     "problemNotFound": "Проблема не найдена",
-    "@problemNotFound": {
-        "description": "Сообщение об ошибке, когда проблема не найдена по ID"
-    },
     "problemDetailSaveButton": "Сохранить",
-    "@problemDetailSaveButton": {
-        "description": "Метка кнопки сохранения на странице деталей проблемы"
-    },
     "problemDetailBackButton": "Назад",
-    "@problemDetailBackButton": {
-        "description": "Метка кнопки назад на странице деталей проблемы"
-    },
     "geoscopeLabel": "Географический охват:",
-    "@geoscopeLabel": {
-        "description": "Метка рядом с выпадающим списком географического охвата на странице деталей проблемы"
-    },
     "copyProblemLink": "Копировать ссылку на эту проблему",
-    "@copyProblemLink": {
-        "description": "Подсказка кнопки копирования ссылки в элементе списка проблем"
-    },
     "problemLinkCopied": "Ссылка скопирована в буфер обмена",
-    "@problemLinkCopied": {
-        "description": "Сообщение SnackBar после копирования ссылки на проблему"
-    },
     "geoscopeDropdownTooltip": "Выберите географический охват для вашей проблемы",
-    "@geoscopeDropdownTooltip": {
-        "description": "Подсказка при наведении на выпадающий список географического охвата"
-    },
     "votesChipTooltip": "Голоса",
-    "@votesChipTooltip": {
-        "description": "Подсказка при наведении на чип голосов на карточке проблемы"
-    },
     "autoTranslateMenuItem": "Автоматический перевод текста",
-    "@autoTranslateMenuItem": {
-        "description": "Метка пункта меню для включения автоматического перевода проблем на иностранных языках"
-    },
     "addGoalHint": "Какой результат решит эту проблему?",
-    "@addGoalHint": {
-        "description": "Подсказка для поля добавления цели"
-    },
     "editGoalHint": "Редактировать желаемый результат",
-    "@editGoalHint": {
-        "description": "Подсказка для поля редактирования цели"
-    },
     "goalLabel": "Цель",
-    "@goalLabel": {
-        "description": "Метка поля цели"
-    },
     "languageMismatchError": "Несовпадение языков: описание, похоже, на {descLang}, а цель — на {goalLang}. Оба поля должны быть на одном языке.",
     "@languageMismatchError": {
-        "description": "Сообщение об ошибке когда описание и цель обнаружены на разных языках",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 голос остался} few{{count} голоса осталось} many{{count} голосов осталось} other{{count} голосов осталось}}",
     "menuVotesReplenishHint": "Голоса обновляются после 3 часов отсутствия",
     "votersHeading": "Голосовавшие",
-    "@votersHeading": {
-        "description": "Заголовок раздела рейтинга голосовавших на странице деталей проблемы"
-    },
     "voterAnonymous": "Аноним",
-    "@voterAnonymous": {
-        "description": "Имя по умолчанию для голосовавших без отображаемого имени"
-    },
-    "signInHintToast": "Войдите через значок в верхнем правом углу, чтобы разблокировать голосование и предложить свои собственные проблемы.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Войдите через значок в верхнем правом углу, чтобы разблокировать голосование и предложить свои собственные проблемы."
 }

@@ -1,124 +1,36 @@
 {
     "@@locale": "id",
     "problemsAppBarTitle": "Masalah yang bisa kita selesaikan bersama",
-    "@problemsAppBarTitle": {
-        "description": "Teks yang ditampilkan di AppBar halaman masalah"
-    },
     "signInButton": "Masuk",
-    "@signInButton": {
-        "description": "Label tombol masuk"
-    },
     "signOutButton": "Keluar",
-    "@signOutButton": {
-        "description": "Tooltip tombol keluar"
-    },
     "addProblemHint": "Tambahkan masalah Anda sendiri di sini",
-    "@addProblemHint": {
-        "description": "Teks placeholder untuk kolom teks tambah masalah"
-    },
     "addProblemButton": "Tambah",
-    "@addProblemButton": {
-        "description": "Label tombol tambah masalah"
-    },
     "addProblemTooltip": "Masukkan masalah Anda ke dalam daftar",
-    "@addProblemTooltip": {
-        "description": "Tooltip tombol tambah masalah"
-    },
     "editProblemHint": "Edit deskripsi masalah",
-    "@editProblemHint": {
-        "description": "Teks placeholder untuk kolom teks edit inline"
-    },
     "editProblemButton": "Edit masalah ini",
-    "@editProblemButton": {
-        "description": "Tooltip tombol edit pada item daftar masalah"
-    },
     "flagProblemButton": "Laporkan masalah ini sebagai penyalahgunaan",
-    "@flagProblemButton": {
-        "description": "Tooltip tombol laporan pada item daftar masalah"
-    },
     "feedbackButton": "Kirim umpan balik",
-    "@feedbackButton": {
-        "description": "Tooltip tombol umpan balik di bilah aplikasi"
-    },
     "feedbackSuccess": "Terima kasih atas umpan balik Anda!",
-    "@feedbackSuccess": {
-        "description": "Pesan SnackBar setelah pengiriman umpan balik berhasil"
-    },
     "feedbackError": "Tidak dapat mengirim umpan balik. Silakan coba lagi.",
-    "@feedbackError": {
-        "description": "Pesan SnackBar ketika pengiriman umpan balik gagal"
-    },
     "geoscopeGlobal": "Global",
-    "@geoscopeGlobal": {
-        "description": "Label opsi global di pemilih lokasi"
-    },
     "geoscopeChangeMenuItem": "Ubah lokasi",
-    "@geoscopeChangeMenuItem": {
-        "description": "Label item menu untuk membuka pemilih lokasi"
-    },
     "showOnlyOwnedMenuItem": "Tampilkan hanya masalah saya",
-    "@showOnlyOwnedMenuItem": {
-        "description": "Label item menu untuk menampilkan hanya masalah pengguna saat ini"
-    },
     "showOnlyWithGoalsMenuItem": "Tampilkan hanya masalah dengan tujuan",
-    "@showOnlyWithGoalsMenuItem": {
-        "description": "Label item menu untuk menampilkan hanya masalah yang memiliki tujuan"
-    },
     "problemDetailPageTitle": "Detail Masalah",
-    "@problemDetailPageTitle": {
-        "description": "Judul di AppBar halaman detail masalah"
-    },
     "problemNotFound": "Masalah tidak ditemukan",
-    "@problemNotFound": {
-        "description": "Pesan error ketika masalah tidak ditemukan berdasarkan ID"
-    },
     "problemDetailSaveButton": "Simpan",
-    "@problemDetailSaveButton": {
-        "description": "Label tombol simpan di halaman detail masalah"
-    },
     "problemDetailBackButton": "Kembali",
-    "@problemDetailBackButton": {
-        "description": "Label tombol kembali di halaman detail masalah"
-    },
     "geoscopeLabel": "Cakupan geografis:",
-    "@geoscopeLabel": {
-        "description": "Label di samping dropdown cakupan geografis di halaman detail masalah"
-    },
     "copyProblemLink": "Salin tautan ke masalah ini",
-    "@copyProblemLink": {
-        "description": "Tooltip tombol salin tautan pada item daftar masalah"
-    },
     "problemLinkCopied": "Tautan disalin ke papan klip",
-    "@problemLinkCopied": {
-        "description": "Pesan SnackBar setelah menyalin tautan masalah"
-    },
     "geoscopeDropdownTooltip": "Pilih cakupan geografis untuk masalah Anda",
-    "@geoscopeDropdownTooltip": {
-        "description": "Tooltip yang ditampilkan saat mengarahkan kursor ke dropdown cakupan geografis"
-    },
     "votesChipTooltip": "Suara",
-    "@votesChipTooltip": {
-        "description": "Tooltip yang ditampilkan saat mengarahkan kursor ke chip suara pada kartu masalah"
-    },
     "autoTranslateMenuItem": "Terjemahkan teks secara otomatis",
-    "@autoTranslateMenuItem": {
-        "description": "Label item menu untuk mengaktifkan terjemahan otomatis masalah dalam bahasa asing"
-    },
     "addGoalHint": "Hasil apa yang akan menyelesaikan ini?",
-    "@addGoalHint": {
-        "description": "Teks petunjuk untuk kolom tambah tujuan"
-    },
     "editGoalHint": "Edit hasil yang diinginkan",
-    "@editGoalHint": {
-        "description": "Teks petunjuk untuk kolom edit tujuan"
-    },
     "goalLabel": "Tujuan",
-    "@goalLabel": {
-        "description": "Label kolom tujuan"
-    },
     "languageMismatchError": "Bahasa tidak cocok: deskripsi tampaknya dalam {descLang} tetapi tujuan dalam {goalLang}. Kedua kolom harus dalam bahasa yang sama.",
     "@languageMismatchError": {
-        "description": "Pesan kesalahan saat deskripsi dan tujuan terdeteksi dalam bahasa berbeda",
         "placeholders": {
             "descLang": {
                 "type": "String"
@@ -133,15 +45,6 @@
     "menuVotesRemaining": "{count, plural, one{1 suara tersisa} other{{count} suara tersisa}}",
     "menuVotesReplenishHint": "Suara diperbarui setelah 3 jam tidak aktif",
     "votersHeading": "Pemilih",
-    "@votersHeading": {
-        "description": "Judul bagian untuk papan peringkat pemilih di halaman detail masalah"
-    },
     "voterAnonymous": "Anonim",
-    "@voterAnonymous": {
-        "description": "Nama pengganti untuk pemilih yang tidak memiliki nama tampilan"
-    },
-    "signInHintToast": "Masuk melalui ikon di sudut kanan atas untuk membuka fitur pemungutan suara dan mengusulkan masalah Anda sendiri.",
-    "@signInHintToast": {
-        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
-    }
+    "signInHintToast": "Masuk melalui ikon di sudut kanan atas untuk membuka fitur pemungutan suara dan mengusulkan masalah Anda sendiri."
 }
