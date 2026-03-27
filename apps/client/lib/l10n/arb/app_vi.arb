@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "Thông báo lỗi khi mô tả và mục tiêu được phát hiện bằng các ngôn ngữ khác nhau",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Bình chọn cho vấn đề này",
+    "signInButtonTooltip": "Đăng nhập để bình chọn vấn đề hoặc thêm vấn đề của bạn vào danh sách",
+    "menuVotesRemaining": "{count, plural, one{Còn 1 lượt bình chọn} other{Còn {count} lượt bình chọn}}",
+    "menuVotesReplenishHint": "Lượt bình chọn được bổ sung sau 3 giờ không hoạt động",
+    "votersHeading": "Người bỏ phiếu",
+    "@votersHeading": {
+        "description": "Tiêu đề phần bảng xếp hạng người bỏ phiếu trên trang chi tiết vấn đề"
+    },
+    "voterAnonymous": "Ẩn danh",
+    "@voterAnonymous": {
+        "description": "Tên thay thế cho người bỏ phiếu không có tên hiển thị"
+    },
+    "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

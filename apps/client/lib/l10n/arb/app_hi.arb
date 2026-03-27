@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "जब विवरण और लक्ष्य अलग-अलग भाषाओं में पाए जाते हैं तब दिखाई जाने वाली त्रुटि",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "इस समस्या के लिए वोट करें",
+    "signInButtonTooltip": "समस्याओं पर वोट करने या सूची में अपनी समस्याएँ जोड़ने के लिए लॉग इन करें",
+    "menuVotesRemaining": "{count, plural, one{1 वोट शेष} other{{count} वोट शेष}}",
+    "menuVotesReplenishHint": "3 घंटे दूर रहने पर वोट फिर से मिलते हैं",
+    "votersHeading": "मतदाता",
+    "@votersHeading": {
+        "description": "समस्या विवरण पृष्ठ पर मतदाता लीडरबोर्ड का अनुभाग शीर्षक"
+    },
+    "voterAnonymous": "गुमनाम",
+    "@voterAnonymous": {
+        "description": "उन मतदाताओं के लिए वैकल्पिक नाम जिनका प्रदर्शन नाम नहीं है"
+    },
+    "signInHintToast": "शीर्ष दाईं ओर के आइकन के माध्यम से साइन इन करें मतदान को अनलॉक करने और अपनी समस्याएं प्रस्तावित करने के लिए।",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "Pesan kesalahan saat deskripsi dan tujuan terdeteksi dalam bahasa berbeda",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Pilih masalah ini",
+    "signInButtonTooltip": "Masuk untuk memilih masalah atau menambahkan masalah Anda sendiri ke daftar",
+    "menuVotesRemaining": "{count, plural, one{1 suara tersisa} other{{count} suara tersisa}}",
+    "menuVotesReplenishHint": "Suara diperbarui setelah 3 jam tidak aktif",
+    "votersHeading": "Pemilih",
+    "@votersHeading": {
+        "description": "Judul bagian untuk papan peringkat pemilih di halaman detail masalah"
+    },
+    "voterAnonymous": "Anonim",
+    "@voterAnonymous": {
+        "description": "Nama pengganti untuk pemilih yang tidak memiliki nama tampilan"
+    },
+    "signInHintToast": "Masuk melalui ikon di sudut kanan atas untuk membuka fitur pemungutan suara dan mengusulkan masalah Anda sendiri.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

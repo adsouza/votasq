@@ -16,6 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
 
+import '../../helpers/helpers.dart';
+
 class _MockProblemsCubit extends MockCubit<ProblemsState>
     implements ProblemsCubit {}
 
@@ -65,8 +67,10 @@ void main() {
   late FeedbackRepository feedbackRepo;
   late LanguageDetectionService languageDetectionService;
   late TranslationRepository translationRepo;
+  late MockSharedPreferencesWithCache mockPrefs;
 
   setUp(() {
+    mockPrefs = createMockSharedPreferences();
     problemsCubit = _MockProblemsCubit();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
@@ -95,7 +99,7 @@ void main() {
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
         BlocProvider<AutoTranslateCubit>(
-          create: (_) => AutoTranslateCubit(),
+          create: (_) => AutoTranslateCubit(prefsForTesting: mockPrefs),
         ),
       ],
       child: MultiRepositoryProvider(
@@ -246,6 +250,93 @@ void main() {
       expect(find.text('42'), findsOneWidget);
     });
 
+    testWidgets('vote chip is ActionChip when authenticated with votes', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: initialVoteBudget,
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(ownerId: 'other', votes: 7)],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.byType(ActionChip), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_circle_up_rounded), findsOneWidget);
+    });
+
+    testWidgets('vote chip is plain Chip when no remaining votes', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: 0,
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem()],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.byType(ActionChip), findsNothing);
+      expect(find.byType(Chip), findsOneWidget);
+    });
+
+    testWidgets('vote chip is plain Chip when not authenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.unauthenticated),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem()],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.byType(ActionChip), findsNothing);
+      expect(find.byType(Chip), findsOneWidget);
+    });
+
+    testWidgets('tapping vote chip calls cubit.vote', (tester) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: initialVoteBudget,
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(id: 'p1', ownerId: 'other')],
+        ),
+      );
+      when(
+        () => problemsCubit.vote(
+          problemId: any(named: 'problemId'),
+          userId: any(named: 'userId'),
+        ),
+      ).thenAnswer((_) async {});
+      await tester.pumpWidget(buildSubject());
+      await tester.tap(find.byType(ActionChip));
+      await tester.pump();
+      verify(
+        () => problemsCubit.vote(problemId: 'p1', userId: 'user1'),
+      ).called(1);
+    });
+
     testWidgets('loading indicator shown during initial load', (tester) async {
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.loading),
@@ -254,15 +345,33 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('hamburger menu renders both items', (tester) async {
+    testWidgets('hamburger menu hides owned filter when not authenticated', (
+      tester,
+    ) async {
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
       );
       await tester.pumpWidget(buildSubject());
-      // Tap the hamburger menu icon.
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
-      // Both menu items should be visible.
+      // Only "with goals" checkbox visible, not "my problems".
+      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+      expect(find.byIcon(Icons.location_on), findsOneWidget);
+    });
+
+    testWidgets('hamburger menu shows owned filter when authenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      // Both checkboxes visible.
       expect(find.byIcon(Icons.check_box_outline_blank), findsNWidgets(2));
       expect(find.byIcon(Icons.location_on), findsOneWidget);
     });

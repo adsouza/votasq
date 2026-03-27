@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "پیام خطا هنگامی که توضیحات و هدف به زبان‌های مختلف تشخیص داده شوند",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "به این مشکل رأی دهید",
+    "signInButtonTooltip": "برای رأی دادن به مشکلات یا افزودن مشکلات خود به لیست وارد شوید",
+    "menuVotesRemaining": "{count, plural, one{۱ رأی باقی‌مانده} other{{count} رأی باقی‌مانده}}",
+    "menuVotesReplenishHint": "آرا پس از ۳ ساعت دور بودن تجدید می‌شوند",
+    "votersHeading": "رای‌دهندگان",
+    "@votersHeading": {
+        "description": "عنوان بخش جدول رای‌دهندگان در صفحه جزئیات مشکل"
+    },
+    "voterAnonymous": "ناشناس",
+    "@voterAnonymous": {
+        "description": "نام جایگزین برای رای‌دهندگانی که نام نمایشی ندارند"
+    },
+    "signInHintToast": "برای باز کردن رای‌گیری و پیشنهاد مشکلات خود، از طریق نماد در گوشه سمت راست بالا وارد شوید.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

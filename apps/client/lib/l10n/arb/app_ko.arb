@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "설명과 목표가 다른 언어로 감지될 때 표시되는 오류 메시지",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "이 문제에 투표하기",
+    "signInButtonTooltip": "문제에 투표하거나 자신의 문제를 목록에 추가하려면 로그인하세요",
+    "menuVotesRemaining": "{count, plural, other{투표 {count}개 남음}}",
+    "menuVotesReplenishHint": "3시간 후에 투표가 충전됩니다",
+    "votersHeading": "투표자",
+    "@votersHeading": {
+        "description": "문제 상세 페이지의 투표자 리더보드 섹션 제목"
+    },
+    "voterAnonymous": "익명",
+    "@voterAnonymous": {
+        "description": "표시 이름이 없는 투표자의 대체 이름"
+    },
+    "signInHintToast": "오른쪽 상단의 아이콘을 통해 로그인하여 투표를 잠금 해제하고 자신의 문제를 제안하세요.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

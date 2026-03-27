@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "جب تفصیل اور ہدف مختلف زبانوں میں پائے جائیں تو دکھائی جانے والی غلطی",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "اس مسئلے کے لیے ووٹ کریں",
+    "signInButtonTooltip": "مسائل پر ووٹ کرنے یا فہرست میں اپنے مسائل شامل کرنے کے لیے لاگ ان کریں",
+    "menuVotesRemaining": "{count, plural, one{1 ووٹ باقی} other{{count} ووٹ باقی}}",
+    "menuVotesReplenishHint": "3 گھنٹے دور رہنے کے بعد ووٹ دوبارہ ملتے ہیں",
+    "votersHeading": "ووٹرز",
+    "@votersHeading": {
+        "description": "مسئلے کی تفصیلات کے صفحے پر ووٹرز کی درجہ بندی کا سیکشن عنوان"
+    },
+    "voterAnonymous": "گمنام",
+    "@voterAnonymous": {
+        "description": "ان ووٹرز کے لیے متبادل نام جن کا ڈسپلے نام نہیں ہے"
+    },
+    "signInHintToast": "اپنے مسائل کو تجویز کرنے کے لیے اور ووٹنگ کو کھولنے کے لیے اوپری دائیں کونے میں آئیکن کے ذریعے سائن ان کریں۔",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

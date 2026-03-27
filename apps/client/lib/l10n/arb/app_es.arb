@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "Toast de error cuando la descripción y la meta del problema están en idiomas diferentes",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Votar por este problema",
+    "signInButtonTooltip": "Inicia sesión para votar por problemas o agregar tus propios problemas a la lista",
+    "signInHintToast": "Inicia sesión usando el icono en la esquina superior derecha para desbloquear votación y proponer tus propios problemas.",
+    "@signInHintToast": {
+        "description": "Mensaje de SnackBar mostrado a usuarios anónimos cuando se comprueba el ciclo de vida"
+    },
+    "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
+    "menuVotesReplenishHint": "Los votos se reponen tras 3 horas de ausencia",
+    "votersHeading": "Votantes",
+    "@votersHeading": {
+        "description": "Encabezado de sección para la tabla de votantes en la página de detalles del problema"
+    },
+    "voterAnonymous": "Anónimo",
+    "@voterAnonymous": {
+        "description": "Nombre alternativo para votantes sin nombre visible"
     }
 }

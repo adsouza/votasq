@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "ਜਦੋਂ ਵਰਣਨ ਅਤੇ ਟੀਚਾ ਵੱਖ-ਵੱਖ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਖੋਜੇ ਜਾਂਦੇ ਹਨ ਤਾਂ ਦਿਖਾਈ ਜਾਣ ਵਾਲੀ ਗਲਤੀ",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "ਇਸ ਸਮੱਸਿਆ ਲਈ ਵੋਟ ਕਰੋ",
+    "signInButtonTooltip": "ਸਮੱਸਿਆਵਾਂ ਤੇ ਵੋਟ ਕਰਨ ਜਾਂ ਸੂਚੀ ਵਿੱਚ ਆਪਣੀਆਂ ਸਮੱਸਿਆਵਾਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਲੌਗ ਇਨ ਕਰੋ",
+    "menuVotesRemaining": "{count, plural, one{1 ਵੋਟ ਬਾਕੀ} other{{count} ਵੋਟ ਬਾਕੀ}}",
+    "menuVotesReplenishHint": "3 ਘੰਟੇ ਦੂਰ ਰਹਿਣ ਤੋਂ ਬਾਅਦ ਵੋਟ ਦੁਬਾਰਾ ਮਿਲਦੇ ਹਨ",
+    "votersHeading": "ਵੋਟਰ",
+    "@votersHeading": {
+        "description": "ਸਮੱਸਿਆ ਵੇਰਵੇ ਪੰਨੇ ਉੱਤੇ ਵੋਟਰ ਲੀਡਰਬੋਰਡ ਦਾ ਭਾਗ ਸਿਰਲੇਖ"
+    },
+    "voterAnonymous": "ਅਗਿਆਤ",
+    "@voterAnonymous": {
+        "description": "ਉਹਨਾਂ ਵੋਟਰਾਂ ਲਈ ਬਦਲਵਾਂ ਨਾਮ ਜਿਨ੍ਹਾਂ ਦਾ ਕੋਈ ਪ੍ਰਦਰਸ਼ਨ ਨਾਮ ਨਹੀਂ ਹੈ"
+    },
+    "signInHintToast": "ਸਿੱਖਰ ਸੱਜੇ ਕੋਣ ਵਿੱਚ ਆਈਕਨ ਰਾਹੀਂ ਸਾਈਨ ਇਨ ਕਰੋ ਵੋਟਿੰਗ ਨੂੰ ਅਨਲਾਕ ਕਰਨ ਅਤੇ ਆਪਣੀਆਂ ਸਮੱਸਿਆਵਾਂ ਦੀ ਪ੍ਰਸਤਾਵ ਕਰਨ ਲਈ।",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

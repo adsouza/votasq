@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "Toast d'erreur lorsque la description et l'objectif sont dans des langues différentes",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Voter pour ce problème",
+    "signInButtonTooltip": "Connectez-vous pour voter sur les problèmes ou ajouter vos propres problèmes à la liste",
+    "menuVotesRemaining": "{count, plural, one{1 vote restant} other{{count} votes restants}}",
+    "menuVotesReplenishHint": "Les votes se renouvellent après 3 heures d'absence",
+    "votersHeading": "Votants",
+    "@votersHeading": {
+        "description": "En-tête de section pour le classement des votants sur la page de détails du problème"
+    },
+    "voterAnonymous": "Anonyme",
+    "@voterAnonymous": {
+        "description": "Nom de remplacement pour les votants sans nom affiché"
+    },
+    "signInHintToast": "Connectez-vous via l'icône en haut à droite pour déverrouiller le vote et proposer vos propres problèmes.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

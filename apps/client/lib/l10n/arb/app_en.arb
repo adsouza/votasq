@@ -120,8 +120,45 @@
     "@languageMismatchError": {
         "description": "Error toast shown when the problem description and goal are detected as different languages",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Vote for this problem",
+    "@voteButtonTooltip": {
+        "description": "Tooltip shown when hovering over the tappable vote chip for authenticated users"
+    },
+    "signInButtonTooltip": "Log in to vote on problems or add your own problems to the list",
+    "@signInButtonTooltip": {
+        "description": "Tooltip for the sign-in button explaining what signing in enables"
+    },
+    "signInHintToast": "Sign in via the icon in the top right to unlock voting and propose your own problems.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
+    },
+    "menuVotesRemaining": "{count, plural, one{1 vote remaining} other{{count} votes remaining}}",
+    "@menuVotesRemaining": {
+        "description": "Label in the hamburger menu showing how many votes the user has left",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "menuVotesReplenishHint": "Votes replenish after 3 hours away",
+    "@menuVotesReplenishHint": {
+        "description": "Label in the hamburger menu shown when the user has no votes remaining"
+    },
+    "votersHeading": "Voters",
+    "@votersHeading": {
+        "description": "Section heading for the voter leaderboard on the problem detail page"
+    },
+    "voterAnonymous": "Anonymous",
+    "@voterAnonymous": {
+        "description": "Fallback name for voters who have no display name"
     }
 }

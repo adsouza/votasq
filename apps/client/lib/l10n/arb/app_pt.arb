@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "Mensagem de erro quando a descrição e o objetivo são detectados em idiomas diferentes",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Votar neste problema",
+    "signInButtonTooltip": "Entre para votar em problemas ou adicionar seus próprios problemas à lista",
+    "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
+    "menuVotesReplenishHint": "Votos se renovam após 3 horas de ausência",
+    "votersHeading": "Votantes",
+    "@votersHeading": {
+        "description": "Cabeçalho da seção para a classificação de votantes na página de detalhes do problema"
+    },
+    "voterAnonymous": "Anônimo",
+    "@voterAnonymous": {
+        "description": "Nome alternativo para votantes sem nome de exibição"
+    },
+    "signInHintToast": "Entre por meio do ícone no canto superior direito para desbloquear votação e propor seus próprios problemas.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

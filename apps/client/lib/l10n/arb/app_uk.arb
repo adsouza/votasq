@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "Повідомлення про помилку, коли опис і мета написані різними мовами",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "Проголосувати за цю проблему",
+    "signInButtonTooltip": "Увійдіть, щоб голосувати за проблеми або додавати свої проблеми до списку",
+    "menuVotesRemaining": "{count, plural, one{1 голос залишився} few{{count} голоси залишилося} many{{count} голосів залишилося} other{{count} голосів залишилося}}",
+    "menuVotesReplenishHint": "Голоси оновлюються після 3 годин відсутності",
+    "votersHeading": "Голосувальники",
+    "@votersHeading": {
+        "description": "Заголовок розділу рейтингу голосувальників на сторінці деталей проблеми"
+    },
+    "voterAnonymous": "Анонім",
+    "@voterAnonymous": {
+        "description": "Ім'я за замовчуванням для голосувальників без відображуваного імені"
+    },
+    "signInHintToast": "Увійдіть через значок у верхньому правому кутку, щоб розблокувати голосування та запропонувати свої проблеми.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

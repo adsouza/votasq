@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "当问题描述和目标被检测为不同语言时显示的错误提示",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "为此问题投票",
+    "signInButtonTooltip": "登录以对问题投票或将您自己的问题添加到列表中",
+    "menuVotesRemaining": "{count, plural, other{剩余 {count} 票}}",
+    "menuVotesReplenishHint": "离开 3 小时后投票会自动补充",
+    "votersHeading": "投票者",
+    "@votersHeading": {
+        "description": "问题详情页面投票者排行榜的分区标题"
+    },
+    "voterAnonymous": "匿名",
+    "@voterAnonymous": {
+        "description": "没有显示名称的投票者的替代名称"
+    },
+    "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

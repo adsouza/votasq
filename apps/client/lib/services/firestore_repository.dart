@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
@@ -150,6 +151,10 @@ class FirestoreRepository {
       ..set(
         _problemsRef.doc(id).collection('versions').doc('$version'),
         revisionData,
+      )
+      ..set(
+        _problemsRef.doc(id).collection('voters').doc(ownerId),
+        {'uid': ownerId, 'votes': 1},
       );
     await batch.commit();
 
@@ -401,6 +406,160 @@ class FirestoreRepository {
     await _problemsRef.doc(problemId).update({
       'complaints': FieldValue.arrayUnion([userId]),
     });
+  }
+
+  /// Ensure a user document exists in the `users` collection.
+  /// Creates one from [user] if missing. Returns the stored [User].
+  Future<User> ensureUserDoc(User user) async {
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+    if (doc.exists) {
+      // Update displayName and lastActiveAt but preserve votes budget.
+      await doc.reference.update({
+        if (user.displayName != null) 'displayName': user.displayName,
+        'lastActiveAt': user.lastActiveAt,
+      });
+      return _docToUser(
+        await _firestore.collection('users').doc(user.uid).get(),
+      );
+    }
+    final data = {
+      'uid': user.uid,
+      'votes': user.votes,
+      'lastActiveAt': user.lastActiveAt,
+      if (user.displayName != null) 'displayName': user.displayName,
+    };
+    await _firestore.collection('users').doc(user.uid).set(data);
+    return user;
+  }
+
+  User _docToUser(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
+    return User(
+      uid: doc.id,
+      votes: (data['votes'] as num).toInt(),
+      lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
+      displayName: data['displayName'] as String?,
+    );
+  }
+
+  /// Grant votes based on log₃(hoursElapsed) and update the timestamp.
+  Future<void> grantVotesAndTouch(String userId) async {
+    final now = DateTime.now().toUtc();
+    final doc = await _firestore.collection('users').doc(userId).get();
+    if (!doc.exists) return;
+    final data = doc.data()!;
+    final lastActive = (data['lastActiveAt'] as Timestamp).toDate();
+    final hoursElapsed = now.difference(lastActive).inHours;
+    final grant = hoursElapsed >= 3
+        ? (math.log(hoursElapsed) / math.log(3)).floor()
+        : 0;
+    if (grant > 0) {
+      await doc.reference.update({
+        'votes': FieldValue.increment(grant),
+        'lastActiveAt': now,
+      });
+    } else {
+      await doc.reference.update({'lastActiveAt': now});
+    }
+  }
+
+  /// Update the user's `lastActiveAt` timestamp.
+  Future<void> touchLastActiveAt(String userId) async {
+    await _firestore.collection('users').doc(userId).update({
+      'lastActiveAt': DateTime.now().toUtc(),
+    });
+  }
+
+  /// Real-time stream of a user's remaining vote budget.
+  Stream<int> watchUserVotes(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.exists ? (doc.data()!['votes'] as num).toInt() : 0);
+  }
+
+  /// Atomically increment a user's vote on a problem.
+  /// Creates the voter doc if it doesn't exist, or increments votes.
+  /// Also increments the problem's denormalized `votes` field
+  /// and decrements the user's vote budget.
+  Future<void> vote({
+    required String problemId,
+    required String userId,
+  }) async {
+    final batch = _firestore.batch()
+      ..set(
+        _problemsRef.doc(problemId).collection('voters').doc(userId),
+        {'uid': userId, 'votes': FieldValue.increment(1)},
+        SetOptions(merge: true),
+      )
+      ..update(
+        _problemsRef.doc(problemId),
+        {'votes': FieldValue.increment(1)},
+      )
+      ..update(
+        _firestore.collection('users').doc(userId),
+        {'votes': FieldValue.increment(-1)},
+      );
+    await batch.commit();
+  }
+
+  /// Fetch all problem IDs that a user has voted for.
+  /// Uses a collection group query across all `voters` subcollections.
+  Future<Set<String>> getVotedProblemIds(String userId) async {
+    final snapshot = await _firestore
+        .collectionGroup('voters')
+        .where('uid', isEqualTo: userId)
+        .get();
+    return snapshot.docs.map((doc) => doc.reference.parent.parent!.id).toSet();
+  }
+
+  /// Fetch the voter leaderboard for a problem.
+  /// Returns voters sorted by votes DESC, then display name ASC.
+  Future<List<({String name, int votes})>> getVotersForProblem(
+    String problemId, {
+    String? excludeUid,
+    String anonymous = 'Anonymous',
+  }) async {
+    final voterSnapshot = await _problemsRef
+        .doc(problemId)
+        .collection('voters')
+        .get();
+    final entries = <({String uid, int votes})>[];
+    for (final doc in voterSnapshot.docs) {
+      final data = doc.data();
+      final uid = data['uid'] as String;
+      if (uid == excludeUid) continue;
+      entries.add((
+        uid: uid,
+        votes: (data['votes'] as num).toInt(),
+      ));
+    }
+    // Batch-fetch user docs for display names.
+    final uids = entries.map((e) => e.uid).toList();
+    final nameMap = <String, String?>{};
+    // Firestore whereIn supports up to 30 items.
+    for (var i = 0; i < uids.length; i += 30) {
+      final end = i + 30 > uids.length ? uids.length : i + 30;
+      final batch = uids.sublist(i, end);
+      final snapshot = await _firestore
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: batch)
+          .get();
+      for (final doc in snapshot.docs) {
+        nameMap[doc.id] = doc.data()['displayName'] as String?;
+      }
+    }
+    final result =
+        entries.map((e) {
+          final name = nameMap[e.uid] ?? anonymous;
+          return (name: name, votes: e.votes);
+        }).toList()..sort((a, b) {
+          final cmp = b.votes.compareTo(a.votes);
+          if (cmp != 0) return cmp;
+          return a.name.compareTo(b.name);
+        });
+    return result;
   }
 
   /// Fetch available geoscopes from the `geoscopes` collection,

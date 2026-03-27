@@ -88,6 +88,18 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     subscribe();
   }
 
+  /// Vote on a problem.
+  Future<void> vote({
+    required String problemId,
+    required String userId,
+  }) async {
+    try {
+      await _repo.vote(problemId: problemId, userId: userId);
+    } on Exception catch (e, st) {
+      log('vote failed: $e', stackTrace: st);
+    }
+  }
+
   /// Update an existing problem.
   Future<void> updateProblem(
     Problem problem, {

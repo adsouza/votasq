@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "বিবরণ এবং লক্ষ্য ভিন্ন ভাষায় শনাক্ত হলে দেখানো ত্রুটি বার্তা",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "এই সমস্যার জন্য ভোট দিন",
+    "signInButtonTooltip": "সমস্যায় ভোট দিতে বা তালিকায় নিজের সমস্যা যোগ করতে লগ ইন করুন",
+    "menuVotesRemaining": "{count, plural, one{১টি ভোট বাকি} other{{count}টি ভোট বাকি}}",
+    "menuVotesReplenishHint": "৩ ঘণ্টা দূরে থাকলে ভোট পুনরায় পূরণ হয়",
+    "votersHeading": "ভোটাররা",
+    "@votersHeading": {
+        "description": "সমস্যার বিবরণ পৃষ্ঠায় ভোটার লিডারবোর্ডের বিভাগ শিরোনাম"
+    },
+    "voterAnonymous": "বেনামী",
+    "@voterAnonymous": {
+        "description": "যেসব ভোটারের প্রদর্শন নাম নেই তাদের জন্য বিকল্প নাম"
+    },
+    "signInHintToast": "আপনার বোতাম দ্বারা সাইন ইন করুন যা আপনার অধিকার উপরে আছে ভোটিং আনলক করতে এবং আপনার নিজের সমস্যা প্রস্তাব করতে।",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

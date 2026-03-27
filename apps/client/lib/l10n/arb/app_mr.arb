@@ -120,8 +120,28 @@
     "@languageMismatchError": {
         "description": "वर्णन आणि ध्येय वेगवेगळ्या भाषांमध्ये आढळल्यावर दाखवली जाणारी त्रुटी",
         "placeholders": {
-            "descLang": { "type": "String" },
-            "goalLang": { "type": "String" }
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
         }
+    },
+    "voteButtonTooltip": "या समस्येसाठी मत द्या",
+    "signInButtonTooltip": "समस्यांवर मतदान करण्यासाठी किंवा यादीत आपल्या समस्या जोडण्यासाठी लॉग इन करा",
+    "menuVotesRemaining": "{count, plural, one{1 मत शिल्लक} other{{count} मते शिल्लक}}",
+    "menuVotesReplenishHint": "3 तास दूर राहिल्यावर मते पुन्हा मिळतात",
+    "votersHeading": "मतदार",
+    "@votersHeading": {
+        "description": "समस्या तपशील पृष्ठावरील मतदार लीडरबोर्डचे विभाग शीर्षक"
+    },
+    "voterAnonymous": "अनामिक",
+    "@voterAnonymous": {
+        "description": "प्रदर्शन नाव नसलेल्या मतदारांसाठी पर्यायी नाव"
+    },
+    "signInHintToast": "शीर्ष उजव्य कोपऱ्यातील आयकनद्वारे साइन इन करा मतदान अनलॉक करायला आणि आपल्या स्वतःच्या समस्या प्रस्तावित करायला।",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

@@ -6,6 +6,23 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared/shared.dart';
 
+/// HTTP client that adds the `Bearer owner` token to bypass Firestore
+/// security rules in the emulator.
+class _EmulatorAdminClient extends http.BaseClient {
+  _EmulatorAdminClient(this._inner);
+
+  final http.Client _inner;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    request.headers['Authorization'] = 'Bearer owner';
+    return _inner.send(request);
+  }
+
+  @override
+  void close() => _inner.close();
+}
+
 /// Storage via Firestore using the official googleapis client.
 /// Authenticates automatically via App Default Creds on Cloud Run.
 /// When the FIRESTORE_EMULATOR_HOST env var is set, connects to the local
@@ -25,7 +42,7 @@ class Db {
     final String? rootUrl;
 
     if (emulatorHost != null) {
-      client = http.Client();
+      client = _EmulatorAdminClient(http.Client());
       rootUrl = 'http://$emulatorHost/';
     } else {
       client = await clientViaApplicationDefaultCredentials(
@@ -306,6 +323,183 @@ class Db {
       );
       pageToken = response.nextPageToken;
     } while (pageToken != null);
+  }
+
+  /// Ensure a user document exists in the `users` collection.
+  /// Creates one from [user] if missing. Returns the stored [User].
+  Future<User> ensureUserDoc(User user) async {
+    try {
+      final doc = await _firestore.projects.databases.documents.get(
+        '$_basePath/users/${user.uid}',
+      );
+      return User(
+        uid: user.uid,
+        votes: int.parse(doc.fields?['votes']?.integerValue ?? '0'),
+        lastActiveAt: _parseTimestamp(doc.fields!['lastActiveAt']!),
+        displayName: doc.fields?['displayName']?.stringValue,
+      );
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status != 404) rethrow;
+    }
+    final userDoc = _userToDocument(user)
+      ..name = '$_basePath/users/${user.uid}';
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(writes: [fs.Write(update: userDoc)]),
+      _databasePath,
+    );
+    return user;
+  }
+
+  fs.Document _userToDocument(User user) {
+    return fs.Document(
+      fields: {
+        'uid': fs.Value(stringValue: user.uid),
+        'votes': fs.Value(integerValue: '${user.votes}'),
+        'lastActiveAt': fs.Value(
+          timestampValue: user.lastActiveAt.toIso8601String(),
+        ),
+        if (user.displayName != null)
+          'displayName': fs.Value(stringValue: user.displayName),
+      },
+    );
+  }
+
+  /// Write a voter doc without modifying the problem's vote count.
+  /// Used during problem creation where the problem already has the
+  /// correct vote total.
+  Future<void> saveVoterDoc({
+    required String problemId,
+    required String voterId,
+    required int votes,
+  }) async {
+    final voterDoc = fs.Document(
+      name: '$_basePath/problems/$problemId/voters/$voterId',
+      fields: {
+        'uid': fs.Value(stringValue: voterId),
+        'votes': fs.Value(integerValue: '$votes'),
+      },
+    );
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(writes: [fs.Write(update: voterDoc)]),
+      _databasePath,
+    );
+  }
+
+  /// Atomically write a voter doc and increment the problem's vote count.
+  Future<void> voteForProblem({
+    required String problemId,
+    required String voterId,
+  }) async {
+    // Read existing voter doc to determine current vote count.
+    int currentVotes;
+    try {
+      final existing = await _firestore.projects.databases.documents.get(
+        '$_basePath/problems/$problemId/voters/$voterId',
+      );
+      currentVotes = int.parse(existing.fields?['votes']?.integerValue ?? '0');
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status == 404) {
+        currentVotes = 0;
+      } else {
+        rethrow;
+      }
+    }
+
+    final newVotes = currentVotes + 1;
+    final voterDoc = fs.Document(
+      name: '$_basePath/problems/$problemId/voters/$voterId',
+      fields: {
+        'uid': fs.Value(stringValue: voterId),
+        'votes': fs.Value(integerValue: '$newVotes'),
+      },
+    );
+
+    // Read problem to compute new total.
+    final problem = await getProblem(problemId);
+    final updatedProblem = Problem(
+      id: problem.id,
+      description: problem.description,
+      goal: problem.goal,
+      ownerId: problem.ownerId,
+      geoscope: problem.geoscope,
+      lang: problem.lang,
+      votes: problem.votes + 1,
+      complaints: problem.complaints,
+      solved: problem.solved,
+      version: problem.version,
+      createdAt: problem.createdAt,
+      lastUpdatedAt: problem.lastUpdatedAt,
+    );
+    final problemDoc = _problemToDocument(updatedProblem)
+      ..name = '$_basePath/problems/$problemId';
+
+    // Read user doc to decrement vote budget.
+    int userVotes;
+    try {
+      final userDoc = await _firestore.projects.databases.documents.get(
+        '$_basePath/users/$voterId',
+      );
+      userVotes = int.parse(
+        userDoc.fields?['votes']?.integerValue ?? '0',
+      );
+    } on fs.DetailedApiRequestError catch (e) {
+      if (e.status == 404) {
+        userVotes = 0;
+      } else {
+        rethrow;
+      }
+    }
+
+    final updatedUserDoc = fs.Document(
+      name: '$_basePath/users/$voterId',
+      fields: {
+        'uid': fs.Value(stringValue: voterId),
+        'votes': fs.Value(integerValue: '${userVotes - 1}'),
+      },
+    );
+
+    await _firestore.projects.databases.documents.commit(
+      fs.CommitRequest(
+        writes: [
+          fs.Write(update: voterDoc),
+          fs.Write(update: problemDoc),
+          fs.Write(update: updatedUserDoc),
+        ],
+      ),
+      _databasePath,
+    );
+  }
+
+  /// Fetch all problem IDs that a user has voted for
+  /// via collection group query.
+  Future<List<String>> getVotedProblemIds(String userId) async {
+    final results = await _firestore.projects.databases.documents.runQuery(
+      fs.RunQueryRequest(
+        structuredQuery: fs.StructuredQuery(
+          from: [
+            fs.CollectionSelector(
+              collectionId: 'voters',
+              allDescendants: true,
+            ),
+          ],
+          where: fs.Filter(
+            fieldFilter: fs.FieldFilter(
+              field: fs.FieldReference(fieldPath: 'uid'),
+              op: 'EQUAL',
+              value: fs.Value(stringValue: userId),
+            ),
+          ),
+        ),
+      ),
+      _basePath,
+    );
+
+    return results.where((r) => r.document != null).map((r) {
+      // Path: .../problems/{problemId}/voters/{voterId}
+      final parts = r.document!.name!.split('/');
+      final problemsIndex = parts.lastIndexOf('problems');
+      return parts[problemsIndex + 1];
+    }).toList();
   }
 
   fs.Document _problemToDocument(Problem problem) {

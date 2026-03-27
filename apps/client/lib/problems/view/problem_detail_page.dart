@@ -27,6 +27,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   final _controller = TextEditingController();
   final _goalController = TextEditingController();
   Problem? _problem;
+  List<({String name, int votes})>? _voters;
   bool _loading = true;
   String? _error;
   String? _geoscope;
@@ -57,8 +58,17 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         });
         return;
       }
+      final voters = await context
+          .read<FirestoreRepository>()
+          .getVotersForProblem(
+            problem.id,
+            excludeUid: problem.ownerId,
+            anonymous: context.l10n.voterAnonymous,
+          );
+      if (!mounted) return;
       setState(() {
         _problem = problem;
+        _voters = voters;
         _controller.text = problem.description;
         _goalController.text = problem.goal;
         _geoscope = problem.geoscope;
@@ -175,6 +185,48 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     return geoscope.split('/').last;
   }
 
+  Widget _buildVoterList() {
+    final voters = _voters;
+    if (voters == null || voters.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(l10n.votersHeading, style: theme.textTheme.titleMedium),
+        const SizedBox(height: 8),
+        for (final voter in voters)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                Flexible(child: Text(voter.name)),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${voter.votes}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildReadOnlyBody(Problem problem) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
@@ -223,12 +275,57 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                           backgroundColor: theme.colorScheme.tertiaryContainer,
                         ),
                       ),
-                    Tooltip(
-                      message: l10n.votesChipTooltip,
-                      child: Chip(
-                        label: Text('${problem.votes}'),
-                        backgroundColor: theme.colorScheme.secondaryContainer,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final authState = context.watch<AuthCubit>().state;
+                        final userId = authState.userId;
+                        if (userId != null &&
+                            (authState.remainingVotes ?? 0) > 0) {
+                          return Tooltip(
+                            message: l10n.voteButtonTooltip,
+                            child: ActionChip(
+                              avatar: const Icon(
+                                Icons.arrow_circle_up_rounded,
+                                size: 16,
+                              ),
+                              label: Text('${problem.votes}'),
+                              backgroundColor:
+                                  theme.colorScheme.secondaryContainer,
+                              onPressed: () async {
+                                final repo = context
+                                    .read<FirestoreRepository>();
+                                final anonName = context.l10n.voterAnonymous;
+                                await repo.vote(
+                                  problemId: problem.id,
+                                  userId: userId,
+                                );
+                                if (!mounted) return;
+                                final voters = await repo.getVotersForProblem(
+                                  problem.id,
+                                  excludeUid: problem.ownerId,
+                                  anonymous: anonName,
+                                );
+                                if (mounted) {
+                                  setState(() {
+                                    _problem = problem.copyWith(
+                                      votes: problem.votes + 1,
+                                    );
+                                    _voters = voters;
+                                  });
+                                }
+                              },
+                            ),
+                          );
+                        }
+                        return Tooltip(
+                          message: l10n.votesChipTooltip,
+                          child: Chip(
+                            label: Text('${problem.votes}'),
+                            backgroundColor:
+                                theme.colorScheme.secondaryContainer,
+                          ),
+                        );
+                      },
                     ),
                     const ProblemTranslateButton(),
                   ],
@@ -236,6 +333,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               ],
             ),
           ),
+          _buildVoterList(),
           const SizedBox(height: 24),
           FilledButton.tonal(
             onPressed: () => context.pop(),
@@ -299,6 +397,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               ),
             ],
           ),
+          _buildVoterList(),
           const SizedBox(height: 24),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _controller,

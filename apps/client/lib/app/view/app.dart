@@ -83,7 +83,12 @@ class _AppState extends State<App> {
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => AuthCubit(authRepo)),
+          BlocProvider(
+            create: (context) => AuthCubit(
+              authRepo,
+              context.read<FirestoreRepository>(),
+            ),
+          ),
           BlocProvider(create: (_) => AutoTranslateCubit()),
           BlocProvider(
             create: (context) {
@@ -95,20 +100,66 @@ class _AppState extends State<App> {
             },
           ),
         ],
-        child: BetterFeedback(
-          child: MaterialApp.router(
-            theme: ThemeData(
-              appBarTheme: AppBarTheme(
-                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        child: _LastActiveTracker(
+          child: BetterFeedback(
+            child: MaterialApp.router(
+              theme: ThemeData(
+                appBarTheme: AppBarTheme(
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                ),
+                useMaterial3: true,
               ),
-              useMaterial3: true,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              routerConfig: _router,
             ),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            routerConfig: _router,
           ),
         ),
       ),
     );
   }
+}
+
+class _LastActiveTracker extends StatefulWidget {
+  const _LastActiveTracker({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_LastActiveTracker> createState() => _LastActiveTrackerState();
+}
+
+class _LastActiveTrackerState extends State<_LastActiveTracker> {
+  late final AppLifecycleListener _lifecycleListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleListener = AppLifecycleListener(
+      onResume: _onResume,
+      onInactive: _bumpUserLastActiveTS,
+      onPause: _bumpUserLastActiveTS,
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
+  }
+
+  void _onResume() {
+    final userId = context.read<AuthCubit>().state.userId;
+    if (userId == null) return;
+    unawaited(context.read<FirestoreRepository>().grantVotesAndTouch(userId));
+  }
+
+  void _bumpUserLastActiveTS() {
+    final userId = context.read<AuthCubit>().state.userId;
+    if (userId == null) return;
+    unawaited(context.read<FirestoreRepository>().touchLastActiveAt(userId));
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
