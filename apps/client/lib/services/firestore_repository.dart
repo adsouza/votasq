@@ -21,8 +21,6 @@ class LanguageMismatchException implements Exception {
 
 /// Result of language detection. When the server fallback is used, English
 /// translations come back for free and can be cached.
-/// Result of language detection. When the server fallback is used, English
-/// translations come back for free and can be cached.
 typedef DetectionResult = ({
   String lang,
   TranslatedProblem? englishTranslation,

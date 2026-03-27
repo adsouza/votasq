@@ -147,7 +147,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     final items = ancestorIds.map((id) {
       final label = id == '/'
           ? '🌐 ${l10n.geoscopeGlobal}'
-          : (labelMap[id] ?? id);
+          : (labelMap[id] ?? id.split('/').last.toUpperCase());
       return DropdownMenuItem(value: id, child: Text(label));
     }).toList();
 
@@ -182,7 +182,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     for (final g in available) {
       if (g.id == geoscope) return g.label;
     }
-    return geoscope.split('/').last;
+    return geoscope.split('/').last.toUpperCase();
   }
 
   Widget _buildVoterList() {
