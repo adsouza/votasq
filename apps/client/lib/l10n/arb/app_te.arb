@@ -139,5 +139,9 @@
     "voterAnonymous": "అజ్ఞాత",
     "@voterAnonymous": {
         "description": "ప్రదర్శన పేరు లేని ఓటర్ల కోసం ప్రత్యామ్నాయ పేరు"
+    },
+    "signInHintToast": "శీర్ష కుడి మూలలో ఐకాన్ ద్వారా సైన్ ఇన్ చేయండి ఓటింగ్‌ను అన్‌లాక్ చేయడానికి మరియు మీ స్వంత సమస్యలను సూచించండి.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

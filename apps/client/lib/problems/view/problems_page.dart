@@ -32,15 +32,31 @@ class ProblemsPage extends StatelessWidget {
         final geoscope = context.read<GeoscopeCubit>().state.selectedGeoscope;
         return ProblemsCubit(repo)..changeGeoscope(geoscope);
       },
-      child: BlocListener<GeoscopeCubit, GeoscopeState>(
+      child: BlocListener<AuthCubit, AuthState>(
         listenWhen: (prev, curr) =>
-            prev.selectedGeoscope != curr.selectedGeoscope,
-        listener: (context, geoscopeState) {
-          context.read<ProblemsCubit>().changeGeoscope(
-            geoscopeState.selectedGeoscope,
-          );
+            prev.status != curr.status &&
+            curr.status == AuthStatus.unauthenticated,
+        listener: (context, authState) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.signInHintToast),
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          });
         },
-        child: const ProblemsView(),
+        child: BlocListener<GeoscopeCubit, GeoscopeState>(
+          listenWhen: (prev, curr) =>
+              prev.selectedGeoscope != curr.selectedGeoscope,
+          listener: (context, geoscopeState) {
+            context.read<ProblemsCubit>().changeGeoscope(
+              geoscopeState.selectedGeoscope,
+            );
+          },
+          child: const ProblemsView(),
+        ),
       ),
     );
   }

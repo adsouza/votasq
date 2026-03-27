@@ -139,5 +139,9 @@
     "voterAnonymous": "گمنام",
     "@voterAnonymous": {
         "description": "ان ووٹرز کے لیے متبادل نام جن کا ڈسپلے نام نہیں ہے"
+    },
+    "signInHintToast": "اپنے مسائل کو تجویز کرنے کے لیے اور ووٹنگ کو کھولنے کے لیے اوپری دائیں کونے میں آئیکن کے ذریعے سائن ان کریں۔",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

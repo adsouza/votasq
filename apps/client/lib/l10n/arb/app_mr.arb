@@ -139,5 +139,9 @@
     "voterAnonymous": "अनामिक",
     "@voterAnonymous": {
         "description": "प्रदर्शन नाव नसलेल्या मतदारांसाठी पर्यायी नाव"
+    },
+    "signInHintToast": "शीर्ष उजव्य कोपऱ्यातील आयकनद्वारे साइन इन करा मतदान अनलॉक करायला आणि आपल्या स्वतःच्या समस्या प्रस्तावित करायला।",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

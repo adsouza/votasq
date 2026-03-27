@@ -139,5 +139,9 @@
     "voterAnonymous": "Anonim",
     "@voterAnonymous": {
         "description": "Görünen adı olmayan oy verenler için yedek ad"
+    },
+    "signInHintToast": "Sağ üst köşedeki simgeden oturum açarak oylamayı açın ve kendi sorunlarınızı önerin.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }
