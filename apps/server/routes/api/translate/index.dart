@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/translator.dart';
@@ -30,7 +31,8 @@ Future<Response> _post(RequestContext context) async {
         'translation': translatedText,
       },
     );
-  } on Exception {
+  } on Exception catch (e) {
+    log('POST /api/translate failed: $e');
     return Response(statusCode: 400);
   }
 }

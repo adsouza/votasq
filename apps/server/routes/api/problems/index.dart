@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -31,7 +32,8 @@ Future<Response> _get(RequestContext context) async {
         if (nextPageToken != null) 'nextPageToken': nextPageToken,
       },
     );
-  } on Exception {
+  } on Exception catch (e) {
+    log('GET /api/problems failed: $e');
     return Response(statusCode: 500);
   }
 }
@@ -59,7 +61,8 @@ Future<Response> _post(RequestContext context) async {
       votes: 1,
     );
     return Response.json(statusCode: 201, body: problem.toJson());
-  } on Exception {
+  } on Exception catch (e) {
+    log('POST /api/problems failed: $e');
     return Response(statusCode: 400);
   }
 }

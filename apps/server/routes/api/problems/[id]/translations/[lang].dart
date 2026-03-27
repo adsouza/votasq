@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
 import 'package:server/src/translator.dart';
@@ -46,7 +48,8 @@ Future<Response> _get(
     );
     await db.saveTranslation(id, lang, translatedProblem);
     return Response.json(body: translatedProblem.toJson());
-  } on Exception {
+  } on Exception catch (e) {
+    log('GET /api/problems/$id/translations/$lang failed: $e');
     return Response(statusCode: 404);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
 
@@ -15,7 +17,8 @@ Future<Response> _get(RequestContext context, String id) async {
     return Response.json(
       body: {'data': versions.map((v) => v.toJson()).toList()},
     );
-  } on Exception {
+  } on Exception catch (e) {
+    log('GET /api/problems/$id/versions failed: $e');
     return Response(statusCode: 500);
   }
 }

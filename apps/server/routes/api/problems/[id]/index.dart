@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -17,7 +18,8 @@ Future<Response> _get(RequestContext context, String id) async {
   try {
     final problem = await db.getProblem(id);
     return Response.json(body: problem.toJson());
-  } on Exception {
+  } on Exception catch (e) {
+    log('GET /api/problems/$id failed: $e');
     return Response(statusCode: 404);
   }
 }
@@ -27,7 +29,8 @@ Future<Response> _put(RequestContext context, String id) async {
   final Problem existing;
   try {
     existing = await db.getProblem(id);
-  } on Exception {
+  } on Exception catch (e) {
+    log('PUT /api/problems/$id lookup failed: $e');
     return Response(statusCode: 404);
   }
   try {
@@ -48,7 +51,8 @@ Future<Response> _put(RequestContext context, String id) async {
     }
     await db.saveProblem(problem);
     return Response.json(body: problem.toJson());
-  } on Exception {
+  } on Exception catch (e) {
+    log('PUT /api/problems/$id update failed: $e');
     return Response(statusCode: 400);
   }
 }

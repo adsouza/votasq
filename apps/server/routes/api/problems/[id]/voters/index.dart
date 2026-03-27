@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -21,7 +22,8 @@ Future<Response> _post(RequestContext context, String id) async {
     }
     await db.voteForProblem(problemId: id, voterId: voterId);
     return Response();
-  } on Exception {
+  } on Exception catch (e) {
+    log('POST /api/problems/$id/voters failed: $e');
     return Response(statusCode: 500);
   }
 }
