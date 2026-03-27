@@ -84,6 +84,22 @@ class _ProblemsViewState extends State<ProblemsView> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showSignInHintIfUnauthenticated();
+    });
+  }
+
+  void _showSignInHintIfUnauthenticated() {
+    final userId = context.read<AuthCubit>().state.userId;
+    if (userId != null) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.signInHintToast),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 5),
+      ),
+    );
   }
 
   @override
