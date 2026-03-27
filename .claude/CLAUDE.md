@@ -46,6 +46,15 @@ export GOOGLE_CLOUD_PROJECT=votasq
 cd apps/server && gcloud auth application-default login && dart_frog dev
 ```
 
+### E2E Tests
+
+Requires Firebase emulators (Auth on :9099, Firestore on :8081) to be running. **Must be run from the project root** (the test uses relative `workingDirectory: 'apps/server'`):
+
+```sh
+firebase emulators:start --only auth,firestore   # in a separate terminal
+dart test apps/server/e2e/ --tags e2e
+```
+
 ### Build & Deploy
 
 ```sh
