@@ -139,5 +139,9 @@
     "voterAnonymous": "匿名",
     "@voterAnonymous": {
         "description": "没有显示名称的投票者的替代名称"
+    },
+    "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

@@ -139,5 +139,9 @@
     "voterAnonymous": "匿名",
     "@voterAnonymous": {
         "description": "表示名のない投票者の代替名"
+    },
+    "signInHintToast": "サインインするには右上のアイコンを使用して、投票をアンロックし、アナタの独自の問題を提案してください。",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

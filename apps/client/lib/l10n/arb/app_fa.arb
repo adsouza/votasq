@@ -139,5 +139,9 @@
     "voterAnonymous": "ناشناس",
     "@voterAnonymous": {
         "description": "نام جایگزین برای رای‌دهندگانی که نام نمایشی ندارند"
+    },
+    "signInHintToast": "برای باز کردن رای‌گیری و پیشنهاد مشکلات خود، از طریق نماد در گوشه سمت راست بالا وارد شوید.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

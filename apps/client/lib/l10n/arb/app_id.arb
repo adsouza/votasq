@@ -139,5 +139,9 @@
     "voterAnonymous": "Anonim",
     "@voterAnonymous": {
         "description": "Nama pengganti untuk pemilih yang tidak memiliki nama tampilan"
+    },
+    "signInHintToast": "Masuk melalui ikon di sudut kanan atas untuk membuka fitur pemungutan suara dan mengusulkan masalah Anda sendiri.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }

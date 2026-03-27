@@ -136,6 +136,10 @@
     "@signInButtonTooltip": {
         "description": "Tooltip for the sign-in button explaining what signing in enables"
     },
+    "signInHintToast": "Sign in via the icon in the top right to unlock voting and propose your own problems.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
+    },
     "menuVotesRemaining": "{count, plural, one{1 vote remaining} other{{count} votes remaining}}",
     "@menuVotesRemaining": {
         "description": "Label in the hamburger menu showing how many votes the user has left",

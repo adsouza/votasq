@@ -139,5 +139,9 @@
     "voterAnonymous": "Анонім",
     "@voterAnonymous": {
         "description": "Ім'я за замовчуванням для голосувальників без відображуваного імені"
+    },
+    "signInHintToast": "Увійдіть через значок у верхньому правому кутку, щоб розблокувати голосування та запропонувати свої проблеми.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
     }
 }
