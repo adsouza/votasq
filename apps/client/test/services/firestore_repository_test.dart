@@ -43,9 +43,9 @@ class _FakeTranslationRepo implements TranslationRepository {
   }) async => throw UnimplementedError();
 
   @override
-  Future<({String detectedLanguage, String translation})>
-      translateToEnglish(String text) async =>
-          throw UnimplementedError();
+  Future<({String detectedLanguage, String translation})> translateToEnglish(
+    String text,
+  ) async => throw UnimplementedError();
 }
 
 void main() {
@@ -153,8 +153,7 @@ void main() {
           userLanguage: 'en',
         );
 
-        final snapshot =
-            await firestore.collection('problems').get();
+        final snapshot = await firestore.collection('problems').get();
         expect(snapshot.docs, hasLength(1));
 
         final doc = snapshot.docs.first;
@@ -191,8 +190,7 @@ void main() {
           userLanguage: 'en',
         );
 
-        final snapshot =
-            await firestore.collection('problems').get();
+        final snapshot = await firestore.collection('problems').get();
         expect(
           snapshot.docs.first.data()['goal'],
           'Achieve this outcome',
@@ -229,8 +227,7 @@ void main() {
         expect(result, isNull);
       });
 
-      test('saveTranslation then getTranslation round-trips',
-          () async {
+      test('saveTranslation then getTranslation round-trips', () async {
         const translation = TranslatedProblem(
           description: 'Traducción',
           goal: 'Meta',
@@ -253,10 +250,8 @@ void main() {
           userId: 'complainer1',
         );
 
-        final doc =
-            await firestore.collection('problems').doc('p1').get();
-        final complaints =
-            (doc.data()!['complaints'] as List).cast<String>();
+        final doc = await firestore.collection('problems').doc('p1').get();
+        final complaints = (doc.data()!['complaints'] as List).cast<String>();
         expect(complaints, contains('complainer1'));
       });
     });
@@ -276,8 +271,7 @@ void main() {
         expect(result.votes, 5);
         expect(result.displayName, 'Alice');
 
-        final doc =
-            await firestore.collection('users').doc('u1').get();
+        final doc = await firestore.collection('users').doc('u1').get();
         expect(doc.exists, isTrue);
       });
 
@@ -322,12 +316,13 @@ void main() {
 
           await repo.vote(problemId: 'p1', userId: 'u1');
 
-          final problem =
-              await firestore.collection('problems').doc('p1').get();
+          final problem = await firestore
+              .collection('problems')
+              .doc('p1')
+              .get();
           expect(problem.data()!['votes'], 6);
 
-          final user =
-              await firestore.collection('users').doc('u1').get();
+          final user = await firestore.collection('users').doc('u1').get();
           expect(user.data()!['votes'], 2);
 
           // Voter doc should exist.
@@ -506,9 +501,9 @@ void main() {
     group('grantVotesAndTouch', () {
       test('grants votes based on hours elapsed', () async {
         // Set lastActiveAt to 27+ hours ago (log₃(27) = 3).
-        final longAgo = DateTime.now()
-            .toUtc()
-            .subtract(const Duration(hours: 28));
+        final longAgo = DateTime.now().toUtc().subtract(
+          const Duration(hours: 28),
+        );
         await firestore.collection('users').doc('u1').set({
           'uid': 'u1',
           'votes': 5,
@@ -517,16 +512,15 @@ void main() {
 
         await repo.grantVotesAndTouch('u1');
 
-        final doc =
-            await firestore.collection('users').doc('u1').get();
+        final doc = await firestore.collection('users').doc('u1').get();
         // Should have granted floor(log₃(28)) = 3 votes.
         expect(doc.data()!['votes'], 8);
       });
 
       test('grants 0 votes when less than 3 hours', () async {
-        final recent = DateTime.now()
-            .toUtc()
-            .subtract(const Duration(hours: 1));
+        final recent = DateTime.now().toUtc().subtract(
+          const Duration(hours: 1),
+        );
         await firestore.collection('users').doc('u1').set({
           'uid': 'u1',
           'votes': 5,
@@ -535,8 +529,7 @@ void main() {
 
         await repo.grantVotesAndTouch('u1');
 
-        final doc =
-            await firestore.collection('users').doc('u1').get();
+        final doc = await firestore.collection('users').doc('u1').get();
         expect(doc.data()!['votes'], 5);
       });
 
