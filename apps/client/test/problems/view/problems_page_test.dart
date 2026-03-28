@@ -6,6 +6,7 @@ import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/view/problems_page.dart';
+import 'package:client/problems/widgets/problem_edit_tile.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
@@ -439,6 +440,279 @@ void main() {
         textWidgets.where((t) => t.data == '').length,
         isZero,
       );
+    });
+
+    testWidgets('failure state shows retry button', (tester) async {
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.failure),
+      );
+      when(() => problemsCubit.subscribe()).thenAnswer((_) async {});
+      await tester.pumpWidget(buildSubject());
+      expect(find.text('Retry'), findsOneWidget);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      verify(() => problemsCubit.subscribe()).called(1);
+    });
+
+    testWidgets('toggling owned filter hides non-owned problems', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'owner1',
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(description: 'my problem'),
+            _problem(
+              id: '2',
+              description: 'someone elses problem',
+              ownerId: 'other',
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      // Both visible initially.
+      expect(find.text('my problem'), findsOneWidget);
+      expect(find.text('someone elses problem'), findsOneWidget);
+
+      // Open menu and toggle owned filter.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // Find the "Show only my problems" menu item and tap it.
+      final ownedItem = find.byType(PopupMenuItem<String>).first;
+      await tester.tap(ownedItem);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Only owned problem visible.
+      expect(find.text('my problem'), findsOneWidget);
+      expect(find.text('someone elses problem'), findsNothing);
+    });
+
+    testWidgets('toggling goals filter hides problems without goals', (
+      tester,
+    ) async {
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(
+              description: 'has goal',
+              goal: 'some goal text',
+            ),
+            _problem(id: '2', description: 'no goal'),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      // Both visible initially.
+      expect(find.text('has goal'), findsOneWidget);
+      expect(find.text('no goal'), findsOneWidget);
+
+      // Open menu and toggle goals filter.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // The goals toggle is the first item for unauthenticated users.
+      final goalsItem = find.byType(PopupMenuItem<String>).first;
+      await tester.tap(goalsItem);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('has goal'), findsOneWidget);
+      expect(find.text('no goal'), findsNothing);
+    });
+
+    testWidgets('sign in button shown when unauthenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(status: AuthStatus.unauthenticated),
+      );
+      when(() => authCubit.signIn()).thenAnswer((_) async {});
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      final signIn = find.byType(TextButton).last;
+      expect(signIn, findsOneWidget);
+
+      await tester.tap(signIn);
+      await tester.pump();
+      verify(() => authCubit.signIn()).called(1);
+    });
+
+    testWidgets('sign out button shown when authenticated', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+        ),
+      );
+      when(() => authCubit.signOut()).thenAnswer((_) async {});
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      expect(find.byIcon(Icons.logout), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.logout));
+      await tester.pump();
+      verify(() => authCubit.signOut()).called(1);
+    });
+
+    testWidgets('tapping edit shows ProblemEditTile', (tester) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'owner1',
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem()],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      // Tap the edit button (🖊️).
+      await tester.tap(find.text('🖊️'));
+      await tester.pump();
+
+      // ProblemEditTile should now be rendered.
+      expect(find.byType(ProblemEditTile), findsOneWidget);
+    });
+
+    testWidgets('complaint dialog confirms and submits', (tester) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(ownerId: 'other', description: 'offensive'),
+          ],
+        ),
+      );
+      when(
+        () => firestoreRepo.addComplaint(
+          problemId: any(named: 'problemId'),
+          userId: any(named: 'userId'),
+        ),
+      ).thenAnswer((_) async {});
+      await tester.pumpWidget(buildSubject());
+
+      // Tap the flag button (🙈).
+      await tester.tap(find.text('🙈'));
+      await tester.pump();
+
+      // Confirm dialog appears.
+      expect(find.text('Flag as abusive?'), findsOneWidget);
+      expect(find.text('Report'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+
+      // Tap Report.
+      await tester.tap(find.text('Report'));
+      await tester.pump();
+
+      verify(
+        () => firestoreRepo.addComplaint(
+          problemId: '1',
+          userId: 'user1',
+        ),
+      ).called(1);
+    });
+
+    testWidgets('complaint dialog cancel does not submit', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(ownerId: 'other', description: 'offensive'),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      await tester.tap(find.text('🙈'));
+      await tester.pump();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pump();
+
+      verifyNever(
+        () => firestoreRepo.addComplaint(
+          problemId: any(named: 'problemId'),
+          userId: any(named: 'userId'),
+        ),
+      );
+    });
+
+    testWidgets('menu shows votes remaining for authenticated user', (
+      tester,
+    ) async {
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'user1',
+          remainingVotes: 7,
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Should display votes remaining text.
+      expect(find.textContaining('7'), findsWidgets);
+    });
+
+    testWidgets('app bar title shows filtered problem count', (
+      tester,
+    ) async {
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(description: 'first'),
+            _problem(id: '2', description: 'second'),
+            _problem(id: '3', description: 'third'),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+      expect(find.textContaining('3'), findsWidgets);
     });
   });
 }
