@@ -4,18 +4,13 @@ import 'package:server/src/resolve_project_id.dart';
 import 'package:server/src/translator.dart';
 
 /// Lazily initialized — created once on first request.
+final Future<String> _projectIdFuture = resolveProjectId();
 final Future<Db> _dbFuture = _initDb();
 final Future<Translator> _translatorFuture = _initTranslator();
 
-Future<Db> _initDb() async {
-  final projectId = await resolveProjectId();
-  return Db.initialize(projectId);
-}
-
-Future<Translator> _initTranslator() async {
-  final projectId = await resolveProjectId();
-  return Translator.initialize(projectId);
-}
+Future<Db> _initDb() async => Db.initialize(await _projectIdFuture);
+Future<Translator> _initTranslator() async =>
+    Translator.initialize(await _projectIdFuture);
 
 Handler middleware(Handler handler) {
   return handler

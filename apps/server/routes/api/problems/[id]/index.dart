@@ -51,8 +51,14 @@ Future<Response> _put(RequestContext context, String id) async {
     }
     await db.saveProblem(problem);
     return Response.json(body: problem.toJson());
+  } on FormatException catch (e) {
+    log('PUT /api/problems/$id bad request: $e');
+    return Response.json(
+      statusCode: 400,
+      body: {'error': 'Invalid request body'},
+    );
   } on Exception catch (e) {
     log('PUT /api/problems/$id update failed: $e');
-    return Response(statusCode: 400);
+    return Response(statusCode: 500);
   }
 }

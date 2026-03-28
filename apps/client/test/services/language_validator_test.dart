@@ -2,6 +2,7 @@ import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/language_validator.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared/shared.dart';
 
 /// Fake [LanguageDetectionService] that returns pre-configured values.
@@ -38,6 +39,11 @@ class _FakeTranslationRepo implements TranslationRepository {
   /// Map from text → (detectedLanguage, englishTranslation).
   final Map<String, ({String detectedLanguage, String translation})>
   translations;
+
+  @override
+  String get baseUrl => '';
+  @override
+  http.Client get client => http.Client();
 
   @override
   Future<({String detectedLanguage, String translation})> translateToEnglish(

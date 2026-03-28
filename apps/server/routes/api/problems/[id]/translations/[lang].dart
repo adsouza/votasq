@@ -50,6 +50,6 @@ Future<Response> _get(
     return Response.json(body: translatedProblem.toJson());
   } on Exception catch (e) {
     log('GET /api/problems/$id/translations/$lang failed: $e');
-    return Response(statusCode: 404);
+    return Response(statusCode: 500);
   }
 }

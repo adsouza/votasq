@@ -19,7 +19,13 @@ Future<Response> _post(RequestContext context) async {
   try {
     final body =
         jsonDecode(await context.request.body()) as Map<String, dynamic>;
-    final text = body['text'] as String;
+    final text = body['text'] as String?;
+    if (text == null || text.isEmpty) {
+      return Response.json(
+        statusCode: 400,
+        body: {'error': 'Missing required field: text'},
+      );
+    }
     final (:translatedText, :detectedLanguage) = await translator
         .translateWithDetection(
           text: text,
@@ -31,8 +37,14 @@ Future<Response> _post(RequestContext context) async {
         'translation': translatedText,
       },
     );
+  } on FormatException catch (e) {
+    log('POST /api/translate bad request: $e');
+    return Response.json(
+      statusCode: 400,
+      body: {'error': 'Invalid request body'},
+    );
   } on Exception catch (e) {
     log('POST /api/translate failed: $e');
-    return Response(statusCode: 400);
+    return Response(statusCode: 500);
   }
 }

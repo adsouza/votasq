@@ -5,6 +5,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/widgets/geoscope_widgets.dart';
+import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository, LanguageMismatchException;
@@ -13,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
-import 'package:word_count/word_count.dart';
 
 class ProblemDetailPage extends StatefulWidget {
   const ProblemDetailPage({required this.problemId, super.key});
@@ -86,12 +86,9 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
-  static bool _hasEnoughWords(String text) =>
-      text.length >= 20 && wordsCount(text.trim()) >= 3;
-
   Future<void> _save() async {
     final problem = _problem;
-    if (problem == null || !_hasEnoughWords(_controller.text)) return;
+    if (problem == null || !hasEnoughWords(_controller.text)) return;
     final newDescription = _controller.text.trim();
     final newGoal = _goalController.text.trim();
     final newGeoscope = _geoscope ?? problem.geoscope;
@@ -304,9 +301,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 decoration: InputDecoration(
                   hintText: l10n.editProblemHint,
                 ),
-                onSubmitted: _hasEnoughWords(value.text)
-                    ? (_) => _save()
-                    : null,
+                onSubmitted: hasEnoughWords(value.text) ? (_) => _save() : null,
               );
             },
           ),
@@ -320,9 +315,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 decoration: InputDecoration(
                   hintText: l10n.editGoalHint,
                 ),
-                onSubmitted: _hasEnoughWords(value.text)
-                    ? (_) => _save()
-                    : null,
+                onSubmitted: hasEnoughWords(value.text) ? (_) => _save() : null,
               );
             },
           ),
@@ -348,7 +341,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _controller,
             builder: (context, value, child) {
-              final hasWords = _hasEnoughWords(_controller.text);
+              final hasWords = hasEnoughWords(_controller.text);
               return Row(
                 children: [
                   FilledButton(

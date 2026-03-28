@@ -1,0 +1,22 @@
+import 'dart:developer';
+
+import 'package:dart_frog/dart_frog.dart';
+import 'package:server/src/db.dart';
+
+Future<Response> onRequest(RequestContext context, String id) async {
+  return switch (context.request.method) {
+    HttpMethod.get => _get(context, id),
+    _ => Future.value(Response(statusCode: 405)),
+  };
+}
+
+Future<Response> _get(RequestContext context, String id) async {
+  final db = await context.read<Future<Db>>();
+  try {
+    final problemIds = await db.getVotedProblemIds(id);
+    return Response.json(body: {'data': problemIds});
+  } on Exception catch (e) {
+    log('GET /api/users/$id/votes failed: $e');
+    return Response(statusCode: 500);
+  }
+}

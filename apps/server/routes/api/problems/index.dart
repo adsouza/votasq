@@ -46,6 +46,20 @@ Future<Response> _post(RequestContext context) async {
               await context.request.body(),
             )
             as Map<String, dynamic>;
+    final description = body['description'] as String?;
+    final ownerId = body['ownerId'] as String?;
+    if (description == null || description.isEmpty) {
+      return Response.json(
+        statusCode: 400,
+        body: {'error': 'Missing required field: description'},
+      );
+    }
+    if (ownerId == null || ownerId.isEmpty) {
+      return Response.json(
+        statusCode: 400,
+        body: {'error': 'Missing required field: ownerId'},
+      );
+    }
     final now = DateTime.now().toUtc().toIso8601String();
     final problem = Problem.fromJson({
       ...body,
@@ -61,8 +75,14 @@ Future<Response> _post(RequestContext context) async {
       votes: 1,
     );
     return Response.json(statusCode: 201, body: problem.toJson());
+  } on FormatException catch (e) {
+    log('POST /api/problems bad request: $e');
+    return Response.json(
+      statusCode: 400,
+      body: {'error': 'Invalid request body'},
+    );
   } on Exception catch (e) {
     log('POST /api/problems failed: $e');
-    return Response(statusCode: 400);
+    return Response(statusCode: 500);
   }
 }

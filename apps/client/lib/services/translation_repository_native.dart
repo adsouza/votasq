@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:client/services/translation_repository_base.dart';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared/shared.dart';
 
 /// Whether the current platform supports Google ML Kit (iOS & Android only).
 final bool _mlKitSupported = Platform.isIOS || Platform.isAndroid;
@@ -16,13 +15,15 @@ final bool _mlKitSupported = Platform.isIOS || Platform.isAndroid;
 /// Returns `null` on desktop or when on-device translation fails.
 /// [translateProblem] fetches a cached (or freshly Cloud-Translated) result
 /// from the server.
-class TranslationRepository {
+class TranslationRepository with TranslationRepositoryBase {
   TranslationRepository({required String serverBaseUrl, http.Client? client})
-    : _baseUrl = serverBaseUrl,
-      _client = client ?? http.Client();
+    : baseUrl = serverBaseUrl,
+      client = client ?? http.Client();
 
-  final String _baseUrl;
-  final http.Client _client;
+  @override
+  final String baseUrl;
+  @override
+  final http.Client client;
 
   /// Whether this platform supports on-device translation.
   bool get canTranslateOnDevice => _mlKitSupported;
@@ -60,25 +61,6 @@ class TranslationRepository {
     return null;
   }
 
-  /// Fetches the translation for a problem, creating it via Cloud Translate
-  /// on the server if not yet cached.
-  Future<TranslatedProblem> translateProblem({
-    required String problemId,
-    required String targetLanguage,
-  }) async {
-    final response = await _client.get(
-      Uri.parse(
-        '$_baseUrl/api/problems/$problemId/translations/$targetLanguage',
-      ),
-    );
-    if (response.statusCode != 200) {
-      throw Exception('Problem translation failed: ${response.statusCode}');
-    }
-    return TranslatedProblem.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
-  }
-
   /// Detects the source [TranslateLanguage] of [text] using ML Kit, or returns
   /// `null` if detection is unavailable.
   Future<TranslateLanguage?> _detectSource(String text) async {
@@ -90,27 +72,5 @@ class TranslationRepository {
     } finally {
       await identifier.close();
     }
-  }
-
-  /// Translates [text] to English via the server, returning both the detected
-  /// source language and the English translation. This is used as a fallback
-  /// when on-device detection fails — translating costs the same as pure
-  /// detection but gives us a cacheable English translation for free.
-  Future<({String detectedLanguage, String translation})> translateToEnglish(
-    String text,
-  ) async {
-    final response = await _client.post(
-      Uri.parse('$_baseUrl/api/translate'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'text': text}),
-    );
-    if (response.statusCode != 200) {
-      throw Exception('Language detection failed: ${response.statusCode}');
-    }
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    return (
-      detectedLanguage: body['detectedLanguage'] as String,
-      translation: body['translation'] as String,
-    );
   }
 }

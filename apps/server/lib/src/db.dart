@@ -219,10 +219,15 @@ class Db {
       if (doc == null) continue;
       revisions.add(
         ProblemRevision(
-          description: doc.fields!['description']!.stringValue!,
+          description:
+              doc.fields?['description']?.stringValue ??
+              (throw StateError('Missing required field: description')),
           goal: doc.fields?['goal']?.stringValue ?? '',
           version: _parseVersion(doc.fields),
-          archivedAt: _parseTimestamp(doc.fields!['archivedAt']!),
+          archivedAt: _parseTimestamp(
+            doc.fields?['archivedAt'] ??
+                (throw StateError('Missing required field: archivedAt')),
+          ),
           restoredFrom: _parseOptionalInt(doc.fields?['restoredFrom']),
         ),
       );
@@ -241,7 +246,9 @@ class Db {
         '$_basePath/problems/$problemId/translations/$langCode',
       );
       return TranslatedProblem(
-        description: doc.fields!['description']!.stringValue!,
+        description:
+            doc.fields?['description']?.stringValue ??
+            (throw StateError('Missing required field: description')),
         goal: doc.fields?['goal']?.stringValue ?? '',
       );
     } on fs.DetailedApiRequestError catch (e) {
@@ -296,7 +303,10 @@ class Db {
       return User(
         uid: user.uid,
         votes: int.parse(doc.fields?['votes']?.integerValue ?? '0'),
-        lastActiveAt: _parseTimestamp(doc.fields!['lastActiveAt']!),
+        lastActiveAt: _parseTimestamp(
+          doc.fields?['lastActiveAt'] ??
+              (throw StateError('Missing required field: lastActiveAt')),
+        ),
         displayName: doc.fields?['displayName']?.stringValue,
       );
     } on fs.DetailedApiRequestError catch (e) {
@@ -453,17 +463,30 @@ class Db {
   Problem _documentToProblem(fs.Document doc, String id) {
     return Problem(
       id: id,
-      description: doc.fields!['description']!.stringValue!,
+      description:
+          doc.fields?['description']?.stringValue ??
+          (throw StateError('Missing required field: description')),
       goal: doc.fields?['goal']?.stringValue ?? '',
-      ownerId: doc.fields!['ownerId']!.stringValue!,
+      ownerId:
+          doc.fields?['ownerId']?.stringValue ??
+          (throw StateError('Missing required field: ownerId')),
       geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
       lang: doc.fields?['lang']?.stringValue,
-      votes: int.parse(doc.fields!['votes']!.integerValue!),
+      votes: int.parse(
+        doc.fields?['votes']?.integerValue ??
+            (throw StateError('Missing required field: votes')),
+      ),
       complaints: _parseStringList(doc.fields?['complaints']),
       solved: doc.fields?['solved']?.booleanValue ?? false,
       version: _parseVersion(doc.fields),
-      createdAt: _parseTimestamp(doc.fields!['createdAt']!),
-      lastUpdatedAt: _parseTimestamp(doc.fields!['lastUpdatedAt']!),
+      createdAt: _parseTimestamp(
+        doc.fields?['createdAt'] ??
+            (throw StateError('Missing required field: createdAt')),
+      ),
+      lastUpdatedAt: _parseTimestamp(
+        doc.fields?['lastUpdatedAt'] ??
+            (throw StateError('Missing required field: lastUpdatedAt')),
+      ),
     );
   }
 
