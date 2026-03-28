@@ -91,7 +91,7 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
     if (!_needsTranslation || _translating || _translation != null) return;
     try {
       if (!context.read<AutoTranslateCubit>().state) return;
-    } on Object {
+    } on Exception {
       return; // Cubit not provided (e.g. in tests without it).
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -197,7 +197,7 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
     bool autoTranslate;
     try {
       autoTranslate = context.watch<AutoTranslateCubit>().state;
-    } on Object {
+    } on Exception {
       autoTranslate = false;
     }
 

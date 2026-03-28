@@ -300,7 +300,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             builder: (context, value, child) {
               return TextField(
                 controller: _controller,
-                maxLength: 80,
+                maxLength: maxProblemTextLength,
                 decoration: InputDecoration(
                   hintText: l10n.editProblemHint,
                 ),
@@ -316,7 +316,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             builder: (context, value, child) {
               return TextField(
                 controller: _goalController,
-                maxLength: 80,
+                maxLength: maxProblemTextLength,
                 decoration: InputDecoration(
                   hintText: l10n.editGoalHint,
                 ),

@@ -46,5 +46,7 @@
     "menuVotesReplenishHint": "Lượt bình chọn được bổ sung sau 3 giờ không hoạt động",
     "votersHeading": "Người bỏ phiếu",
     "voterAnonymous": "Ẩn danh",
-    "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn."
+    "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn.",
+    "complaintSubmitted": "Đã gửi khiếu nại",
+    "failedToLoadProblems": "Không thể tải danh sách vấn đề"
 }

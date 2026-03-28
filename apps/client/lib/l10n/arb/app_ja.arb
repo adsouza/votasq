@@ -46,5 +46,7 @@
     "menuVotesReplenishHint": "3時間離れると投票が補充されます",
     "votersHeading": "投票者",
     "voterAnonymous": "匿名",
-    "signInHintToast": "サインインするには右上のアイコンを使用して、投票をアンロックし、アナタの独自の問題を提案してください。"
+    "signInHintToast": "サインインするには右上のアイコンを使用して、投票をアンロックし、アナタの独自の問題を提案してください。",
+    "complaintSubmitted": "報告が送信されました",
+    "failedToLoadProblems": "問題を読み込めませんでした"
 }

@@ -46,5 +46,7 @@
     "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
     "menuVotesReplenishHint": "Los votos se reponen tras 3 horas de ausencia",
     "votersHeading": "Votantes",
-    "voterAnonymous": "Anónimo"
+    "voterAnonymous": "Anónimo",
+    "complaintSubmitted": "Queja enviada",
+    "failedToLoadProblems": "No se pudieron cargar los problemas"
 }

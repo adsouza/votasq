@@ -172,25 +172,10 @@ class Db {
       final doc = result.document;
       if (doc == null) continue;
       final id = doc.name!.split('/').last;
-      final votes = int.parse(doc.fields!['votes']!.integerValue!);
-      problems.add(
-        Problem(
-          id: id,
-          description: doc.fields!['description']!.stringValue!,
-          goal: doc.fields?['goal']?.stringValue ?? '',
-          ownerId: doc.fields!['ownerId']!.stringValue!,
-          geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
-          lang: doc.fields?['lang']?.stringValue,
-          votes: votes,
-          complaints: _parseStringList(doc.fields?['complaints']),
-          solved: doc.fields?['solved']?.booleanValue ?? false,
-          version: _parseVersion(doc.fields),
-          createdAt: _parseTimestamp(doc.fields!['createdAt']!),
-          lastUpdatedAt: _parseTimestamp(doc.fields!['lastUpdatedAt']!),
-        ),
-      );
+      final problem = _documentToProblem(doc, id);
+      problems.add(problem);
       lastDocName = doc.name;
-      lastVotes = votes;
+      lastVotes = problem.votes;
     }
 
     String? nextPageToken;
@@ -208,20 +193,7 @@ class Db {
     final doc = await _firestore.projects.databases.documents.get(
       '$_basePath/problems/$id',
     );
-    return Problem(
-      id: id,
-      description: doc.fields!['description']!.stringValue!,
-      goal: doc.fields?['goal']?.stringValue ?? '',
-      ownerId: doc.fields!['ownerId']!.stringValue!,
-      geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
-      lang: doc.fields?['lang']?.stringValue,
-      votes: int.parse(doc.fields!['votes']!.integerValue!),
-      complaints: _parseStringList(doc.fields?['complaints']),
-      solved: doc.fields?['solved']?.booleanValue ?? false,
-      version: _parseVersion(doc.fields),
-      createdAt: _parseTimestamp(doc.fields!['createdAt']!),
-      lastUpdatedAt: _parseTimestamp(doc.fields!['lastUpdatedAt']!),
-    );
+    return _documentToProblem(doc, id);
   }
 
   /// Fetch all revisions of a [Problem], ordered by version ascending.
@@ -405,20 +377,7 @@ class Db {
 
     // Read problem to compute new total.
     final problem = await getProblem(problemId);
-    final updatedProblem = Problem(
-      id: problem.id,
-      description: problem.description,
-      goal: problem.goal,
-      ownerId: problem.ownerId,
-      geoscope: problem.geoscope,
-      lang: problem.lang,
-      votes: problem.votes + 1,
-      complaints: problem.complaints,
-      solved: problem.solved,
-      version: problem.version,
-      createdAt: problem.createdAt,
-      lastUpdatedAt: problem.lastUpdatedAt,
-    );
+    final updatedProblem = problem.copyWith(votes: problem.votes + 1);
     final problemDoc = _problemToDocument(updatedProblem)
       ..name = '$_basePath/problems/$problemId';
 
@@ -489,6 +448,23 @@ class Db {
       final problemsIndex = parts.lastIndexOf('problems');
       return parts[problemsIndex + 1];
     }).toList();
+  }
+
+  Problem _documentToProblem(fs.Document doc, String id) {
+    return Problem(
+      id: id,
+      description: doc.fields!['description']!.stringValue!,
+      goal: doc.fields?['goal']?.stringValue ?? '',
+      ownerId: doc.fields!['ownerId']!.stringValue!,
+      geoscope: doc.fields?['geoscope']?.stringValue ?? '/',
+      lang: doc.fields?['lang']?.stringValue,
+      votes: int.parse(doc.fields!['votes']!.integerValue!),
+      complaints: _parseStringList(doc.fields?['complaints']),
+      solved: doc.fields?['solved']?.booleanValue ?? false,
+      version: _parseVersion(doc.fields),
+      createdAt: _parseTimestamp(doc.fields!['createdAt']!),
+      lastUpdatedAt: _parseTimestamp(doc.fields!['lastUpdatedAt']!),
+    );
   }
 
   fs.Document _problemToDocument(Problem problem) {

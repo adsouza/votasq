@@ -46,5 +46,7 @@
     "menuVotesReplenishHint": "Stimmen erneuern sich nach 3 Stunden Abwesenheit",
     "votersHeading": "Abstimmende",
     "voterAnonymous": "Anonym",
-    "signInHintToast": "Melden Sie sich über das Symbol in der oberen rechten Ecke an, um Abstimmungen freizuschalten und Ihre eigenen Probleme vorzuschlagen."
+    "signInHintToast": "Melden Sie sich über das Symbol in der oberen rechten Ecke an, um Abstimmungen freizuschalten und Ihre eigenen Probleme vorzuschlagen.",
+    "complaintSubmitted": "Beschwerde eingereicht",
+    "failedToLoadProblems": "Probleme konnten nicht geladen werden"
 }

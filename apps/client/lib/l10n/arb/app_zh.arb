@@ -46,5 +46,7 @@
     "menuVotesReplenishHint": "离开 3 小时后投票会自动补充",
     "votersHeading": "投票者",
     "voterAnonymous": "匿名",
-    "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。"
+    "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。",
+    "complaintSubmitted": "举报已提交",
+    "failedToLoadProblems": "无法加载问题"
 }

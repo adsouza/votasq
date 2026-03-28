@@ -160,5 +160,13 @@
     "voterAnonymous": "Anonymous",
     "@voterAnonymous": {
         "description": "Fallback name for voters who have no display name"
+    },
+    "complaintSubmitted": "Complaint submitted",
+    "@complaintSubmitted": {
+        "description": "SnackBar message shown after successfully flagging a problem"
+    },
+    "failedToLoadProblems": "Failed to load problems",
+    "@failedToLoadProblems": {
+        "description": "Error message shown when problems cannot be loaded"
     }
 }

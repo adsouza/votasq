@@ -150,9 +150,23 @@ class _ProblemsViewState extends State<ProblemsView> {
     );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Complaint submitted')),
+        SnackBar(content: Text(context.l10n.complaintSubmitted)),
       );
     }
+  }
+
+  List<Problem> _applyFilters(List<Problem> problems, String? userId) {
+    var filtered = problems;
+    if (userId != null) {
+      filtered = filtered.where((p) => !p.complaints.contains(userId)).toList();
+    }
+    if (_showOnlyOwned && userId != null) {
+      filtered = filtered.where((p) => p.ownerId == userId).toList();
+    }
+    if (_showOnlyWithGoals) {
+      filtered = filtered.where((p) => p.goal.isNotEmpty).toList();
+    }
+    return filtered;
   }
 
   bool get _isNearBottom {
@@ -169,20 +183,7 @@ class _ProblemsViewState extends State<ProblemsView> {
         title: BlocBuilder<ProblemsCubit, ProblemsState>(
           builder: (context, state) {
             final userId = context.read<AuthCubit>().state.userId;
-            var filtered = state.problems;
-            if (userId != null) {
-              filtered = filtered
-                  .where(
-                    (p) => !p.complaints.contains(userId),
-                  )
-                  .toList();
-            }
-            if (_showOnlyOwned && userId != null) {
-              filtered = filtered.where((p) => p.ownerId == userId).toList();
-            }
-            if (_showOnlyWithGoals) {
-              filtered = filtered.where((p) => p.goal.isNotEmpty).toList();
-            }
+            final filtered = _applyFilters(state.problems, userId);
             return Text(
               '${filtered.length} ${l10n.problemsAppBarTitle}',
             );
@@ -372,7 +373,7 @@ class _ProblemsViewState extends State<ProblemsView> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Failed to load problems'),
+                        Text(context.l10n.failedToLoadProblems),
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: () =>
@@ -385,28 +386,12 @@ class _ProblemsViewState extends State<ProblemsView> {
                   _ => Builder(
                     builder: (context) {
                       final userId = context.read<AuthCubit>().state.userId;
-                      var filtered = state.problems;
-                      if (userId != null) {
-                        filtered = filtered
-                            .where((p) => !p.complaints.contains(userId))
-                            .toList();
-                      }
-                      if (_showOnlyOwned && userId != null) {
-                        filtered = filtered
-                            .where((p) => p.ownerId == userId)
-                            .toList();
-                      }
-                      if (_showOnlyWithGoals) {
-                        filtered = filtered
-                            .where((p) => p.goal.isNotEmpty)
-                            .toList();
-                      }
-                      final visible = filtered;
+                      final filtered = _applyFilters(state.problems, userId);
                       return ListView.builder(
                         controller: _scrollController,
-                        itemCount: visible.length + (state.hasMore ? 1 : 0),
+                        itemCount: filtered.length + (state.hasMore ? 1 : 0),
                         itemBuilder: (context, index) {
-                          if (index >= visible.length) {
+                          if (index >= filtered.length) {
                             return const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(16),
@@ -414,7 +399,7 @@ class _ProblemsViewState extends State<ProblemsView> {
                               ),
                             );
                           }
-                          final problem = visible[index];
+                          final problem = filtered[index];
                           if (_editingProblemId == problem.id) {
                             return ProblemEditTile(
                               problem: problem,

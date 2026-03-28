@@ -7,6 +7,7 @@ import 'package:client/services/firestore_repository.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/shared.dart';
 
 /// Row at the top of the problems list that lets authenticated users submit a
 /// new problem with an optional goal.
@@ -38,6 +39,7 @@ class _AddProblemRowState extends State<AddProblemRow> {
   final _addGoalController = TextEditingController();
   final _addFocusNode = FocusNode();
   final _addRowFocusNode = FocusNode();
+  final _keyboardListenerFocusNode = FocusNode();
   bool _addGoalVisible = false;
   String? _addProblemGeoscope;
   bool _submitting = false;
@@ -48,6 +50,7 @@ class _AddProblemRowState extends State<AddProblemRow> {
     _addGoalController.dispose();
     _addFocusNode.dispose();
     _addRowFocusNode.dispose();
+    _keyboardListenerFocusNode.dispose();
     super.dispose();
   }
 
@@ -113,7 +116,7 @@ class _AddProblemRowState extends State<AddProblemRow> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: KeyboardListener(
-        focusNode: FocusNode(),
+        focusNode: _keyboardListenerFocusNode,
         onKeyEvent: (event) {
           if (event is KeyDownEvent &&
               event.logicalKey == LogicalKeyboardKey.escape) {
@@ -139,7 +142,7 @@ class _AddProblemRowState extends State<AddProblemRow> {
                           controller: _addController,
                           focusNode: _addFocusNode,
                           readOnly: _submitting,
-                          maxLength: 80,
+                          maxLength: maxProblemTextLength,
                           decoration: InputDecoration(
                             hintText: l10n.addProblemHint,
                           ),
@@ -154,7 +157,7 @@ class _AddProblemRowState extends State<AddProblemRow> {
                           TextField(
                             controller: _addGoalController,
                             readOnly: _submitting,
-                            maxLength: 80,
+                            maxLength: maxProblemTextLength,
                             decoration: InputDecoration(
                               hintText: l10n.addGoalHint,
                             ),

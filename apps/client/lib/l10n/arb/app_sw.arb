@@ -46,5 +46,7 @@
     "menuVotesReplenishHint": "Kura zinarejeshwa baada ya masaa 3 bila shughuli",
     "votersHeading": "Wapiga kura",
     "voterAnonymous": "Asiyejulikana",
-    "signInHintToast": "Ingia kupitia ikoni katika kona ya juu kulia ili kufungua upigaji kura na kupendekeza matatizo yako."
+    "signInHintToast": "Ingia kupitia ikoni katika kona ya juu kulia ili kufungua upigaji kura na kupendekeza matatizo yako.",
+    "complaintSubmitted": "Malalamiko yametumwa",
+    "failedToLoadProblems": "Imeshindwa kupakia matatizo"
 }

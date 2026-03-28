@@ -46,5 +46,7 @@
     "menuVotesReplenishHint": "Suara diperbarui setelah 3 jam tidak aktif",
     "votersHeading": "Pemilih",
     "voterAnonymous": "Anonim",
-    "signInHintToast": "Masuk melalui ikon di sudut kanan atas untuk membuka fitur pemungutan suara dan mengusulkan masalah Anda sendiri."
+    "signInHintToast": "Masuk melalui ikon di sudut kanan atas untuk membuka fitur pemungutan suara dan mengusulkan masalah Anda sendiri.",
+    "complaintSubmitted": "Laporan terkirim",
+    "failedToLoadProblems": "Gagal memuat masalah"
 }

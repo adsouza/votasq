@@ -135,7 +135,7 @@ class _ProblemEditTileState extends State<ProblemEditTile> {
                           controller: _editController,
                           focusNode: _editFocusNode,
                           readOnly: _submitting,
-                          maxLength: 80,
+                          maxLength: maxProblemTextLength,
                           decoration: InputDecoration(
                             hintText: l10n.editProblemHint,
                           ),
@@ -148,7 +148,7 @@ class _ProblemEditTileState extends State<ProblemEditTile> {
                         TextField(
                           controller: _editGoalController,
                           readOnly: _submitting,
-                          maxLength: 80,
+                          maxLength: maxProblemTextLength,
                           decoration: InputDecoration(
                             hintText: l10n.editGoalHint,
                           ),
