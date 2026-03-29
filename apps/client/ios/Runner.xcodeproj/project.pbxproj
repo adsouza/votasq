@@ -131,7 +131,6 @@
 				92415C0A31FD140F26CDB3E0 /* Pods-RunnerTests.profile-staging.xcconfig */,
 				FF9E93841E2DF2B083A645EF /* Pods-RunnerTests.profile-development.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -544,10 +543,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = Client;
 				FLUTTER_TARGET = lib/main_production.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -639,10 +640,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = Client;
 				FLUTTER_TARGET = lib/main_production.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -729,10 +732,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = Client;
 				FLUTTER_TARGET = lib/main_production.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -824,10 +829,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-dev";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = "[DEV] Client";
 				FLUTTER_TARGET = lib/main_development.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -917,10 +924,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-dev";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = "[DEV] Client";
 				FLUTTER_TARGET = lib/main_development.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1009,10 +1018,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-dev";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = "[DEV] Client";
 				FLUTTER_TARGET = lib/main_development.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1104,10 +1115,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-stg";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = "[STG] Client";
 				FLUTTER_TARGET = lib/main_staging.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1199,10 +1212,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-stg";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = "[STG] Client";
 				FLUTTER_TARGET = lib/main_staging.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1289,10 +1304,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-stg";
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
 				ENABLE_BITCODE = NO;
 				FLAVOR_APP_NAME = "[STG] Client";
 				FLUTTER_TARGET = lib/main_staging.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Votasq;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
