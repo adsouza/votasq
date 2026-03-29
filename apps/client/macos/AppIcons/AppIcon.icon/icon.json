@@ -28,7 +28,7 @@
             }
           ],
           "glass" : false,
-          "image-name" : "Logo.svg",
+          "image-name" : "Logo.png",
           "name" : "Logo",
           "position" : {
             "scale" : 1.8,
