@@ -11,7 +11,7 @@ void showGeoscopePicker(BuildContext context) {
   final l10n = context.l10n;
   final geoscopeCubit = context.read<GeoscopeCubit>();
   final geoState = geoscopeCubit.state;
-  const superstateIds = {'us', 'in', 'eu'};
+  const superstateIds = {'us', 'in', 'eu', 'scm'};
   final allGeo = geoState.availableGeoscopes;
   final labelMap = {for (final g in allGeo) g.id: g.label};
   final superstates = allGeo
