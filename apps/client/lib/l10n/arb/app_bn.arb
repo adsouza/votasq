@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "আপনার সমস্যার জন্য ভৌগোলিক পরিসর নির্বাচন করুন",
     "votesChipTooltip": "ভোট",
     "autoTranslateMenuItem": "স্বয়ংক্রিয়ভাবে পাঠ্য অনুবাদ করুন",
-    "addGoalHint": "কোন ফলাফল এটি সমাধান করবে?",
+    "addGoalHint": "(ঐচ্ছিক) কোন ফলাফল এটি সমাধান করবে?",
     "editGoalHint": "কাঙ্ক্ষিত ফলাফল সম্পাদনা করুন",
     "goalLabel": "লক্ষ্য",
     "languageMismatchError": "ভাষার অমিল: বিবরণটি {descLang} ভাষায় মনে হচ্ছে কিন্তু লক্ষ্যটি {goalLang} ভাষায় মনে হচ্ছে। উভয় ক্ষেত্র একই ভাষায় হতে হবে।",

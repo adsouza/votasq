@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "محدوده جغرافیایی مشکل خود را انتخاب کنید",
     "votesChipTooltip": "آرا",
     "autoTranslateMenuItem": "ترجمه خودکار متن",
-    "addGoalHint": "چه نتیجه‌ای این مشکل را حل می‌کند؟",
+    "addGoalHint": "(اختیاری) چه نتیجه‌ای این مشکل را حل می‌کند؟",
     "editGoalHint": "ویرایش نتیجه مطلوب",
     "goalLabel": "هدف",
     "languageMismatchError": "عدم تطابق زبان: توضیحات به نظر به زبان {descLang} و هدف به زبان {goalLang} است. هر دو فیلد باید به یک زبان باشند.",

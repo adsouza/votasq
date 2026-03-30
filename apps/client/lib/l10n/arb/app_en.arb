@@ -104,7 +104,7 @@
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
     },
-    "addGoalHint": "What outcome would solve this?",
+    "addGoalHint": "(Optional) What outcome would solve this?",
     "@addGoalHint": {
         "description": "Placeholder text for the add-goal text field"
     },

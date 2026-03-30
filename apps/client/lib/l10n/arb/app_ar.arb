@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "اختر النطاق الجغرافي لمشكلتك",
     "votesChipTooltip": "الأصوات",
     "autoTranslateMenuItem": "ترجمة النص تلقائيًا",
-    "addGoalHint": "ما النتيجة التي تحل هذا؟",
+    "addGoalHint": "(اختياري) ما النتيجة التي تحل هذا؟",
     "editGoalHint": "تعديل النتيجة المطلوبة",
     "goalLabel": "الهدف",
     "languageMismatchError": "عدم تطابق اللغة: يبدو أن الوصف بلغة {descLang} لكن الهدف بلغة {goalLang}. يجب أن يكون كلا الحقلين بنفس اللغة.",

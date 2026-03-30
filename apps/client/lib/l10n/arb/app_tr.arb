@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "Sorununuz için coğrafi kapsamı seçin",
     "votesChipTooltip": "Oylar",
     "autoTranslateMenuItem": "Metni otomatik çevir",
-    "addGoalHint": "Hangi sonuç bunu çözer?",
+    "addGoalHint": "(İsteğe bağlı) Hangi sonuç bunu çözer?",
     "editGoalHint": "İstenen sonucu düzenle",
     "goalLabel": "Hedef",
     "languageMismatchError": "Dil uyuşmazlığı: açıklama {descLang} dilinde, hedef ise {goalLang} dilinde görünüyor. Her iki alan da aynı dilde olmalıdır.",

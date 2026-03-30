@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "तुमच्या समस्येसाठी भौगोलिक व्याप्ती निवडा",
     "votesChipTooltip": "मते",
     "autoTranslateMenuItem": "मजकूर आपोआप भाषांतर करा",
-    "addGoalHint": "कोणता परिणाम हे सोडवेल?",
+    "addGoalHint": "(पर्यायी) कोणता परिणाम हे सोडवेल?",
     "editGoalHint": "इच्छित परिणाम संपादित करा",
     "goalLabel": "ध्येय",
     "languageMismatchError": "भाषा जुळत नाही: वर्णन {descLang} मध्ये दिसते पण ध्येय {goalLang} मध्ये दिसते. दोन्ही फील्ड एकाच भाषेत असणे आवश्यक आहे.",

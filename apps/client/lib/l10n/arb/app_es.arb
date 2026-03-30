@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "Selecciona el ámbito geográfico de tu problema",
     "votesChipTooltip": "Votos",
     "autoTranslateMenuItem": "Traducir texto automáticamente",
-    "addGoalHint": "¿Qué resultado resolvería esto?",
+    "addGoalHint": "(Opcional) ¿Qué resultado resolvería esto?",
     "editGoalHint": "Editar resultado deseado",
     "goalLabel": "Meta",
     "languageMismatchError": "Idiomas no coinciden: la descripción parece estar en {descLang} pero la meta parece estar en {goalLang}. Ambos campos deben estar en el mismo idioma.",

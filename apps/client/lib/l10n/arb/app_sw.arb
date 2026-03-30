@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "Chagua wigo wa kijiografia kwa tatizo lako",
     "votesChipTooltip": "Kura",
     "autoTranslateMenuItem": "Tafsiri maandishi kiotomatiki",
-    "addGoalHint": "Matokeo gani yangetatua hili?",
+    "addGoalHint": "(Si lazima) Matokeo gani yangetatua hili?",
     "editGoalHint": "Hariri matokeo yanayotarajiwa",
     "goalLabel": "Lengo",
     "languageMismatchError": "Lugha hazifanani: maelezo yanaonekana kuwa kwa {descLang} lakini lengo linaonekana kuwa kwa {goalLang}. Sehemu zote mbili lazima ziwe kwa lugha moja.",

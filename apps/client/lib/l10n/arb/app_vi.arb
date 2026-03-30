@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "Chọn phạm vi địa lý cho vấn đề của bạn",
     "votesChipTooltip": "Bình chọn",
     "autoTranslateMenuItem": "Tự động dịch văn bản",
-    "addGoalHint": "Kết quả nào sẽ giải quyết vấn đề này?",
+    "addGoalHint": "(Tùy chọn) Kết quả nào sẽ giải quyết vấn đề này?",
     "editGoalHint": "Chỉnh sửa kết quả mong muốn",
     "goalLabel": "Mục tiêu",
     "languageMismatchError": "Ngôn ngữ không khớp: mô tả có vẻ bằng {descLang} nhưng mục tiêu bằng {goalLang}. Cả hai trường phải cùng một ngôn ngữ.",

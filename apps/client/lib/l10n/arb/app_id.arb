@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "Pilih cakupan geografis untuk masalah Anda",
     "votesChipTooltip": "Suara",
     "autoTranslateMenuItem": "Terjemahkan teks secara otomatis",
-    "addGoalHint": "Hasil apa yang akan menyelesaikan ini?",
+    "addGoalHint": "(Opsional) Hasil apa yang akan menyelesaikan ini?",
     "editGoalHint": "Edit hasil yang diinginkan",
     "goalLabel": "Tujuan",
     "languageMismatchError": "Bahasa tidak cocok: deskripsi tampaknya dalam {descLang} tetapi tujuan dalam {goalLang}. Kedua kolom harus dalam bahasa yang sama.",

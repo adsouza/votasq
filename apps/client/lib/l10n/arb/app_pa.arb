@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "ਆਪਣੀ ਸਮੱਸਿਆ ਲਈ ਭੂਗੋਲਿਕ ਦਾਇਰਾ ਚੁਣੋ",
     "votesChipTooltip": "ਵੋਟ",
     "autoTranslateMenuItem": "ਟੈਕਸਟ ਦਾ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਕਰੋ",
-    "addGoalHint": "ਕਿਹੜਾ ਨਤੀਜਾ ਇਸ ਨੂੰ ਹੱਲ ਕਰੇਗਾ?",
+    "addGoalHint": "(ਵਿਕਲਪਿਕ) ਕਿਹੜਾ ਨਤੀਜਾ ਇਸ ਨੂੰ ਹੱਲ ਕਰੇਗਾ?",
     "editGoalHint": "ਲੋੜੀਂਦਾ ਨਤੀਜਾ ਸੰਪਾਦਿਤ ਕਰੋ",
     "goalLabel": "ਟੀਚਾ",
     "languageMismatchError": "ਭਾਸ਼ਾ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ: ਵਰਣਨ {descLang} ਵਿੱਚ ਲੱਗਦਾ ਹੈ ਪਰ ਟੀਚਾ {goalLang} ਵਿੱਚ ਲੱਗਦਾ ਹੈ। ਦੋਵੇਂ ਖੇਤਰ ਇੱਕੋ ਭਾਸ਼ਾ ਵਿੱਚ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।",

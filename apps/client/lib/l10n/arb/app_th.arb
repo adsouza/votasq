@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "เลือกขอบเขตทางภูมิศาสตร์สำหรับปัญหาของคุณ",
     "votesChipTooltip": "คะแนนโหวต",
     "autoTranslateMenuItem": "แปลข้อความอัตโนมัติ",
-    "addGoalHint": "ผลลัพธ์ใดจะแก้ปัญหานี้ได้?",
+    "addGoalHint": "(ไม่บังคับ) ผลลัพธ์ใดจะแก้ปัญหานี้ได้?",
     "editGoalHint": "แก้ไขผลลัพธ์ที่ต้องการ",
     "goalLabel": "เป้าหมาย",
     "languageMismatchError": "ภาษาไม่ตรงกัน: คำอธิบายดูเหมือนเป็นภาษา {descLang} แต่เป้าหมายเป็นภาษา {goalLang} ทั้งสองช่องต้องเป็นภาษาเดียวกัน",

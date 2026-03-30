@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "문제의 지리적 범위를 선택하세요",
     "votesChipTooltip": "투표",
     "autoTranslateMenuItem": "텍스트 자동 번역",
-    "addGoalHint": "어떤 결과가 이것을 해결할까요?",
+    "addGoalHint": "(선택사항) 어떤 결과가 이것을 해결할까요?",
     "editGoalHint": "원하는 결과 편집",
     "goalLabel": "목표",
     "languageMismatchError": "언어 불일치: 설명은 {descLang}로 보이지만 목표는 {goalLang}로 보입니다. 두 필드 모두 같은 언어여야 합니다.",

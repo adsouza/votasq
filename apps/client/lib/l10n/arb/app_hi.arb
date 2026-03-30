@@ -26,7 +26,7 @@
     "geoscopeDropdownTooltip": "अपनी समस्या का भौगोलिक दायरा चुनें",
     "votesChipTooltip": "वोट",
     "autoTranslateMenuItem": "पाठ स्वचालित रूप से अनुवाद करें",
-    "addGoalHint": "कौन सा परिणाम इसे हल करेगा?",
+    "addGoalHint": "(वैकल्पिक) कौन सा परिणाम इसे हल करेगा?",
     "editGoalHint": "वांछित परिणाम संपादित करें",
     "goalLabel": "लक्ष्य",
     "languageMismatchError": "भाषा बेमेल: विवरण {descLang} में लगता है लेकिन लक्ष्य {goalLang} में लगता है। दोनों फ़ील्ड एक ही भाषा में होने चाहिए।",
