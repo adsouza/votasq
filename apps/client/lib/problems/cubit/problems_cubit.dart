@@ -12,6 +12,7 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   final FirestoreRepository _repo;
   StreamSubscription<dynamic>? _subscription;
   static const _pageSize = 20;
+  bool _isLoadingMore = false;
 
   /// Subscribe to real-time updates for the first page of problems.
   void subscribe() {
@@ -39,7 +40,8 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Load the next page of problems (appends to existing list).
   Future<void> loadMore() async {
-    if (!state.hasMore || state.lastDocument == null) return;
+    if (_isLoadingMore || !state.hasMore || state.lastDocument == null) return;
+    _isLoadingMore = true;
     try {
       final result = await _repo.getProblems(
         geoscope: state.geoscope,
@@ -55,6 +57,8 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     } on Exception catch (e, st) {
       log('loadMore failed: $e', stackTrace: st);
       emit(state.copyWith(status: ProblemsStatus.failure));
+    } finally {
+      _isLoadingMore = false;
     }
   }
 
