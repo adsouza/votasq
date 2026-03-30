@@ -132,9 +132,12 @@ class _AddProblemRowState extends State<AddProblemRow> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _addController,
-                  builder: (context, value, child) {
+                child: ListenableBuilder(
+                  listenable: Listenable.merge([
+                    _addController,
+                    _addGoalController,
+                  ]),
+                  builder: (context, child) {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -172,10 +175,16 @@ class _AddProblemRowState extends State<AddProblemRow> {
                   },
                 ),
               ),
-              ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _addController,
-                builder: (context, value, child) {
-                  final hasWords = hasEnoughWords(_addController.text);
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  _addController,
+                  _addGoalController,
+                ]),
+                builder: (context, child) {
+                  final hasWords =
+                      hasEnoughWords(_addController.text) &&
+                      (_addGoalController.text.isEmpty ||
+                          hasEnoughWords(_addGoalController.text));
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
