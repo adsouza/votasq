@@ -137,8 +137,6 @@ class _LastActiveTrackerState extends State<_LastActiveTracker> {
     super.initState();
     _lifecycleListener = AppLifecycleListener(
       onResume: _onResume,
-      onInactive: _bumpUserLastActiveTS,
-      onPause: _bumpUserLastActiveTS,
     );
   }
 
@@ -152,12 +150,6 @@ class _LastActiveTrackerState extends State<_LastActiveTracker> {
     final userId = context.read<AuthCubit>().state.userId;
     if (userId == null) return;
     unawaited(context.read<FirestoreRepository>().grantVotesAndTouch(userId));
-  }
-
-  void _bumpUserLastActiveTS() {
-    final userId = context.read<AuthCubit>().state.userId;
-    if (userId == null) return;
-    unawaited(context.read<FirestoreRepository>().touchLastActiveAt(userId));
   }
 
   @override
