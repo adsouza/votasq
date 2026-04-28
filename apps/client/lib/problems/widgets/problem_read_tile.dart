@@ -34,8 +34,13 @@ class ProblemReadTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final compactButtonStyle = TextButton.styleFrom(
+      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      minimumSize: Size.zero,
+    );
     return ListTile(
-      contentPadding: const EdgeInsets.only(left: 16, right: 4),
       title: ProblemTranslation(
         problemId: problem.id,
         lang: problem.lang,
@@ -127,36 +132,38 @@ class ProblemReadTile extends StatelessWidget {
               },
             ),
             const ProblemTranslateButton(),
+            Tooltip(
+              message: l10n.copyProblemLink,
+              child: IconButton(
+                icon: const Icon(Icons.link, size: 20),
+                style: IconButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.all(4),
+                ),
+                onPressed: onCopyLink,
+              ),
+            ),
+            if (showEditButton)
+              Tooltip(
+                message: l10n.editProblemButton,
+                child: TextButton(
+                  style: compactButtonStyle,
+                  onPressed: onEdit,
+                  child: const Text('🖊️'),
+                ),
+              )
+            else if (showComplaintButton)
+              Tooltip(
+                message: l10n.flagProblemButton,
+                child: TextButton(
+                  style: compactButtonStyle,
+                  onPressed: onComplaint,
+                  child: const Text('🙈'),
+                ),
+              ),
           ],
         ),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Tooltip(
-            message: l10n.copyProblemLink,
-            child: IconButton(
-              icon: const Icon(Icons.link, size: 20),
-              onPressed: onCopyLink,
-            ),
-          ),
-          if (showEditButton)
-            Tooltip(
-              message: l10n.editProblemButton,
-              child: TextButton(
-                onPressed: onEdit,
-                child: const Text('🖊️'),
-              ),
-            )
-          else if (showComplaintButton)
-            Tooltip(
-              message: l10n.flagProblemButton,
-              child: TextButton(
-                onPressed: onComplaint,
-                child: const Text('🙈'),
-              ),
-            ),
-        ],
       ),
     );
   }
