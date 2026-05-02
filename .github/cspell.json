@@ -19,6 +19,9 @@
     }
   ],
   "useGitignore": true,
+  "ignorePaths": [
+    "docs/superpowers/plans/**"
+  ],
   "words": [
     "Contador",
     "contador",
