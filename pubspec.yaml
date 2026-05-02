@@ -19,20 +19,22 @@ melos:
 
   scripts:
     setup:
-      run: melos bootstrap
-      description: Initialize the workspace and link packages.
+      run: |
+        melos bootstrap && \
+        flutter config --enable-swift-package-manager
+      description: Initialize the workspace and link packages, and enable Flutter
+        Swift Package Manager support.
 
     gen:
-      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs" && cd apps/client && flutter gen-l10n
+      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs" &&
+        cd apps/client && flutter gen-l10n
       description: Generate code for all packages and regenerate l10n strings.
       packageFilters:
         dependsOn: "build_runner"
 
     deploy:server:
       run: >
-        gcloud run deploy votasq-server
-        --source .
-        --region us-central1
+        gcloud run deploy votasq-server --source . --region us-central1
         --allow-unauthenticated
       description: Deploy the Dart server to Cloud Run.
 
