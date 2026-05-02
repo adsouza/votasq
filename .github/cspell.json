@@ -20,22 +20,32 @@
   ],
   "useGitignore": true,
   "ignorePaths": [
-    "docs/superpowers/plans/**"
+    "**/docs/superpowers/plans/**"
   ],
   "words": [
+    "codesign",
     "Contador",
     "contador",
+    "deintegrate",
     "Geoscope",
     "geoscope",
     "geoscopes",
+    "infoplist",
+    "iphoneos",
     "mlkit",
     "mostrado",
+    "oneline",
     "página",
+    "pbxproj",
+    "Podfile",
+    "podspec",
     "Prefs",
     "shared",
     "subcollection",
+    "swiftpm",
     "Texto",
     "Votasq",
-    "votasq"
+    "votasq",
+    "xcworkspacedata"
   ]
 }
