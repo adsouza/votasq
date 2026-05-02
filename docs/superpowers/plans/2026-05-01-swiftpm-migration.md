@@ -354,38 +354,49 @@ grep -c "^  - " apps/client/ios/Podfile.lock
 
 Expected: substantially smaller than the iOS baseline from Task 0 Step 6 (typically a 60-80% drop, since Firebase/Google Sign-In/shared_preferences all migrate). If the count is the same as baseline, no plugins migrated — investigate before committing.
 
-- [ ] **Step 6: Run iOS Xcode test target**
+- [ ] **Step 6: Build iOS Runner workspace for device**
+
+The app does not run on iOS simulators (real-device-only features), so we substitute a device-targeted `xcodebuild` build for the simulator-based test target. This still validates that the SwiftPM-rewritten workspace compiles, links, and signs end-to-end — the part that would catch SwiftPM linking regressions.
 
 Run from repo root:
 
 ```bash
-xcodebuild test \
+xcodebuild build \
   -workspace apps/client/ios/Runner.xcworkspace \
   -scheme Runner \
-  -destination 'platform=iOS Simulator,name=iPhone 15' \
-  -configuration Debug \
-  CODE_SIGNING_ALLOWED=NO
+  -destination 'generic/platform=iOS' \
+  -configuration Debug
 ```
 
-Expected: build phase succeeds, test phase runs `RunnerTests.testExample` (a no-op), and the overall result is `** TEST SUCCEEDED **`.
+Expected: `** BUILD SUCCEEDED **`. Code signing settings apply; if a signing error occurs, this is unrelated to SwiftPM and the user resolves it (likely a development team / provisioning profile issue surfacing for the first time on this machine).
 
-If `iPhone 15` simulator isn't installed, substitute any available iOS simulator name (`xcrun simctl list devices` shows what's available).
+The `RunnerTests` no-op XCTest is intentionally skipped — it would require either a simulator destination (which the app doesn't run on) or signed device test execution (which adds friction without proportional value for a no-op test).
 
-- [ ] **Step 7: Smoke-launch on iOS simulator**
+- [ ] **Step 7: Smoke-launch on a connected iOS device**
 
-Run (in a separate terminal, with a simulator booted):
+The user has an iOS device available. With it connected and unlocked:
+
+Run from repo root:
 
 ```bash
-cd apps/client && flutter run --flavor development --target lib/main_development.dart -d <simulator-id>
+flutter devices
 ```
 
-Use `flutter devices` to find the simulator ID. Expected:
+Identify the iOS device ID in the output (e.g., a UUID under `iPhone (mobile) • <id> • ios`).
 
-- App installs and launches.
+Then, in a separate terminal:
+
+```bash
+cd apps/client && flutter run --flavor development --target lib/main_development.dart -d <device-id>
+```
+
+Expected:
+
+- App installs and launches on device.
 - No native crash on Firebase initialization.
-- The initial UI renders (sign-in or main screen depending on auth state).
+- The initial UI renders.
 
-Press `q` to quit when verified. This is a hand-eye check, not automated.
+Press `q` to quit when verified. This is a hand-eye check by the user, not the subagent.
 
 - [ ] **Step 8: Review the project.pbxproj diff**
 
