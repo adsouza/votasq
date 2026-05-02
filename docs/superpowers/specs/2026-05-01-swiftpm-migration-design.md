@@ -21,7 +21,7 @@ Migrating reduces dependency-resolution time, brings the project in line with Fl
 ## Non-goals
 
 - Not migrating Android, web, Linux, or Windows builds.
-- Not bumping deployment targets, plugin versions, the Flutter version, or Firebase versions.
+- Not bumping deployment targets, the Flutter version, or our `pubspec.yaml` plugin version constraints. Note that native iOS/macOS SDK versions (e.g., the underlying `firebase-ios-sdk`) are determined by the dependency resolver, not by us — switching from CocoaPods to SwiftPM re-resolves these against the SwiftPM `Package.swift` ranges declared by each Flutter plugin, which can shift the resolved version within the constraint. Observed: `firebase-ios-sdk` resolved at 12.9.0 under CocoaPods, 12.12.1 under SwiftPM (same major, three minor versions newer). This is expected behavior of the resolver swap, not a deliberate version bump.
 - Not touching CI. Current CI does not build iOS or macOS, so SwiftPM enablement has no CI impact in this PR.
 - Not removing CocoaPods entirely. Hybrid mode is the chosen end state; the Podfile stays.
 - Not migrating the server (`apps/server`) or `packages/shared`.
