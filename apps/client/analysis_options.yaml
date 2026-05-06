@@ -4,12 +4,6 @@ include:
 analyzer:
   exclude:
     - lib/l10n/gen/*
-formatter:
-  exclude:
-    - build/**
-    - lib/l10n/gen/**
-    - "**/*.freezed.dart"
-    - "**/*.g.dart"
 linter:
   rules:
     public_member_api_docs: false
