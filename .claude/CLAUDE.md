@@ -28,7 +28,7 @@ melos gen                  # Runs build_runner across all packages that need it
 
 ### Format, Analyze, Test (mirrors CI)
 
-Run `dart format --set-exit-if-changed apps packages` after every change.
+Run `melos format` after every change. (Plain `dart format apps packages` descends into vendored SwiftPM checkouts under `apps/client/build/` and is noisy.)
 
 Also do this after making nontrivial changes:
 

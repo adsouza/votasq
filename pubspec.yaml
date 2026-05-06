@@ -32,6 +32,13 @@ melos:
       packageFilters:
         dependsOn: "build_runner"
 
+    format:
+      run: |
+        melos exec -c 1 --ignore="client" -- "dart format --set-exit-if-changed ." && \
+        cd apps/client && dart format --set-exit-if-changed lib test
+      description: Format Dart sources, skipping vendored SwiftPM checkouts under
+        apps/client/build that have their own analysis_options.yaml.
+
     deploy:server:
       run: >
         gcloud run deploy votasq-server --source . --region us-central1

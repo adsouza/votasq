@@ -1,1 +1,7 @@
 include: package:dart_frog_lint/recommended.yaml
+formatter:
+  exclude:
+    - build/**
+    - .dart_frog/**
+    - "**/*.freezed.dart"
+    - "**/*.g.dart"
