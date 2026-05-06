@@ -9,6 +9,7 @@ import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
+import 'package:client/services/visibility_listener.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -131,6 +132,7 @@ class _LastActiveTracker extends StatefulWidget {
 
 class _LastActiveTrackerState extends State<_LastActiveTracker> {
   late final AppLifecycleListener _lifecycleListener;
+  late final VisibilityListener _visibilityListener;
 
   @override
   void initState() {
@@ -138,10 +140,12 @@ class _LastActiveTrackerState extends State<_LastActiveTracker> {
     _lifecycleListener = AppLifecycleListener(
       onResume: _onResume,
     );
+    _visibilityListener = VisibilityListener(onVisible: _onResume);
   }
 
   @override
   void dispose() {
+    _visibilityListener.dispose();
     _lifecycleListener.dispose();
     super.dispose();
   }

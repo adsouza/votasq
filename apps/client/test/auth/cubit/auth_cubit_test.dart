@@ -45,6 +45,9 @@ void main() {
     when(
       () => firestoreRepo.watchUserVotes(any()),
     ).thenAnswer((_) => Stream.value(initialVoteBudget));
+    when(
+      () => firestoreRepo.grantVotesAndTouch(any()),
+    ).thenAnswer((_) async {});
   });
 
   group('AuthCubit', () {
