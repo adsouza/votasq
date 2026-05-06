@@ -1,6 +1,7 @@
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -301,6 +302,24 @@ void main() {
           expect(result.displayName, 'NewName');
         },
       );
+
+      test('preserves lastActiveAt on existing doc', () async {
+        final oldTime = DateTime.utc(2024);
+        await firestore.collection('users').doc('u1').set({
+          'uid': 'u1',
+          'votes': 10,
+          'lastActiveAt': oldTime,
+        });
+
+        await repo.ensureUserDoc(
+          User(uid: 'u1', votes: 0, lastActiveAt: DateTime.now().toUtc()),
+        );
+
+        final stored = await firestore.collection('users').doc('u1').get();
+        final actualLastActive = (stored.data()!['lastActiveAt'] as Timestamp)
+            .toDate();
+        expect(actualLastActive.isAtSameMomentAs(oldTime), isTrue);
+      });
     });
 
     group('vote', () {

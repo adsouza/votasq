@@ -262,17 +262,20 @@ class FirestoreRepository {
 
   /// Ensure a user document exists in the `users` collection.
   /// Creates one from [user] if missing. Returns the stored [User].
+  ///
+  /// Does not touch `lastActiveAt` for existing users — that timer is owned
+  /// by [grantVotesAndTouch], and resetting it here would zero out the
+  /// elapsed-time calculation that drives vote grants.
   Future<User> ensureUserDoc(User user) async {
     final doc = await _firestore.collection('users').doc(user.uid).get();
     if (doc.exists) {
-      // Update displayName and lastActiveAt but preserve votes budget.
-      await doc.reference.update({
-        if (user.displayName != null) 'displayName': user.displayName,
-        'lastActiveAt': user.lastActiveAt,
-      });
-      return _docToUser(
-        await _firestore.collection('users').doc(user.uid).get(),
-      );
+      if (user.displayName != null) {
+        await doc.reference.update({'displayName': user.displayName});
+        return _docToUser(
+          await _firestore.collection('users').doc(user.uid).get(),
+        );
+      }
+      return _docToUser(doc);
     }
     final data = {
       'uid': user.uid,
