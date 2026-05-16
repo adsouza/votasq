@@ -18,7 +18,8 @@ Votasq is a shared task queue where people vote on task priority. It's a Dart/Fl
 melos setup                # Bootstrap workspace, link packages, enable SwiftPM
 ```
 
-`melos setup` enables Flutter Swift Package Manager support via `flutter config --enable-swift-package-manager`. The Apple platforms (iOS, macOS) build in hybrid mode where SwiftPM and CocoaPods coexist — most plugins resolve via SwiftPM, with the Podfile retained as a fallback.
+`melos setup` enables Flutter Swift Package Manager support via `flutter config --enable-swift-package-manager`.
+The Apple platforms (iOS, macOS) build in hybrid mode where SwiftPM and CocoaPods coexist — most plugins resolve via SwiftPM, with the Podfile retained as a fallback.
 
 ### Code Generation (required after changing models in packages/shared)
 
@@ -70,7 +71,8 @@ Update the `ARCHITECTURE.md` file in the project root dir after making architect
 
 ### Monorepo Structure
 
-Uses Dart's `workspace` feature (pubspec.yaml) with Melos for script orchestration. The `shared` package is referenced as `shared: any` by both client and server and resolved via workspace.
+Uses Dart's `workspace` feature (pubspec.yaml) with Melos for script orchestration.
+The `shared` package is referenced as `shared: any` by both client and server and resolved via workspace.
 
 ### Client (BLoC Pattern)
 
