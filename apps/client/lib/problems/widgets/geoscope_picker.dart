@@ -77,9 +77,44 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
     Navigator.of(context).pop();
   }
 
+  /// Tap handler for filter-mode results. Leaves dismiss as before; items with
+  /// descendants instead drill into hierarchical mode focused on them so the
+  /// user can still pick a child (e.g. a metro under a tapped state).
+  void _handleFilteredTap(String id) {
+    final geoCubit = context.read<GeoscopeCubit>();
+    final allGeo = geoCubit.state.availableGeoscopes;
+    final hasChildren = allGeo.any((g) => g.id.startsWith('$id/'));
+    if (!hasChildren) {
+      _select(id);
+      return;
+    }
+
+    _filterController.clear();
+    final parts = id.split('/');
+    setState(() {
+      if (_superstateIds.contains(id)) {
+        _selectedSuperstate = id;
+        _selectedCountry = null;
+      } else if (parts.length >= 2 && _superstateIds.contains(parts.first)) {
+        _selectedSuperstate = parts.first;
+        _selectedCountry = parts.sublist(0, 2).join('/');
+      } else {
+        // Non-superstate country (e.g. `mx`) — the synthesized state-tier row
+        // for its first segment carries the expand-marker via _selectedCountry.
+        _selectedSuperstate = null;
+        _selectedCountry = parts.first;
+      }
+    });
+    unawaited(geoCubit.selectGeoscope(id));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // The filter is only meaningful at the top of the hierarchy. Drilling into
+    // a superstate or state disables the field; backing out re-enables it.
+    final filterEnabled =
+        _selectedSuperstate == null && _selectedCountry == null;
     return Padding(
       // Keep the sheet's content above the on-screen keyboard while typing.
       padding: EdgeInsets.only(
@@ -93,6 +128,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: TextField(
                 controller: _filterController,
+                enabled: filterEnabled,
                 autocorrect: false,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
@@ -150,7 +186,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
           ListTile(
             title: Text(g.label),
             trailing: activeId == g.id ? const Icon(Icons.check) : null,
-            onTap: () => _select(g.id),
+            onTap: () => _handleFilteredTap(g.id),
           ),
       ],
     );
