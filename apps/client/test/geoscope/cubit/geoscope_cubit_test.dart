@@ -62,8 +62,8 @@ void main() {
         );
         when(() => repo.getGeoscopes()).thenAnswer(
           (_) async => [
-            (id: 'us', label: 'United States'),
-            (id: 'us/nyc', label: 'New York City'),
+            (id: 'us', label: 'United States', population: 330000000),
+            (id: 'us/nyc', label: 'New York City', population: 8500000),
           ],
         );
       },
@@ -100,7 +100,9 @@ void main() {
           {'selected_geoscope': 'us'},
         );
         when(() => repo.getGeoscopes()).thenAnswer(
-          (_) async => [(id: 'na/us', label: 'United States')],
+          (_) async => [
+            (id: 'na/us', label: 'United States', population: 330000000),
+          ],
         );
       },
       build: () => GeoscopeCubit(repo),

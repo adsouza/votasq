@@ -19,7 +19,7 @@ void main() {
   });
 
   Widget buildSubject({
-    List<({String id, String label})> geoscopes = const [],
+    List<({String id, String label, int population})> geoscopes = const [],
     String selectedGeoscope = '/',
   }) {
     when(() => geoscopeCubit.state).thenReturn(
@@ -61,9 +61,9 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
-              (id: 'in', label: 'India'),
-              (id: 'eu', label: 'European Union'),
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'in', label: 'India', population: 1400000000),
+              (id: 'eu', label: 'European Union', population: 450000000),
             ],
           ),
         );
@@ -96,8 +96,8 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
-              (id: 'us/ca', label: 'California'),
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
             ],
           ),
         );
@@ -119,7 +119,7 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
+              (id: 'us', label: 'United States', population: 330000000),
             ],
             selectedGeoscope: 'us',
           ),
@@ -138,9 +138,9 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
-              (id: 'us/ca', label: 'California'),
-              (id: 'us/ny', label: 'New York'),
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ny', label: 'New York', population: 19000000),
             ],
             selectedGeoscope: 'us',
           ),
@@ -150,6 +150,48 @@ void main() {
 
         expect(find.text('California'), findsOneWidget);
         expect(find.text('New York'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'top-level metro list hides metros under 10M population',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              // Megacity — should appear at top level.
+              (id: 'us/ny/nyc', label: 'New York City', population: 19000000),
+              // Below threshold — should be hidden at top level.
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('New York City'), findsOneWidget);
+        expect(find.text('SF Bay Area'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'population threshold is lifted once a superstate is selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              // Below 10M — hidden at top level, but visible under "us".
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('SF Bay Area'), findsOneWidget);
       },
     );
   });

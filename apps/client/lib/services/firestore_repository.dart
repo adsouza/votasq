@@ -419,7 +419,8 @@ class FirestoreRepository {
 
   /// Fetch available geoscopes from the `geoscopes` collection,
   /// sorted by population descending.
-  Future<List<({String id, String label})>> getGeoscopes() async {
+  Future<List<({String id, String label, int population})>>
+  getGeoscopes() async {
     final snapshot = await _firestore.collection('geoscopes').get();
     final docs = snapshot.docs.toList()
       ..sort((a, b) {
@@ -432,6 +433,7 @@ class FirestoreRepository {
       return (
         id: data['id'] as String? ?? doc.id,
         label: data['label'] as String? ?? doc.id,
+        population: ((data['population'] as num?) ?? 0).toInt(),
       );
     }).toList();
   }

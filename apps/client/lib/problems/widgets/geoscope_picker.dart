@@ -42,7 +42,7 @@ void showGeoscopePicker(BuildContext context) {
         return StatefulBuilder(
           builder: (sheetContext, setSheetState) {
             // Build States section.
-            List<({String id, String label})> stateItems;
+            List<({String id, String label, int population})> stateItems;
             if (selectedSuperstate != null) {
               final prefix = '$selectedSuperstate/';
               stateItems = allGeo
@@ -52,6 +52,10 @@ void showGeoscopePicker(BuildContext context) {
                   )
                   .toList();
             } else {
+              // Walking allGeo in population-desc order ensures the first hit
+              // per firstSeg wins. The retained population is therefore the
+              // largest known for that prefix — either the country-level
+              // geoscope itself (if present) or its biggest sub-region.
               final seen = <String>{};
               stateItems = [];
               for (final g in allGeo) {
@@ -60,13 +64,18 @@ void showGeoscopePicker(BuildContext context) {
                   stateItems.add((
                     id: firstSeg,
                     label: labelMap[firstSeg] ?? firstSeg,
+                    population: g.population,
                   ));
                 }
               }
             }
 
-            // Build Metro areas section.
-            List<({String id, String label})> metroItems;
+            // Build Metro areas section. When no superstate or state is
+            // selected, the unfiltered list is enormous, so restrict to
+            // megacities (population ≥ 10M). Drilling into a region removes
+            // the threshold so users can see all metros within their scope.
+            const topLevelMetroPopulationThreshold = 10000000;
+            List<({String id, String label, int population})> metroItems;
             if (selectedCountry != null) {
               final prefix = '$selectedCountry/';
               metroItems = allGeo
@@ -83,8 +92,11 @@ void showGeoscopePicker(BuildContext context) {
             } else {
               metroItems = allGeo.where((g) {
                 final parts = g.id.split('/');
-                return parts.length >= 3 ||
+                final isMetro =
+                    parts.length >= 3 ||
                     (parts.length == 2 && !superstateIds.contains(parts.first));
+                return isMetro &&
+                    g.population >= topLevelMetroPopulationThreshold;
               }).toList();
             }
 

@@ -10,7 +10,7 @@ class GeoscopeState {
 
   final GeoscopeStatus status;
   final String selectedGeoscope;
-  final List<({String id, String label})> availableGeoscopes;
+  final List<({String id, String label, int population})> availableGeoscopes;
 
   /// True when no geoscope has ever been explicitly chosen by the user — the
   /// current [selectedGeoscope] is either the global fallback or a locale
@@ -20,7 +20,7 @@ class GeoscopeState {
   GeoscopeState copyWith({
     GeoscopeStatus? status,
     String? selectedGeoscope,
-    List<({String id, String label})>? availableGeoscopes,
+    List<({String id, String label, int population})>? availableGeoscopes,
     bool? needsSelection,
   }) {
     return GeoscopeState(
