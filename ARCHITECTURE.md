@@ -266,10 +266,23 @@ and global problems appear alongside city-scoped ones.
 
 Available geoscopes are stored in a Firestore `geoscopes` collection (each
 document has `id`, `label`, and `population` fields). The `GeoscopeCubit`
-manages selection, persists the user's choice in `SharedPreferences`, and
-infers a default from the device locale on first launch. If the persisted value
-becomes stale (e.g. after a hierarchy migration), it falls back via suffix
-matching against available geoscopes.
+manages selection and persists the user's choice in `SharedPreferences`.
+
+**First-launch flow.** When no value is stored in `SharedPreferences`,
+`initialize()` infers a default from the device locale but does **not** persist
+it, and emits `needsSelection: true`. `ProblemsPage` listens for this transition
+and auto-opens the `showGeoscopePicker` bottom sheet so the user makes an
+explicit choice. Only `selectGeoscope` (an explicit pick — including "Global")
+writes to `SharedPreferences`, so the absence of a stored value remains the
+signal for "user hasn't picked yet." If the user dismisses the sheet without
+picking, the picker re-opens on the next cold start. `acknowledgeSelectionPrompt`
+clears the flag for the current session so the sheet doesn't re-trigger on
+subsequent rebuilds.
+
+If a persisted value becomes stale (e.g. after a hierarchy migration like
+`us` → `na/us`), `initialize()` falls back via suffix matching against
+available geoscopes and writes the migrated id back — this is a real prior
+selection expressed under a stale id, so it bypasses the first-launch prompt.
 
 ### Language detection & translation
 

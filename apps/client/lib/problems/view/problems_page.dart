@@ -48,14 +48,26 @@ class ProblemsPage extends StatelessWidget {
             );
           });
         },
-        child: BlocListener<GeoscopeCubit, GeoscopeState>(
-          listenWhen: (prev, curr) =>
-              prev.selectedGeoscope != curr.selectedGeoscope,
-          listener: (context, geoscopeState) {
-            context.read<ProblemsCubit>().changeGeoscope(
-              geoscopeState.selectedGeoscope,
-            );
-          },
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<GeoscopeCubit, GeoscopeState>(
+              listenWhen: (prev, curr) =>
+                  prev.selectedGeoscope != curr.selectedGeoscope,
+              listener: (context, geoscopeState) {
+                context.read<ProblemsCubit>().changeGeoscope(
+                  geoscopeState.selectedGeoscope,
+                );
+              },
+            ),
+            BlocListener<GeoscopeCubit, GeoscopeState>(
+              listenWhen: (prev, curr) =>
+                  !prev.needsSelection && curr.needsSelection,
+              listener: (context, _) {
+                showGeoscopePicker(context);
+                context.read<GeoscopeCubit>().acknowledgeSelectionPrompt();
+              },
+            ),
+          ],
           child: const ProblemsView(),
         ),
       ),

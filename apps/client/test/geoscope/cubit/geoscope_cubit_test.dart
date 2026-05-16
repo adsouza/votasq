@@ -27,7 +27,7 @@ void main() {
 
     blocTest<GeoscopeCubit, GeoscopeState>(
       'initialize with no persisted value and no available geoscopes '
-      'falls back to "/"',
+      'falls back to "/" and flags needsSelection',
       setUp: () {
         SharedPreferences.setMockInitialValues({});
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
@@ -42,12 +42,20 @@ void main() {
         ),
         isA<GeoscopeState>()
             .having((s) => s.status, 'status', GeoscopeStatus.success)
-            .having((s) => s.selectedGeoscope, 'selectedGeoscope', '/'),
+            .having((s) => s.selectedGeoscope, 'selectedGeoscope', '/')
+            .having((s) => s.needsSelection, 'needsSelection', true),
       ],
+      verify: (_) async {
+        // The auto-inferred default must NOT be persisted; otherwise the next
+        // cold start would think the user had already picked.
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('selected_geoscope'), isNull);
+      },
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
-      'initialize with persisted value matching available uses persisted',
+      'initialize with persisted value matching available uses persisted '
+      'and does not flag needsSelection',
       setUp: () {
         SharedPreferences.setMockInitialValues(
           {'selected_geoscope': 'us/nyc'},
@@ -78,12 +86,14 @@ void main() {
               (s) => s.availableGeoscopes,
               'availableGeoscopes',
               hasLength(2),
-            ),
+            )
+            .having((s) => s.needsSelection, 'needsSelection', false),
       ],
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
-      'initialize with stale persisted value resolves via suffix match',
+      'initialize with stale persisted value resolves via suffix match '
+      'and persists the migrated id',
       setUp: () {
         // User had "us" persisted, but hierarchy changed to "na/us".
         SharedPreferences.setMockInitialValues(
@@ -107,8 +117,43 @@ void main() {
               (s) => s.selectedGeoscope,
               'selectedGeoscope',
               'na/us',
-            ),
+            )
+            .having((s) => s.needsSelection, 'needsSelection', false),
       ],
+      verify: (_) async {
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('selected_geoscope'), 'na/us');
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'acknowledgeSelectionPrompt clears needsSelection without persisting',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+      },
+      build: () => GeoscopeCubit(repo),
+      act: (cubit) async {
+        await cubit.initialize();
+        cubit.acknowledgeSelectionPrompt();
+      },
+      skip: 2,
+      expect: () => [
+        isA<GeoscopeState>()
+            .having((s) => s.needsSelection, 'needsSelection', false)
+            .having((s) => s.selectedGeoscope, 'selectedGeoscope', '/'),
+      ],
+      verify: (_) async {
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('selected_geoscope'), isNull);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'acknowledgeSelectionPrompt is a no-op when needsSelection is false',
+      build: () => GeoscopeCubit(repo),
+      act: (cubit) => cubit.acknowledgeSelectionPrompt(),
+      expect: () => <GeoscopeState>[],
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
@@ -141,16 +186,37 @@ void main() {
       build: () => GeoscopeCubit(repo),
       act: (cubit) => cubit.selectGeoscope('us/nyc'),
       expect: () => [
-        isA<GeoscopeState>().having(
-          (s) => s.selectedGeoscope,
-          'selectedGeoscope',
-          'us/nyc',
-        ),
+        isA<GeoscopeState>()
+            .having(
+              (s) => s.selectedGeoscope,
+              'selectedGeoscope',
+              'us/nyc',
+            )
+            .having((s) => s.needsSelection, 'needsSelection', false),
       ],
       verify: (_) async {
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.getString('selected_geoscope'), 'us/nyc');
       },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectGeoscope clears needsSelection set by initialize',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+      },
+      build: () => GeoscopeCubit(repo),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectGeoscope('us/nyc');
+      },
+      skip: 2,
+      expect: () => [
+        isA<GeoscopeState>()
+            .having((s) => s.selectedGeoscope, 'selectedGeoscope', 'us/nyc')
+            .having((s) => s.needsSelection, 'needsSelection', false),
+      ],
     );
   });
 }

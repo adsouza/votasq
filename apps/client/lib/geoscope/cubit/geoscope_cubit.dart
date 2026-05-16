@@ -13,7 +13,8 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
   static const _prefsKey = 'selected_geoscope';
 
   /// Load persisted geoscope and available geoscopes.
-  /// If no persisted value, infer from device locale region.
+  /// If no persisted value, infer from device locale region and flag the state
+  /// as needing an explicit selection so the UI can prompt the user.
   Future<void> initialize() async {
     emit(state.copyWith(status: GeoscopeStatus.loading));
     try {
@@ -22,7 +23,10 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
       final available = await _repo.getGeoscopes();
       final availableIds = {'/'}..addAll(available.map((g) => g.id));
       final geoscope = _resolveGeoscope(persisted, availableIds);
-      if (geoscope != persisted) {
+      // Only persist when migrating a stale stored value (e.g. "us" → "na/us").
+      // Don't persist the locale-inferred default — the absence of a stored
+      // value is what tells us the user still hasn't explicitly picked.
+      if (persisted != null && geoscope != persisted) {
         await prefs.setString(_prefsKey, geoscope);
       }
       emit(
@@ -30,6 +34,7 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
           status: GeoscopeStatus.success,
           selectedGeoscope: geoscope,
           availableGeoscopes: available,
+          needsSelection: persisted == null,
         ),
       );
     } on Exception catch (e, st) {
@@ -40,9 +45,18 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
 
   /// Select a geoscope and persist the choice.
   Future<void> selectGeoscope(String geoscope) async {
-    emit(state.copyWith(selectedGeoscope: geoscope));
+    emit(state.copyWith(selectedGeoscope: geoscope, needsSelection: false));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefsKey, geoscope);
+  }
+
+  /// Mark the first-time selection prompt as shown without persisting a choice.
+  /// Stops the picker from re-opening on every rebuild within this session;
+  /// the next cold start will prompt again until [selectGeoscope] is called.
+  void acknowledgeSelectionPrompt() {
+    if (state.needsSelection) {
+      emit(state.copyWith(needsSelection: false));
+    }
   }
 
   /// Resolve the best geoscope to use given a persisted value and the set of
