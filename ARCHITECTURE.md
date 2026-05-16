@@ -245,20 +245,19 @@ the new filter.
 ### Geoscope (location scoping)
 
 Problems are scoped by geography via a `geoscope` field — a slash-delimited
-hierarchical string (e.g. `"us/ny/nyc"`, `"eu/gb/eng/london"`, `"/"` for
-global). The hierarchy supports up to 6 levels: root, continent, country,
-region, city, neighborhood.
+hierarchical string (e.g. `"us/ny/nyc"`, `"eu/fr/paris"`, `"/"` for global).
+The hierarchy supports up to 5 levels: root (global), superstate, state, metro,
+town/neighborhood.
 
 ```mermaid
 graph TD
     Root["/  (global)"]
-    Root --> NA["na"]
+    Root --> USA["us"]
     Root --> EU["eu"]
-    NA --> US["na/us"]
-    US --> NY["na/us/ny"]
-    NY --> NYC["na/us/ny/nyc"]
-    NYC --> BK["na/us/ny/nyc/brooklyn"]
-    EU --> GB["eu/gb"]
+    USA --> CA["us/ca"]
+    CA --> SF["us/ca/sfbay"]
+    SF --> Mission["us/ca/sfbay/mission"]
+    EU --> France["eu/fr"]
 ```
 
 Queries are **ancestor-inclusive**: viewing `"us/ny/nyc"` uses a Firestore
