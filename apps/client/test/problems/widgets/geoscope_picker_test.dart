@@ -194,5 +194,103 @@ void main() {
         expect(find.text('SF Bay Area'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'filter field hint text is shown at the top of the sheet',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Type partial name of current location here to '
+            'narrow down the list',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'typing a substring filters the list across sections and bypasses '
+      'the population threshold',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              // Superstate.
+              (id: 'us', label: 'United States', population: 330000000),
+              // Sub-megacity metro that would normally be hidden at top level.
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              // A metro that doesn't match the query.
+              (id: 'us/ny/nyc', label: 'New York City', population: 19000000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'sf');
+        await tester.pumpAndSettle();
+
+        // Matches across the (formerly) hidden metro tier — case-insensitive.
+        expect(find.text('SF Bay Area'), findsOneWidget);
+        // Non-matching entries are filtered out.
+        expect(find.text('United States'), findsNothing);
+        expect(find.text('New York City'), findsNothing);
+        // Section headers don't render while filtering.
+        expect(find.text('Superstates'), findsNothing);
+        expect(find.text('Metro areas'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'clearing the filter restores the full hierarchical list',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'in', label: 'India', population: 1400000000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'india');
+        await tester.pumpAndSettle();
+        expect(find.text('United States'), findsNothing);
+
+        await tester.enterText(find.byType(TextField), '');
+        await tester.pumpAndSettle();
+        expect(find.text('United States'), findsOneWidget);
+        expect(find.text('India'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping a filtered result selects that geoscope and closes the sheet',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'bay');
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('SF Bay Area'));
+        await tester.pumpAndSettle();
+
+        verify(() => geoscopeCubit.selectGeoscope('us/ca/sfbay')).called(1);
+      },
+    );
   });
 }

@@ -5,256 +5,336 @@ import 'package:client/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+const _superstateIds = {'us', 'in', 'eu', 'scm', 'sea', 'las', 'cn'};
+
+/// Top-level metros only show megacities; drilling in lifts the threshold.
+const _topLevelMetroPopulationThreshold = 10000000;
+
 /// Shows a modal bottom sheet that lets the user drill into the geoscope
-/// hierarchy (superstates → states → metro areas) and select one.
+/// hierarchy (superstates → states → metro areas) or substring-filter the
+/// flat list of all geoscopes.
 void showGeoscopePicker(BuildContext context) {
-  final l10n = context.l10n;
-  final geoscopeCubit = context.read<GeoscopeCubit>();
-  final geoState = geoscopeCubit.state;
-  const superstateIds = {'us', 'in', 'eu', 'scm', 'sea', 'las', 'cn'};
-  final allGeo = geoState.availableGeoscopes;
-  final labelMap = {for (final g in allGeo) g.id: g.label};
-  final superstates = allGeo
-      .where((g) => superstateIds.contains(g.id))
-      .toList();
-
-  final activeParts = geoState.selectedGeoscope == '/'
-      ? <String>[]
-      : geoState.selectedGeoscope.split('/');
-  String? selectedSuperstate;
-  String? selectedCountry;
-  if (activeParts.isNotEmpty) {
-    final firstSeg = activeParts.first;
-    if (superstateIds.contains(firstSeg)) {
-      selectedSuperstate = firstSeg;
-      if (activeParts.length >= 2) {
-        selectedCountry = activeParts.sublist(0, 2).join('/');
-      }
-    } else if (activeParts.length >= 2) {
-      selectedCountry = firstSeg;
-    }
-  }
-
   unawaited(
     showModalBottomSheet<void>(
       context: context,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            // Build States section.
-            List<({String id, String label, int population})> stateItems;
-            if (selectedSuperstate != null) {
-              final prefix = '$selectedSuperstate/';
-              stateItems = allGeo
-                  .where(
-                    (g) =>
-                        g.id.startsWith(prefix) && g.id.split('/').length == 2,
-                  )
-                  .toList();
-            } else {
-              // Walking allGeo in population-desc order ensures the first hit
-              // per firstSeg wins. The retained population is therefore the
-              // largest known for that prefix — either the country-level
-              // geoscope itself (if present) or its biggest sub-region.
-              final seen = <String>{};
-              stateItems = [];
-              for (final g in allGeo) {
-                final firstSeg = g.id.split('/').first;
-                if (!superstateIds.contains(firstSeg) && seen.add(firstSeg)) {
-                  stateItems.add((
-                    id: firstSeg,
-                    label: labelMap[firstSeg] ?? firstSeg,
-                    population: g.population,
-                  ));
-                }
-              }
-            }
-
-            // Build Metro areas section. When no superstate or state is
-            // selected, the unfiltered list is enormous, so restrict to
-            // megacities (population ≥ 10M). Drilling into a region removes
-            // the threshold so users can see all metros within their scope.
-            const topLevelMetroPopulationThreshold = 10000000;
-            List<({String id, String label, int population})> metroItems;
-            if (selectedCountry != null) {
-              final prefix = '$selectedCountry/';
-              metroItems = allGeo
-                  .where((g) => g.id.startsWith(prefix))
-                  .toList();
-            } else if (selectedSuperstate != null) {
-              final prefix = '$selectedSuperstate/';
-              metroItems = allGeo
-                  .where(
-                    (g) =>
-                        g.id.startsWith(prefix) && g.id.split('/').length >= 3,
-                  )
-                  .toList();
-            } else {
-              metroItems = allGeo.where((g) {
-                final parts = g.id.split('/');
-                final isMetro =
-                    parts.length >= 3 ||
-                    (parts.length == 2 && !superstateIds.contains(parts.first));
-                return isMetro &&
-                    g.population >= topLevelMetroPopulationThreshold;
-              }).toList();
-            }
-
-            final activeId = geoscopeCubit.state.selectedGeoscope;
-
-            return ListView(
-              children: [
-                // Global option.
-                ListTile(
-                  title: Text('🌐 ${l10n.geoscopeGlobal}'),
-                  trailing: activeId == '/' ? const Icon(Icons.check) : null,
-                  onTap: () {
-                    unawaited(geoscopeCubit.selectGeoscope('/'));
-                    Navigator.of(context).pop();
-                  },
-                ),
-                const Divider(),
-
-                // Superstates header.
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    top: 8,
-                    bottom: 4,
-                  ),
-                  child: Text(
-                    'Superstates',
-                    style: Theme.of(sheetContext).textTheme.labelSmall,
-                  ),
-                ),
-                for (final s in superstates)
-                  ListTile(
-                    title: Text(s.label),
-                    trailing: activeId == s.id
-                        ? const Icon(Icons.check)
-                        : selectedSuperstate == s.id
-                        ? const Icon(Icons.expand_more)
-                        : null,
-                    onTap: () {
-                      if (selectedSuperstate == s.id) {
-                        setSheetState(() {
-                          selectedSuperstate = null;
-                          selectedCountry = null;
-                        });
-                        unawaited(geoscopeCubit.selectGeoscope('/'));
-                      } else {
-                        setSheetState(() {
-                          if (selectedSuperstate != s.id) {
-                            selectedCountry = null;
-                          }
-                          selectedSuperstate = s.id;
-                        });
-                        unawaited(geoscopeCubit.selectGeoscope(s.id));
-                      }
-                    },
-                  ),
-
-                // States section.
-                if (stateItems.isNotEmpty) ...[
-                  const Divider(),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      top: 8,
-                      bottom: 4,
-                    ),
-                    child: Text(
-                      'States',
-                      style: Theme.of(sheetContext).textTheme.labelSmall,
-                    ),
-                  ),
-                  for (final m in stateItems)
-                    ListTile(
-                      contentPadding: const EdgeInsets.only(
-                        left: 32,
-                        right: 16,
-                      ),
-                      title: Text(m.label),
-                      trailing: activeId == m.id
-                          ? const Icon(Icons.check)
-                          : selectedCountry == m.id
-                          ? const Icon(Icons.expand_more)
-                          : null,
-                      onTap: () {
-                        if (selectedCountry == m.id) {
-                          setSheetState(() {
-                            selectedCountry = null;
-                          });
-                          unawaited(
-                            geoscopeCubit.selectGeoscope(
-                              selectedSuperstate ?? '/',
-                            ),
-                          );
-                        } else {
-                          unawaited(
-                            geoscopeCubit.selectGeoscope(m.id),
-                          );
-                          final hasMetro = allGeo.any(
-                            (g) => g.id.startsWith('${m.id}/'),
-                          );
-                          if (hasMetro) {
-                            setSheetState(() {
-                              selectedCountry = m.id;
-                            });
-                          } else {
-                            Navigator.of(context).pop();
-                          }
-                        }
-                      },
-                    ),
-                ],
-
-                // Metro areas section.
-                if (metroItems.isNotEmpty) ...[
-                  const Divider(),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      top: 8,
-                      bottom: 4,
-                    ),
-                    child: Text(
-                      'Metro areas',
-                      style: Theme.of(sheetContext).textTheme.labelSmall,
-                    ),
-                  ),
-                  for (final b in metroItems)
-                    ListTile(
-                      contentPadding: const EdgeInsets.only(
-                        left: 48,
-                        right: 16,
-                      ),
-                      title: Text(b.label),
-                      trailing: activeId == b.id
-                          ? const Icon(Icons.check)
-                          : null,
-                      onTap: () {
-                        if (activeId == b.id) {
-                          unawaited(
-                            geoscopeCubit.selectGeoscope(
-                              selectedCountry ?? selectedSuperstate ?? '/',
-                            ),
-                          );
-                          setSheetState(() {});
-                        } else {
-                          unawaited(
-                            geoscopeCubit.selectGeoscope(b.id),
-                          );
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                ],
-              ],
-            );
-          },
-        );
-      },
+      isScrollControlled: true,
+      builder: (_) => const _GeoscopePickerSheet(),
     ),
   );
+}
+
+class _GeoscopePickerSheet extends StatefulWidget {
+  const _GeoscopePickerSheet();
+
+  @override
+  State<_GeoscopePickerSheet> createState() => _GeoscopePickerSheetState();
+}
+
+class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
+  final _filterController = TextEditingController();
+  String _query = '';
+  String? _selectedSuperstate;
+  String? _selectedCountry;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterController.addListener(_onQueryChanged);
+    final activeId = context.read<GeoscopeCubit>().state.selectedGeoscope;
+    final activeParts = activeId == '/'
+        ? const <String>[]
+        : activeId.split('/');
+    if (activeParts.isNotEmpty) {
+      final firstSeg = activeParts.first;
+      if (_superstateIds.contains(firstSeg)) {
+        _selectedSuperstate = firstSeg;
+        if (activeParts.length >= 2) {
+          _selectedCountry = activeParts.sublist(0, 2).join('/');
+        }
+      } else if (activeParts.length >= 2) {
+        _selectedCountry = firstSeg;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _filterController
+      ..removeListener(_onQueryChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged() {
+    final trimmed = _filterController.text.trim();
+    if (trimmed != _query) {
+      setState(() => _query = trimmed);
+    }
+  }
+
+  void _select(String geoscope) {
+    unawaited(context.read<GeoscopeCubit>().selectGeoscope(geoscope));
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      // Keep the sheet's content above the on-screen keyboard while typing.
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: TextField(
+                controller: _filterController,
+                autocorrect: false,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: l10n.geoscopeFilterHint,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: _filterController.clear,
+                        ),
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ),
+            Flexible(
+              child: _query.isEmpty
+                  ? _buildHierarchical(context)
+                  : _buildFiltered(context, _query.toLowerCase()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFiltered(BuildContext context, String queryLower) {
+    final l10n = context.l10n;
+    final geoCubit = context.read<GeoscopeCubit>();
+    final allGeo = geoCubit.state.availableGeoscopes;
+    final activeId = geoCubit.state.selectedGeoscope;
+
+    final matches = allGeo
+        .where((g) => g.label.toLowerCase().contains(queryLower))
+        .toList();
+    final includeGlobal = l10n.geoscopeGlobal.toLowerCase().contains(
+      queryLower,
+    );
+
+    if (!includeGlobal && matches.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        if (includeGlobal)
+          ListTile(
+            title: Text('🌐 ${l10n.geoscopeGlobal}'),
+            trailing: activeId == '/' ? const Icon(Icons.check) : null,
+            onTap: () => _select('/'),
+          ),
+        for (final g in matches)
+          ListTile(
+            title: Text(g.label),
+            trailing: activeId == g.id ? const Icon(Icons.check) : null,
+            onTap: () => _select(g.id),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHierarchical(BuildContext context) {
+    final l10n = context.l10n;
+    final geoCubit = context.read<GeoscopeCubit>();
+    final allGeo = geoCubit.state.availableGeoscopes;
+    final activeId = geoCubit.state.selectedGeoscope;
+    final labelMap = {for (final g in allGeo) g.id: g.label};
+    final superstates = allGeo
+        .where((g) => _superstateIds.contains(g.id))
+        .toList();
+
+    // Build States section.
+    List<({String id, String label, int population})> stateItems;
+    if (_selectedSuperstate != null) {
+      final prefix = '$_selectedSuperstate/';
+      stateItems = allGeo
+          .where(
+            (g) => g.id.startsWith(prefix) && g.id.split('/').length == 2,
+          )
+          .toList();
+    } else {
+      // Walking allGeo in population-desc order ensures the first hit
+      // per firstSeg wins. The retained population is therefore the
+      // largest known for that prefix — either the country-level
+      // geoscope itself (if present) or its biggest sub-region.
+      final seen = <String>{};
+      stateItems = [];
+      for (final g in allGeo) {
+        final firstSeg = g.id.split('/').first;
+        if (!_superstateIds.contains(firstSeg) && seen.add(firstSeg)) {
+          stateItems.add((
+            id: firstSeg,
+            label: labelMap[firstSeg] ?? firstSeg,
+            population: g.population,
+          ));
+        }
+      }
+    }
+
+    // Build Metro areas section. When no superstate or state is selected,
+    // the unfiltered list is enormous, so restrict to megacities. Drilling
+    // into a region removes the threshold.
+    List<({String id, String label, int population})> metroItems;
+    if (_selectedCountry != null) {
+      final prefix = '$_selectedCountry/';
+      metroItems = allGeo.where((g) => g.id.startsWith(prefix)).toList();
+    } else if (_selectedSuperstate != null) {
+      final prefix = '$_selectedSuperstate/';
+      metroItems = allGeo
+          .where(
+            (g) => g.id.startsWith(prefix) && g.id.split('/').length >= 3,
+          )
+          .toList();
+    } else {
+      metroItems = allGeo.where((g) {
+        final parts = g.id.split('/');
+        final isMetro =
+            parts.length >= 3 ||
+            (parts.length == 2 && !_superstateIds.contains(parts.first));
+        return isMetro && g.population >= _topLevelMetroPopulationThreshold;
+      }).toList();
+    }
+
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        // Global option.
+        ListTile(
+          title: Text('🌐 ${l10n.geoscopeGlobal}'),
+          trailing: activeId == '/' ? const Icon(Icons.check) : null,
+          onTap: () => _select('/'),
+        ),
+        const Divider(),
+
+        // Superstates header.
+        Padding(
+          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+          child: Text(
+            'Superstates',
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ),
+        for (final s in superstates)
+          ListTile(
+            title: Text(s.label),
+            trailing: activeId == s.id
+                ? const Icon(Icons.check)
+                : _selectedSuperstate == s.id
+                ? const Icon(Icons.expand_more)
+                : null,
+            onTap: () {
+              if (_selectedSuperstate == s.id) {
+                setState(() {
+                  _selectedSuperstate = null;
+                  _selectedCountry = null;
+                });
+                unawaited(geoCubit.selectGeoscope('/'));
+              } else {
+                setState(() {
+                  if (_selectedSuperstate != s.id) {
+                    _selectedCountry = null;
+                  }
+                  _selectedSuperstate = s.id;
+                });
+                unawaited(geoCubit.selectGeoscope(s.id));
+              }
+            },
+          ),
+
+        // States section.
+        if (stateItems.isNotEmpty) ...[
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+            child: Text(
+              'States',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
+          for (final m in stateItems)
+            ListTile(
+              contentPadding: const EdgeInsets.only(left: 32, right: 16),
+              title: Text(m.label),
+              trailing: activeId == m.id
+                  ? const Icon(Icons.check)
+                  : _selectedCountry == m.id
+                  ? const Icon(Icons.expand_more)
+                  : null,
+              onTap: () {
+                if (_selectedCountry == m.id) {
+                  setState(() => _selectedCountry = null);
+                  unawaited(
+                    geoCubit.selectGeoscope(_selectedSuperstate ?? '/'),
+                  );
+                } else {
+                  unawaited(geoCubit.selectGeoscope(m.id));
+                  final hasMetro = allGeo.any(
+                    (g) => g.id.startsWith('${m.id}/'),
+                  );
+                  if (hasMetro) {
+                    setState(() => _selectedCountry = m.id);
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                }
+              },
+            ),
+        ],
+
+        // Metro areas section.
+        if (metroItems.isNotEmpty) ...[
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+            child: Text(
+              'Metro areas',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
+          for (final b in metroItems)
+            ListTile(
+              contentPadding: const EdgeInsets.only(left: 48, right: 16),
+              title: Text(b.label),
+              trailing: activeId == b.id ? const Icon(Icons.check) : null,
+              onTap: () {
+                if (activeId == b.id) {
+                  unawaited(
+                    geoCubit.selectGeoscope(
+                      _selectedCountry ?? _selectedSuperstate ?? '/',
+                    ),
+                  );
+                  setState(() {});
+                } else {
+                  unawaited(geoCubit.selectGeoscope(b.id));
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+        ],
+      ],
+    );
+  }
 }

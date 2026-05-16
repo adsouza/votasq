@@ -48,5 +48,6 @@
     "voterAnonymous": "Anonim",
     "signInHintToast": "Sağ üst köşedeki simgeden oturum açarak oylamayı açın ve kendi sorunlarınızı önerin.",
     "complaintSubmitted": "Şikayet gönderildi",
-    "failedToLoadProblems": "Sorunlar yüklenemedi"
+    "failedToLoadProblems": "Sorunlar yüklenemedi",
+    "geoscopeFilterHint": "Listeyi daraltmak için mevcut konumun adının bir kısmını buraya yazın"
 }

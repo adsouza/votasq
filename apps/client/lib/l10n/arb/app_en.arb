@@ -168,5 +168,9 @@
     "failedToLoadProblems": "Failed to load problems",
     "@failedToLoadProblems": {
         "description": "Error message shown when problems cannot be loaded"
+    },
+    "geoscopeFilterHint": "Type partial name of current location here to narrow down the list",
+    "@geoscopeFilterHint": {
+        "description": "Placeholder text for the substring filter field at the top of the geoscope picker"
     }
 }

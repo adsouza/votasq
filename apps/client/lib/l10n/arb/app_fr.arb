@@ -48,5 +48,6 @@
     "voterAnonymous": "Anonyme",
     "signInHintToast": "Connectez-vous via l'icône en haut à droite pour déverrouiller le vote et proposer vos propres problèmes.",
     "complaintSubmitted": "Signalement envoyé",
-    "failedToLoadProblems": "Impossible de charger les problèmes"
+    "failedToLoadProblems": "Impossible de charger les problèmes",
+    "geoscopeFilterHint": "Tapez une partie du nom du lieu actuel pour affiner la liste"
 }

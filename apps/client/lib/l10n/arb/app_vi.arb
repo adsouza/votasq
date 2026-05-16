@@ -48,5 +48,6 @@
     "voterAnonymous": "Ẩn danh",
     "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn.",
     "complaintSubmitted": "Đã gửi khiếu nại",
-    "failedToLoadProblems": "Không thể tải danh sách vấn đề"
+    "failedToLoadProblems": "Không thể tải danh sách vấn đề",
+    "geoscopeFilterHint": "Nhập một phần tên vị trí hiện tại vào đây để thu hẹp danh sách"
 }

@@ -48,5 +48,6 @@
     "votersHeading": "Votantes",
     "voterAnonymous": "Anónimo",
     "complaintSubmitted": "Queja enviada",
-    "failedToLoadProblems": "No se pudieron cargar los problemas"
+    "failedToLoadProblems": "No se pudieron cargar los problemas",
+    "geoscopeFilterHint": "Escribe parte del nombre de la ubicación actual para acotar la lista"
 }

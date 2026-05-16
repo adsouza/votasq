@@ -48,5 +48,6 @@
     "voterAnonymous": "ناشناس",
     "signInHintToast": "برای باز کردن رای‌گیری و پیشنهاد مشکلات خود، از طریق نماد در گوشه سمت راست بالا وارد شوید.",
     "complaintSubmitted": "شکایت ارسال شد",
-    "failedToLoadProblems": "بارگذاری مشکلات ممکن نشد"
+    "failedToLoadProblems": "بارگذاری مشکلات ممکن نشد",
+    "geoscopeFilterHint": "بخشی از نام مکان فعلی را اینجا تایپ کنید تا فهرست محدودتر شود"
 }

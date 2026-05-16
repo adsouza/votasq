@@ -48,5 +48,6 @@
     "voterAnonymous": "مجهول",
     "signInHintToast": "سجل الدخول عبر الأيقونة في الزاوية العلوية اليمنى لفتح التصويت واقتراح مشاكلك الخاصة.",
     "complaintSubmitted": "تم إرسال الشكوى",
-    "failedToLoadProblems": "تعذّر تحميل المشاكل"
+    "failedToLoadProblems": "تعذّر تحميل المشاكل",
+    "geoscopeFilterHint": "اكتب جزءًا من اسم موقعك الحالي هنا لتضييق القائمة"
 }
