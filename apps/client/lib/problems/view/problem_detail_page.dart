@@ -29,6 +29,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   final _goalController = TextEditingController();
   Problem? _problem;
   List<({String name, int votes})>? _voters;
+  List<Problem>? _forks;
   bool _loading = true;
   String? _error;
   String? _geoscope;
@@ -47,10 +48,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   }
 
   Future<void> _load() async {
+    // Capturing the repo is fine here (Provider's read doesn't depend on
+    // Localizations). But `context.l10n` would crash if used before the
+    // first build completes, so we defer those reads to after the first
+    // await + mounted check.
+    final repo = context.read<FirestoreRepository>();
     try {
-      final problem = await context.read<FirestoreRepository>().getProblem(
-        widget.problemId,
-      );
+      final problem = await repo.getProblem(widget.problemId);
       if (!mounted) return;
       if (problem == null) {
         setState(() {
@@ -59,17 +63,24 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         });
         return;
       }
-      final voters = await context
-          .read<FirestoreRepository>()
-          .getVotersForProblem(
-            problem.id,
-            excludeUid: problem.ownerId,
-            anonymous: context.l10n.voterAnonymous,
-          );
+      final voters = await repo.getVotersForProblem(
+        problem.id,
+        excludeUid: problem.ownerId,
+        anonymous: context.l10n.voterAnonymous,
+      );
+      if (!mounted) return;
+      // Fork-list failure is non-fatal — the section just won't render.
+      List<Problem>? forks;
+      try {
+        forks = await repo.getForksOfProblem(problem.id);
+      } on Exception catch (e) {
+        log('Failed to load forks: $e');
+      }
       if (!mounted) return;
       setState(() {
         _problem = problem;
         _voters = voters;
+        _forks = forks;
         _controller.text = problem.description;
         _goalController.text = problem.goal;
         _geoscope = problem.geoscope;
@@ -153,6 +164,38 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         onPressed: () => context.push('/problems/$sourceId'),
         icon: const Icon(Icons.call_merge, size: 16),
         label: Text(context.l10n.forkedFromOriginalLink),
+      ),
+    );
+  }
+
+  Widget _buildForksList() {
+    final forks = _forks;
+    if (forks == null || forks.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: ExpansionTile(
+        title: Text(
+          l10n.forksHeading(forks.length),
+          style: theme.textTheme.titleMedium,
+        ),
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        children: [
+          for (final fork in forks)
+            ListTile(
+              dense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+              title: Text(
+                fork.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () => context.push('/problems/${fork.id}'),
+            ),
+        ],
       ),
     );
   }
@@ -306,6 +349,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               ],
             ),
           ),
+          _buildForksList(),
           _buildVoterList(),
           const SizedBox(height: 24),
           FilledButton.tonal(
@@ -369,6 +413,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               ),
             ],
           ),
+          _buildForksList(),
           _buildVoterList(),
           const SizedBox(height: 24),
           ValueListenableBuilder<TextEditingValue>(

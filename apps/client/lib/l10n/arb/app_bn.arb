@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "নীচের তালিকা থেকে সর্বোচ্চ উপলব্ধ নির্ভুলতায় আপনার অবস্থান নির্বাচন করুন",
     "forkProblemTooltip": "এই সমস্যাটি ফর্ক করে নিজের কপি তৈরি করুন",
     "forkProblemError": "এই সমস্যাটি ফর্ক করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
-    "forkedFromOriginalLink": "মূল সমস্যা থেকে ফর্ক করা"
+    "forkedFromOriginalLink": "মূল সমস্যা থেকে ফর্ক করা",
+    "forksHeading": "ফর্কসমূহ ({count})"
 }

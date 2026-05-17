@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "Konumunuzu mevcut en yüksek hassasiyetle aşağıdaki listeden seçin",
     "forkProblemTooltip": "Bu sorunu kendi kopyana çatalla",
     "forkProblemError": "Sorun çatallanamadı. Lütfen tekrar deneyin.",
-    "forkedFromOriginalLink": "Orijinalden çatallandı"
+    "forkedFromOriginalLink": "Orijinalden çatallandı",
+    "forksHeading": "Çatallar ({count})"
 }

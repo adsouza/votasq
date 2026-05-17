@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "Selecione sua localização com a maior precisão disponível na lista abaixo",
     "forkProblemTooltip": "Bifurcar este problema em sua própria cópia",
     "forkProblemError": "Não foi possível bifurcar este problema. Tente novamente.",
-    "forkedFromOriginalLink": "Bifurcado do original"
+    "forkedFromOriginalLink": "Bifurcado do original",
+    "forksHeading": "Bifurcações ({count})"
 }

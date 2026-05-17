@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "موقعیت خود را با بالاترین دقت موجود از فهرست زیر انتخاب کنید",
     "forkProblemTooltip": "این مسئله را به نسخه‌ی خودتان فورک کنید",
     "forkProblemError": "فورک کردن این مسئله ممکن نشد. لطفاً دوباره تلاش کنید.",
-    "forkedFromOriginalLink": "فورک‌شده از نسخه‌ی اصلی"
+    "forkedFromOriginalLink": "فورک‌شده از نسخه‌ی اصلی",
+    "forksHeading": "فورک‌ها ({count})"
 }

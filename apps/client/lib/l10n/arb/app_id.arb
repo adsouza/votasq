@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "Pilih lokasi Anda dengan presisi tertinggi yang tersedia dari daftar di bawah",
     "forkProblemTooltip": "Buat salinan Anda dari masalah ini (fork)",
     "forkProblemError": "Tidak dapat membuat salinan masalah ini. Silakan coba lagi.",
-    "forkedFromOriginalLink": "Difork dari aslinya"
+    "forkedFromOriginalLink": "Difork dari aslinya",
+    "forksHeading": "Fork ({count})"
 }

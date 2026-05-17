@@ -196,5 +196,14 @@
     "forkedFromOriginalLink": "Forked from original",
     "@forkedFromOriginalLink": {
         "description": "Label on the backlink shown above the description of a forked problem; tapping navigates to the source problem"
+    },
+    "forksHeading": "Forks ({count})",
+    "@forksHeading": {
+        "description": "Title of the collapsible section listing every fork of the current problem; the count is shown whether expanded or collapsed",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
     }
 }

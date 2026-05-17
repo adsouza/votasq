@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "ਹੇਠਾਂ ਦਿੱਤੀ ਸੂਚੀ ਤੋਂ ਉਪਲਬਧ ਉੱਚਤਮ ਸ਼ੁੱਧਤਾ ਨਾਲ ਆਪਣਾ ਟਿਕਾਣਾ ਚੁਣੋ",
     "forkProblemTooltip": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਆਪਣੀ ਕਾਪੀ ਵਿੱਚ ਫ਼ੋਰਕ ਕਰੋ",
     "forkProblemError": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਫ਼ੋਰਕ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-    "forkedFromOriginalLink": "ਮੂਲ ਤੋਂ ਫ਼ੋਰਕ ਕੀਤਾ"
+    "forkedFromOriginalLink": "ਮੂਲ ਤੋਂ ਫ਼ੋਰਕ ਕੀਤਾ",
+    "forksHeading": "ਫ਼ੋਰਕ ({count})"
 }

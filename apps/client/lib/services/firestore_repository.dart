@@ -231,6 +231,21 @@ class FirestoreRepository {
     );
   }
 
+  /// Fetch every problem that was forked from [sourceProblemId], sorted by
+  /// votes descending (then by document id for stable ordering). Sorts in
+  /// memory rather than via a server `orderBy` so we don't need a composite
+  /// index — fork counts are expected to stay small.
+  Future<List<Problem>> getForksOfProblem(String sourceProblemId) async {
+    final snapshot = await _problemsRef
+        .where('inspoProblemId', isEqualTo: sourceProblemId)
+        .get();
+    return snapshot.docs.map(_docToProblem).toList()..sort((a, b) {
+      final cmp = b.votes.compareTo(a.votes);
+      if (cmp != 0) return cmp;
+      return a.id.compareTo(b.id);
+    });
+  }
+
   /// Update a problem's fields.
   /// Uses a batched write to atomically update the main document and create
   /// a new revision snapshot.

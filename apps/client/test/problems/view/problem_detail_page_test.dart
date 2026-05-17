@@ -74,6 +74,7 @@ void main() {
         anonymous: any(named: 'anonymous'),
       ),
     ).thenAnswer((_) async => []);
+    when(() => repo.getForksOfProblem(any())).thenAnswer((_) async => []);
     when(
       () => languageDetectionService.needsTranslation(
         text: any(named: 'text'),
@@ -419,6 +420,50 @@ void main() {
           anonymous: any(named: 'anonymous'),
         ),
       ).called(2);
+    });
+
+    testWidgets('hides forks section when there are no forks', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExpansionTile), findsNothing);
+    });
+
+    testWidgets('shows forks section with count when forks exist', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => repo.getForksOfProblem(any())).thenAnswer(
+        (_) async => [
+          _problem(id: 'fork-a', description: 'Forked problem A'),
+          _problem(id: 'fork-b', description: 'Forked problem B'),
+        ],
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Heading shows the count.
+      expect(find.text('Forks (2)'), findsOneWidget);
+      // Initially expanded — both fork titles visible.
+      expect(find.text('Forked problem A'), findsOneWidget);
+      expect(find.text('Forked problem B'), findsOneWidget);
+    });
+
+    testWidgets('collapsing the forks section hides the items', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => repo.getForksOfProblem(any())).thenAnswer(
+        (_) async => [_problem(id: 'fork-a', description: 'Forked problem A')],
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Forked problem A'), findsOneWidget);
+      await tester.tap(find.text('Forks (1)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Forked problem A'), findsNothing);
+      // Heading (with count) remains visible.
+      expect(find.text('Forks (1)'), findsOneWidget);
     });
   });
 }

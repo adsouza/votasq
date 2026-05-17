@@ -358,6 +358,65 @@ void main() {
         },
       );
 
+      test(
+        'getForksOfProblem returns only forks of the given source',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 1);
+          final aliceFork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'alice',
+          );
+          final bobFork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'bob',
+          );
+          // Unrelated problem + fork must not show up.
+          await seedProblemWithVersion(id: 'other', version: 1);
+          await repo.forkProblem(sourceProblemId: 'other', ownerId: 'eve');
+
+          final forks = await repo.getForksOfProblem('src');
+          expect(forks.map((f) => f.id).toSet(), {aliceFork.id, bobFork.id});
+        },
+      );
+
+      test('getForksOfProblem sorts by votes desc, then id asc', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+        final a = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'alice',
+        );
+        final b = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'bob',
+        );
+        final c = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'carol',
+        );
+        // Manually adjust votes (all forks start at 1).
+        await firestore.collection('problems').doc(a.id).update({'votes': 5});
+        await firestore.collection('problems').doc(b.id).update({'votes': 9});
+        await firestore.collection('problems').doc(c.id).update({'votes': 9});
+
+        final forks = await repo.getForksOfProblem('src');
+        // c may sort before or after b purely by id comparison; both have
+        // votes=9, then a with votes=5.
+        expect(forks[2].id, a.id);
+        expect({forks[0].id, forks[1].id}, {b.id, c.id});
+        // Stable tiebreak by id ascending.
+        final tied = [forks[0].id, forks[1].id]..sort();
+        expect([forks[0].id, forks[1].id], tied);
+      });
+
+      test(
+        'getForksOfProblem returns empty list when there are no forks',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 1);
+          final forks = await repo.getForksOfProblem('src');
+          expect(forks, isEmpty);
+        },
+      );
+
       test('enumerates all forks of a problem via inspoProblemId', () async {
         await seedProblemWithVersion(id: 'src', version: 1);
         await repo.forkProblem(sourceProblemId: 'src', ownerId: 'alice');

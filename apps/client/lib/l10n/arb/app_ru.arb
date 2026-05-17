@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "Выберите своё местоположение с наибольшей доступной точностью из списка ниже",
     "forkProblemTooltip": "Создать форк этой проблемы (свою копию)",
     "forkProblemError": "Не удалось создать форк проблемы. Попробуйте ещё раз.",
-    "forkedFromOriginalLink": "Форк оригинала"
+    "forkedFromOriginalLink": "Форк оригинала",
+    "forksHeading": "Форки ({count})"
 }

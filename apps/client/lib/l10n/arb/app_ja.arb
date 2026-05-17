@@ -55,5 +55,6 @@
     "geoscopePickerHeading": "以下の一覧から、利用可能な最も精度の高い位置を選択してください",
     "forkProblemTooltip": "この問題を自分のコピーにフォークする",
     "forkProblemError": "この問題をフォークできませんでした。もう一度お試しください。",
-    "forkedFromOriginalLink": "元の問題からフォーク"
+    "forkedFromOriginalLink": "元の問題からフォーク",
+    "forksHeading": "フォーク ({count})"
 }
