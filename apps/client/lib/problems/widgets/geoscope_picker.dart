@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
@@ -14,10 +15,30 @@ const _topLevelMetroPopulationThreshold = 10000000;
 /// hierarchy (superstates → states → metro areas) or substring-filter the
 /// flat list of all geoscopes.
 void showGeoscopePicker(BuildContext context) {
+  // Pre-measure the heading so the sheet widens on roomy displays to keep it
+  // on a single line. On viewports narrower than the heading the constraint
+  // is clamped by the screen anyway, so mobile keeps wrapping.
+  final headingStyle = Theme.of(
+    context,
+  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold);
+  final painter = TextPainter(
+    text: TextSpan(
+      text: context.l10n.geoscopePickerHeading,
+      style: headingStyle,
+    ),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  // 16 px horizontal padding on each side of the heading inside the sheet.
+  final desiredWidth = math.max<double>(painter.size.width + 32, 640);
+  painter.dispose();
+
   unawaited(
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      constraints: BoxConstraints(maxWidth: desiredWidth),
       builder: (_) => const _GeoscopePickerSheet(),
     ),
   );
@@ -125,7 +146,16 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Text(
+                l10n.geoscopePickerHeading,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: TextField(
                 controller: _filterController,
                 enabled: filterEnabled,

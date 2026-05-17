@@ -51,5 +51,6 @@
     "signInHintToast": "Sağ üst köşedeki simgeden oturum açarak oylamayı açın ve kendi sorunlarınızı önerin.",
     "complaintSubmitted": "Şikayet gönderildi",
     "failedToLoadProblems": "Sorunlar yüklenemedi",
-    "geoscopeFilterHint": "Listeyi daraltmak için mevcut konumun adının bir kısmını buraya yazın"
+    "geoscopeFilterHint": "Listeyi daraltmak için mevcut konumun adının bir kısmını buraya yazın",
+    "geoscopePickerHeading": "Konumunuzu mevcut en yüksek hassasiyetle aşağıdaki listeden seçin"
 }

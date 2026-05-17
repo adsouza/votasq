@@ -51,5 +51,6 @@
     "signInHintToast": "Đăng nhập qua biểu tượng ở góc trên cùng bên phải để mở khóa bỏ phiếu và đề xuất vấn đề của riêng bạn.",
     "complaintSubmitted": "Đã gửi khiếu nại",
     "failedToLoadProblems": "Không thể tải danh sách vấn đề",
-    "geoscopeFilterHint": "Nhập một phần tên vị trí hiện tại vào đây để thu hẹp danh sách"
+    "geoscopeFilterHint": "Nhập một phần tên vị trí hiện tại vào đây để thu hẹp danh sách",
+    "geoscopePickerHeading": "Chọn vị trí của bạn với độ chính xác cao nhất hiện có từ danh sách bên dưới"
 }

@@ -51,5 +51,6 @@
     "signInHintToast": "通过右上角的图标登录以解锁投票并提议您自己的问题。",
     "complaintSubmitted": "举报已提交",
     "failedToLoadProblems": "无法加载问题",
-    "geoscopeFilterHint": "在此输入当前地点名称的一部分以缩小列表"
+    "geoscopeFilterHint": "在此输入当前地点名称的一部分以缩小列表",
+    "geoscopePickerHeading": "请从下方列表中选择精度最高的位置"
 }
