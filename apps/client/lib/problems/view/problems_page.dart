@@ -251,12 +251,15 @@ class _ProblemsViewState extends State<ProblemsView> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
         title: BlocBuilder<ProblemsCubit, ProblemsState>(
           builder: (context, state) {
             final userId = context.read<AuthCubit>().state.userId;
             final filtered = _applyFilters(state.problems, userId);
             return Text(
               '${filtered.length} ${l10n.problemsAppBarTitle}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),
