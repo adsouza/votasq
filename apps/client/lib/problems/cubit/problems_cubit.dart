@@ -109,6 +109,25 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     }
   }
 
+  /// Flag a problem as objectionable on behalf of [userId]. Optimistically
+  /// hides it from the local list (the page-level filter drops problems whose
+  /// `complaints` contain the viewer's uid) instead of waiting on the watch
+  /// stream. No-op if the user has already flagged this problem.
+  Future<void> flagProblem({
+    required Problem problem,
+    required String userId,
+  }) async {
+    if (problem.complaints.contains(userId)) return;
+    try {
+      await _repo.addComplaint(problemId: problem.id, userId: userId);
+      applyLocalUpdate(
+        problem.copyWith(complaints: [...problem.complaints, userId]),
+      );
+    } on Exception catch (e, st) {
+      log('flagProblem failed: $e', stackTrace: st);
+    }
+  }
+
   /// Update an existing problem.
   Future<void> updateProblem(
     Problem problem, {

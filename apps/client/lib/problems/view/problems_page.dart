@@ -214,8 +214,8 @@ class _ProblemsViewState extends State<ProblemsView> {
     if (confirmed != true || !mounted) return;
     final userId = context.read<AuthCubit>().state.userId!;
     unawaited(
-      context.read<FirestoreRepository>().addComplaint(
-        problemId: problem.id,
+      context.read<ProblemsCubit>().flagProblem(
+        problem: problem,
         userId: userId,
       ),
     );

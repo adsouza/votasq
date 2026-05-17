@@ -70,6 +70,10 @@ void main() {
   late TranslationRepository translationRepo;
   late MockSharedPreferencesWithCache mockPrefs;
 
+  setUpAll(() {
+    registerFallbackValue(_problem());
+  });
+
   setUp(() {
     mockPrefs = createMockSharedPreferences();
     problemsCubit = _MockProblemsCubit();
@@ -605,17 +609,16 @@ void main() {
           userId: 'user1',
         ),
       );
+      final problem = _problem(ownerId: 'other', description: 'offensive');
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
           status: ProblemsStatus.success,
-          problems: [
-            _problem(ownerId: 'other', description: 'offensive'),
-          ],
+          problems: [problem],
         ),
       );
       when(
-        () => firestoreRepo.addComplaint(
-          problemId: any(named: 'problemId'),
+        () => problemsCubit.flagProblem(
+          problem: any(named: 'problem'),
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async {});
@@ -635,8 +638,8 @@ void main() {
       await tester.pump();
 
       verify(
-        () => firestoreRepo.addComplaint(
-          problemId: '1',
+        () => problemsCubit.flagProblem(
+          problem: problem,
           userId: 'user1',
         ),
       ).called(1);
@@ -668,8 +671,8 @@ void main() {
       await tester.pump();
 
       verifyNever(
-        () => firestoreRepo.addComplaint(
-          problemId: any(named: 'problemId'),
+        () => problemsCubit.flagProblem(
+          problem: any(named: 'problem'),
           userId: any(named: 'userId'),
         ),
       );
