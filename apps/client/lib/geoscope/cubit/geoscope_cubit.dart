@@ -4,7 +4,14 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:client/geoscope/cubit/geoscope_state.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// Superstates whose 2-part children are countries (e.g. `eu/fr` = France),
+/// rather than subdivisions of a single country. Locale-based inference looks
+/// here when the bare country code (e.g. `fr`) has no top-level row, so an
+/// `en-CA` user lands at `/` rather than `us/ca` (California, a US state).
+const _countryContainingSuperstateIds = {'eu', 'scm', 'sea', 'las'};
 
 class GeoscopeCubit extends Cubit<GeoscopeState> {
   GeoscopeCubit(this._repo) : super(const GeoscopeState());
@@ -22,7 +29,11 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
       final persisted = prefs.getString(_prefsKey);
       final available = await _repo.getGeoscopes();
       final availableIds = {'/'}..addAll(available.map((g) => g.id));
-      final geoscope = _resolveGeoscope(persisted, availableIds);
+      final geoscope = resolveGeoscope(
+        persisted: persisted,
+        inferred: _inferFromLocale(),
+        availableIds: availableIds,
+      );
       // Only persist when migrating a stale stored value (e.g. "us" → "na/us").
       // Don't persist the locale-inferred default — the absence of a stored
       // value is what tells us the user still hasn't explicitly picked.
@@ -59,27 +70,39 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
     }
   }
 
-  /// Resolve the best geoscope to use given a persisted value and the set of
-  /// available geoscope IDs. If [persisted] is still valid, use it. Otherwise,
-  /// try to find an available geoscope whose path ends with the persisted value
-  /// (handles hierarchy changes, e.g. "us" → "na/us"). Falls back to locale
-  /// inference with the same suffix-match logic, then to `'/'`.
-  static String _resolveGeoscope(String? persisted, Set<String> availableIds) {
+  /// Resolve the best geoscope to use given the inputs. Pure function:
+  /// [inferred] is computed by the caller (typically via [_inferFromLocale])
+  /// so the resolution logic can be unit-tested with arbitrary locales.
+  ///
+  /// Resolution order:
+  /// 1. [persisted] if it's still a valid id.
+  /// 2. Any id ending in `/$persisted` (handles hierarchy reshapes like
+  ///    `us` → `na/us`).
+  /// 3. [inferred] if it's a valid 1-part id (e.g. `us`, `ca`).
+  /// 4. `<superstate>/<inferred>` for each [_countryContainingSuperstateIds]
+  ///    (e.g. `eu/fr`). Restricted to country-containing superstates so a
+  ///    locale country code never matches a subdivision id like `us/ca`.
+  /// 5. `'/'` (global).
+  @visibleForTesting
+  static String resolveGeoscope({
+    required String? persisted,
+    required String inferred,
+    required Set<String> availableIds,
+  }) {
     if (persisted != null && availableIds.contains(persisted)) {
       return persisted;
     }
-    // Try suffix match for persisted value (e.g. "us" matches "na/us").
     if (persisted != null && persisted != '/') {
       final suffix = '/$persisted';
       final match = availableIds.where((id) => id.endsWith(suffix)).firstOrNull;
       if (match != null) return match;
     }
-    // Fall back to locale inference.
-    final inferred = _inferFromLocale();
+    if (inferred == '/') return '/';
     if (availableIds.contains(inferred)) return inferred;
-    final suffix = '/$inferred';
-    final match = availableIds.where((id) => id.endsWith(suffix)).firstOrNull;
-    if (match != null) return match;
+    for (final superstate in _countryContainingSuperstateIds) {
+      final candidate = '$superstate/$inferred';
+      if (availableIds.contains(candidate)) return candidate;
+    }
     return '/';
   }
 

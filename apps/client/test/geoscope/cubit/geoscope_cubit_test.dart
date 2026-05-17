@@ -158,6 +158,87 @@ void main() {
       expect: () => <GeoscopeState>[],
     );
 
+    group('resolveGeoscope (locale-based defaulting)', () {
+      test('locale country code resolves via 1-part exact match', () {
+        // e.g. en-US with the `us` superstate present, or en-CA with a
+        // top-level `ca` (Canada) row.
+        expect(
+          GeoscopeCubit.resolveGeoscope(
+            persisted: null,
+            inferred: 'us',
+            availableIds: const {'/', 'us', 'us/ca'},
+          ),
+          'us',
+        );
+        expect(
+          GeoscopeCubit.resolveGeoscope(
+            persisted: null,
+            inferred: 'ca',
+            availableIds: const {'/', 'ca', 'us', 'us/ca'},
+          ),
+          'ca',
+        );
+      });
+
+      test(
+        'inferred country code with no 1-part match falls back to a '
+        'country-containing superstate (e.g. fr → eu/fr)',
+        () {
+          expect(
+            GeoscopeCubit.resolveGeoscope(
+              persisted: null,
+              inferred: 'fr',
+              availableIds: const {'/', 'eu', 'eu/fr', 'us', 'us/ca'},
+            ),
+            'eu/fr',
+          );
+        },
+      );
+
+      test(
+        'inferred country code does NOT fall back to a subdivision id '
+        '(en-CA must not resolve to us/ca / California)',
+        () {
+          expect(
+            GeoscopeCubit.resolveGeoscope(
+              persisted: null,
+              inferred: 'ca',
+              // No top-level `ca`, but `us/ca` (California) is present and
+              // would have matched a blind suffix search.
+              availableIds: const {'/', 'us', 'us/ca'},
+            ),
+            '/',
+          );
+        },
+      );
+
+      test('persisted value takes precedence over locale inference', () {
+        expect(
+          GeoscopeCubit.resolveGeoscope(
+            persisted: 'eu/de',
+            inferred: 'us',
+            availableIds: const {'/', 'us', 'eu', 'eu/de'},
+          ),
+          'eu/de',
+        );
+      });
+
+      test(
+        'persisted-value suffix match still uses the broad rule '
+        '(e.g. us → na/us) — independent of locale',
+        () {
+          expect(
+            GeoscopeCubit.resolveGeoscope(
+              persisted: 'us',
+              inferred: 'fr',
+              availableIds: const {'/', 'na/us', 'eu/fr'},
+            ),
+            'na/us',
+          );
+        },
+      );
+    });
+
     blocTest<GeoscopeCubit, GeoscopeState>(
       'initialize emits failure on exception',
       setUp: () {

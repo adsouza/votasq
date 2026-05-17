@@ -176,6 +176,34 @@ void main() {
     );
 
     testWidgets(
+      'opens drilled into a 1-part non-superstate country '
+      '(locale-inferred default like Canada / "ca")',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'ca', label: 'Canada', population: 38000000),
+              // Sub-megacity that would be hidden without a drill-in.
+              (id: 'ca/toronto', label: 'Toronto', population: 6700000),
+            ],
+            // Mimics the cubit's locale resolution for en-CA: an exact-match
+            // 1-part id that isn't a superstate.
+            selectedGeoscope: 'ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // Sub-region surfaces because the picker drilled in to "ca".
+        expect(find.text('Toronto'), findsOneWidget);
+        // The filter field is disabled while drilled in.
+        final field = tester.widget<TextField>(find.byType(TextField));
+        expect(field.enabled, isFalse);
+      },
+    );
+
+    testWidgets(
       'population threshold is lifted once a superstate is selected',
       (tester) async {
         await tester.pumpWidget(
@@ -196,18 +224,17 @@ void main() {
     );
 
     testWidgets(
-      'filter field hint text is shown at the top of the sheet',
+      'filter field hint text is configured on the sheet',
       (tester) async {
         await tester.pumpWidget(buildSubject());
         await tester.tap(find.text('Open Picker'));
         await tester.pumpAndSettle();
 
+        final field = tester.widget<TextField>(find.byType(TextField));
         expect(
-          find.text(
-            'Type partial name of current location here to '
-            'narrow down the list',
-          ),
-          findsOneWidget,
+          field.decoration?.hintText,
+          'Type partial name of current location here to '
+          'narrow down the list.',
         );
       },
     );

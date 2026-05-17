@@ -72,7 +72,10 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
         if (activeParts.length >= 2) {
           _selectedCountry = activeParts.sublist(0, 2).join('/');
         }
-      } else if (activeParts.length >= 2) {
+      } else {
+        // Non-superstate first segment — this is a country-tier scope like
+        // `ca` (Canada) or `mx/mexico-city`. The synthesized state-tier row
+        // for `firstSeg` is what carries the expand-marker.
         _selectedCountry = firstSeg;
       }
     }
