@@ -56,5 +56,7 @@
     "forkProblemTooltip": "แยกปัญหานี้เป็นสำเนาของคุณเอง",
     "forkProblemError": "ไม่สามารถแยกปัญหานี้ได้ โปรดลองอีกครั้ง",
     "forkedFromOriginalLink": "แยกมาจากต้นฉบับ",
-    "forksHeading": "สำเนา ({count})"
+    "forksHeading": "สำเนา ({count})",
+    "problemSavedToast": "บันทึกการเปลี่ยนแปลงของคุณแล้ว",
+    "saveProblemError": "ไม่สามารถบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้ง"
 }

@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Tengeneza nakala yako mwenyewe ya tatizo hili",
     "forkProblemError": "Imeshindwa kunakili tatizo hili. Tafadhali jaribu tena.",
     "forkedFromOriginalLink": "Nakala kutoka kwa asili",
-    "forksHeading": "Nakala ({count})"
+    "forksHeading": "Nakala ({count})",
+    "problemSavedToast": "Mabadiliko yako yamehifadhiwa",
+    "saveProblemError": "Imeshindwa kuhifadhi mabadiliko yako. Tafadhali jaribu tena."
 }

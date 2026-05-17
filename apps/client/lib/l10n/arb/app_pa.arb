@@ -56,5 +56,7 @@
     "forkProblemTooltip": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਆਪਣੀ ਕਾਪੀ ਵਿੱਚ ਫ਼ੋਰਕ ਕਰੋ",
     "forkProblemError": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਫ਼ੋਰਕ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "forkedFromOriginalLink": "ਮੂਲ ਤੋਂ ਫ਼ੋਰਕ ਕੀਤਾ",
-    "forksHeading": "ਫ਼ੋਰਕ ({count})"
+    "forksHeading": "ਫ਼ੋਰਕ ({count})",
+    "problemSavedToast": "ਤੁਹਾਡੀਆਂ ਤਬਦੀਲੀਆਂ ਸੁਰੱਖਿਅਤ ਹੋ ਗਈਆਂ ਹਨ",
+    "saveProblemError": "ਤੁਹਾਡੀਆਂ ਤਬਦੀਲੀਆਂ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾ ਸਕੀਆਂ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
 }

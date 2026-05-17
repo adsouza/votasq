@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Создать форк этой проблемы (свою копию)",
     "forkProblemError": "Не удалось создать форк проблемы. Попробуйте ещё раз.",
     "forkedFromOriginalLink": "Форк оригинала",
-    "forksHeading": "Форки ({count})"
+    "forksHeading": "Форки ({count})",
+    "problemSavedToast": "Ваши изменения сохранены",
+    "saveProblemError": "Не удалось сохранить изменения. Попробуйте ещё раз."
 }

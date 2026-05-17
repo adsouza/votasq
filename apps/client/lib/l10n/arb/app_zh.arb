@@ -56,5 +56,7 @@
     "forkProblemTooltip": "将此问题分叉为你自己的副本",
     "forkProblemError": "无法分叉此问题。请重试。",
     "forkedFromOriginalLink": "分叉自原始问题",
-    "forksHeading": "分叉 ({count})"
+    "forksHeading": "分叉 ({count})",
+    "problemSavedToast": "您的更改已保存",
+    "saveProblemError": "无法保存您的更改。请重试。"
 }

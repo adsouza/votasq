@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Bifurcar este problema en tu propia copia",
     "forkProblemError": "No se pudo bifurcar el problema. Inténtalo de nuevo.",
     "forkedFromOriginalLink": "Bifurcado del original",
-    "forksHeading": "Bifurcaciones ({count})"
+    "forksHeading": "Bifurcaciones ({count})",
+    "problemSavedToast": "Tus cambios se han guardado",
+    "saveProblemError": "No se pudieron guardar tus cambios. Inténtalo de nuevo."
 }

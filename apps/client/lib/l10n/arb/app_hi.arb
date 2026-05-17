@@ -56,5 +56,7 @@
     "forkProblemTooltip": "इस समस्या को अपनी प्रति में फ़ोर्क करें",
     "forkProblemError": "इस समस्या को फ़ोर्क नहीं किया जा सका। कृपया पुनः प्रयास करें।",
     "forkedFromOriginalLink": "मूल से फ़ोर्क किया गया",
-    "forksHeading": "फ़ोर्क ({count})"
+    "forksHeading": "फ़ोर्क ({count})",
+    "problemSavedToast": "आपके परिवर्तन सहेज लिए गए हैं",
+    "saveProblemError": "आपके परिवर्तन सहेजे नहीं जा सके। कृपया पुनः प्रयास करें।"
 }

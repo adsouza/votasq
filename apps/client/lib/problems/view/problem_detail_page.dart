@@ -118,15 +118,25 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   Future<void> _save() async {
     final problem = _problem;
     if (problem == null || !hasEnoughWords(_controller.text)) return;
+    // Capture context-dependent values before any async gap. Safe here
+    // because _save is only invoked from a button tap, which can't happen
+    // before the first build completes.
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final repo = context.read<FirestoreRepository>();
+    final userLang = Localizations.localeOf(context).languageCode;
+
     final newDescription = _controller.text.trim();
     final newGoal = _goalController.text.trim();
     final newGeoscope = _geoscope ?? problem.geoscope;
-    if (newDescription != problem.description ||
+    final hasChanges =
+        newDescription != problem.description ||
         newGoal != problem.goal ||
-        newGeoscope != problem.geoscope) {
+        newGeoscope != problem.geoscope;
+
+    if (hasChanges) {
       try {
-        final userLang = Localizations.localeOf(context).languageCode;
-        await context.read<FirestoreRepository>().updateProblem(
+        await repo.updateProblem(
           problem.copyWith(
             description: newDescription,
             goal: newGoal,
@@ -135,24 +145,38 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
           userLanguage: userLang,
         );
       } on LanguageMismatchException catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.l10n.languageMismatchError(
-                  e.descriptionLang,
-                  e.goalLang,
-                ),
-              ),
+        if (!mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.languageMismatchError(e.descriptionLang, e.goalLang),
             ),
-          );
-        }
+          ),
+        );
         return;
       } on Exception catch (e) {
         log('Failed to save problem: $e');
+        if (!mounted) return;
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.saveProblemError)),
+        );
+        return;
       }
+      if (!mounted) return;
+      // Reflect the saved values locally so subsequent change-detection
+      // works against fresh state.
+      setState(() {
+        _problem = problem.copyWith(
+          description: newDescription,
+          goal: newGoal,
+          geoscope: newGeoscope,
+        );
+      });
     }
-    if (mounted) context.pop();
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.problemSavedToast)),
+    );
   }
 
   Widget _buildInspoBacklink(Problem problem) {

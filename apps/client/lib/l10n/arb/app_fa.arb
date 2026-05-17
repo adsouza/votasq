@@ -56,5 +56,7 @@
     "forkProblemTooltip": "این مسئله را به نسخه‌ی خودتان فورک کنید",
     "forkProblemError": "فورک کردن این مسئله ممکن نشد. لطفاً دوباره تلاش کنید.",
     "forkedFromOriginalLink": "فورک‌شده از نسخه‌ی اصلی",
-    "forksHeading": "فورک‌ها ({count})"
+    "forksHeading": "فورک‌ها ({count})",
+    "problemSavedToast": "تغییرات شما ذخیره شد",
+    "saveProblemError": "ذخیره تغییرات شما ممکن نشد. لطفاً دوباره تلاش کنید."
 }

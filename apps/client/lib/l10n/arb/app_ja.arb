@@ -56,5 +56,7 @@
     "forkProblemTooltip": "この問題を自分のコピーにフォークする",
     "forkProblemError": "この問題をフォークできませんでした。もう一度お試しください。",
     "forkedFromOriginalLink": "元の問題からフォーク",
-    "forksHeading": "フォーク ({count})"
+    "forksHeading": "フォーク ({count})",
+    "problemSavedToast": "変更が保存されました",
+    "saveProblemError": "変更を保存できませんでした。もう一度お試しください。"
 }

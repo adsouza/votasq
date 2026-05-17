@@ -56,5 +56,7 @@
     "forkProblemTooltip": "এই সমস্যাটি ফর্ক করে নিজের কপি তৈরি করুন",
     "forkProblemError": "এই সমস্যাটি ফর্ক করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "forkedFromOriginalLink": "মূল সমস্যা থেকে ফর্ক করা",
-    "forksHeading": "ফর্কসমূহ ({count})"
+    "forksHeading": "ফর্কসমূহ ({count})",
+    "problemSavedToast": "আপনার পরিবর্তনগুলি সংরক্ষিত হয়েছে",
+    "saveProblemError": "আপনার পরিবর্তনগুলি সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
 }

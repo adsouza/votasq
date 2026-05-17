@@ -56,5 +56,7 @@
     "forkProblemTooltip": "ही समस्या तुमच्या स्वतःच्या प्रतीत फॉर्क करा",
     "forkProblemError": "ही समस्या फॉर्क करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
     "forkedFromOriginalLink": "मूळवरून फॉर्क केले",
-    "forksHeading": "फॉर्क ({count})"
+    "forksHeading": "फॉर्क ({count})",
+    "problemSavedToast": "तुमचे बदल जतन केले गेले",
+    "saveProblemError": "तुमचे बदल जतन करता आले नाहीत. कृपया पुन्हा प्रयत्न करा."
 }

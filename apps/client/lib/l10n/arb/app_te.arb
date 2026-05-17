@@ -56,5 +56,7 @@
     "forkProblemTooltip": "ఈ సమస్యను మీ స్వంత కాపీగా ఫోర్క్ చేయండి",
     "forkProblemError": "ఈ సమస్యను ఫోర్క్ చేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.",
     "forkedFromOriginalLink": "అసలు నుండి ఫోర్క్ చేయబడింది",
-    "forksHeading": "ఫోర్క్‌లు ({count})"
+    "forksHeading": "ఫోర్క్‌లు ({count})",
+    "problemSavedToast": "మీ మార్పులు సేవ్ చేయబడ్డాయి",
+    "saveProblemError": "మీ మార్పులను సేవ్ చేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి."
 }

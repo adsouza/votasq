@@ -205,5 +205,13 @@
                 "type": "int"
             }
         }
+    },
+    "problemSavedToast": "Your changes have been saved",
+    "@problemSavedToast": {
+        "description": "SnackBar message shown after a problem is successfully saved from the detail page"
+    },
+    "saveProblemError": "Could not save your changes. Please try again.",
+    "@saveProblemError": {
+        "description": "SnackBar message shown when saving a problem fails for any reason other than language mismatch"
     }
 }

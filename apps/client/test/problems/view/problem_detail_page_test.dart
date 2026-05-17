@@ -182,7 +182,50 @@ void main() {
       expect(find.text('home'), findsOneWidget);
     });
 
-    testWidgets('save calls updateProblem and navigates home', (tester) async {
+    testWidgets(
+      'save calls updateProblem, stays on the page, and shows a toast',
+      (tester) async {
+        final problem = _problem();
+        when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byType(TextField).first,
+          'updated problem description',
+        );
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).called(1);
+        // Still on the detail page, not navigated home.
+        expect(find.text('home'), findsNothing);
+        // Confirmation toast is visible.
+        expect(find.text('Your changes have been saved'), findsOneWidget);
+      },
+    );
+
+    testWidgets('save shows an error toast when updateProblem throws', (
+      tester,
+    ) async {
       final problem = _problem();
       when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
       when(
@@ -190,7 +233,7 @@ void main() {
           any(),
           userLanguage: any(named: 'userLanguage'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenThrow(Exception('boom'));
       when(() => authCubit.state).thenReturn(
         const AuthState(
           status: AuthStatus.authenticated,
@@ -201,7 +244,6 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      // Modify the description.
       await tester.enterText(
         find.byType(TextField).first,
         'updated problem description',
@@ -209,13 +251,13 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
-      verify(
-        () => repo.updateProblem(
-          any(),
-          userLanguage: any(named: 'userLanguage'),
-        ),
-      ).called(1);
-      expect(find.text('home'), findsOneWidget);
+      expect(find.text('home'), findsNothing);
+      expect(
+        find.text('Could not save your changes. Please try again.'),
+        findsOneWidget,
+      );
+      // Success toast must NOT appear on failure.
+      expect(find.text('Your changes have been saved'), findsNothing);
     });
 
     testWidgets('vote chip is tappable for authenticated non-owner', (

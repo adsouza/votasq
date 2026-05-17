@@ -56,5 +56,7 @@
     "forkProblemTooltip": "اس مسئلے کو اپنی کاپی میں فورک کریں",
     "forkProblemError": "اس مسئلے کو فورک نہیں کیا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔",
     "forkedFromOriginalLink": "اصل سے فورک کیا گیا",
-    "forksHeading": "فورکس ({count})"
+    "forksHeading": "فورکس ({count})",
+    "problemSavedToast": "آپ کی تبدیلیاں محفوظ ہو گئی ہیں",
+    "saveProblemError": "آپ کی تبدیلیاں محفوظ نہیں ہو سکیں۔ براہ کرم دوبارہ کوشش کریں۔"
 }

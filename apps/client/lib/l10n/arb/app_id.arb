@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Buat salinan Anda dari masalah ini (fork)",
     "forkProblemError": "Tidak dapat membuat salinan masalah ini. Silakan coba lagi.",
     "forkedFromOriginalLink": "Difork dari aslinya",
-    "forksHeading": "Fork ({count})"
+    "forksHeading": "Fork ({count})",
+    "problemSavedToast": "Perubahan Anda telah disimpan",
+    "saveProblemError": "Tidak dapat menyimpan perubahan Anda. Silakan coba lagi."
 }

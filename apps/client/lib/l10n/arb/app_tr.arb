@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Bu sorunu kendi kopyana çatalla",
     "forkProblemError": "Sorun çatallanamadı. Lütfen tekrar deneyin.",
     "forkedFromOriginalLink": "Orijinalden çatallandı",
-    "forksHeading": "Çatallar ({count})"
+    "forksHeading": "Çatallar ({count})",
+    "problemSavedToast": "Değişiklikleriniz kaydedildi",
+    "saveProblemError": "Değişiklikleriniz kaydedilemedi. Lütfen tekrar deneyin."
 }

@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Forker ce problème dans votre propre copie",
     "forkProblemError": "Impossible de forker ce problème. Veuillez réessayer.",
     "forkedFromOriginalLink": "Forké depuis l’original",
-    "forksHeading": "Forks ({count})"
+    "forksHeading": "Forks ({count})",
+    "problemSavedToast": "Vos modifications ont été enregistrées",
+    "saveProblemError": "Impossible d'enregistrer vos modifications. Veuillez réessayer."
 }

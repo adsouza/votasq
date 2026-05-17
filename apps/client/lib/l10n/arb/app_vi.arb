@@ -56,5 +56,7 @@
     "forkProblemTooltip": "Phân nhánh vấn đề này thành bản sao của riêng bạn",
     "forkProblemError": "Không thể phân nhánh vấn đề này. Vui lòng thử lại.",
     "forkedFromOriginalLink": "Phân nhánh từ bản gốc",
-    "forksHeading": "Phân nhánh ({count})"
+    "forksHeading": "Phân nhánh ({count})",
+    "problemSavedToast": "Đã lưu các thay đổi của bạn",
+    "saveProblemError": "Không thể lưu thay đổi của bạn. Vui lòng thử lại."
 }

@@ -56,5 +56,7 @@
     "forkProblemTooltip": "أنشئ نسختك الخاصة من هذه المشكلة",
     "forkProblemError": "تعذّر إنشاء نسخة من هذه المشكلة. يُرجى المحاولة مرة أخرى.",
     "forkedFromOriginalLink": "نسخة من المشكلة الأصلية",
-    "forksHeading": "النسخ المتفرعة ({count})"
+    "forksHeading": "النسخ المتفرعة ({count})",
+    "problemSavedToast": "تم حفظ تغييراتك",
+    "saveProblemError": "تعذّر حفظ تغييراتك. يُرجى المحاولة مرة أخرى."
 }

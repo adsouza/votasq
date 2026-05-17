@@ -56,5 +56,7 @@
     "forkProblemTooltip": "이 문제를 내 사본으로 포크하기",
     "forkProblemError": "이 문제를 포크할 수 없습니다. 다시 시도해 주세요.",
     "forkedFromOriginalLink": "원본에서 포크됨",
-    "forksHeading": "포크 ({count})"
+    "forksHeading": "포크 ({count})",
+    "problemSavedToast": "변경 사항이 저장되었습니다",
+    "saveProblemError": "변경 사항을 저장할 수 없습니다. 다시 시도해 주세요."
 }
