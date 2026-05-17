@@ -108,7 +108,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         ownerId: ownerId,
       );
       if (!mounted) return;
-      unawaited(router.push('/problems/${fork.id}'));
+      router.go('/problems/${fork.id}');
     } on Exception catch (e) {
       log('Failed to fork problem: $e');
       messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
@@ -185,7 +185,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: TextButton.icon(
-        onPressed: () => context.push('/problems/$sourceId'),
+        onPressed: () => context.go('/problems/$sourceId'),
         icon: const Icon(Icons.call_merge, size: 16),
         label: Text(context.l10n.forkedFromOriginalLink),
       ),
@@ -217,7 +217,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              onTap: () => context.push('/problems/${fork.id}'),
+              onTap: () => context.go('/problems/${fork.id}'),
             ),
         ],
       ),
