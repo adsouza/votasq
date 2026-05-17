@@ -199,6 +199,188 @@ void main() {
       });
     });
 
+    group('forkProblem', () {
+      Future<void> seedProblemWithVersion({
+        required String id,
+        required int version,
+        String description = 'Original problem',
+        String goal = 'Original goal',
+        String ownerId = 'owner1',
+        String geoscope = '/',
+        String? lang = 'en',
+      }) async {
+        final now = DateTime.now().toUtc();
+        await firestore.collection('problems').doc(id).set({
+          'description': description,
+          'goal': goal,
+          'ownerId': ownerId,
+          'geoscope': geoscope,
+          'lang': ?lang,
+          'votes': 17,
+          'solved': false,
+          'version': version,
+          'createdAt': now,
+          'lastUpdatedAt': now,
+        });
+      }
+
+      test(
+        'creates a fork owned by the new user with copied content and inspo',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 4);
+
+          final fork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'forker',
+          );
+
+          expect(fork.description, 'Original problem');
+          expect(fork.goal, 'Original goal');
+          expect(fork.ownerId, 'forker');
+          expect(fork.inspoProblemId, 'src');
+          expect(fork.inspoVersion, 4);
+          // Fork starts fresh: votes=1 (forker's vote), version=1.
+          expect(fork.id, isNot('src'));
+
+          final stored = await firestore
+              .collection('problems')
+              .doc(fork.id)
+              .get();
+          expect(stored.data()!['inspoProblemId'], 'src');
+          expect(stored.data()!['inspoVersion'], 4);
+          expect(stored.data()!['votes'], 1);
+          expect(stored.data()!['version'], 1);
+          expect(stored.data()!['ownerId'], 'forker');
+
+          // Original problem should be untouched.
+          final original = await firestore
+              .collection('problems')
+              .doc('src')
+              .get();
+          expect(original.data()!['ownerId'], 'owner1');
+          expect(original.data()!['votes'], 17);
+          expect(original.data()!.containsKey('inspoProblemId'), isFalse);
+          expect(original.data()!.containsKey('inspoVersion'), isFalse);
+        },
+      );
+
+      test('seeds the fork with a voter doc for the new owner', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+
+        final fork = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'forker',
+        );
+
+        final voters = await firestore
+            .collection('problems')
+            .doc(fork.id)
+            .collection('voters')
+            .get();
+        expect(voters.docs, hasLength(1));
+        expect(voters.docs.first.data()['uid'], 'forker');
+        expect(voters.docs.first.data()['votes'], 1);
+      });
+
+      test('writes a v1 revision snapshot for the fork', () async {
+        await seedProblemWithVersion(id: 'src', version: 4);
+
+        final fork = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'forker',
+        );
+
+        final versions = await firestore
+            .collection('problems')
+            .doc(fork.id)
+            .collection('versions')
+            .get();
+        expect(versions.docs, hasLength(1));
+        expect(versions.docs.first.id, '1');
+        expect(versions.docs.first.data()['description'], 'Original problem');
+      });
+
+      test('copies cached translations into the fork', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+        await firestore
+            .collection('problems')
+            .doc('src')
+            .collection('translations')
+            .doc('es')
+            .set({'description': 'Problema original', 'goal': 'Meta original'});
+
+        final fork = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'forker',
+        );
+
+        final forkTranslation = await firestore
+            .collection('problems')
+            .doc(fork.id)
+            .collection('translations')
+            .doc('es')
+            .get();
+        expect(forkTranslation.exists, isTrue);
+        expect(forkTranslation.data()!['description'], 'Problema original');
+        expect(forkTranslation.data()!['goal'], 'Meta original');
+      });
+
+      test('throws StateError when source does not exist', () async {
+        expect(
+          () => repo.forkProblem(
+            sourceProblemId: 'ghost',
+            ownerId: 'forker',
+          ),
+          throwsStateError,
+        );
+      });
+
+      test(
+        'updateProblem on a fork does not touch the inspo fields',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 2);
+          final fork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'forker',
+          );
+
+          await repo.updateProblem(
+            fork.copyWith(description: 'Edited by forker'),
+          );
+
+          final stored = await firestore
+              .collection('problems')
+              .doc(fork.id)
+              .get();
+          expect(stored.data()!['inspoProblemId'], 'src');
+          expect(stored.data()!['inspoVersion'], 2);
+          expect(stored.data()!['description'], 'Edited by forker');
+        },
+      );
+
+      test('enumerates all forks of a problem via inspoProblemId', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+        await repo.forkProblem(sourceProblemId: 'src', ownerId: 'alice');
+        // Bump source version and fork again so we cover multiple versions.
+        await firestore.collection('problems').doc('src').update({
+          'version': 2,
+        });
+        await repo.forkProblem(sourceProblemId: 'src', ownerId: 'bob');
+        // Unrelated problem and fork that must not show up.
+        await seedProblemWithVersion(id: 'other', version: 1);
+        await repo.forkProblem(sourceProblemId: 'other', ownerId: 'eve');
+
+        final query = await firestore
+            .collection('problems')
+            .where('inspoProblemId', isEqualTo: 'src')
+            .get();
+        final ownerIds = query.docs
+            .map((d) => d.data()['ownerId'] as String)
+            .toSet();
+        expect(ownerIds, {'alice', 'bob'});
+      });
+    });
+
     group('updateProblem', () {
       test('updates description and creates version', () async {
         await seedProblem(id: 'p1');

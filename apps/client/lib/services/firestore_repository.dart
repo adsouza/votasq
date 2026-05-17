@@ -152,6 +152,85 @@ class FirestoreRepository {
     );
   }
 
+  /// Create a fork of the problem identified by [sourceProblemId], owned by
+  /// [ownerId]. Copies description, goal, geoscope, lang, and any cached
+  /// translations, and stamps the new problem with `inspoProblemId` +
+  /// `inspoVersion` referencing the source's latest revision at fork time.
+  /// Skips language detection because the text isn't user-authored on this
+  /// flow.
+  Future<Problem> forkProblem({
+    required String sourceProblemId,
+    required String ownerId,
+  }) async {
+    // Re-read the source so the inspo fields reference whatever the latest
+    // revision is right now, not whatever the caller's snapshot says.
+    final source = await getProblem(sourceProblemId);
+    if (source == null) {
+      throw StateError(
+        'Cannot fork: source problem $sourceProblemId not found',
+      );
+    }
+    final id = const Uuid().v4();
+    final now = DateTime.now().toUtc();
+    const version = 1;
+    final problemData = <String, Object?>{
+      'description': source.description,
+      'goal': source.goal,
+      'ownerId': ownerId,
+      'geoscope': source.geoscope,
+      'lang': ?source.lang,
+      'votes': 1,
+      'solved': false,
+      'version': version,
+      'createdAt': now,
+      'lastUpdatedAt': now,
+      'inspoProblemId': source.id,
+      'inspoVersion': source.version,
+    };
+    final revisionData = {
+      'description': source.description,
+      'goal': source.goal,
+      'version': version,
+      'archivedAt': now,
+    };
+
+    final translations = await _problemsRef
+        .doc(source.id)
+        .collection('translations')
+        .get();
+
+    final batch = _firestore.batch()
+      ..set(_problemsRef.doc(id), problemData)
+      ..set(
+        _problemsRef.doc(id).collection('versions').doc('$version'),
+        revisionData,
+      )
+      ..set(
+        _problemsRef.doc(id).collection('voters').doc(ownerId),
+        {'uid': ownerId, 'votes': 1},
+      );
+    for (final doc in translations.docs) {
+      batch.set(
+        _problemsRef.doc(id).collection('translations').doc(doc.id),
+        doc.data(),
+      );
+    }
+    await batch.commit();
+
+    return Problem(
+      id: id,
+      description: source.description,
+      goal: source.goal,
+      ownerId: ownerId,
+      geoscope: source.geoscope,
+      lang: source.lang,
+      createdAt: now,
+      lastUpdatedAt: now,
+      inspoProblemId: source.id,
+      inspoVersion: source.version,
+    );
+  }
+
   /// Update a problem's fields.
   /// Uses a batched write to atomically update the main document and create
   /// a new revision snapshot.
@@ -471,6 +550,8 @@ class FirestoreRepository {
       version: (data['version'] as num?)?.toInt() ?? 1,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp).toDate(),
+      inspoProblemId: data['inspoProblemId'] as String?,
+      inspoVersion: (data['inspoVersion'] as num?)?.toInt(),
     );
   }
 }

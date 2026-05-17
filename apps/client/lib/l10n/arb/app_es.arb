@@ -52,5 +52,7 @@
     "complaintSubmitted": "Queja enviada",
     "failedToLoadProblems": "No se pudieron cargar los problemas",
     "geoscopeFilterHint": "Escribe parte del nombre de la ubicación actual para acotar la lista",
-    "geoscopePickerHeading": "Selecciona tu ubicación con la mayor precisión disponible en la lista de abajo"
+    "geoscopePickerHeading": "Selecciona tu ubicación con la mayor precisión disponible en la lista de abajo",
+    "forkProblemTooltip": "Bifurcar este problema en tu propia copia",
+    "forkProblemError": "No se pudo bifurcar el problema. Inténtalo de nuevo."
 }

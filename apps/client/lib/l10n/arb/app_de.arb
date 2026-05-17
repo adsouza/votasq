@@ -52,5 +52,7 @@
     "complaintSubmitted": "Beschwerde eingereicht",
     "failedToLoadProblems": "Probleme konnten nicht geladen werden",
     "geoscopeFilterHint": "Geben Sie hier einen Teil des aktuellen Ortsnamens ein, um die Liste einzugrenzen",
-    "geoscopePickerHeading": "Wählen Sie Ihren Standort mit der höchsten verfügbaren Genauigkeit aus der untenstehenden Liste"
+    "geoscopePickerHeading": "Wählen Sie Ihren Standort mit der höchsten verfügbaren Genauigkeit aus der untenstehenden Liste",
+    "forkProblemTooltip": "Dieses Problem in eine eigene Kopie forken",
+    "forkProblemError": "Problem konnte nicht geforkt werden. Bitte erneut versuchen."
 }

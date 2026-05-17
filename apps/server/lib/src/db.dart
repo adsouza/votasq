@@ -487,6 +487,8 @@ class Db {
         doc.fields?['lastUpdatedAt'] ??
             (throw StateError('Missing required field: lastUpdatedAt')),
       ),
+      inspoProblemId: doc.fields?['inspoProblemId']?.stringValue,
+      inspoVersion: _parseOptionalInt(doc.fields?['inspoVersion']),
     );
   }
 
@@ -514,6 +516,10 @@ class Db {
         'lastUpdatedAt': fs.Value(
           timestampValue: problem.lastUpdatedAt.toIso8601String(),
         ),
+        if (problem.inspoProblemId != null)
+          'inspoProblemId': fs.Value(stringValue: problem.inspoProblemId),
+        if (problem.inspoVersion != null)
+          'inspoVersion': fs.Value(integerValue: '${problem.inspoVersion}'),
       },
     );
   }

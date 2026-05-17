@@ -52,5 +52,7 @@
     "complaintSubmitted": "تم إرسال الشكوى",
     "failedToLoadProblems": "تعذّر تحميل المشاكل",
     "geoscopeFilterHint": "اكتب جزءًا من اسم موقعك الحالي هنا لتضييق القائمة",
-    "geoscopePickerHeading": "اختر موقعك بأعلى دقة متاحة من القائمة أدناه"
+    "geoscopePickerHeading": "اختر موقعك بأعلى دقة متاحة من القائمة أدناه",
+    "forkProblemTooltip": "أنشئ نسختك الخاصة من هذه المشكلة",
+    "forkProblemError": "تعذّر إنشاء نسخة من هذه المشكلة. يُرجى المحاولة مرة أخرى."
 }

@@ -184,5 +184,13 @@
     "geoscopePickerHeading": "Select your location with the highest available precision from the list below:",
     "@geoscopePickerHeading": {
         "description": "Heading shown at the top of the geoscope picker overlay, above the substring filter field"
+    },
+    "forkProblemTooltip": "Fork this problem into your own copy",
+    "@forkProblemTooltip": {
+        "description": "Tooltip for the fork icon button on the problem detail page"
+    },
+    "forkProblemError": "Could not fork this problem. Please try again.",
+    "@forkProblemError": {
+        "description": "SnackBar message shown when forking a problem fails"
     }
 }

@@ -52,5 +52,7 @@
     "complaintSubmitted": "Şikayet gönderildi",
     "failedToLoadProblems": "Sorunlar yüklenemedi",
     "geoscopeFilterHint": "Listeyi daraltmak için mevcut konumun adının bir kısmını buraya yazın",
-    "geoscopePickerHeading": "Konumunuzu mevcut en yüksek hassasiyetle aşağıdaki listeden seçin"
+    "geoscopePickerHeading": "Konumunuzu mevcut en yüksek hassasiyetle aşağıdaki listeden seçin",
+    "forkProblemTooltip": "Bu sorunu kendi kopyana çatalla",
+    "forkProblemError": "Sorun çatallanamadı. Lütfen tekrar deneyin."
 }

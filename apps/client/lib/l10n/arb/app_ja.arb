@@ -52,5 +52,7 @@
     "complaintSubmitted": "報告が送信されました",
     "failedToLoadProblems": "問題を読み込めませんでした",
     "geoscopeFilterHint": "現在地の名前の一部をここに入力してリストを絞り込んでください",
-    "geoscopePickerHeading": "以下の一覧から、利用可能な最も精度の高い位置を選択してください"
+    "geoscopePickerHeading": "以下の一覧から、利用可能な最も精度の高い位置を選択してください",
+    "forkProblemTooltip": "この問題を自分のコピーにフォークする",
+    "forkProblemError": "この問題をフォークできませんでした。もう一度お試しください。"
 }

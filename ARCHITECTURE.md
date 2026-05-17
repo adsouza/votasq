@@ -43,6 +43,8 @@ classDiagram
         +int version = 1
         +DateTime createdAt
         +DateTime lastUpdatedAt
+        +String? inspoProblemId
+        +int? inspoVersion
     }
 
     class ProblemRevision {
@@ -72,6 +74,16 @@ irrelevant to the revision history.
 
 `TranslatedProblem` caches the translation of both text fields for a given
 language, stored at `problems/{id}/translations/{langCode}`.
+
+`Problem.inspoProblemId` + `Problem.inspoVersion` together identify the
+`ProblemRevision` that inspired this problem (must be set or null as a pair).
+They are populated only when a user "forks" another user's problem to suggest
+changes — the fork starts a fresh revision history but retains a pointer back
+to the exact snapshot it was copied from. Kept as two flat fields rather than
+a composite string so all forks of a given problem can be enumerated with a
+direct equality query on `inspoProblemId`. Write-once: set at fork creation
+and never modified afterwards (`FirestoreRepository.updateProblem` never
+includes them in its update map).
 
 The `@freezed` annotation generates immutability, equality, `copyWith`, and
 pattern matching. `json_serializable` generates `toJson` / `fromJson`. Both

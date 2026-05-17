@@ -86,6 +86,24 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
+  Future<void> _fork(Problem problem, String ownerId) async {
+    final repo = context.read<FirestoreRepository>();
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    final errorMessage = context.l10n.forkProblemError;
+    try {
+      final fork = await repo.forkProblem(
+        sourceProblemId: problem.id,
+        ownerId: ownerId,
+      );
+      if (!mounted) return;
+      router.go('/problems/${fork.id}');
+    } on Exception catch (e) {
+      log('Failed to fork problem: $e');
+      messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
+    }
+  }
+
   Future<void> _save() async {
     final problem = _problem;
     if (problem == null || !hasEnoughWords(_controller.text)) return;
@@ -395,15 +413,32 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     final problem = _problem!;
     final userId = context.read<AuthCubit>().state.userId;
     final isOwner = userId != null && userId == problem.ownerId;
+    final canFork = userId != null && !isOwner;
 
+    // Note: no `autofocus: true` on the Focus wrapper. It used to be there so
+    // Escape would pop without a prior tap, but it interacts badly with route
+    // remounts (e.g. fork → navigate to fork): the outer Focus re-grabs
+    // primary focus during the transition and Flutter Web/desktop's
+    // HardwareKeyboard state can desync, throwing a "key already pressed"
+    // assertion and breaking subsequent typing in TextFields. Escape still
+    // works once the user has interacted with anything on the page.
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.escape): () => context.pop(),
       },
       child: Focus(
-        autofocus: true,
         child: Scaffold(
-          appBar: AppBar(title: Text(l10n.problemDetailPageTitle)),
+          appBar: AppBar(
+            title: Text(l10n.problemDetailPageTitle),
+            actions: [
+              if (canFork)
+                IconButton(
+                  tooltip: l10n.forkProblemTooltip,
+                  icon: const Icon(Icons.call_split),
+                  onPressed: () => _fork(problem, userId),
+                ),
+            ],
+          ),
           body: isOwner ? _buildEditBody(problem) : _buildReadOnlyBody(problem),
         ),
       ),

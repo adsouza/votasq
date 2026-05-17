@@ -20,6 +20,14 @@ abstract class Problem with _$Problem {
     @Default([]) List<String> complaints,
     @Default(false) bool solved,
     @Default(1) int version,
+    // Source ProblemRevision that inspired this problem (set when forked).
+    // The two `inspo*` fields together identify a revision and must be set
+    // or null as a pair. Kept as two flat fields rather than a composite
+    // string so `inspoProblemId` can be queried directly to enumerate all
+    // forks of a problem. Write-once: only populated at creation time and
+    // never modified afterwards.
+    String? inspoProblemId,
+    int? inspoVersion,
   }) = _Problem;
 
   /// This factory is what the Server uses to encode and Client uses to decode
