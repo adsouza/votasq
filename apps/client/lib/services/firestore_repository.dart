@@ -82,10 +82,13 @@ class FirestoreRepository {
     return _docToProblem(doc);
   }
 
-  /// Create a new problem with a client-generated UUID.
+  /// Create a new problem with a client-generated UUID. Returns the created
+  /// [Problem] so callers can update local state without waiting for the
+  /// Firestore listener (which won't emit if the new doc falls outside the
+  /// limited query's first page).
   /// Uses a batched write to atomically create the main document and its
   /// first revision snapshot.
-  Future<void> addProblem({
+  Future<Problem> addProblem({
     required String description,
     required String ownerId,
     required String geoscope,
@@ -136,6 +139,17 @@ class FirestoreRepository {
     if (english != null) {
       unawaited(saveTranslation(id, 'en', english));
     }
+
+    return Problem(
+      id: id,
+      description: description,
+      goal: goal,
+      ownerId: ownerId,
+      geoscope: geoscope,
+      lang: result.lang,
+      createdAt: now,
+      lastUpdatedAt: now,
+    );
   }
 
   /// Update a problem's fields.

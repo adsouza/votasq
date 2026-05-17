@@ -64,6 +64,10 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Create a new problem with the given description.
   /// If [geoscope] is provided it overrides the current viewing geoscope.
+  ///
+  /// Optimistically prepends the new problem to local state. The watch stream
+  /// will not emit when the new doc falls past the first page's `limit`, so
+  /// this keeps the UI in sync regardless.
   Future<void> addProblem({
     required String description,
     required String ownerId,
@@ -72,13 +76,14 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     String goal = '',
   }) async {
     try {
-      await _repo.addProblem(
+      final created = await _repo.addProblem(
         description: description,
         goal: goal,
         ownerId: ownerId,
         geoscope: geoscope ?? state.geoscope,
         userLanguage: userLanguage,
       );
+      emit(state.copyWith(problems: [created, ...state.problems]));
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {
