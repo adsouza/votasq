@@ -18,8 +18,13 @@ String geoscopeLabel(BuildContext context, String geoscope) {
 
 /// Build a geoscope dropdown for the given [geoscope] value.
 /// [currentValue] is the currently selected ID, [onChanged] is called when
-/// the user picks a new level. Returns an empty list if the geoscope is
-/// global (`"/"`), hiding the dropdown entirely.
+/// the user picks a new level. The options are the ancestor chain of
+/// [geoscope] (most specific first); when [currentValue] isn't in that
+/// chain — e.g. the saved value lives outside the user's current location
+/// hierarchy — it's injected at the top so it's both selectable and the
+/// first item. Returns an empty list when both the user's location and
+/// the saved value are global (`"/"`), since there would be nothing
+/// meaningful to pick.
 List<Widget> buildGeoscopeDropdown(
   BuildContext context, {
   required String geoscope,
@@ -28,10 +33,13 @@ List<Widget> buildGeoscopeDropdown(
   bool enabled = true,
   bool compact = true,
 }) {
-  if (geoscope == '/') return [];
+  if (geoscope == '/' && currentValue == '/') return [];
   final l10n = context.l10n;
   final geoState = context.read<GeoscopeCubit>().state;
   final ancestorIds = geoscopeAncestors(geoscope).reversed.toList();
+  if (!ancestorIds.contains(currentValue)) {
+    ancestorIds.insert(0, currentValue);
+  }
   final labelMap = {
     for (final g in geoState.availableGeoscopes) g.id: g.label,
   };
@@ -43,11 +51,7 @@ List<Widget> buildGeoscopeDropdown(
     return DropdownMenuItem(value: id, child: Text(label));
   }).toList();
 
-  // If currentValue isn't in the ancestor list (e.g. problem was created
-  // under a different geoscope), fall back to the most granular ancestor.
-  final effectiveValue = ancestorIds.contains(currentValue)
-      ? currentValue
-      : ancestorIds.first;
+  final effectiveValue = currentValue;
 
   return [
     const SizedBox(width: 8),
