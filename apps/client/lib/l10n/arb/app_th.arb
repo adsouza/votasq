@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "เลือกขอบเขตทางภูมิศาสตร์สำหรับปัญหาของคุณ",
     "votesChipTooltip": "คะแนนโหวต",
     "autoTranslateMenuItem": "แปลข้อความอัตโนมัติ",
+    "showOriginalLanguageTooltip": "แสดงข้อความในภาษาต้นฉบับ",
+    "showTranslationTooltip": "แสดงคำแปล",
     "addGoalHint": "(ไม่บังคับ) ผลลัพธ์ใดจะแก้ปัญหานี้ได้?",
     "editGoalHint": "แก้ไขผลลัพธ์ที่ต้องการ",
     "goalLabel": "เป้าหมาย",

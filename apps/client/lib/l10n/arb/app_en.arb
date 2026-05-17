@@ -104,6 +104,14 @@
     "@autoTranslateMenuItem": {
         "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
     },
+    "showOriginalLanguageTooltip": "Show text in original language instead",
+    "@showOriginalLanguageTooltip": {
+        "description": "Tooltip on the translate toggle button when the translated text is currently shown; tapping flips the view to the original (untranslated) text"
+    },
+    "showTranslationTooltip": "Show translation instead",
+    "@showTranslationTooltip": {
+        "description": "Tooltip on the translate toggle button when the original (untranslated) text is currently shown; tapping flips the view back to the translation"
+    },
     "addGoalHint": "(Optional) What outcome would solve this?",
     "@addGoalHint": {
         "description": "Placeholder text for the add-goal text field"

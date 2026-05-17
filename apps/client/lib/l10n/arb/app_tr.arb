@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Sorununuz için coğrafi kapsamı seçin",
     "votesChipTooltip": "Oylar",
     "autoTranslateMenuItem": "Metni otomatik çevir",
+    "showOriginalLanguageTooltip": "Metni orijinal dilinde göster",
+    "showTranslationTooltip": "Çeviriyi göster",
     "addGoalHint": "(İsteğe bağlı) Hangi sonuç bunu çözer?",
     "editGoalHint": "İstenen sonucu düzenle",
     "goalLabel": "Hedef",

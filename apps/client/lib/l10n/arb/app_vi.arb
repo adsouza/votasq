@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Chọn phạm vi địa lý cho vấn đề của bạn",
     "votesChipTooltip": "Bình chọn",
     "autoTranslateMenuItem": "Tự động dịch văn bản",
+    "showOriginalLanguageTooltip": "Hiển thị văn bản bằng ngôn ngữ gốc",
+    "showTranslationTooltip": "Hiển thị bản dịch",
     "addGoalHint": "(Tùy chọn) Kết quả nào sẽ giải quyết vấn đề này?",
     "editGoalHint": "Chỉnh sửa kết quả mong muốn",
     "goalLabel": "Mục tiêu",

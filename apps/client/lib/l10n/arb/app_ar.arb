@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "اختر النطاق الجغرافي لمشكلتك",
     "votesChipTooltip": "الأصوات",
     "autoTranslateMenuItem": "ترجمة النص تلقائيًا",
+    "showOriginalLanguageTooltip": "عرض النص باللغة الأصلية",
+    "showTranslationTooltip": "عرض الترجمة",
     "addGoalHint": "(اختياري) ما النتيجة التي تحل هذا؟",
     "editGoalHint": "تعديل النتيجة المطلوبة",
     "goalLabel": "الهدف",

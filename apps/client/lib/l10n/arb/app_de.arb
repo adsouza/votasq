@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Wählen Sie den geografischen Bereich für Ihr Problem",
     "votesChipTooltip": "Stimmen",
     "autoTranslateMenuItem": "Text automatisch übersetzen",
+    "showOriginalLanguageTooltip": "Text in Originalsprache anzeigen",
+    "showTranslationTooltip": "Übersetzung anzeigen",
     "addGoalHint": "(Optional) Welches Ergebnis würde dies lösen?",
     "editGoalHint": "Gewünschtes Ergebnis bearbeiten",
     "goalLabel": "Ziel",

@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "আপনার সমস্যার জন্য ভৌগোলিক পরিসর নির্বাচন করুন",
     "votesChipTooltip": "ভোট",
     "autoTranslateMenuItem": "স্বয়ংক্রিয়ভাবে পাঠ্য অনুবাদ করুন",
+    "showOriginalLanguageTooltip": "মূল ভাষায় টেক্সট দেখান",
+    "showTranslationTooltip": "অনুবাদ দেখান",
     "addGoalHint": "(ঐচ্ছিক) কোন ফলাফল এটি সমাধান করবে?",
     "editGoalHint": "কাঙ্ক্ষিত ফলাফল সম্পাদনা করুন",
     "goalLabel": "লক্ষ্য",

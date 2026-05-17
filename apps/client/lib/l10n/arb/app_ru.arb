@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Выберите географический охват для вашей проблемы",
     "votesChipTooltip": "Голоса",
     "autoTranslateMenuItem": "Автоматический перевод текста",
+    "showOriginalLanguageTooltip": "Показать текст на языке оригинала",
+    "showTranslationTooltip": "Показать перевод",
     "addGoalHint": "(Необязательно) Какой результат решит эту проблему?",
     "editGoalHint": "Редактировать желаемый результат",
     "goalLabel": "Цель",

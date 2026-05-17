@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "உங்கள் பிரச்சனைக்கான புவியியல் நோக்கத்தைத் தேர்ந்தெடுக்கவும்",
     "votesChipTooltip": "வாக்குகள்",
     "autoTranslateMenuItem": "உரையை தானாகவே மொழிபெயர்",
+    "showOriginalLanguageTooltip": "மூல மொழியில் உரையைக் காட்டு",
+    "showTranslationTooltip": "மொழிபெயர்ப்பைக் காட்டு",
     "addGoalHint": "(விருப்பத்தேர்வு) எந்த முடிவு இதை தீர்க்கும்?",
     "editGoalHint": "விரும்பிய முடிவை திருத்து",
     "goalLabel": "இலக்கு",

@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "तुमच्या समस्येसाठी भौगोलिक व्याप्ती निवडा",
     "votesChipTooltip": "मते",
     "autoTranslateMenuItem": "मजकूर आपोआप भाषांतर करा",
+    "showOriginalLanguageTooltip": "मूळ भाषेत मजकूर दर्शवा",
+    "showTranslationTooltip": "भाषांतर दर्शवा",
     "addGoalHint": "(पर्यायी) कोणता परिणाम हे सोडवेल?",
     "editGoalHint": "इच्छित परिणाम संपादित करा",
     "goalLabel": "ध्येय",

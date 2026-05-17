@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "ਆਪਣੀ ਸਮੱਸਿਆ ਲਈ ਭੂਗੋਲਿਕ ਦਾਇਰਾ ਚੁਣੋ",
     "votesChipTooltip": "ਵੋਟ",
     "autoTranslateMenuItem": "ਟੈਕਸਟ ਦਾ ਆਟੋਮੈਟਿਕ ਅਨੁਵਾਦ ਕਰੋ",
+    "showOriginalLanguageTooltip": "ਮੂਲ ਭਾਸ਼ਾ ਵਿੱਚ ਟੈਕਸਟ ਦਿਖਾਓ",
+    "showTranslationTooltip": "ਅਨੁਵਾਦ ਦਿਖਾਓ",
     "addGoalHint": "(ਵਿਕਲਪਿਕ) ਕਿਹੜਾ ਨਤੀਜਾ ਇਸ ਨੂੰ ਹੱਲ ਕਰੇਗਾ?",
     "editGoalHint": "ਲੋੜੀਂਦਾ ਨਤੀਜਾ ਸੰਪਾਦਿਤ ਕਰੋ",
     "goalLabel": "ਟੀਚਾ",

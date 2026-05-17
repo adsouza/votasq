@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "اپنے مسئلے کے لیے جغرافیائی دائرہ منتخب کریں",
     "votesChipTooltip": "ووٹ",
     "autoTranslateMenuItem": "خودکار طور پر متن کا ترجمہ کریں",
+    "showOriginalLanguageTooltip": "اصل زبان میں متن دکھائیں",
+    "showTranslationTooltip": "ترجمہ دکھائیں",
     "addGoalHint": "(اختیاری) کون سا نتیجہ اسے حل کرے گا؟",
     "editGoalHint": "مطلوبہ نتیجے میں ترمیم کریں",
     "goalLabel": "ہدف",

@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Chagua wigo wa kijiografia kwa tatizo lako",
     "votesChipTooltip": "Kura",
     "autoTranslateMenuItem": "Tafsiri maandishi kiotomatiki",
+    "showOriginalLanguageTooltip": "Onyesha maandishi katika lugha asili",
+    "showTranslationTooltip": "Onyesha tafsiri",
     "addGoalHint": "(Si lazima) Matokeo gani yangetatua hili?",
     "editGoalHint": "Hariri matokeo yanayotarajiwa",
     "goalLabel": "Lengo",

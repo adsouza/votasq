@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "문제의 지리적 범위를 선택하세요",
     "votesChipTooltip": "투표",
     "autoTranslateMenuItem": "텍스트 자동 번역",
+    "showOriginalLanguageTooltip": "원래 언어로 텍스트 보기",
+    "showTranslationTooltip": "번역 보기",
     "addGoalHint": "(선택사항) 어떤 결과가 이것을 해결할까요?",
     "editGoalHint": "원하는 결과 편집",
     "goalLabel": "목표",

@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Selecciona el ámbito geográfico de tu problema",
     "votesChipTooltip": "Votos",
     "autoTranslateMenuItem": "Traducir texto automáticamente",
+    "showOriginalLanguageTooltip": "Mostrar texto en el idioma original",
+    "showTranslationTooltip": "Mostrar la traducción",
     "addGoalHint": "(Opcional) ¿Qué resultado resolvería esto?",
     "editGoalHint": "Editar resultado deseado",
     "goalLabel": "Meta",

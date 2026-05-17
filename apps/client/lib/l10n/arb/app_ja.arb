@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "問題の地理的範囲を選択してください",
     "votesChipTooltip": "投票数",
     "autoTranslateMenuItem": "テキストを自動翻訳",
+    "showOriginalLanguageTooltip": "元の言語のテキストを表示",
+    "showTranslationTooltip": "翻訳を表示",
     "addGoalHint": "（任意）どんな結果がこれを解決しますか？",
     "editGoalHint": "望む結果を編集",
     "goalLabel": "目標",

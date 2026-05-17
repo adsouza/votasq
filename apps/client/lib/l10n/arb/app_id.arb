@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "Pilih cakupan geografis untuk masalah Anda",
     "votesChipTooltip": "Suara",
     "autoTranslateMenuItem": "Terjemahkan teks secara otomatis",
+    "showOriginalLanguageTooltip": "Tampilkan teks dalam bahasa asli",
+    "showTranslationTooltip": "Tampilkan terjemahan",
     "addGoalHint": "(Opsional) Hasil apa yang akan menyelesaikan ini?",
     "editGoalHint": "Edit hasil yang diinginkan",
     "goalLabel": "Tujuan",

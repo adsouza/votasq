@@ -26,6 +26,8 @@
     "geoscopeDropdownTooltip": "మీ సమస్యకు భౌగోళిక పరిధిని ఎంచుకోండి",
     "votesChipTooltip": "ఓట్లు",
     "autoTranslateMenuItem": "వచనాన్ని స్వయంచాలకంగా అనువదించు",
+    "showOriginalLanguageTooltip": "అసలు భాషలో వచనాన్ని చూపించు",
+    "showTranslationTooltip": "అనువాదాన్ని చూపించు",
     "addGoalHint": "(ఐచ్ఛికం) ఏ ఫలితం దీన్ని పరిష్కరిస్తుంది?",
     "editGoalHint": "కోరుకున్న ఫలితాన్ని సవరించండి",
     "goalLabel": "లక్ష్యం",
