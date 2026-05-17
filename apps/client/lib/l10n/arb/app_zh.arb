@@ -54,5 +54,6 @@
     "geoscopeFilterHint": "在此输入当前地点名称的一部分以缩小列表",
     "geoscopePickerHeading": "请从下方列表中选择精度最高的位置",
     "forkProblemTooltip": "将此问题分叉为你自己的副本",
-    "forkProblemError": "无法分叉此问题。请重试。"
+    "forkProblemError": "无法分叉此问题。请重试。",
+    "forkedFromOriginalLink": "分叉自原始问题"
 }

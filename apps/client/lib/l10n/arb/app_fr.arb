@@ -54,5 +54,6 @@
     "geoscopeFilterHint": "Tapez une partie du nom du lieu actuel pour affiner la liste",
     "geoscopePickerHeading": "Sélectionnez votre lieu avec la précision la plus élevée disponible dans la liste ci-dessous",
     "forkProblemTooltip": "Forker ce problème dans votre propre copie",
-    "forkProblemError": "Impossible de forker ce problème. Veuillez réessayer."
+    "forkProblemError": "Impossible de forker ce problème. Veuillez réessayer.",
+    "forkedFromOriginalLink": "Forké depuis l’original"
 }

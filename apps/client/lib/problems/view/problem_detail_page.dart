@@ -97,7 +97,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         ownerId: ownerId,
       );
       if (!mounted) return;
-      router.go('/problems/${fork.id}');
+      unawaited(router.push('/problems/${fork.id}'));
     } on Exception catch (e) {
       log('Failed to fork problem: $e');
       messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
@@ -142,6 +142,19 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       }
     }
     if (mounted) context.pop();
+  }
+
+  Widget _buildInspoBacklink(Problem problem) {
+    final sourceId = problem.inspoProblemId;
+    if (sourceId == null) return const SizedBox.shrink();
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TextButton.icon(
+        onPressed: () => context.push('/problems/$sourceId'),
+        icon: const Icon(Icons.call_merge, size: 16),
+        label: Text(context.l10n.forkedFromOriginalLink),
+      ),
+    );
   }
 
   Widget _buildVoterList() {
@@ -194,6 +207,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildInspoBacklink(problem),
           ProblemTranslation(
             problemId: problem.id,
             lang: problem.lang,
@@ -310,6 +324,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildInspoBacklink(problem),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _controller,
             builder: (context, value, child) {

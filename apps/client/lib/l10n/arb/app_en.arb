@@ -192,5 +192,9 @@
     "forkProblemError": "Could not fork this problem. Please try again.",
     "@forkProblemError": {
         "description": "SnackBar message shown when forking a problem fails"
+    },
+    "forkedFromOriginalLink": "Forked from original",
+    "@forkedFromOriginalLink": {
+        "description": "Label on the backlink shown above the description of a forked problem; tapping navigates to the source problem"
     }
 }

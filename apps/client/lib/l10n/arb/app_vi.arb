@@ -54,5 +54,6 @@
     "geoscopeFilterHint": "Nhập một phần tên vị trí hiện tại vào đây để thu hẹp danh sách",
     "geoscopePickerHeading": "Chọn vị trí của bạn với độ chính xác cao nhất hiện có từ danh sách bên dưới",
     "forkProblemTooltip": "Phân nhánh vấn đề này thành bản sao của riêng bạn",
-    "forkProblemError": "Không thể phân nhánh vấn đề này. Vui lòng thử lại."
+    "forkProblemError": "Không thể phân nhánh vấn đề này. Vui lòng thử lại.",
+    "forkedFromOriginalLink": "Phân nhánh từ bản gốc"
 }

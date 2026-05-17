@@ -54,5 +54,6 @@
     "geoscopeFilterHint": "Digite parte do nome da localização atual para filtrar a lista",
     "geoscopePickerHeading": "Selecione sua localização com a maior precisão disponível na lista abaixo",
     "forkProblemTooltip": "Bifurcar este problema em sua própria cópia",
-    "forkProblemError": "Não foi possível bifurcar este problema. Tente novamente."
+    "forkProblemError": "Não foi possível bifurcar este problema. Tente novamente.",
+    "forkedFromOriginalLink": "Bifurcado do original"
 }

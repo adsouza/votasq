@@ -54,5 +54,6 @@
     "geoscopeFilterHint": "Andika sehemu ya jina la mahali ulipo hapa ili kupunguza orodha",
     "geoscopePickerHeading": "Chagua eneo lako kwa usahihi wa juu zaidi unaopatikana kutoka kwenye orodha iliyo hapa chini",
     "forkProblemTooltip": "Tengeneza nakala yako mwenyewe ya tatizo hili",
-    "forkProblemError": "Imeshindwa kunakili tatizo hili. Tafadhali jaribu tena."
+    "forkProblemError": "Imeshindwa kunakili tatizo hili. Tafadhali jaribu tena.",
+    "forkedFromOriginalLink": "Nakala kutoka kwa asili"
 }
