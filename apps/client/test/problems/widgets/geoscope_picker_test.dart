@@ -287,7 +287,8 @@ void main() {
         await tester.tap(find.text('Open Picker'));
         await tester.pumpAndSettle();
 
-        TextField findField() => tester.widget<TextField>(find.byType(TextField));
+        TextField findField() =>
+            tester.widget<TextField>(find.byType(TextField));
         expect(findField().enabled, isFalse);
 
         // Tapping the active superstate clears the drill-in and brings the
@@ -319,7 +320,8 @@ void main() {
         await tester.tap(find.text('Open Picker'));
         await tester.pumpAndSettle();
 
-        TextField findField() => tester.widget<TextField>(find.byType(TextField));
+        TextField findField() =>
+            tester.widget<TextField>(find.byType(TextField));
         expect(findField().enabled, isFalse);
 
         // Tapping the active state collapses the drill-in.
