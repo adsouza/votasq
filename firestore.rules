@@ -25,6 +25,17 @@ service cloud.firestore {
           && request.resource.data.version == resource.data.version
         )
         ||
+        // Complaint append (auth required, only complaints changes,
+        // existing entries preserved, only the caller's own uid may be added)
+        (
+          request.auth != null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['complaints'])
+          && request.resource.data.complaints is list
+          && request.resource.data.complaints.hasAll(resource.data.get('complaints', []))
+          && request.resource.data.complaints.hasOnly(resource.data.get('complaints', []).concat([request.auth.uid]))
+          && request.auth.uid in request.resource.data.complaints
+        )
+        ||
         // Full problem update
         (
           request.resource.data.description is string
