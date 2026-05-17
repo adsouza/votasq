@@ -512,7 +512,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = Client;
+				FLAVOR_APP_NAME = "Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -645,7 +645,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = Client;
+				FLAVOR_APP_NAME = "Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -670,7 +670,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = Client;
+				FLAVOR_APP_NAME = "Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -764,7 +764,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = "[STG] Client";
+				FLAVOR_APP_NAME = "[STG] Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -865,7 +865,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = "[DEV] Client";
+				FLAVOR_APP_NAME = "[DEV] Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -959,7 +959,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = "[DEV] Client";
+				FLAVOR_APP_NAME = "[DEV] Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1052,7 +1052,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = "[STG] Client";
+				FLAVOR_APP_NAME = "[STG] Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1145,7 +1145,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = "[DEV] Client";
+				FLAVOR_APP_NAME = "[DEV] Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1238,7 +1238,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X6Q4W6ZWSV;
-				FLAVOR_APP_NAME = "[STG] Client";
+				FLAVOR_APP_NAME = "[STG] Votasq Client";
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
