@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
@@ -124,6 +125,17 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     final repo = context.read<FirestoreRepository>();
+    // ProblemsCubit is provided by the parent route; we notify it after a
+    // successful save so the list reflects the edit on return without
+    // waiting for the Firestore watch stream. Defensive: if for some
+    // reason the cubit isn't in scope (tests, future route restructure),
+    // skip the notification.
+    ProblemsCubit? problemsCubit;
+    try {
+      problemsCubit = context.read<ProblemsCubit>();
+    } on Object {
+      problemsCubit = null;
+    }
     final userLang = Localizations.localeOf(context).languageCode;
 
     final newDescription = _controller.text.trim();
@@ -135,15 +147,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         newGeoscope != problem.geoscope;
 
     if (hasChanges) {
+      final updated = problem.copyWith(
+        description: newDescription,
+        goal: newGoal,
+        geoscope: newGeoscope,
+      );
       try {
-        await repo.updateProblem(
-          problem.copyWith(
-            description: newDescription,
-            goal: newGoal,
-            geoscope: newGeoscope,
-          ),
-          userLanguage: userLang,
-        );
+        await repo.updateProblem(updated, userLanguage: userLang);
       } on LanguageMismatchException catch (e) {
         if (!mounted) return;
         messenger.showSnackBar(
@@ -164,14 +174,12 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       }
       if (!mounted) return;
       // Reflect the saved values locally so subsequent change-detection
-      // works against fresh state.
+      // works against fresh state, and push the same update into the list
+      // cubit so the previous page doesn't show stale data on return.
       setState(() {
-        _problem = problem.copyWith(
-          description: newDescription,
-          goal: newGoal,
-          geoscope: newGeoscope,
-        );
+        _problem = updated;
       });
+      problemsCubit?.applyLocalUpdate(updated);
     }
     if (!mounted) return;
     messenger.showSnackBar(

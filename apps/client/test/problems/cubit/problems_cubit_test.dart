@@ -384,5 +384,59 @@ void main() {
       act: (cubit) => cubit.updateProblem(_problem()),
       expect: () => <ProblemsState>[],
     );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'updateProblem swaps the local copy of the saved problem',
+      build: () {
+        when(() => repo.updateProblem(any())).thenAnswer((_) async {});
+        return ProblemsCubit(repo);
+      },
+      seed: () => ProblemsState(
+        problems: [
+          _problem(id: 'a', description: 'old A'),
+          _problem(id: 'b', description: 'B'),
+        ],
+      ),
+      act: (cubit) =>
+          cubit.updateProblem(_problem(id: 'a', description: 'new A')),
+      expect: () => [
+        isA<ProblemsState>().having(
+          (s) => s.problems.map((p) => p.description).toList(),
+          'descriptions',
+          ['new A', 'B'],
+        ),
+      ],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'applyLocalUpdate replaces a matching problem in the list',
+      build: () => ProblemsCubit(repo),
+      seed: () => ProblemsState(
+        problems: [
+          _problem(id: 'a', description: 'old A'),
+          _problem(id: 'b', description: 'B'),
+        ],
+      ),
+      act: (cubit) =>
+          cubit.applyLocalUpdate(_problem(id: 'a', description: 'new A')),
+      expect: () => [
+        isA<ProblemsState>().having(
+          (s) => s.problems.map((p) => p.description).toList(),
+          'descriptions',
+          ['new A', 'B'],
+        ),
+      ],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'applyLocalUpdate is a no-op when the problem is not in the list',
+      build: () => ProblemsCubit(repo),
+      seed: () => ProblemsState(
+        problems: [_problem(id: 'a', description: 'A')],
+      ),
+      act: (cubit) =>
+          cubit.applyLocalUpdate(_problem(id: 'missing', description: 'X')),
+      expect: () => <ProblemsState>[],
+    );
   });
 }

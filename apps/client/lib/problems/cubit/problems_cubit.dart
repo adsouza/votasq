@@ -116,11 +116,25 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }) async {
     try {
       await _repo.updateProblem(problem, userLanguage: userLanguage);
+      applyLocalUpdate(problem);
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {
       log('updateProblem failed: $e', stackTrace: st);
     }
+  }
+
+  /// Replace [problem] in the local list when present. Use this after a
+  /// successful out-of-band write (e.g. from the detail page, which goes
+  /// through the repo directly) so the list reflects the edit immediately
+  /// on return instead of relying on the Firestore watch stream's delivery
+  /// latency. A no-op if the problem isn't in the current page of results.
+  void applyLocalUpdate(Problem problem) {
+    final index = state.problems.indexWhere((p) => p.id == problem.id);
+    if (index == -1) return;
+    final updated = [...state.problems];
+    updated[index] = problem;
+    emit(state.copyWith(problems: updated));
   }
 
   @override

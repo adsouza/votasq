@@ -2,6 +2,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/problems/cubit/problems_cubit.dart';
+import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/view/problem_detail_page.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
@@ -19,6 +21,9 @@ class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
+
+class _MockProblemsCubit extends MockCubit<ProblemsState>
+    implements ProblemsCubit {}
 
 class _MockLanguageDetectionService extends Mock
     implements LanguageDetectionService {}
@@ -51,6 +56,7 @@ void main() {
   late FirestoreRepository repo;
   late AuthCubit authCubit;
   late GeoscopeCubit geoscopeCubit;
+  late ProblemsCubit problemsCubit;
   late LanguageDetectionService languageDetectionService;
   late TranslationRepository translationRepo;
 
@@ -62,11 +68,14 @@ void main() {
     repo = _MockFirestoreRepository();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
+    problemsCubit = _MockProblemsCubit();
     languageDetectionService = _MockLanguageDetectionService();
     translationRepo = _MockTranslationRepository();
 
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
+    when(() => problemsCubit.state).thenReturn(const ProblemsState());
+    when(() => problemsCubit.applyLocalUpdate(any())).thenReturn(null);
     when(
       () => repo.getVotersForProblem(
         any(),
@@ -109,6 +118,7 @@ void main() {
       providers: [
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
+        BlocProvider<ProblemsCubit>.value(value: problemsCubit),
       ],
       child: MultiRepositoryProvider(
         providers: [
@@ -216,6 +226,8 @@ void main() {
             userLanguage: any(named: 'userLanguage'),
           ),
         ).called(1);
+        // Notifies the list cubit so the list won't show stale data on return.
+        verify(() => problemsCubit.applyLocalUpdate(any())).called(1);
         // Still on the detail page, not navigated home.
         expect(find.text('home'), findsNothing);
         // Confirmation toast is visible.
@@ -258,6 +270,8 @@ void main() {
       );
       // Success toast must NOT appear on failure.
       expect(find.text('Your changes have been saved'), findsNothing);
+      // List cubit must NOT be notified on failure.
+      verifyNever(() => problemsCubit.applyLocalUpdate(any()));
     });
 
     testWidgets('vote chip is tappable for authenticated non-owner', (
