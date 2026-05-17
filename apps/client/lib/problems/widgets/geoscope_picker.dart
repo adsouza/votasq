@@ -13,8 +13,9 @@ const _topLevelMetroPopulationThreshold = 10000000;
 
 /// Shows a modal bottom sheet that lets the user drill into the geoscope
 /// hierarchy (superstates → states → metro areas) or substring-filter the
-/// flat list of all geoscopes.
-void showGeoscopePicker(BuildContext context) {
+/// flat list of all geoscopes. Returns a future that completes when the
+/// sheet is dismissed.
+Future<void> showGeoscopePicker(BuildContext context) {
   // Pre-measure the heading so the sheet widens on roomy displays to keep it
   // on a single line. On viewports narrower than the heading the constraint
   // is clamped by the screen anyway, so mobile keeps wrapping.
@@ -34,13 +35,11 @@ void showGeoscopePicker(BuildContext context) {
   final desiredWidth = math.max<double>(painter.size.width + 32, 640);
   painter.dispose();
 
-  unawaited(
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      constraints: BoxConstraints(maxWidth: desiredWidth),
-      builder: (_) => const _GeoscopePickerSheet(),
-    ),
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    constraints: BoxConstraints(maxWidth: desiredWidth),
+    builder: (_) => const _GeoscopePickerSheet(),
   );
 }
 

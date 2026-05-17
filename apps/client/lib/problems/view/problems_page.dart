@@ -33,44 +33,103 @@ class ProblemsPage extends StatelessWidget {
         final geoscope = context.read<GeoscopeCubit>().state.selectedGeoscope;
         return ProblemsCubit(repo)..changeGeoscope(geoscope);
       },
-      child: BlocListener<AuthCubit, AuthState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status &&
-            curr.status == AuthStatus.unauthenticated,
-        listener: (context, authState) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(context.l10n.signInHintToast),
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          });
-        },
-        child: MultiBlocListener(
-          listeners: [
-            BlocListener<GeoscopeCubit, GeoscopeState>(
-              listenWhen: (prev, curr) =>
-                  prev.selectedGeoscope != curr.selectedGeoscope,
-              listener: (context, geoscopeState) {
-                context.read<ProblemsCubit>().changeGeoscope(
-                  geoscopeState.selectedGeoscope,
-                );
-              },
-            ),
-            BlocListener<GeoscopeCubit, GeoscopeState>(
-              listenWhen: (prev, curr) =>
-                  !prev.needsSelection && curr.needsSelection,
-              listener: (context, _) {
-                showGeoscopePicker(context);
-                context.read<GeoscopeCubit>().acknowledgeSelectionPrompt();
-              },
-            ),
-          ],
-          child: const ProblemsView(),
+      child: const _ProblemsPageCoordinator(),
+    );
+  }
+}
+
+/// Coordinates the auth sign-in hint toast with the geoscope picker so the
+/// toast isn't immediately obscured by the picker on first launch. The toast
+/// fires once per unauthenticated session, when (a) the user is unauth, (b)
+/// the geoscope cubit has settled, and (c) no picker is currently shown.
+class _ProblemsPageCoordinator extends StatefulWidget {
+  const _ProblemsPageCoordinator();
+
+  @override
+  State<_ProblemsPageCoordinator> createState() =>
+      _ProblemsPageCoordinatorState();
+}
+
+class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
+  bool _pickerActive = false;
+  bool _signInToastShown = false;
+
+  Future<void> _openPicker() async {
+    context.read<GeoscopeCubit>().acknowledgeSelectionPrompt();
+    setState(() => _pickerActive = true);
+    try {
+      await showGeoscopePicker(context);
+    } finally {
+      if (mounted) {
+        setState(() => _pickerActive = false);
+        _maybeShowSignInToast();
+      }
+    }
+  }
+
+  /// Try to show the sign-in toast. Returns silently when not yet appropriate
+  /// (picker active, auth still resolving, geoscope still loading, etc.) so
+  /// the next state transition can re-attempt.
+  void _maybeShowSignInToast() {
+    if (_signInToastShown) return;
+    if (_pickerActive) return;
+    final authState = context.read<AuthCubit>().state;
+    if (authState.status != AuthStatus.unauthenticated) return;
+    final geoState = context.read<GeoscopeCubit>().state;
+    if (geoState.status != GeoscopeStatus.success) return;
+    if (geoState.needsSelection) return;
+
+    _signInToastShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.signInHintToast),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
         ),
-      ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GeoscopeCubit, GeoscopeState>(
+          listenWhen: (prev, curr) =>
+              prev.selectedGeoscope != curr.selectedGeoscope,
+          listener: (context, geoscopeState) {
+            context.read<ProblemsCubit>().changeGeoscope(
+              geoscopeState.selectedGeoscope,
+            );
+          },
+        ),
+        BlocListener<GeoscopeCubit, GeoscopeState>(
+          listenWhen: (prev, curr) =>
+              !prev.needsSelection && curr.needsSelection,
+          listener: (_, _) => unawaited(_openPicker()),
+        ),
+        // Re-attempt the toast when the geoscope cubit settles, in case the
+        // auth listener fired before geoscope was ready.
+        BlocListener<GeoscopeCubit, GeoscopeState>(
+          listenWhen: (prev, curr) =>
+              prev.status != GeoscopeStatus.success &&
+              curr.status == GeoscopeStatus.success,
+          listener: (_, _) => _maybeShowSignInToast(),
+        ),
+        BlocListener<AuthCubit, AuthState>(
+          listenWhen: (prev, curr) =>
+              prev.status != curr.status &&
+              curr.status == AuthStatus.unauthenticated,
+          listener: (context, _) {
+            // New unauthenticated session — reset and try.
+            _signInToastShown = false;
+            _maybeShowSignInToast();
+          },
+        ),
+      ],
+      child: const ProblemsView(),
     );
   }
 }
@@ -205,7 +264,7 @@ class _ProblemsViewState extends State<ProblemsView> {
           icon: const Icon(Icons.menu),
           onSelected: (value) {
             if (value == 'change_location') {
-              showGeoscopePicker(context);
+              unawaited(showGeoscopePicker(context));
             } else if (value == 'toggle_owned') {
               setState(() {
                 _showOnlyOwned = !_showOnlyOwned;
