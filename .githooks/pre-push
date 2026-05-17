@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Mirror CI's format + analyze checks before pushing.
+# Bypass (rarely): git push --no-verify
+set -e
+
+echo "[pre-push] dart format..."
+melos format
+
+echo "[pre-push] flutter analyze..."
+flutter analyze apps packages
+
+echo "[pre-push] ok"

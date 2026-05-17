@@ -15,11 +15,13 @@ Votasq is a shared task queue where people vote on task priority. It's a Dart/Fl
 ### Setup
 
 ```sh
-melos setup                # Bootstrap workspace, link packages, enable SwiftPM
+melos setup                # Bootstrap workspace, link packages, enable SwiftPM, activate git hooks
 ```
 
 `melos setup` enables Flutter Swift Package Manager support via `flutter config --enable-swift-package-manager`.
 The Apple platforms (iOS, macOS) build in hybrid mode where SwiftPM and CocoaPods coexist — most plugins resolve via SwiftPM, with the Podfile retained as a fallback.
+
+It also points `core.hooksPath` at the tracked `.githooks/` directory. The `pre-push` hook there runs `melos format` and `flutter analyze apps packages` to catch CI failures before they reach GitHub. Bypass with `git push --no-verify` if you must.
 
 ### Code Generation (required after changing models in packages/shared)
 

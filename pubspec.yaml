@@ -21,9 +21,11 @@ melos:
     setup:
       run: |
         melos bootstrap && \
-        flutter config --enable-swift-package-manager
-      description: Initialize the workspace and link packages, and enable Flutter
-        Swift Package Manager support.
+        flutter config --enable-swift-package-manager && \
+        git config core.hooksPath .githooks
+      description: Initialize the workspace and link packages, enable Flutter
+        Swift Package Manager support, and activate the tracked git hooks under
+        .githooks (e.g. pre-push runs format + analyze to mirror CI).
 
     gen:
       run: melos exec -- "dart run build_runner build --delete-conflicting-outputs" &&
