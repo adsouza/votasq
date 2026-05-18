@@ -390,6 +390,11 @@ class _ProblemsViewState extends State<ProblemsView> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: l10n.addProblemTooltip,
+            onPressed: () => context.go('/new'),
+          ),
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
               if (authState.status != AuthStatus.authenticated) {
