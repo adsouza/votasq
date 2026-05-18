@@ -15,6 +15,7 @@ import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository;
 import 'package:client/services/translation_repository.dart';
+import 'package:client/widgets/toast.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -82,12 +83,9 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
     _signInToastShown = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.signInHintToast),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 5),
-        ),
+      showToast(
+        context.l10n.signInHintToast,
+        duration: const Duration(seconds: 5),
       );
     });
   }
@@ -173,9 +171,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     final base = kIsWeb ? Uri.base : Uri.parse(webBase);
     final url = base.resolve('/problems/${problem.id}').toString();
     unawaited(Clipboard.setData(ClipboardData(text: url)));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.problemLinkCopied)),
-    );
+    showToast(context.l10n.problemLinkCopied);
   }
 
   void _startEdit(Problem problem) {
@@ -220,9 +216,7 @@ class _ProblemsViewState extends State<ProblemsView> {
       ),
     );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.complaintSubmitted)),
-      );
+      showToast(context.l10n.complaintSubmitted);
     }
   }
 
@@ -362,20 +356,12 @@ class _ProblemsViewState extends State<ProblemsView> {
                           userId: context.read<AuthCubit>().state.userId!,
                         );
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.feedbackSuccess),
-                            ),
-                          );
+                          showToast(l10n.feedbackSuccess);
                         }
                       } on Exception catch (e) {
                         log('Feedback submission failed: $e');
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.feedbackError),
-                            ),
-                          );
+                          showToast(l10n.feedbackError);
                         }
                       }
                     });

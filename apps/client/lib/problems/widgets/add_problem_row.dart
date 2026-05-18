@@ -4,6 +4,7 @@ import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/services/firestore_repository.dart'
     show LanguageMismatchException;
+import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -73,15 +74,8 @@ class _AddProblemRowState extends State<AddProblemRow> {
       });
     } on LanguageMismatchException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.l10n.languageMismatchError(
-                e.descriptionLang,
-                e.goalLang,
-              ),
-            ),
-          ),
+        showToast(
+          context.l10n.languageMismatchError(e.descriptionLang, e.goalLang),
         );
       }
     } finally {

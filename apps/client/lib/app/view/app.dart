@@ -14,6 +14,7 @@ import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toastification/toastification.dart';
 
 class App extends StatefulWidget {
   const App({
@@ -103,16 +104,20 @@ class _AppState extends State<App> {
         ],
         child: _LastActiveTracker(
           child: BetterFeedback(
-            child: MaterialApp.router(
-              theme: ThemeData(
-                appBarTheme: AppBarTheme(
-                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            child: ToastificationWrapper(
+              child: MaterialApp.router(
+                theme: ThemeData(
+                  appBarTheme: AppBarTheme(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.inversePrimary,
+                  ),
+                  useMaterial3: true,
                 ),
-                useMaterial3: true,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                routerConfig: _router,
               ),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              routerConfig: _router,
             ),
           ),
         ),

@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
+import 'package:toastification/toastification.dart';
 
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
@@ -130,10 +131,12 @@ void main() {
             value: translationRepo,
           ),
         ],
-        child: MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
+        child: ToastificationWrapper(
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
         ),
       ),
     );
@@ -232,6 +235,9 @@ void main() {
         expect(find.text('home'), findsNothing);
         // Confirmation toast is visible.
         expect(find.text('Your changes have been saved'), findsOneWidget);
+        // Dismiss so the toast's auto-close timer doesn't outlive the test.
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
       },
     );
 
@@ -272,6 +278,9 @@ void main() {
       expect(find.text('Your changes have been saved'), findsNothing);
       // List cubit must NOT be notified on failure.
       verifyNever(() => problemsCubit.applyLocalUpdate(any()));
+      // Dismiss so the toast's auto-close timer doesn't outlive the test.
+      toastification.dismissAll(delayForAnimation: false);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('vote chip is tappable for authenticated non-owner', (

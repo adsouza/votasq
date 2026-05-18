@@ -9,6 +9,7 @@ import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository, LanguageMismatchException;
+import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,7 +101,6 @@ class _NewProblemPageState extends State<NewProblemPage> {
     if (_submitting || !hasEnoughWords(_controller.text)) return;
     final userId = context.read<AuthCubit>().state.userId;
     if (userId == null) return;
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     final repo = context.read<FirestoreRepository>();
     final router = GoRouter.of(context);
@@ -123,19 +123,13 @@ class _NewProblemPageState extends State<NewProblemPage> {
     } on LanguageMismatchException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.languageMismatchError(e.descriptionLang, e.goalLang),
-          ),
-        ),
-      );
+      showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
       return;
     } on Exception catch (e) {
       log('Failed to create problem: $e');
       if (!mounted) return;
       setState(() => _submitting = false);
-      messenger.showSnackBar(SnackBar(content: Text(l10n.saveProblemError)));
+      showToast(l10n.saveProblemError);
       return;
     }
     if (!mounted) return;

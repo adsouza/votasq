@@ -10,6 +10,7 @@ import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository, LanguageMismatchException;
+import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,7 +101,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
   Future<void> _fork(Problem problem, String ownerId) async {
     final repo = context.read<FirestoreRepository>();
-    final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
     final errorMessage = context.l10n.forkProblemError;
     try {
@@ -112,7 +112,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       router.go('/problems/${fork.id}');
     } on Exception catch (e) {
       log('Failed to fork problem: $e');
-      messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
+      showToast(errorMessage);
     }
   }
 
@@ -122,7 +122,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     // Capture context-dependent values before any async gap. Safe here
     // because _save is only invoked from a button tap, which can't happen
     // before the first build completes.
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     final repo = context.read<FirestoreRepository>();
     // ProblemsCubit is provided by the parent route; we notify it after a
@@ -156,20 +155,12 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         await repo.updateProblem(updated, userLanguage: userLang);
       } on LanguageMismatchException catch (e) {
         if (!mounted) return;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.languageMismatchError(e.descriptionLang, e.goalLang),
-            ),
-          ),
-        );
+        showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
         return;
       } on Exception catch (e) {
         log('Failed to save problem: $e');
         if (!mounted) return;
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.saveProblemError)),
-        );
+        showToast(l10n.saveProblemError);
         return;
       }
       if (!mounted) return;
@@ -182,9 +173,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       problemsCubit?.applyLocalUpdate(updated);
     }
     if (!mounted) return;
-    messenger.showSnackBar(
-      SnackBar(content: Text(l10n.problemSavedToast)),
-    );
+    showToast(l10n.problemSavedToast);
   }
 
   Widget _buildInspoBacklink(Problem problem) {

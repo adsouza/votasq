@@ -16,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../helpers/helpers.dart';
 
@@ -118,11 +119,13 @@ void main() {
             value: translationRepo,
           ),
         ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          // Test ProblemsView directly — ProblemsPage creates its own cubit.
-          home: Scaffold(body: ProblemsView()),
+        child: const ToastificationWrapper(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            // Test ProblemsView directly — ProblemsPage creates its own cubit.
+            home: Scaffold(body: ProblemsView()),
+          ),
         ),
       ),
     );
@@ -643,6 +646,10 @@ void main() {
           userId: 'user1',
         ),
       ).called(1);
+      // Dismiss and pump past the dismiss-animation + delayed-dispose so the
+      // toast's internal timers don't outlive the disposed widget tree.
+      toastification.dismissAll(delayForAnimation: false);
+      await tester.pump(const Duration(seconds: 1));
     });
 
     testWidgets('complaint dialog cancel does not submit', (
