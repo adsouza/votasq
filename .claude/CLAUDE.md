@@ -80,7 +80,7 @@ The `shared` package is referenced as `shared: any` by both client and server an
 
 - State management via `bloc`/`flutter_bloc` — feature code lives in `apps/client/lib/problems/` with cubit, state, and view layers
 - Three app flavors: development, staging, production (separate `main_*.dart` entry points)
-- Internationalization via ARB files in `apps/client/lib/l10n/` (English + Spanish)
+- Internationalization via ARB files in `apps/client/lib/l10n/` (English + several other langs)
 - Linting: `very_good_analysis` + `bloc_lint`
 
 ### Server (Dart Frog)
