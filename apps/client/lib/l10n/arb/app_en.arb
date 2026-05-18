@@ -68,6 +68,10 @@
     "@problemDetailPageTitle": {
         "description": "Title in the AppBar of the problem detail page"
     },
+    "newProblemPageTitle": "What is a collective problem that vexes you?",
+    "@newProblemPageTitle": {
+        "description": "Title in the AppBar of the page for creating a new problem"
+    },
     "problemNotFound": "Problem not found",
     "@problemNotFound": {
         "description": "Error message when a problem cannot be found by ID"
@@ -76,9 +80,9 @@
     "@problemDetailSaveButton": {
         "description": "Label for the save button on the problem detail page"
     },
-    "problemDetailBackButton": "Back",
+    "problemDetailBackButton": "See everybody's problems",
     "@problemDetailBackButton": {
-        "description": "Label for the back button on the problem detail page"
+        "description": "Label for the back button on the problem detail page that returns the user to the global problems list"
     },
     "geoscopeLabel": "Geographic scope:",
     "@geoscopeLabel": {

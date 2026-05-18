@@ -187,7 +187,7 @@ void main() {
       when(() => repo.getProblem(any())).thenAnswer((_) async => null);
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Back'));
+      await tester.tap(find.text("See everybody's problems"));
       await tester.pumpAndSettle();
       expect(find.text('home'), findsOneWidget);
     });

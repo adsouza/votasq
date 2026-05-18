@@ -10,6 +10,10 @@ GoRouter buildRouter() {
         builder: (context, state) => const ProblemsPage(),
         routes: [
           GoRoute(
+            path: 'new',
+            builder: (context, state) => const NewProblemPage(),
+          ),
+          GoRoute(
             path: 'problems/:id',
             builder: (context, state) {
               final id = state.pathParameters['id']!;
