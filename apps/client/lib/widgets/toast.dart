@@ -8,16 +8,19 @@ import 'package:toastification/toastification.dart';
 final Color _backgroundColor = Colors.orange.shade100.withValues(alpha: 0.85);
 const _foregroundColor = Color(0xFF1A237E); // Material indigo.shade900.
 
-/// Shows a centered toast notification with [message].
+/// Shows a centered toast notification with [message]. Returns a handle that
+/// callers can pass to `toastification.dismiss(...)` to remove the toast
+/// before its [duration] elapses — useful when the toast's instruction stops
+/// being relevant (e.g. the originating page is no longer visible).
 ///
 /// Requires [ToastificationWrapper] to be in the widget tree above any
 /// [MaterialApp] that calls this; the wrapper provides the overlay and lets us
 /// fire toasts without a [BuildContext].
-void showToast(
+ToastificationItem showToast(
   String message, {
   Duration duration = const Duration(seconds: 4),
 }) {
-  toastification.show(
+  return toastification.show(
     // Explicit maxLines overrides toastification's built-in 2-line cap, which
     // would otherwise ellipsize longer messages like the sign-in hint.
     title: Text(

@@ -21,7 +21,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
+import 'package:toastification/toastification.dart';
 
 class ProblemsPage extends StatelessWidget {
   const ProblemsPage({super.key});
@@ -54,6 +56,46 @@ class _ProblemsPageCoordinator extends StatefulWidget {
 class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
   bool _pickerActive = false;
   bool _signInToastShown = false;
+  ToastificationItem? _signInToastItem;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    // Re-attempt the toast when the user pops a child route (e.g. /new),
+    // since no auth/geoscope transition fires on that navigation alone.
+    // Also dismiss any live toast when a child route is pushed on top —
+    // toastification's overlay persists across navigations, so the toast
+    // would otherwise linger on /new for the remainder of its duration.
+    _router = GoRouter.of(context)..routerDelegate.addListener(_onRouterChange);
+  }
+
+  @override
+  void dispose() {
+    _router.routerDelegate.removeListener(_onRouterChange);
+    super.dispose();
+  }
+
+  /// Whether the current top-of-stack location is this page. We read from
+  /// go_router's router delegate rather than `ModalRoute.of(context).isCurrent`
+  /// because the navigator widget hasn't rebuilt yet at the moment route
+  /// listeners fire — `currentConfiguration` reflects the intended state,
+  /// which is what we want to gate on.
+  bool get _isHomeCurrent =>
+      _router.routerDelegate.currentConfiguration.uri.path == '/';
+
+  void _onRouterChange() {
+    if (!mounted) return;
+    if (!_isHomeCurrent) {
+      final item = _signInToastItem;
+      if (item != null) {
+        toastification.dismiss(item);
+        _signInToastItem = null;
+      }
+      return;
+    }
+    _maybeShowSignInToast();
+  }
 
   Future<void> _openPicker() async {
     context.read<GeoscopeCubit>().acknowledgeSelectionPrompt();
@@ -72,8 +114,13 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
   /// (picker active, auth still resolving, geoscope still loading, etc.) so
   /// the next state transition can re-attempt.
   void _maybeShowSignInToast() {
+    if (!mounted) return;
     if (_signInToastShown) return;
     if (_pickerActive) return;
+    // The toast text directs users to the sign-in icon in this page's
+    // app bar. Skip when a child route (e.g. /new) is on top — that page
+    // doesn't have the icon, so the instruction wouldn't apply.
+    if (!_isHomeCurrent) return;
     final authState = context.read<AuthCubit>().state;
     if (authState.status != AuthStatus.unauthenticated) return;
     final geoState = context.read<GeoscopeCubit>().state;
@@ -83,7 +130,13 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
     _signInToastShown = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      showToast(
+      // Re-check: the user may have navigated away in the frame between
+      // scheduling and now. Reset the flag so a return can re-attempt.
+      if (!_isHomeCurrent) {
+        _signInToastShown = false;
+        return;
+      }
+      _signInToastItem = showToast(
         context.l10n.signInHintToast,
         duration: const Duration(seconds: 5),
       );

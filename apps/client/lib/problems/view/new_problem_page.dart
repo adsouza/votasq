@@ -27,18 +27,15 @@ class _NewProblemPageState extends State<NewProblemPage> {
   final _controller = TextEditingController();
   final _goalController = TextEditingController();
   String? _geoscope;
-  bool _signInTriggered = false;
   bool _pickerTriggered = false;
   bool _submitting = false;
 
   @override
   void initState() {
     super.initState();
-    // initState runs before the first build, so context.read of bloc state is
-    // safe but showing a modal sheet is not. Defer side effects by one frame.
+    // Showing a modal sheet during initState is unsafe; defer by one frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _maybeTriggerSignIn();
       _maybeShowPicker();
     });
   }
@@ -48,40 +45,6 @@ class _NewProblemPageState extends State<NewProblemPage> {
     _controller.dispose();
     _goalController.dispose();
     super.dispose();
-  }
-
-  void _maybeTriggerSignIn() {
-    if (_signInTriggered) return;
-    final authState = context.read<AuthCubit>().state;
-    if (authState.status != AuthStatus.unauthenticated) return;
-    _signInTriggered = true;
-    unawaited(_triggerSignIn());
-  }
-
-  Future<void> _triggerSignIn() async {
-    final authCubit = context.read<AuthCubit>();
-    final router = GoRouter.of(context);
-    // Subscribe before calling signIn so we don't miss the authenticated
-    // emission if it lands while signIn() is still in flight — the Future
-    // returned by signIn resolves separately from the auth stream.
-    final authenticated = authCubit.stream.firstWhere(
-      (s) => s.status == AuthStatus.authenticated,
-    );
-    await authCubit.signIn();
-    if (!mounted) return;
-    if (authCubit.state.status == AuthStatus.authenticated) return;
-    // signIn() returned without authenticating: either the auth-stream
-    // emission is racing us (success case) or the user cancelled / it
-    // failed. Cap the wait so a cancellation doesn't strand the page.
-    try {
-      await authenticated.timeout(const Duration(seconds: 1));
-    } on Object {
-      // Timeout or stream error — fall through to redirect.
-    }
-    if (!mounted) return;
-    if (authCubit.state.status != AuthStatus.authenticated) {
-      router.go('/');
-    }
   }
 
   void _maybeShowPicker() {
@@ -134,6 +97,29 @@ class _NewProblemPageState extends State<NewProblemPage> {
     }
     if (!mounted) return;
     router.go('/');
+  }
+
+  Widget _buildSignInPrompt() {
+    final l10n = context.l10n;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilledButton(
+              onPressed: () => context.read<AuthCubit>().signIn(),
+              child: Text(l10n.signInButton),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonal(
+              onPressed: () => context.go('/'),
+              child: Text(l10n.problemDetailBackButton),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildForm() {
@@ -223,10 +209,7 @@ class _NewProblemPageState extends State<NewProblemPage> {
       listeners: [
         BlocListener<AuthCubit, AuthState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
-          listener: (_, _) {
-            _maybeTriggerSignIn();
-            _maybeShowPicker();
-          },
+          listener: (_, _) => _maybeShowPicker(),
         ),
         BlocListener<GeoscopeCubit, GeoscopeState>(
           listenWhen: (prev, curr) =>
@@ -244,11 +227,12 @@ class _NewProblemPageState extends State<NewProblemPage> {
           child: Scaffold(
             appBar: AppBar(title: Text(l10n.newProblemPageTitle)),
             body: BlocBuilder<AuthCubit, AuthState>(
-              builder: (context, authState) {
-                if (authState.status != AuthStatus.authenticated) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return _buildForm();
+              builder: (context, authState) => switch (authState.status) {
+                AuthStatus.unknown => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                AuthStatus.unauthenticated => _buildSignInPrompt(),
+                AuthStatus.authenticated => _buildForm(),
               },
             ),
           ),
