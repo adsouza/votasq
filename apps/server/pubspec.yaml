@@ -18,4 +18,4 @@ dependencies:
 
 dev_dependencies:
   dart_frog_lint: ^0.1.0
-  test: ^1.25.5
+  test: ^1.31.0
