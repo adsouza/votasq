@@ -15,8 +15,13 @@ Votasq is a shared task queue where people vote on task priority. It's a Dart/Fl
 ### Setup
 
 ```sh
-melos setup                # Bootstrap workspace and link packages
+melos setup                # Bootstrap workspace, link packages, enable SwiftPM, activate git hooks
 ```
+
+`melos setup` enables Flutter Swift Package Manager support via `flutter config --enable-swift-package-manager`.
+The Apple platforms (iOS, macOS) build in hybrid mode where SwiftPM and CocoaPods coexist — most plugins resolve via SwiftPM, with the Podfile retained as a fallback.
+
+It also points `core.hooksPath` at the tracked `.githooks/` directory. The `pre-push` hook there runs `melos format` and `flutter analyze apps packages` to catch CI failures before they reach GitHub. Bypass with `git push --no-verify` if you must.
 
 ### Code Generation (required after changing models in packages/shared)
 
@@ -26,7 +31,7 @@ melos gen                  # Runs build_runner across all packages that need it
 
 ### Format, Analyze, Test (mirrors CI)
 
-Run `dart format --set-exit-if-changed apps packages` after every change.
+Run `melos format` after every change. (Plain `dart format apps packages` descends into vendored SwiftPM checkouts under `apps/client/build/` and is noisy.)
 
 Also do this after making nontrivial changes:
 
@@ -68,13 +73,14 @@ Update the `ARCHITECTURE.md` file in the project root dir after making architect
 
 ### Monorepo Structure
 
-Uses Dart's `workspace` feature (pubspec.yaml) with Melos for script orchestration. The `shared` package is referenced as `shared: any` by both client and server and resolved via workspace.
+Uses Dart's `workspace` feature (pubspec.yaml) with Melos for script orchestration.
+The `shared` package is referenced as `shared: any` by both client and server and resolved via workspace.
 
 ### Client (BLoC Pattern)
 
 - State management via `bloc`/`flutter_bloc` — feature code lives in `apps/client/lib/problems/` with cubit, state, and view layers
 - Three app flavors: development, staging, production (separate `main_*.dart` entry points)
-- Internationalization via ARB files in `apps/client/lib/l10n/` (English + Spanish)
+- Internationalization via ARB files in `apps/client/lib/l10n/` (English + several other langs)
 - Linting: `very_good_analysis` + `bloc_lint`
 
 ### Server (Dart Frog)

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Mirror CI's format + analyze checks before pushing.
+# Mirror CI's format + analyze checks before pushing, and guard against
+# AGENTS.md / CLAUDE.md drifting beyond their tool-identity lines.
 # Bypass (rarely): git push --no-verify
 set -e
 
@@ -8,5 +9,15 @@ melos format
 
 echo "[pre-push] flutter analyze..."
 flutter analyze apps packages
+
+echo "[pre-push] AGENTS.md / CLAUDE.md sync..."
+if ! diff -q \
+  <(sed -e '1s|^# AGENTS\.md$|# CLAUDE.md|' \
+        -e '3s|Codex (Codex\.ai/code)|Claude Code (claude.ai/code)|' AGENTS.md) \
+  .claude/CLAUDE.md > /dev/null; then
+  echo "[pre-push] AGENTS.md and CLAUDE.md have drifted beyond their tool-identity lines:"
+  diff AGENTS.md .claude/CLAUDE.md || true
+  exit 1
+fi
 
 echo "[pre-push] ok"
