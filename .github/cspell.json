@@ -20,7 +20,8 @@
   ],
   "useGitignore": true,
   "ignorePaths": [
-    "**/docs/superpowers/plans/**"
+    "**/docs/superpowers/plans/**",
+    "**/google_mlkit_*/**"
   ],
   "words": [
     "codesign",
