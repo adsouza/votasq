@@ -51,7 +51,7 @@ class ProblemReadTile extends StatelessWidget {
           spacing: 6,
           children: [
             GestureDetector(
-              onDoubleTap: () => context.go('/problems/${problem.id}'),
+              onDoubleTap: () => context.push('/problems/${problem.id}'),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
