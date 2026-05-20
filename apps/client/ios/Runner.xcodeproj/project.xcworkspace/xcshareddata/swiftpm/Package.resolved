@@ -46,6 +46,15 @@
       }
     },
     {
+      "identity" : "google-mlkit-swiftpm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/d-date/google-mlkit-swiftpm",
+      "state" : {
+        "revision" : "7aefa43c5105f28b9a8f9a48f7a115524a101186",
+        "version" : "9.0.0"
+      }
+    },
+    {
       "identity" : "googleappmeasurement",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/GoogleAppMeasurement.git",

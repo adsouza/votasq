@@ -8,6 +8,9 @@ workspace:
   - apps/client
   - apps/server
   - packages/shared
+  - packages/google_mlkit_commons
+  - packages/google_mlkit_language_id
+  - packages/google_mlkit_translation
 
 dev_dependencies:
   melos: ^7.5.0

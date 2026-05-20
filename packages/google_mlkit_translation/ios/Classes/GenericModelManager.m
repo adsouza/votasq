@@ -1,0 +1,1 @@
+../../../google_mlkit_commons/ios/Classes/GenericModelManager.m

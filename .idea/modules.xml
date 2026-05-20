@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
 <module fileurl="file://$PROJECT_DIR$/apps/client/melos_client.iml" filepath="$PROJECT_DIR$/apps/client/melos_client.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/google_mlkit_commons/melos_google_mlkit_commons.iml" filepath="$PROJECT_DIR$/packages/google_mlkit_commons/melos_google_mlkit_commons.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/google_mlkit_language_id/melos_google_mlkit_language_id.iml" filepath="$PROJECT_DIR$/packages/google_mlkit_language_id/melos_google_mlkit_language_id.iml"/>
+<module fileurl="file://$PROJECT_DIR$/packages/google_mlkit_translation/melos_google_mlkit_translation.iml" filepath="$PROJECT_DIR$/packages/google_mlkit_translation/melos_google_mlkit_translation.iml"/>
 <module fileurl="file://$PROJECT_DIR$/apps/server/melos_server.iml" filepath="$PROJECT_DIR$/apps/server/melos_server.iml"/>
 <module fileurl="file://$PROJECT_DIR$/packages/shared/melos_shared.iml" filepath="$PROJECT_DIR$/packages/shared/melos_shared.iml"/>
 <module fileurl="file://$PROJECT_DIR$/melos_votasq.iml" filepath="$PROJECT_DIR$/melos_votasq.iml"/>
