@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "मूळवरून फॉर्क केले",
     "forksHeading": "फॉर्क ({count})",
     "problemSavedToast": "तुमचे बदल जतन केले गेले",
-    "saveProblemError": "तुमचे बदल जतन करता आले नाहीत. कृपया पुन्हा प्रयत्न करा."
+    "saveProblemError": "तुमचे बदल जतन करता आले नाहीत. कृपया पुन्हा प्रयत्न करा.",
+    "linkedProblemsHeading": "लिंक केलेल्या समस्या ({count})",
+    "linkProblemButton": "दुसरी समस्या लिंक करा",
+    "linkProblemDialogTitle": "समस्या लिंक करा",
+    "linkProblemSearchHint": "मजकुराद्वारे शोधा, समस्या आयडी किंवा पूर्ण URL पेस्ट करा...",
+    "linkProblemError": "समस्या लिंक करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
+    "unlinkProblemError": "समस्या अनलिंक करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
+    "unlinkProblemTooltip": "ही समस्या अनलिंक करा"
 }

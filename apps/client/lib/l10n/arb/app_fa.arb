@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "فورک‌شده از نسخه‌ی اصلی",
     "forksHeading": "فورک‌ها ({count})",
     "problemSavedToast": "تغییرات شما ذخیره شد",
-    "saveProblemError": "ذخیره تغییرات شما ممکن نشد. لطفاً دوباره تلاش کنید."
+    "saveProblemError": "ذخیره تغییرات شما ممکن نشد. لطفاً دوباره تلاش کنید.",
+    "linkedProblemsHeading": "مسائل مرتبط ({count})",
+    "linkProblemButton": "پیوند دادن مسئله‌ای دیگر",
+    "linkProblemDialogTitle": "پیوند دادن یک مسئله",
+    "linkProblemSearchHint": "جستجو با متن، چسباندن شناسه مسئله، یا آدرس کامل...",
+    "linkProblemError": "پیوند دادن مسئله امکان‌پذیر نبود. لطفاً دوباره تلاش کنید.",
+    "unlinkProblemError": "حذف پیوند مسئله امکان‌پذیر نبود. لطفاً دوباره تلاش کنید.",
+    "unlinkProblemTooltip": "حذف پیوند این مسئله"
 }

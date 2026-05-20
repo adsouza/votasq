@@ -21,7 +21,7 @@ mixin _$Problem {
 // string so `inspoProblemId` can be queried directly to enumerate all
 // forks of a problem. Write-once: only populated at creation time and
 // never modified afterwards.
- String? get inspoProblemId; int? get inspoVersion;
+ String? get inspoProblemId; int? get inspoVersion; List<String> get linkedProblemIds;
 /// Create a copy of Problem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,16 +34,16 @@ $ProblemCopyWith<Problem> get copyWith => _$ProblemCopyWithImpl<Problem>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Problem&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastUpdatedAt, lastUpdatedAt) || other.lastUpdatedAt == lastUpdatedAt)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.geoscope, geoscope) || other.geoscope == geoscope)&&(identical(other.lang, lang) || other.lang == lang)&&(identical(other.votes, votes) || other.votes == votes)&&const DeepCollectionEquality().equals(other.complaints, complaints)&&(identical(other.solved, solved) || other.solved == solved)&&(identical(other.version, version) || other.version == version)&&(identical(other.inspoProblemId, inspoProblemId) || other.inspoProblemId == inspoProblemId)&&(identical(other.inspoVersion, inspoVersion) || other.inspoVersion == inspoVersion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Problem&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastUpdatedAt, lastUpdatedAt) || other.lastUpdatedAt == lastUpdatedAt)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.geoscope, geoscope) || other.geoscope == geoscope)&&(identical(other.lang, lang) || other.lang == lang)&&(identical(other.votes, votes) || other.votes == votes)&&const DeepCollectionEquality().equals(other.complaints, complaints)&&(identical(other.solved, solved) || other.solved == solved)&&(identical(other.version, version) || other.version == version)&&(identical(other.inspoProblemId, inspoProblemId) || other.inspoProblemId == inspoProblemId)&&(identical(other.inspoVersion, inspoVersion) || other.inspoVersion == inspoVersion)&&const DeepCollectionEquality().equals(other.linkedProblemIds, linkedProblemIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,description,createdAt,lastUpdatedAt,ownerId,goal,geoscope,lang,votes,const DeepCollectionEquality().hash(complaints),solved,version,inspoProblemId,inspoVersion);
+int get hashCode => Object.hash(runtimeType,id,description,createdAt,lastUpdatedAt,ownerId,goal,geoscope,lang,votes,const DeepCollectionEquality().hash(complaints),solved,version,inspoProblemId,inspoVersion,const DeepCollectionEquality().hash(linkedProblemIds));
 
 @override
 String toString() {
-  return 'Problem(id: $id, description: $description, createdAt: $createdAt, lastUpdatedAt: $lastUpdatedAt, ownerId: $ownerId, goal: $goal, geoscope: $geoscope, lang: $lang, votes: $votes, complaints: $complaints, solved: $solved, version: $version, inspoProblemId: $inspoProblemId, inspoVersion: $inspoVersion)';
+  return 'Problem(id: $id, description: $description, createdAt: $createdAt, lastUpdatedAt: $lastUpdatedAt, ownerId: $ownerId, goal: $goal, geoscope: $geoscope, lang: $lang, votes: $votes, complaints: $complaints, solved: $solved, version: $version, inspoProblemId: $inspoProblemId, inspoVersion: $inspoVersion, linkedProblemIds: $linkedProblemIds)';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $ProblemCopyWith<$Res>  {
   factory $ProblemCopyWith(Problem value, $Res Function(Problem) _then) = _$ProblemCopyWithImpl;
 @useResult
 $Res call({
- String id, String description, DateTime createdAt, DateTime lastUpdatedAt, String ownerId, String goal, String geoscope, String? lang, int votes, List<String> complaints, bool solved, int version, String? inspoProblemId, int? inspoVersion
+ String id, String description, DateTime createdAt, DateTime lastUpdatedAt, String ownerId, String goal, String geoscope, String? lang, int votes, List<String> complaints, bool solved, int version, String? inspoProblemId, int? inspoVersion, List<String> linkedProblemIds
 });
 
 
@@ -71,7 +71,7 @@ class _$ProblemCopyWithImpl<$Res>
 
 /// Create a copy of Problem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? createdAt = null,Object? lastUpdatedAt = null,Object? ownerId = null,Object? goal = null,Object? geoscope = null,Object? lang = freezed,Object? votes = null,Object? complaints = null,Object? solved = null,Object? version = null,Object? inspoProblemId = freezed,Object? inspoVersion = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? createdAt = null,Object? lastUpdatedAt = null,Object? ownerId = null,Object? goal = null,Object? geoscope = null,Object? lang = freezed,Object? votes = null,Object? complaints = null,Object? solved = null,Object? version = null,Object? inspoProblemId = freezed,Object? inspoVersion = freezed,Object? linkedProblemIds = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -87,7 +87,8 @@ as List<String>,solved: null == solved ? _self.solved : solved // ignore: cast_n
 as bool,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,inspoProblemId: freezed == inspoProblemId ? _self.inspoProblemId : inspoProblemId // ignore: cast_nullable_to_non_nullable
 as String?,inspoVersion: freezed == inspoVersion ? _self.inspoVersion : inspoVersion // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,linkedProblemIds: null == linkedProblemIds ? _self.linkedProblemIds : linkedProblemIds // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -172,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  DateTime createdAt,  DateTime lastUpdatedAt,  String ownerId,  String goal,  String geoscope,  String? lang,  int votes,  List<String> complaints,  bool solved,  int version,  String? inspoProblemId,  int? inspoVersion)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  DateTime createdAt,  DateTime lastUpdatedAt,  String ownerId,  String goal,  String geoscope,  String? lang,  int votes,  List<String> complaints,  bool solved,  int version,  String? inspoProblemId,  int? inspoVersion,  List<String> linkedProblemIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Problem() when $default != null:
-return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_that.ownerId,_that.goal,_that.geoscope,_that.lang,_that.votes,_that.complaints,_that.solved,_that.version,_that.inspoProblemId,_that.inspoVersion);case _:
+return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_that.ownerId,_that.goal,_that.geoscope,_that.lang,_that.votes,_that.complaints,_that.solved,_that.version,_that.inspoProblemId,_that.inspoVersion,_that.linkedProblemIds);case _:
   return orElse();
 
 }
@@ -193,10 +194,10 @@ return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  DateTime createdAt,  DateTime lastUpdatedAt,  String ownerId,  String goal,  String geoscope,  String? lang,  int votes,  List<String> complaints,  bool solved,  int version,  String? inspoProblemId,  int? inspoVersion)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  DateTime createdAt,  DateTime lastUpdatedAt,  String ownerId,  String goal,  String geoscope,  String? lang,  int votes,  List<String> complaints,  bool solved,  int version,  String? inspoProblemId,  int? inspoVersion,  List<String> linkedProblemIds)  $default,) {final _that = this;
 switch (_that) {
 case _Problem():
-return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_that.ownerId,_that.goal,_that.geoscope,_that.lang,_that.votes,_that.complaints,_that.solved,_that.version,_that.inspoProblemId,_that.inspoVersion);case _:
+return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_that.ownerId,_that.goal,_that.geoscope,_that.lang,_that.votes,_that.complaints,_that.solved,_that.version,_that.inspoProblemId,_that.inspoVersion,_that.linkedProblemIds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +214,10 @@ return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  DateTime createdAt,  DateTime lastUpdatedAt,  String ownerId,  String goal,  String geoscope,  String? lang,  int votes,  List<String> complaints,  bool solved,  int version,  String? inspoProblemId,  int? inspoVersion)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  DateTime createdAt,  DateTime lastUpdatedAt,  String ownerId,  String goal,  String geoscope,  String? lang,  int votes,  List<String> complaints,  bool solved,  int version,  String? inspoProblemId,  int? inspoVersion,  List<String> linkedProblemIds)?  $default,) {final _that = this;
 switch (_that) {
 case _Problem() when $default != null:
-return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_that.ownerId,_that.goal,_that.geoscope,_that.lang,_that.votes,_that.complaints,_that.solved,_that.version,_that.inspoProblemId,_that.inspoVersion);case _:
+return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_that.ownerId,_that.goal,_that.geoscope,_that.lang,_that.votes,_that.complaints,_that.solved,_that.version,_that.inspoProblemId,_that.inspoVersion,_that.linkedProblemIds);case _:
   return null;
 
 }
@@ -228,7 +229,7 @@ return $default(_that.id,_that.description,_that.createdAt,_that.lastUpdatedAt,_
 @JsonSerializable()
 
 class _Problem implements Problem {
-  const _Problem({required this.id, required this.description, required this.createdAt, required this.lastUpdatedAt, required this.ownerId, this.goal = '', this.geoscope = '/', this.lang, this.votes = 1, final  List<String> complaints = const [], this.solved = false, this.version = 1, this.inspoProblemId, this.inspoVersion}): _complaints = complaints;
+  const _Problem({required this.id, required this.description, required this.createdAt, required this.lastUpdatedAt, required this.ownerId, this.goal = '', this.geoscope = '/', this.lang, this.votes = 1, final  List<String> complaints = const [], this.solved = false, this.version = 1, this.inspoProblemId, this.inspoVersion, final  List<String> linkedProblemIds = const []}): _complaints = complaints,_linkedProblemIds = linkedProblemIds;
   factory _Problem.fromJson(Map<String, dynamic> json) => _$ProblemFromJson(json);
 
 @override final  String id;
@@ -257,6 +258,13 @@ class _Problem implements Problem {
 // never modified afterwards.
 @override final  String? inspoProblemId;
 @override final  int? inspoVersion;
+ final  List<String> _linkedProblemIds;
+@override@JsonKey() List<String> get linkedProblemIds {
+  if (_linkedProblemIds is EqualUnmodifiableListView) return _linkedProblemIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_linkedProblemIds);
+}
+
 
 /// Create a copy of Problem
 /// with the given fields replaced by the non-null parameter values.
@@ -271,16 +279,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Problem&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastUpdatedAt, lastUpdatedAt) || other.lastUpdatedAt == lastUpdatedAt)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.geoscope, geoscope) || other.geoscope == geoscope)&&(identical(other.lang, lang) || other.lang == lang)&&(identical(other.votes, votes) || other.votes == votes)&&const DeepCollectionEquality().equals(other._complaints, _complaints)&&(identical(other.solved, solved) || other.solved == solved)&&(identical(other.version, version) || other.version == version)&&(identical(other.inspoProblemId, inspoProblemId) || other.inspoProblemId == inspoProblemId)&&(identical(other.inspoVersion, inspoVersion) || other.inspoVersion == inspoVersion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Problem&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastUpdatedAt, lastUpdatedAt) || other.lastUpdatedAt == lastUpdatedAt)&&(identical(other.ownerId, ownerId) || other.ownerId == ownerId)&&(identical(other.goal, goal) || other.goal == goal)&&(identical(other.geoscope, geoscope) || other.geoscope == geoscope)&&(identical(other.lang, lang) || other.lang == lang)&&(identical(other.votes, votes) || other.votes == votes)&&const DeepCollectionEquality().equals(other._complaints, _complaints)&&(identical(other.solved, solved) || other.solved == solved)&&(identical(other.version, version) || other.version == version)&&(identical(other.inspoProblemId, inspoProblemId) || other.inspoProblemId == inspoProblemId)&&(identical(other.inspoVersion, inspoVersion) || other.inspoVersion == inspoVersion)&&const DeepCollectionEquality().equals(other._linkedProblemIds, _linkedProblemIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,description,createdAt,lastUpdatedAt,ownerId,goal,geoscope,lang,votes,const DeepCollectionEquality().hash(_complaints),solved,version,inspoProblemId,inspoVersion);
+int get hashCode => Object.hash(runtimeType,id,description,createdAt,lastUpdatedAt,ownerId,goal,geoscope,lang,votes,const DeepCollectionEquality().hash(_complaints),solved,version,inspoProblemId,inspoVersion,const DeepCollectionEquality().hash(_linkedProblemIds));
 
 @override
 String toString() {
-  return 'Problem(id: $id, description: $description, createdAt: $createdAt, lastUpdatedAt: $lastUpdatedAt, ownerId: $ownerId, goal: $goal, geoscope: $geoscope, lang: $lang, votes: $votes, complaints: $complaints, solved: $solved, version: $version, inspoProblemId: $inspoProblemId, inspoVersion: $inspoVersion)';
+  return 'Problem(id: $id, description: $description, createdAt: $createdAt, lastUpdatedAt: $lastUpdatedAt, ownerId: $ownerId, goal: $goal, geoscope: $geoscope, lang: $lang, votes: $votes, complaints: $complaints, solved: $solved, version: $version, inspoProblemId: $inspoProblemId, inspoVersion: $inspoVersion, linkedProblemIds: $linkedProblemIds)';
 }
 
 
@@ -291,7 +299,7 @@ abstract mixin class _$ProblemCopyWith<$Res> implements $ProblemCopyWith<$Res> {
   factory _$ProblemCopyWith(_Problem value, $Res Function(_Problem) _then) = __$ProblemCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String description, DateTime createdAt, DateTime lastUpdatedAt, String ownerId, String goal, String geoscope, String? lang, int votes, List<String> complaints, bool solved, int version, String? inspoProblemId, int? inspoVersion
+ String id, String description, DateTime createdAt, DateTime lastUpdatedAt, String ownerId, String goal, String geoscope, String? lang, int votes, List<String> complaints, bool solved, int version, String? inspoProblemId, int? inspoVersion, List<String> linkedProblemIds
 });
 
 
@@ -308,7 +316,7 @@ class __$ProblemCopyWithImpl<$Res>
 
 /// Create a copy of Problem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? createdAt = null,Object? lastUpdatedAt = null,Object? ownerId = null,Object? goal = null,Object? geoscope = null,Object? lang = freezed,Object? votes = null,Object? complaints = null,Object? solved = null,Object? version = null,Object? inspoProblemId = freezed,Object? inspoVersion = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? createdAt = null,Object? lastUpdatedAt = null,Object? ownerId = null,Object? goal = null,Object? geoscope = null,Object? lang = freezed,Object? votes = null,Object? complaints = null,Object? solved = null,Object? version = null,Object? inspoProblemId = freezed,Object? inspoVersion = freezed,Object? linkedProblemIds = null,}) {
   return _then(_Problem(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -324,7 +332,8 @@ as List<String>,solved: null == solved ? _self.solved : solved // ignore: cast_n
 as bool,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,inspoProblemId: freezed == inspoProblemId ? _self.inspoProblemId : inspoProblemId // ignore: cast_nullable_to_non_nullable
 as String?,inspoVersion: freezed == inspoVersion ? _self.inspoVersion : inspoVersion // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,linkedProblemIds: null == linkedProblemIds ? _self._linkedProblemIds : linkedProblemIds // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

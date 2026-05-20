@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Phân nhánh từ bản gốc",
     "forksHeading": "Phân nhánh ({count})",
     "problemSavedToast": "Đã lưu các thay đổi của bạn",
-    "saveProblemError": "Không thể lưu thay đổi của bạn. Vui lòng thử lại."
+    "saveProblemError": "Không thể lưu thay đổi của bạn. Vui lòng thử lại.",
+    "linkedProblemsHeading": "Vấn đề liên kết ({count})",
+    "linkProblemButton": "Liên kết vấn đề khác",
+    "linkProblemDialogTitle": "Liên kết vấn đề",
+    "linkProblemSearchHint": "Tìm theo văn bản, dán ID vấn đề, hoặc URL đầy đủ...",
+    "linkProblemError": "Không thể liên kết vấn đề. Vui lòng thử lại.",
+    "unlinkProblemError": "Không thể hủy liên kết vấn đề. Vui lòng thử lại.",
+    "unlinkProblemTooltip": "Hủy liên kết vấn đề này"
 }

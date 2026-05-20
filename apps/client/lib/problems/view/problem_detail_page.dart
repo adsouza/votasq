@@ -32,6 +32,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   Problem? _problem;
   List<({String name, int votes})>? _voters;
   List<Problem>? _forks;
+  List<Problem>? _linkedProblems;
   bool _loading = true;
   String? _error;
   String? _geoscope;
@@ -79,10 +80,24 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         log('Failed to load forks: $e');
       }
       if (!mounted) return;
+      List<Problem>? linkedProblems;
+      try {
+        if (problem.linkedProblemIds.isNotEmpty) {
+          linkedProblems = await Future.wait(
+            problem.linkedProblemIds.map(repo.getProblem),
+          ).then((list) => list.whereType<Problem>().toList());
+        } else {
+          linkedProblems = [];
+        }
+      } on Exception catch (e) {
+        log('Failed to load linked problems: $e');
+      }
+      if (!mounted) return;
       setState(() {
         _problem = problem;
         _voters = voters;
         _forks = forks;
+        _linkedProblems = linkedProblems;
         _controller.text = problem.description;
         _goalController.text = problem.goal;
         _geoscope = problem.geoscope;
@@ -204,6 +219,8 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         initiallyExpanded: true,
         tilePadding: EdgeInsets.zero,
         childrenPadding: EdgeInsets.zero,
+        shape: const RoundedRectangleBorder(),
+        collapsedShape: const RoundedRectangleBorder(),
         children: [
           for (final fork in forks)
             ListTile(
@@ -219,6 +236,88 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildLinkedProblemsList() {
+    final linked = _linkedProblems;
+    if (linked == null || linked.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final userId = context.read<AuthCubit>().state.userId;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: ExpansionTile(
+        title: Text(
+          l10n.linkedProblemsHeading(linked.length),
+          style: theme.textTheme.titleMedium,
+        ),
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        shape: const RoundedRectangleBorder(),
+        collapsedShape: const RoundedRectangleBorder(),
+        children: [
+          for (final p in linked)
+            ListTile(
+              dense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+              title: Text(
+                p.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: p.goal.isNotEmpty
+                  ? Text(
+                      p.goal,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    )
+                  : null,
+              trailing: userId != null
+                  ? IconButton(
+                      tooltip: l10n.unlinkProblemTooltip,
+                      icon: const Icon(Icons.link_off),
+                      onPressed: () => _unlink(p.id),
+                    )
+                  : null,
+              onTap: () => context.go('/problems/${p.id}'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _unlink(String targetId) async {
+    final repo = context.read<FirestoreRepository>();
+    try {
+      await repo.unlinkProblem(targetId);
+      if (!mounted) return;
+      await _load();
+    } on Exception catch (e) {
+      log('Failed to unlink problem: $e');
+      if (mounted) {
+        showToast(context.l10n.unlinkProblemError);
+      }
+    }
+  }
+
+  Future<void> _showLinkProblemDialog(BuildContext context) async {
+    final problem = _problem;
+    if (problem == null) return;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => _LinkProblemDialog(
+        currentProblem: problem,
+        linkedProblemIds: problem.linkedProblemIds,
+      ),
+    );
+    if (result == true && mounted) {
+      await _load();
+    }
   }
 
   Widget _buildVoterList() {
@@ -371,6 +470,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             ),
           ),
           _buildForksList(),
+          _buildLinkedProblemsList(),
           _buildVoterList(),
           const SizedBox(height: 24),
           FilledButton.tonal(
@@ -435,6 +535,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             ],
           ),
           _buildForksList(),
+          _buildLinkedProblemsList(),
           _buildVoterList(),
           const SizedBox(height: 24),
           ValueListenableBuilder<TextEditingValue>(
@@ -518,9 +619,274 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   icon: const Icon(Icons.call_split),
                   onPressed: () => _fork(problem, userId),
                 ),
+              if (userId != null)
+                IconButton(
+                  tooltip: l10n.linkProblemButton,
+                  icon: const Icon(Icons.link),
+                  onPressed: () => _showLinkProblemDialog(context),
+                ),
             ],
           ),
-          body: isOwner ? _buildEditBody(problem) : _buildReadOnlyBody(problem),
+          body: SingleChildScrollView(
+            child: isOwner
+                ? _buildEditBody(problem)
+                : _buildReadOnlyBody(problem),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkProblemDialog extends StatefulWidget {
+  const _LinkProblemDialog({
+    required this.currentProblem,
+    required this.linkedProblemIds,
+  });
+
+  final Problem currentProblem;
+  final List<String> linkedProblemIds;
+
+  @override
+  State<_LinkProblemDialog> createState() => _LinkProblemDialogState();
+}
+
+class _LinkProblemDialogState extends State<_LinkProblemDialog> {
+  final _searchController = TextEditingController();
+  final _uuidRegex = RegExp(
+    '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+    '[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+  );
+
+  List<Problem> _allProblems = [];
+  List<Problem> _searchResults = [];
+  bool _loading = false;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+    unawaited(_loadInitialProblems());
+  }
+
+  @override
+  void dispose() {
+    _searchController
+      ..removeListener(_onSearchChanged)
+      ..dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadInitialProblems() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+    try {
+      final repo = context.read<FirestoreRepository>();
+      final list = await repo.getGlobalProblemsForSearch();
+      if (mounted) {
+        setState(() {
+          _allProblems = list;
+          _loading = false;
+          _filterResults();
+        });
+      }
+    } on Exception catch (e) {
+      log('Failed to load global problems: $e');
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        unawaited(_performSearch());
+      }
+    });
+  }
+
+  Future<void> _performSearch() async {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) {
+      setState(_filterResults);
+      return;
+    }
+
+    final match = _uuidRegex.firstMatch(query);
+    if (match != null) {
+      final extractedUuid = match.group(0)!;
+      if (!mounted) return;
+      setState(() => _loading = true);
+      try {
+        final repo = context.read<FirestoreRepository>();
+        final problem = await repo.getProblem(extractedUuid);
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            if (problem != null) {
+              _searchResults = [problem];
+            } else {
+              _searchResults = [];
+            }
+            _excludeCurrentAndLinked();
+          });
+        }
+      } on Exception catch (e) {
+        log('Failed to fetch problem by UUID: $e');
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _searchResults = [];
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(_filterResults);
+      }
+    }
+  }
+
+  void _filterResults() {
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      _searchResults = List.from(_allProblems);
+    } else {
+      _searchResults = _allProblems.where((p) {
+        final descMatch = p.description.toLowerCase().contains(query);
+        final goalMatch = p.goal.toLowerCase().contains(query);
+        return descMatch || goalMatch;
+      }).toList();
+    }
+    _excludeCurrentAndLinked();
+  }
+
+  void _excludeCurrentAndLinked() {
+    _searchResults = _searchResults.where((p) {
+      final isSelf = p.id == widget.currentProblem.id;
+      final isAlreadyLinked = widget.linkedProblemIds.contains(p.id);
+      return !isSelf && !isAlreadyLinked;
+    }).toList();
+  }
+
+  Future<void> _link(Problem target) async {
+    final repo = context.read<FirestoreRepository>();
+    final l10n = context.l10n;
+    try {
+      await repo.linkProblems(widget.currentProblem.id, target.id);
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } on Exception catch (e) {
+      log('Failed to link problem: $e');
+      showToast(l10n.linkProblemError);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.linkProblemDialogTitle,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: l10n.linkProblemSearchHint,
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _searchResults.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No problems found',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: _searchResults.length,
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final problem = _searchResults[index];
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          title: Text(
+                            problem.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: problem.goal.isNotEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    problem.goal,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                          trailing: IconButton(
+                            icon: const Icon(Icons.link),
+                            tooltip: l10n.linkProblemButton,
+                            color: theme.colorScheme.primary,
+                            onPressed: () => _link(problem),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );

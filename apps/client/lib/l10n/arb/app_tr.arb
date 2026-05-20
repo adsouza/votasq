@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Orijinalden çatallandı",
     "forksHeading": "Çatallar ({count})",
     "problemSavedToast": "Değişiklikleriniz kaydedildi",
-    "saveProblemError": "Değişiklikleriniz kaydedilemedi. Lütfen tekrar deneyin."
+    "saveProblemError": "Değişiklikleriniz kaydedilemedi. Lütfen tekrar deneyin.",
+    "linkedProblemsHeading": "Bağlantılı Sorunlar ({count})",
+    "linkProblemButton": "Başka bir sorun bağla",
+    "linkProblemDialogTitle": "Sorun Bağla",
+    "linkProblemSearchHint": "Metinle ara, sorun kimliğini veya tam URL'yi yapıştır...",
+    "linkProblemError": "Sorun bağlanamadı. Lütfen tekrar deneyin.",
+    "unlinkProblemError": "Sorun bağlantısı kesilemedi. Lütfen tekrar deneyin.",
+    "unlinkProblemTooltip": "Bu sorunun bağlantısını kes"
 }

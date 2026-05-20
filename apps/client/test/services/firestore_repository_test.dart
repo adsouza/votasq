@@ -798,5 +798,68 @@ void main() {
         await repo.grantVotesAndTouch('ghost');
       });
     });
+
+    group('linking and search', () {
+      test('linkProblems merges cliques symmetrically', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await seedProblem(id: 'p3');
+
+        // Link p1 and p2 first
+        await repo.linkProblems('p1', 'p2');
+
+        var updatedP1 = await repo.getProblem('p1');
+        var updatedP2 = await repo.getProblem('p2');
+        expect(updatedP1!.linkedProblemIds, ['p2']);
+        expect(updatedP2!.linkedProblemIds, ['p1']);
+
+        // Merge p3 into the cluster
+        await repo.linkProblems('p2', 'p3');
+
+        updatedP1 = await repo.getProblem('p1');
+        updatedP2 = await repo.getProblem('p2');
+        final updatedP3 = await repo.getProblem('p3');
+
+        // Fully connected clique: p1, p2, p3 each linked to all others
+        expect(updatedP1!.linkedProblemIds.toSet(), {'p2', 'p3'});
+        expect(updatedP2!.linkedProblemIds.toSet(), {'p1', 'p3'});
+        expect(updatedP3!.linkedProblemIds.toSet(), {'p1', 'p2'});
+      });
+
+      test('unlinkProblem removes a problem symmetrically', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await seedProblem(id: 'p3');
+
+        // Link p1, p2, p3
+        await repo.linkProblems('p1', 'p2');
+        await repo.linkProblems('p2', 'p3');
+
+        // Unlink p3
+        await repo.unlinkProblem('p3');
+
+        final updatedP1 = await repo.getProblem('p1');
+        final updatedP2 = await repo.getProblem('p2');
+        final updatedP3 = await repo.getProblem('p3');
+
+        // p1 and p2 should still be linked together
+        expect(updatedP1!.linkedProblemIds, ['p2']);
+        expect(updatedP2!.linkedProblemIds, ['p1']);
+        // p3 should be completely unlinked
+        expect(updatedP3!.linkedProblemIds, isEmpty);
+      });
+
+      test('getGlobalProblemsForSearch returns active problems', () async {
+        await seedProblem(id: 'p1', votes: 10);
+        await seedProblem(id: 'p2', solved: true, votes: 50);
+        await seedProblem(id: 'p3', votes: 20);
+
+        final results = await repo.getGlobalProblemsForSearch();
+        expect(results, hasLength(2));
+        // Sorted by votes DESC, then ID ASC
+        expect(results[0].id, 'p3');
+        expect(results[1].id, 'p1');
+      });
+    });
   });
 }

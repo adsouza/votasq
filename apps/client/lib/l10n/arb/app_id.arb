@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Difork dari aslinya",
     "forksHeading": "Fork ({count})",
     "problemSavedToast": "Perubahan Anda telah disimpan",
-    "saveProblemError": "Tidak dapat menyimpan perubahan Anda. Silakan coba lagi."
+    "saveProblemError": "Tidak dapat menyimpan perubahan Anda. Silakan coba lagi.",
+    "linkedProblemsHeading": "Masalah Terkait ({count})",
+    "linkProblemButton": "Tautkan masalah lain",
+    "linkProblemDialogTitle": "Tautkan Masalah",
+    "linkProblemSearchHint": "Cari dengan teks, tempel ID masalah, atau URL lengkap...",
+    "linkProblemError": "Tidak dapat menautkan masalah. Silakan coba lagi.",
+    "unlinkProblemError": "Tidak dapat melepaskan tautan masalah. Silakan coba lagi.",
+    "unlinkProblemTooltip": "Lepaskan tautan masalah ini"
 }

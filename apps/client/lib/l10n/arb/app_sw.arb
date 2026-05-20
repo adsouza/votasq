@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Nakala kutoka kwa asili",
     "forksHeading": "Nakala ({count})",
     "problemSavedToast": "Mabadiliko yako yamehifadhiwa",
-    "saveProblemError": "Imeshindwa kuhifadhi mabadiliko yako. Tafadhali jaribu tena."
+    "saveProblemError": "Imeshindwa kuhifadhi mabadiliko yako. Tafadhali jaribu tena.",
+    "linkedProblemsHeading": "Changamoto Zilizounganishwa ({count})",
+    "linkProblemButton": "Unganisha changamoto nyingine",
+    "linkProblemDialogTitle": "Unganisha Changamoto",
+    "linkProblemSearchHint": "Tafuta kwa maandishi, bandika ID ya changamoto, au URL kamili...",
+    "linkProblemError": "Imeshindwa kuunganisha changamoto. Tafadhali jaribu tena.",
+    "unlinkProblemError": "Imeshindwa kutenganisha changamoto. Tafadhali jaribu tena.",
+    "unlinkProblemTooltip": "Tenganisha changamoto hii"
 }

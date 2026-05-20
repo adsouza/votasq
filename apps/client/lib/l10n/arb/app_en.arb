@@ -217,5 +217,38 @@
     "saveProblemError": "Could not save your changes. Please try again.",
     "@saveProblemError": {
         "description": "SnackBar message shown when saving a problem fails for any reason other than language mismatch"
+    },
+    "linkedProblemsHeading": "Linked Problems ({count})",
+    "@linkedProblemsHeading": {
+        "description": "Heading for the section showing linked problems",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "linkProblemButton": "Link another problem",
+    "@linkProblemButton": {
+        "description": "Label for the button that opens the link problem dialog"
+    },
+    "linkProblemDialogTitle": "Link a Problem",
+    "@linkProblemDialogTitle": {
+        "description": "Title of the dialog for linking a similar problem"
+    },
+    "linkProblemSearchHint": "Search by text, paste problem ID, or full URL...",
+    "@linkProblemSearchHint": {
+        "description": "Placeholder hint text in the search bar of the link problem dialog"
+    },
+    "linkProblemError": "Could not link problem. Please try again.",
+    "@linkProblemError": {
+        "description": "Toast message shown when linking a problem fails"
+    },
+    "unlinkProblemError": "Could not unlink problem. Please try again.",
+    "@unlinkProblemError": {
+        "description": "Toast message shown when unlinking a problem fails"
+    },
+    "unlinkProblemTooltip": "Unlink this problem",
+    "@unlinkProblemTooltip": {
+        "description": "Tooltip for the button that unlinks a problem from its cluster"
     }
 }

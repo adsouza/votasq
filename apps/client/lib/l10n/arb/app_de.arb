@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Vom Original geforkt",
     "forksHeading": "Forks ({count})",
     "problemSavedToast": "Ihre Änderungen wurden gespeichert",
-    "saveProblemError": "Ihre Änderungen konnten nicht gespeichert werden. Bitte erneut versuchen."
+    "saveProblemError": "Ihre Änderungen konnten nicht gespeichert werden. Bitte erneut versuchen.",
+    "linkedProblemsHeading": "Verknüpfte Probleme ({count})",
+    "linkProblemButton": "Anderes Problem verknüpfen",
+    "linkProblemDialogTitle": "Problem verknüpfen",
+    "linkProblemSearchHint": "Suche nach Text, Problem-ID oder vollständiger URL...",
+    "linkProblemError": "Problem konnte nicht verknüpft werden. Bitte erneut versuchen.",
+    "unlinkProblemError": "Problemverknüpfung konnte nicht aufgehoben werden. Bitte erneut versuchen.",
+    "unlinkProblemTooltip": "Verknüpfung aufheben"
 }

@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Forké depuis l’original",
     "forksHeading": "Forks ({count})",
     "problemSavedToast": "Vos modifications ont été enregistrées",
-    "saveProblemError": "Impossible d'enregistrer vos modifications. Veuillez réessayer."
+    "saveProblemError": "Impossible d'enregistrer vos modifications. Veuillez réessayer.",
+    "linkedProblemsHeading": "Problèmes liés ({count})",
+    "linkProblemButton": "Lier un autre problème",
+    "linkProblemDialogTitle": "Lier un problème",
+    "linkProblemSearchHint": "Rechercher par texte, coller l'ID du problème ou l'URL complète...",
+    "linkProblemError": "Impossible de lier le problème. Veuillez réessayer.",
+    "unlinkProblemError": "Impossible de délier le problème. Veuillez réessayer.",
+    "unlinkProblemTooltip": "Délier ce problème"
 }

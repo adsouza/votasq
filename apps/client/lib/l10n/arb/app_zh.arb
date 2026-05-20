@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "分叉自原始问题",
     "forksHeading": "分叉 ({count})",
     "problemSavedToast": "您的更改已保存",
-    "saveProblemError": "无法保存您的更改。请重试。"
+    "saveProblemError": "无法保存您的更改。请重试。",
+    "linkedProblemsHeading": "关联问题 ({count})",
+    "linkProblemButton": "关联其他问题",
+    "linkProblemDialogTitle": "关联问题",
+    "linkProblemSearchHint": "按文本搜索、粘贴问题 ID 或完整 URL...",
+    "linkProblemError": "无法关联问题。请重试。",
+    "unlinkProblemError": "无法取消关联问题。请重试。",
+    "unlinkProblemTooltip": "取消关联此问题"
 }

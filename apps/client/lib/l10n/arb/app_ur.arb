@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "اصل سے فورک کیا گیا",
     "forksHeading": "فورکس ({count})",
     "problemSavedToast": "آپ کی تبدیلیاں محفوظ ہو گئی ہیں",
-    "saveProblemError": "آپ کی تبدیلیاں محفوظ نہیں ہو سکیں۔ براہ کرم دوبارہ کوشش کریں۔"
+    "saveProblemError": "آپ کی تبدیلیاں محفوظ نہیں ہو سکیں۔ براہ کرم دوبارہ کوشش کریں۔",
+    "linkedProblemsHeading": "منسلک مسائل ({count})",
+    "linkProblemButton": "کوئی اور مسئلہ منسلک کریں",
+    "linkProblemDialogTitle": "مسئلہ منسلک کریں",
+    "linkProblemSearchHint": "متن سے تلاش کریں، مسئلہ ID یا مکمل یو آر ایل پیسٹ کریں...",
+    "linkProblemError": "مسئلہ منسلک نہیں کیا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔",
+    "unlinkProblemError": "مسئلہ غیر منسلک نہیں کیا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔",
+    "unlinkProblemTooltip": "اس مسئلے کو غیر منسلک کریں"
 }

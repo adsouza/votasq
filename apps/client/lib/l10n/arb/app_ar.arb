@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "نسخة من المشكلة الأصلية",
     "forksHeading": "النسخ المتفرعة ({count})",
     "problemSavedToast": "تم حفظ تغييراتك",
-    "saveProblemError": "تعذّر حفظ تغييراتك. يُرجى المحاولة مرة أخرى."
+    "saveProblemError": "تعذّر حفظ تغييراتك. يُرجى المحاولة مرة أخرى.",
+    "linkedProblemsHeading": "مشاكل مرتبطة ({count})",
+    "linkProblemButton": "ربط مشكلة أخرى",
+    "linkProblemDialogTitle": "ربط مشكلة",
+    "linkProblemSearchHint": "ابحث بالنص، أو الصق معرف المشكلة، أو عنوان URL الكامل...",
+    "linkProblemError": "تعذر ربط المشكلة. يرجى المحاولة مرة أخرى.",
+    "unlinkProblemError": "تعذر إلغاء ربط المشكلة. يرجى المحاولة مرة أخرى.",
+    "unlinkProblemTooltip": "إلغاء ربط هذه المشكلة"
 }

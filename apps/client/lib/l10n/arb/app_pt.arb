@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Bifurcado do original",
     "forksHeading": "Bifurcações ({count})",
     "problemSavedToast": "Suas alterações foram salvas",
-    "saveProblemError": "Não foi possível salvar suas alterações. Tente novamente."
+    "saveProblemError": "Não foi possível salvar suas alterações. Tente novamente.",
+    "linkedProblemsHeading": "Problemas vinculados ({count})",
+    "linkProblemButton": "Vincular outro problema",
+    "linkProblemDialogTitle": "Vincular um problema",
+    "linkProblemSearchHint": "Buscar por texto, colar ID do problema ou URL completa...",
+    "linkProblemError": "Não foi possível vincular o problema. Tente novamente.",
+    "unlinkProblemError": "Não foi possível desvincular o problema. Tente novamente.",
+    "unlinkProblemTooltip": "Desvincular este problema"
 }

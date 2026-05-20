@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Форк оригіналу",
     "forksHeading": "Форки ({count})",
     "problemSavedToast": "Ваші зміни збережено",
-    "saveProblemError": "Не вдалося зберегти зміни. Спробуйте ще раз."
+    "saveProblemError": "Не вдалося зберегти зміни. Спробуйте ще раз.",
+    "linkedProblemsHeading": "Пов'язані проблеми ({count})",
+    "linkProblemButton": "Пов'язати іншу проблему",
+    "linkProblemDialogTitle": "Пов'язати проблему",
+    "linkProblemSearchHint": "Пошук за текстом, вставка ID проблеми або повного посилання...",
+    "linkProblemError": "Не вдалося пов'язати проблему. Спробуйте ще раз.",
+    "unlinkProblemError": "Не вдалося відв'язати проблему. Спробуйте ще раз.",
+    "unlinkProblemTooltip": "Відв'язати цю проблему"
 }

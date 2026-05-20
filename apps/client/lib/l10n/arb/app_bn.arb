@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "মূল সমস্যা থেকে ফর্ক করা",
     "forksHeading": "ফর্কসমূহ ({count})",
     "problemSavedToast": "আপনার পরিবর্তনগুলি সংরক্ষিত হয়েছে",
-    "saveProblemError": "আপনার পরিবর্তনগুলি সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
+    "saveProblemError": "আপনার পরিবর্তনগুলি সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "linkedProblemsHeading": "সংযুক্ত সমস্যা ({count})",
+    "linkProblemButton": "অন্য একটি সমস্যা সংযুক্ত করুন",
+    "linkProblemDialogTitle": "সমস্যা সংযুক্ত করুন",
+    "linkProblemSearchHint": "টেক্সট দিয়ে খুঁজুন, সমস্যা আইডি পেस्ट করুন, বা সম্পূর্ণ ইউআরএল...",
+    "linkProblemError": "সমস্যা সংযুক্ত করা যায়নি। আবার চেষ্টা করুন।",
+    "unlinkProblemError": "সমস্যা বিচ্ছিন্ন করা যায়নি। আবার চেষ্টা করুন।",
+    "unlinkProblemTooltip": "এই সমস্যাটি বিচ্ছিন্ন করুন"
 }

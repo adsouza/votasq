@@ -567,6 +567,66 @@ class FirestoreRepository {
       lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp).toDate(),
       inspoProblemId: data['inspoProblemId'] as String?,
       inspoVersion: (data['inspoVersion'] as num?)?.toInt(),
+      linkedProblemIds:
+          (data['linkedProblemIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
+  }
+
+  /// Symmetrically link two problems together into a merged cluster (clique).
+  Future<void> linkProblems(String problemIdA, String problemIdB) async {
+    final problemA = await getProblem(problemIdA);
+    final problemB = await getProblem(problemIdB);
+    if (problemA == null || problemB == null) return;
+
+    final allIds = {
+      problemIdA,
+      problemIdB,
+      ...problemA.linkedProblemIds,
+      ...problemB.linkedProblemIds,
+    };
+
+    final batch = _firestore.batch();
+    for (final id in allIds) {
+      final otherIds = allIds.difference({id}).toList();
+      batch.update(_problemsRef.doc(id), {
+        'linkedProblemIds': otherIds,
+      });
+    }
+    await batch.commit();
+  }
+
+  /// Unlink a problem from its cluster symmetrically.
+  Future<void> unlinkProblem(String problemId) async {
+    final problem = await getProblem(problemId);
+    if (problem == null || problem.linkedProblemIds.isEmpty) return;
+
+    final clusterIds = problem.linkedProblemIds;
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(problemId), {
+        'linkedProblemIds': <String>[],
+      });
+
+    // Remove this problem ID from all other problems in the cluster
+    for (final otherId in clusterIds) {
+      batch.update(_problemsRef.doc(otherId), {
+        'linkedProblemIds': FieldValue.arrayRemove([problemId]),
+      });
+    }
+    await batch.commit();
+  }
+
+  /// Fetch up to 100 unsolved problems globally, sorted by votes DESC,
+  /// then doc ID ASC, for search.
+  Future<List<Problem>> getGlobalProblemsForSearch({int limit = 100}) async {
+    final snapshot = await _problemsRef
+        .where('solved', isEqualTo: false)
+        .orderBy('votes', descending: true)
+        .orderBy(FieldPath.documentId)
+        .limit(limit)
+        .get();
+    return snapshot.docs.map(_docToProblem).toList();
   }
 }

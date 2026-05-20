@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "ਮੂਲ ਤੋਂ ਫ਼ੋਰਕ ਕੀਤਾ",
     "forksHeading": "ਫ਼ੋਰਕ ({count})",
     "problemSavedToast": "ਤੁਹਾਡੀਆਂ ਤਬਦੀਲੀਆਂ ਸੁਰੱਖਿਅਤ ਹੋ ਗਈਆਂ ਹਨ",
-    "saveProblemError": "ਤੁਹਾਡੀਆਂ ਤਬਦੀਲੀਆਂ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾ ਸਕੀਆਂ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    "saveProblemError": "ਤੁਹਾਡੀਆਂ ਤਬਦੀਲੀਆਂ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾ ਸਕੀਆਂ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "linkedProblemsHeading": "ਲਿੰਕ ਕੀਤੀਆਂ ਸਮੱਸਿਆਵਾਂ ({count})",
+    "linkProblemButton": "ਹੋਰ ਸਮੱਸਿਆ ਲਿੰਕ ਕਰੋ",
+    "linkProblemDialogTitle": "ਸਮੱਸਿਆ ਲਿੰਕ ਕਰੋ",
+    "linkProblemSearchHint": "ਟੈਕਸट ਦੁਆਰਾ ਖੋਜੋ, ਸਮੱਸਿਆ ਆਈਡੀ ਜਾਂ ਪੂਰਾ URL ਪੇਸਟ ਕਰੋ...",
+    "linkProblemError": "ਸਮੱਸਿਆ ਲਿੰਕ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "unlinkProblemError": "ਸਮੱਸਿਆ ਅਣਲਿੰਕ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "unlinkProblemTooltip": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਅਣਲਿੰਕ ਕਰੋ"
 }

@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "元の問題からフォーク",
     "forksHeading": "フォーク ({count})",
     "problemSavedToast": "変更が保存されました",
-    "saveProblemError": "変更を保存できませんでした。もう一度お試しください。"
+    "saveProblemError": "変更を保存できませんでした。もう一度お試しください。",
+    "linkedProblemsHeading": "関連する課題 ({count})",
+    "linkProblemButton": "別の課題をリンク",
+    "linkProblemDialogTitle": "課題をリンク",
+    "linkProblemSearchHint": "テキストで検索、課題IDまたはURLを貼り付け...",
+    "linkProblemError": "課題をリンクできませんでした。もう一度お試しください。",
+    "unlinkProblemError": "課題のリンクを解除できませんでした。もう一度お試しください。",
+    "unlinkProblemTooltip": "この課題のリンクを解除"
 }

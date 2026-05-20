@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Форк оригинала",
     "forksHeading": "Форки ({count})",
     "problemSavedToast": "Ваши изменения сохранены",
-    "saveProblemError": "Не удалось сохранить изменения. Попробуйте ещё раз."
+    "saveProblemError": "Не удалось сохранить изменения. Попробуйте ещё раз.",
+    "linkedProblemsHeading": "Связанные проблемы ({count})",
+    "linkProblemButton": "Связать другую проблему",
+    "linkProblemDialogTitle": "Связать проблему",
+    "linkProblemSearchHint": "Поиск по тексту, вставка ID проблемы или полной ссылки...",
+    "linkProblemError": "Не удалось связать проблему. Попробуйте еще раз.",
+    "unlinkProblemError": "Не удалось отвязать проблему. Попробуйте еще раз.",
+    "unlinkProblemTooltip": "Отвязать эту проблему"
 }

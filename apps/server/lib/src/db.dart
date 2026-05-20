@@ -489,6 +489,7 @@ class Db {
       ),
       inspoProblemId: doc.fields?['inspoProblemId']?.stringValue,
       inspoVersion: _parseOptionalInt(doc.fields?['inspoVersion']),
+      linkedProblemIds: _parseStringList(doc.fields?['linkedProblemIds']),
     );
   }
 
@@ -520,6 +521,13 @@ class Db {
           'inspoProblemId': fs.Value(stringValue: problem.inspoProblemId),
         if (problem.inspoVersion != null)
           'inspoVersion': fs.Value(integerValue: '${problem.inspoVersion}'),
+        'linkedProblemIds': fs.Value(
+          arrayValue: fs.ArrayValue(
+            values: problem.linkedProblemIds
+                .map((id) => fs.Value(stringValue: id))
+                .toList(),
+          ),
+        ),
       },
     );
   }

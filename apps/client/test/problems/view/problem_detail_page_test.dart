@@ -530,5 +530,174 @@ void main() {
       // Heading (with count) remains visible.
       expect(find.text('Forks (1)'), findsOneWidget);
     });
+
+    testWidgets(
+      'shows linked problems section with count when linked problems exist',
+      (tester) async {
+        final mainProblem = _problem(
+          id: 'p1',
+        ).copyWith(linkedProblemIds: ['p2']);
+        final linkedProblem = _problem(
+          id: 'p2',
+          description: 'Linked problem description',
+        );
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getProblem('p2'),
+        ).thenAnswer((_) async => linkedProblem);
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // Heading shows the count.
+        expect(find.text('Linked Problems (1)'), findsOneWidget);
+        // Linked problem description is visible.
+        expect(find.text('Linked problem description'), findsOneWidget);
+      },
+    );
+
+    testWidgets('allows unlinking when authenticated', (tester) async {
+      final mainProblem = _problem(id: 'p1').copyWith(linkedProblemIds: ['p2']);
+      final linkedProblem = _problem(
+        id: 'p2',
+        description: 'Linked problem description',
+      );
+
+      when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+      when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
+      when(() => repo.unlinkProblem('p2')).thenAnswer((_) async {});
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'owner1',
+        ),
+      );
+
+      await tester.pumpWidget(buildSubject(problemId: 'p1'));
+      await tester.pumpAndSettle();
+
+      // Unlink button should be present
+      final unlinkBtn = find.byIcon(Icons.link_off);
+      expect(unlinkBtn, findsOneWidget);
+
+      await tester.tap(unlinkBtn);
+      await tester.pumpAndSettle();
+
+      verify(() => repo.unlinkProblem('p2')).called(1);
+    });
+
+    testWidgets('hides unlink button when unauthenticated', (tester) async {
+      final mainProblem = _problem(id: 'p1').copyWith(linkedProblemIds: ['p2']);
+      final linkedProblem = _problem(
+        id: 'p2',
+        description: 'Linked problem description',
+      );
+
+      when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+      when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
+      when(() => authCubit.state).thenReturn(const AuthState());
+
+      await tester.pumpWidget(buildSubject(problemId: 'p1'));
+      await tester.pumpAndSettle();
+
+      // Unlink button should not be present
+      expect(find.byIcon(Icons.link_off), findsNothing);
+    });
+
+    testWidgets(
+      'clicking link button opens dialog and allows linking via search',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1');
+        final searchResult = _problem(
+          id: 'p2',
+          description: 'Matching problem description',
+        );
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getGlobalProblemsForSearch(),
+        ).thenAnswer((_) async => [searchResult]);
+        when(() => repo.linkProblems('p1', 'p2')).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // Dialog trigger button (link icon) should be in app bar actions
+        final linkBtn = find.byIcon(Icons.link);
+        expect(linkBtn, findsOneWidget);
+
+        await tester.tap(linkBtn);
+        await tester.pumpAndSettle();
+
+        // Dialog is open
+        expect(find.text('Link a Problem'), findsOneWidget);
+        expect(find.text('Matching problem description'), findsOneWidget);
+
+        // Tap on link icon of the search result
+        final confirmLinkBtn = find.descendant(
+          of: find.byType(ListTile),
+          matching: find.byIcon(Icons.link),
+        );
+        await tester.tap(confirmLinkBtn);
+        await tester.pumpAndSettle();
+
+        verify(() => repo.linkProblems('p1', 'p2')).called(1);
+        expect(find.text('Link a Problem'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'typing in search query debounces and filters list correctly',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1');
+        final result1 = _problem(id: 'p2', description: 'Apple problem');
+        final result2 = _problem(id: 'p3', description: 'Banana problem');
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(() => repo.getGlobalProblemsForSearch()).thenAnswer(
+          (_) async => [result1, result2],
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // Open dialog
+        await tester.tap(find.byIcon(Icons.link));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Apple problem'), findsOneWidget);
+        expect(find.text('Banana problem'), findsOneWidget);
+
+        // Type "Apple"
+        await tester.enterText(find.byType(TextField).last, 'Apple');
+
+        // Before 300ms debounce, nothing should change
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(find.text('Apple problem'), findsOneWidget);
+        expect(find.text('Banana problem'), findsOneWidget);
+
+        // Pump 300ms to trigger debounce and perform search
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pumpAndSettle();
+
+        // Now only "Apple problem" should be visible, and "Banana problem"
+        // should be gone
+        expect(find.text('Apple problem'), findsOneWidget);
+        expect(find.text('Banana problem'), findsNothing);
+      },
+    );
   });
 }

@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "แยกมาจากต้นฉบับ",
     "forksHeading": "สำเนา ({count})",
     "problemSavedToast": "บันทึกการเปลี่ยนแปลงของคุณแล้ว",
-    "saveProblemError": "ไม่สามารถบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้ง"
+    "saveProblemError": "ไม่สามารถบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้ง",
+    "linkedProblemsHeading": "ปัญหาที่เชื่อมโยง ({count})",
+    "linkProblemButton": "เชื่อมโยงปัญหาอื่น",
+    "linkProblemDialogTitle": "เชื่อมโยงปัญหา",
+    "linkProblemSearchHint": "ค้นหาด้วยข้อความ วาง ID ปัญหา หรือ URL แบบเต็ม...",
+    "linkProblemError": "ไม่สามารถเชื่อมโยงปัญหาได้ กรุณาลองอีกครั้ง",
+    "unlinkProblemError": "ไม่สามารถยกเลิกการเชื่อมโยงปัญหาได้ กรุณาลองอีกครั้ง",
+    "unlinkProblemTooltip": "ยกเลิกการเชื่อมโยงปัญหานี้"
 }

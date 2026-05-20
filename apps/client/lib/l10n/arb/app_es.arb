@@ -59,5 +59,12 @@
     "forkedFromOriginalLink": "Bifurcado del original",
     "forksHeading": "Bifurcaciones ({count})",
     "problemSavedToast": "Tus cambios se han guardado",
-    "saveProblemError": "No se pudieron guardar tus cambios. Inténtalo de nuevo."
+    "saveProblemError": "No se pudieron guardar tus cambios. Inténtalo de nuevo.",
+    "linkedProblemsHeading": "Problemas vinculados ({count})",
+    "linkProblemButton": "Vincular otro problema",
+    "linkProblemDialogTitle": "Vincular un problema",
+    "linkProblemSearchHint": "Buscar por texto, pegar ID de problema o URL completa...",
+    "linkProblemError": "No se pudo vincular el problema. Inténtalo de nuevo.",
+    "unlinkProblemError": "No se pudo desvincular el problema. Inténtalo de nuevo.",
+    "unlinkProblemTooltip": "Desvincular este problema"
 }

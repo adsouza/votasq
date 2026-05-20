@@ -28,6 +28,7 @@ abstract class Problem with _$Problem {
     // never modified afterwards.
     String? inspoProblemId,
     int? inspoVersion,
+    @Default([]) List<String> linkedProblemIds,
   }) = _Problem;
 
   /// This factory is what the Server uses to encode and Client uses to decode
