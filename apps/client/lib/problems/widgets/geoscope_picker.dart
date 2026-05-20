@@ -55,6 +55,10 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
   String _query = '';
   String? _selectedSuperstate;
   String? _selectedCountry;
+  bool? _superstatesExpandedOverride;
+
+  bool get _isSuperstatesSectionExpanded =>
+      _superstatesExpandedOverride ?? (_selectedCountry == null);
 
   @override
   void initState() {
@@ -115,6 +119,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
     _filterController.clear();
     final parts = id.split('/');
     setState(() {
+      _superstatesExpandedOverride = null;
       if (_superstateIds.contains(id)) {
         _selectedSuperstate = id;
         _selectedCountry = null;
@@ -296,41 +301,60 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
           onTap: () => _select('/'),
         ),
         const Divider(),
-
-        // Superstates header.
-        Padding(
-          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
-          child: Text(
-            'Superstates',
-            style: Theme.of(context).textTheme.labelSmall,
+        InkWell(
+          onTap: () {
+            setState(() {
+              _superstatesExpandedOverride = !_isSuperstatesSectionExpanded;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Superstates',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                Icon(
+                  _isSuperstatesSectionExpanded
+                      ? Icons.expand_less
+                      : Icons.expand_more,
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
-        for (final s in superstates)
-          ListTile(
-            title: Text(s.label),
-            trailing: activeId == s.id
-                ? const Icon(Icons.check)
-                : _selectedSuperstate == s.id
-                ? const Icon(Icons.expand_more)
-                : null,
-            onTap: () {
-              if (_selectedSuperstate == s.id) {
-                setState(() {
-                  _selectedSuperstate = null;
-                  _selectedCountry = null;
-                });
-                unawaited(geoCubit.selectGeoscope('/'));
-              } else {
-                setState(() {
-                  if (_selectedSuperstate != s.id) {
+        if (_isSuperstatesSectionExpanded)
+          for (final s in superstates)
+            ListTile(
+              title: Text(s.label),
+              trailing: activeId == s.id
+                  ? const Icon(Icons.check)
+                  : _selectedSuperstate == s.id
+                  ? const Icon(Icons.expand_more)
+                  : null,
+              onTap: () {
+                if (_selectedSuperstate == s.id) {
+                  setState(() {
+                    _selectedSuperstate = null;
                     _selectedCountry = null;
-                  }
-                  _selectedSuperstate = s.id;
-                });
-                unawaited(geoCubit.selectGeoscope(s.id));
-              }
-            },
-          ),
+                    _superstatesExpandedOverride = null;
+                  });
+                  unawaited(geoCubit.selectGeoscope('/'));
+                } else {
+                  setState(() {
+                    if (_selectedSuperstate != s.id) {
+                      _selectedCountry = null;
+                    }
+                    _selectedSuperstate = s.id;
+                    _superstatesExpandedOverride = null;
+                  });
+                  unawaited(geoCubit.selectGeoscope(s.id));
+                }
+              },
+            ),
 
         // States section.
         if (stateItems.isNotEmpty) ...[
@@ -353,7 +377,10 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
                   : null,
               onTap: () {
                 if (_selectedCountry == m.id) {
-                  setState(() => _selectedCountry = null);
+                  setState(() {
+                    _selectedCountry = null;
+                    _superstatesExpandedOverride = null;
+                  });
                   unawaited(
                     geoCubit.selectGeoscope(_selectedSuperstate ?? '/'),
                   );
@@ -363,7 +390,10 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
                     (g) => g.id.startsWith('${m.id}/'),
                   );
                   if (hasMetro) {
-                    setState(() => _selectedCountry = m.id);
+                    setState(() {
+                      _selectedCountry = m.id;
+                      _superstatesExpandedOverride = null;
+                    });
                   } else {
                     Navigator.of(context).pop();
                   }

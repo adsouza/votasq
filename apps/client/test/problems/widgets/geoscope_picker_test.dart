@@ -440,5 +440,119 @@ void main() {
         expect(find.text('SF Bay Area'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'superstates section heading is visible but collapsed when a state is '
+      'selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us/ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // The state (California) and its metro areas are visible.
+        expect(find.text('California'), findsOneWidget);
+        expect(find.text('SF Bay Area'), findsOneWidget);
+
+        // Superstates heading is visible, but list items are hidden/collapsed.
+        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('United States'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'superstates section is expanded when no state is selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+            ],
+            selectedGeoscope: 'us',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // No state is selected (only superstate is selected).
+        // Superstates heading and items are visible.
+        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('United States'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'superstates section expands automatically when a selected state is '
+      'deselected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us/ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // Superstates heading is visible but list items are collapsed.
+        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('United States'), findsNothing);
+
+        // Deselect the state by tapping on California again.
+        await tester.tap(find.text('California'));
+        await tester.pumpAndSettle();
+
+        // Superstates list items are now automatically expanded.
+        expect(find.text('United States'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'user can manually toggle the superstates section by tapping the heading',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us/ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // Initially collapsed due to active state.
+        expect(find.text('United States'), findsNothing);
+
+        // Tap the heading to manually expand it.
+        await tester.tap(find.text('Superstates'));
+        await tester.pumpAndSettle();
+
+        // Now expanded.
+        expect(find.text('United States'), findsOneWidget);
+
+        // Tap the heading again to manually collapse it.
+        await tester.tap(find.text('Superstates'));
+        await tester.pumpAndSettle();
+
+        // Collapsed again.
+        expect(find.text('United States'), findsNothing);
+      },
+    );
   });
 }
