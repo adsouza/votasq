@@ -225,7 +225,14 @@ class _NewProblemPageState extends State<NewProblemPage> {
         },
         child: Focus(
           child: Scaffold(
-            appBar: AppBar(title: Text(l10n.newProblemPageTitle)),
+            appBar: AppBar(
+              toolbarHeight: 80,
+              title: Text(
+                l10n.newProblemPageTitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             body: BlocBuilder<AuthCubit, AuthState>(
               builder: (context, authState) => switch (authState.status) {
                 AuthStatus.unknown => const Center(

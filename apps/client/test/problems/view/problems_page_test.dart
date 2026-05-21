@@ -61,6 +61,10 @@ Problem _problem({
   );
 }
 
+Finder _menuItem(String value) => find.byWidgetPredicate(
+  (w) => w is PopupMenuItem<String> && w.value == value,
+);
+
 void main() {
   late ProblemsCubit problemsCubit;
   late AuthCubit authCubit;
@@ -494,9 +498,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      // Find the "Show only my problems" menu item and tap it.
-      final ownedItem = find.byType(PopupMenuItem<String>).first;
-      await tester.tap(ownedItem);
+      await tester.tap(_menuItem('toggle_owned'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -530,9 +532,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      // The goals toggle is the first item for unauthenticated users.
-      final goalsItem = find.byType(PopupMenuItem<String>).first;
-      await tester.tap(goalsItem);
+      await tester.tap(_menuItem('toggle_with_goals'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -560,7 +560,7 @@ void main() {
       verify(() => authCubit.signIn()).called(1);
     });
 
-    testWidgets('sign out button shown when authenticated', (
+    testWidgets('sign out menu item shown when authenticated', (
       tester,
     ) async {
       when(() => authCubit.state).thenReturn(
@@ -575,9 +575,13 @@ void main() {
       );
       await tester.pumpWidget(buildSubject());
 
-      expect(find.byIcon(Icons.logout), findsOneWidget);
+      // Logout is no longer in the app bar — it's a hamburger menu item.
+      expect(find.byIcon(Icons.logout), findsNothing);
 
-      await tester.tap(find.byIcon(Icons.logout));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(_menuItem('sign_out'));
       await tester.pump();
       verify(() => authCubit.signOut()).called(1);
     });

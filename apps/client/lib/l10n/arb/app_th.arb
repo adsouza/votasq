@@ -1,7 +1,7 @@
 {
     "@@locale": "th",
     "problemsAppBarTitle": "ปัญหาที่เราสามารถแก้ไขร่วมกันได้",
-    "signInButton": "เข้าสู่ระบบ",
+    "signInButton": "เข้าสู่​ระบบ",
     "signOutButton": "ออกจากระบบ",
     "addProblemHint": "เพิ่มปัญหาของคุณที่นี่",
     "addProblemButton": "เพิ่ม",

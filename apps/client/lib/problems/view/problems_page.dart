@@ -239,6 +239,26 @@ class _ProblemsViewState extends State<ProblemsView> {
     });
   }
 
+  void _sendFeedback(AppLocalizations l10n) {
+    BetterFeedback.of(context).show((feedback) async {
+      try {
+        await context.read<FeedbackRepository>().submit(
+          text: feedback.text,
+          screenshot: feedback.screenshot,
+          userId: context.read<AuthCubit>().state.userId!,
+        );
+        if (mounted) {
+          showToast(l10n.feedbackSuccess);
+        }
+      } on Exception catch (e) {
+        log('Feedback submission failed: $e');
+        if (mounted) {
+          showToast(l10n.feedbackError);
+        }
+      }
+    });
+  }
+
   Future<void> _confirmComplaint(Problem problem) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -299,6 +319,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
+        titleSpacing: 0,
         title: BlocBuilder<ProblemsCubit, ProblemsState>(
           builder: (context, state) {
             final userId = context.read<AuthCubit>().state.userId;
@@ -310,138 +331,148 @@ class _ProblemsViewState extends State<ProblemsView> {
             );
           },
         ),
-        leading: PopupMenuButton<String>(
-          icon: const Icon(Icons.menu),
-          onSelected: (value) {
-            if (value == 'change_location') {
-              unawaited(showGeoscopePicker(context));
-            } else if (value == 'toggle_owned') {
-              setState(() {
-                _showOnlyOwned = !_showOnlyOwned;
-              });
-            } else if (value == 'toggle_with_goals') {
-              setState(() {
-                _showOnlyWithGoals = !_showOnlyWithGoals;
-              });
-            } else if (value == 'toggle_auto_translate') {
-              unawaited(context.read<AutoTranslateCubit>().toggle());
-            }
-          },
-          itemBuilder: (context) => [
-            if (context.read<AuthCubit>().state.userId != null)
-              PopupMenuItem(
-                value: 'toggle_owned',
-                child: ListTile(
-                  leading: Icon(
-                    _showOnlyOwned
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank,
-                  ),
-                  title: Text(l10n.showOnlyOwnedMenuItem),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            PopupMenuItem(
-              value: 'toggle_with_goals',
-              child: ListTile(
-                leading: Icon(
-                  _showOnlyWithGoals
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank,
-                ),
-                title: Text(l10n.showOnlyWithGoalsMenuItem),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            if (context.read<TranslationRepository>().canTranslateOnDevice)
-              PopupMenuItem(
-                value: 'toggle_auto_translate',
-                child: ListTile(
-                  leading: Icon(
-                    context.read<AutoTranslateCubit>().state
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank,
-                  ),
-                  title: Text(l10n.autoTranslateMenuItem),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            PopupMenuItem(
-              value: 'change_location',
-              child: ListTile(
-                leading: const Icon(Icons.location_on),
-                title: Text(l10n.geoscopeChangeMenuItem),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            if (context.read<AuthCubit>().state.userId != null) ...[
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                enabled: false,
-                child: Text(
-                  (context.read<AuthCubit>().state.remainingVotes ?? 0) > 0
-                      ? l10n.menuVotesRemaining(
-                          context.read<AuthCubit>().state.remainingVotes!,
-                        )
-                      : l10n.menuVotesReplenishHint,
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: l10n.addProblemTooltip,
-            onPressed: () => context.go('/new'),
-          ),
-          BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, authState) {
-              if (authState.status != AuthStatus.authenticated) {
-                return const SizedBox.shrink();
+        leading: TapRegion(
+          groupId: _editTapRegionGroupId,
+          child: PopupMenuButton<String>(
+            icon: const Icon(Icons.menu),
+            iconSize: 32,
+            onSelected: (value) {
+              if (value == 'change_location') {
+                unawaited(showGeoscopePicker(context));
+              } else if (value == 'toggle_owned') {
+                setState(() {
+                  _showOnlyOwned = !_showOnlyOwned;
+                });
+              } else if (value == 'toggle_with_goals') {
+                setState(() {
+                  _showOnlyWithGoals = !_showOnlyWithGoals;
+                });
+              } else if (value == 'toggle_auto_translate') {
+                unawaited(context.read<AutoTranslateCubit>().toggle());
+              } else if (value == 'add_problem') {
+                context.go('/new');
+              } else if (value == 'send_feedback') {
+                _sendFeedback(l10n);
+              } else if (value == 'sign_out') {
+                unawaited(context.read<AuthCubit>().signOut());
               }
-              return TapRegion(
-                groupId: _editTapRegionGroupId,
-                child: IconButton(
-                  icon: const Text('🗣️', style: TextStyle(fontSize: 24)),
-                  tooltip: l10n.feedbackButton,
-                  onPressed: () {
-                    BetterFeedback.of(context).show((feedback) async {
-                      try {
-                        await context.read<FeedbackRepository>().submit(
-                          text: feedback.text,
-                          screenshot: feedback.screenshot,
-                          userId: context.read<AuthCubit>().state.userId!,
-                        );
-                        if (context.mounted) {
-                          showToast(l10n.feedbackSuccess);
-                        }
-                      } on Exception catch (e) {
-                        log('Feedback submission failed: $e');
-                        if (context.mounted) {
-                          showToast(l10n.feedbackError);
-                        }
-                      }
-                    });
-                  },
+            },
+            itemBuilder: (context) {
+              final isAuthenticated =
+                  context.read<AuthCubit>().state.userId != null;
+              return [
+                PopupMenuItem(
+                  value: 'add_problem',
+                  child: ListTile(
+                    leading: const Icon(Icons.add),
+                    title: Text(l10n.addProblemTooltip),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              );
+                if (isAuthenticated)
+                  PopupMenuItem(
+                    value: 'toggle_owned',
+                    child: ListTile(
+                      leading: Icon(
+                        _showOnlyOwned
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      title: Text(l10n.showOnlyOwnedMenuItem),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                PopupMenuItem(
+                  value: 'toggle_with_goals',
+                  child: ListTile(
+                    leading: Icon(
+                      _showOnlyWithGoals
+                          ? Icons.check_box
+                          : Icons.check_box_outline_blank,
+                    ),
+                    title: Text(l10n.showOnlyWithGoalsMenuItem),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                if (context.read<TranslationRepository>().canTranslateOnDevice)
+                  PopupMenuItem(
+                    value: 'toggle_auto_translate',
+                    child: ListTile(
+                      leading: Icon(
+                        context.read<AutoTranslateCubit>().state
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      title: Text(l10n.autoTranslateMenuItem),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                PopupMenuItem(
+                  value: 'change_location',
+                  child: ListTile(
+                    leading: const Icon(Icons.location_on),
+                    title: Text(l10n.geoscopeChangeMenuItem),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                if (isAuthenticated) ...[
+                  PopupMenuItem(
+                    value: 'send_feedback',
+                    child: ListTile(
+                      leading: Transform.translate(
+                        offset: const Offset(0, -4),
+                        child: const Text(
+                          '🗣️',
+                          style: TextStyle(fontSize: 24, height: 1),
+                        ),
+                      ),
+                      title: Text(l10n.feedbackButton),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'sign_out',
+                    child: ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: Text(l10n.signOutButton),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    enabled: false,
+                    child: Text(
+                      (context.read<AuthCubit>().state.remainingVotes ?? 0) > 0
+                          ? l10n.menuVotesRemaining(
+                              context.read<AuthCubit>().state.remainingVotes!,
+                            )
+                          : l10n.menuVotesReplenishHint,
+                    ),
+                  ),
+                ],
+              ];
             },
           ),
+        ),
+        actions: [
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
               if (authState.status == AuthStatus.authenticated) {
-                return IconButton(
-                  icon: const Icon(Icons.logout),
-                  tooltip: l10n.signOutButton,
-                  onPressed: () => context.read<AuthCubit>().signOut(),
-                );
+                return const SizedBox.shrink();
               }
               return Tooltip(
                 message: l10n.signInButtonTooltip,
                 child: TextButton(
                   onPressed: () => context.read<AuthCubit>().signIn(),
-                  child: Text(l10n.signInButton),
+                  child: SizedBox(
+                    width: 64,
+                    child: Text(
+                      l10n.signInButton,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
               );
             },
