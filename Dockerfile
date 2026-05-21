@@ -6,7 +6,8 @@ COPY pubspec.yaml pubspec.lock ./
 COPY apps/client/ apps/client/
 COPY packages/ packages/
 
-# Remove the server from the workspace so flutter pub get succeeds
+# Remove the server from the workspace so flutter pub get succeeds.
+# See ARCHITECTURE.md "Adding workspace members" before adding new apps/*.
 RUN sed -i '/apps\/server/d' pubspec.yaml
 
 WORKDIR /app/apps/client

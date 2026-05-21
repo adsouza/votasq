@@ -413,6 +413,15 @@ graph LR
 The server's `GET /` route serves `public/index.html`, so the web client is
 bundled directly into the server container.
 
+**Adding workspace members.** The build context copies the entire `packages/`
+tree, so a new `packages/<name>/` entry needs no Dockerfile change. A new
+`apps/<name>/` entry does: each stage explicitly `COPY`s only the `apps/*`
+it needs and `sed`s the others out of the root `pubspec.yaml`'s `workspace:`
+list, since the workspace constraint solver requires every listed member to
+exist on disk. Additionally, any new package that depends on the Flutter SDK
+(like the vendored MLKit plugins) must be `sed`-removed from the workspace
+in Stage 2, which runs in a Dart-only image.
+
 ### Cloud Run deployment
 
 `melos deploy:server` runs `gcloud run deploy` from the repo root,
