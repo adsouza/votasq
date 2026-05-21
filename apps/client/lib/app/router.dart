@@ -3,6 +3,12 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter buildRouter() {
+  // Without this, `context.push('/problems/X')` updates the Navigator stack
+  // but leaves the browser URL at the pre-push location, so the visible URL
+  // never reflects which problem the user is viewing. Our pushed locations
+  // are all declared `GoRoute`s, so the "not always deeplink-able" caveat in
+  // the go_router docs does not apply here.
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   return GoRouter(
     routes: [
       GoRoute(
