@@ -474,7 +474,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
           _buildVoterList(),
           const SizedBox(height: 24),
           FilledButton.tonal(
-            onPressed: () => context.pop(),
+            onPressed: () => context.go('/'),
             child: Text(l10n.problemDetailBackButton),
           ),
         ],
@@ -550,7 +550,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonal(
-                    onPressed: () => context.pop(),
+                    onPressed: () => context.go('/'),
                     child: Text(l10n.problemDetailBackButton),
                   ),
                 ],
@@ -583,7 +583,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               Text(_error ?? l10n.problemNotFound),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: () => context.pop(),
+                onPressed: () => context.go('/'),
                 child: Text(l10n.problemDetailBackButton),
               ),
             ],
