@@ -242,7 +242,10 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   /// Replace one field of [_problem] with the corresponding value from a
   /// fork, persist the change as a new revision, and reflect the result
   /// locally. Called by [_ForkRow] when the owner taps "Use this here".
-  Future<void> _useForkField(Problem updated) async {
+  ///
+  /// [forkId] is recorded on the new revision so the notifications producer
+  /// can emit a `forkAdopted` notification to the fork's owner.
+  Future<void> _useForkField(Problem updated, String forkId) async {
     final l10n = context.l10n;
     final repo = context.read<FirestoreRepository>();
     ProblemsCubit? problemsCubit;
@@ -253,7 +256,11 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
     final userLang = Localizations.localeOf(context).languageCode;
     try {
-      await repo.updateProblem(updated, userLanguage: userLang);
+      await repo.updateProblem(
+        updated,
+        userLanguage: userLang,
+        copiedFromProblemId: forkId,
+      );
     } on LanguageMismatchException catch (e) {
       if (!mounted) return;
       showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
@@ -698,9 +705,9 @@ class _ForkRow extends StatefulWidget {
   final bool canCompare;
 
   /// Invoked with [current] copied to include the fork's value for one or
-  /// more fields. The callback persists the change and updates ambient
-  /// state.
-  final Future<void> Function(Problem updated) onUseField;
+  /// more fields, plus the source fork's id. The callback persists the
+  /// change and updates ambient state.
+  final Future<void> Function(Problem updated, String forkId) onUseField;
 
   @override
   State<_ForkRow> createState() => _ForkRowState();
@@ -825,7 +832,11 @@ class _ForkRowState extends State<_ForkRow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final diff in diffs)
-                  _ForkFieldDiffRow(diff: diff, onUse: widget.onUseField),
+                  _ForkFieldDiffRow(
+                    diff: diff,
+                    forkId: widget.fork.id,
+                    onUse: widget.onUseField,
+                  ),
               ],
             ),
           ),
@@ -845,10 +856,15 @@ class _ForkFieldDiff {
 }
 
 class _ForkFieldDiffRow extends StatelessWidget {
-  const _ForkFieldDiffRow({required this.diff, required this.onUse});
+  const _ForkFieldDiffRow({
+    required this.diff,
+    required this.forkId,
+    required this.onUse,
+  });
 
   final _ForkFieldDiff diff;
-  final Future<void> Function(Problem updated) onUse;
+  final String forkId;
+  final Future<void> Function(Problem updated, String forkId) onUse;
 
   @override
   Widget build(BuildContext context) {
@@ -881,7 +897,7 @@ class _ForkFieldDiffRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           TextButton(
-            onPressed: () => onUse(diff.apply()),
+            onPressed: () => onUse(diff.apply(), forkId),
             child: Text(l10n.useForkFieldButton),
           ),
         ],

@@ -67,7 +67,13 @@ service cloud.firestore {
           request.resource.data.keys().hasAll(['description', 'version', 'archivedAt'])
           && request.resource.data.description is string
           && request.resource.data.version is int
-          && request.resource.data.archivedAt is timestamp;
+          && request.resource.data.archivedAt is timestamp
+          // Optional: fork id stamped when the revision was sourced from a
+          // fork via the "Use this here" flow on the detail page.
+          && (
+            !('copiedFromProblemId' in request.resource.data.keys())
+            || request.resource.data.copiedFromProblemId is string
+          );
       }
 
       match /voters/{voterId} {

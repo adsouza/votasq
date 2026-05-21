@@ -206,6 +206,7 @@ void main() {
           () => repo.updateProblem(
             any(),
             userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
         when(() => authCubit.state).thenReturn(
@@ -229,6 +230,7 @@ void main() {
           () => repo.updateProblem(
             any(),
             userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).called(1);
         // Notifies the list cubit so the list won't show stale data on return.
@@ -252,6 +254,7 @@ void main() {
         () => repo.updateProblem(
           any(),
           userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
         ),
       ).thenThrow(Exception('boom'));
       when(() => authCubit.state).thenReturn(
@@ -595,6 +598,7 @@ void main() {
           () => repo.updateProblem(
             any(),
             userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
         when(() => authCubit.state).thenReturn(
@@ -630,6 +634,7 @@ void main() {
                   () => repo.updateProblem(
                     captureAny(),
                     userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
                   ),
                 ).captured.single
                 as Problem;
@@ -670,6 +675,7 @@ void main() {
           () => repo.updateProblem(
             any(),
             userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
         when(() => authCubit.state).thenReturn(
@@ -700,6 +706,7 @@ void main() {
                   () => repo.updateProblem(
                     captureAny(),
                     userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
                   ),
                 ).captured.single
                 as Problem;
@@ -736,6 +743,7 @@ void main() {
           () => repo.updateProblem(
             any(),
             userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
         when(() => authCubit.state).thenReturn(
@@ -764,6 +772,7 @@ void main() {
                   () => repo.updateProblem(
                     captureAny(),
                     userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
                   ),
                 ).captured.single
                 as Problem;

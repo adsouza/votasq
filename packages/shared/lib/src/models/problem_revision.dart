@@ -13,6 +13,11 @@ abstract class ProblemRevision with _$ProblemRevision {
     required DateTime archivedAt,
     @Default('') String goal,
     int? restoredFrom,
+    // Set when this revision was created by copying field values from a fork
+    // of the parent problem (the "Use this here" action on the detail page).
+    // Used by the notifications producer to emit `forkAdopted` notifications
+    // to the fork's owner. Null for normal user-authored revisions.
+    String? copiedFromProblemId,
   }) = _ProblemRevision;
 
   /// Deserializes a [ProblemRevision] from JSON.

@@ -251,9 +251,12 @@ class FirestoreRepository {
   /// a new revision snapshot.
   ///
   /// If [userLanguage] is provided, re-detects the description language.
+  /// If [copiedFromProblemId] is provided, the new revision is stamped with
+  /// that fork's id so the notifications producer can emit `forkAdopted`.
   Future<void> updateProblem(
     Problem problem, {
     String? userLanguage,
+    String? copiedFromProblemId,
   }) async {
     final result = userLanguage != null
         ? await _langValidator.detectAndValidateLang(
@@ -285,11 +288,12 @@ class FirestoreRepository {
       'version': newVersion,
       'lastUpdatedAt': now,
     };
-    final revisionData = {
+    final revisionData = <String, Object?>{
       'description': problem.description,
       'goal': problem.goal,
       'version': newVersion,
       'archivedAt': now,
+      'copiedFromProblemId': ?copiedFromProblemId,
     };
 
     final batch = _firestore.batch()
