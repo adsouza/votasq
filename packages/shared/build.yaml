@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Required so nested Freezed objects (e.g. a union payload, or a
+          # Map<String, ChannelPreferences>) are serialized via their own
+          # toJson rather than embedded as raw class instances.
+          explicit_to_json: true

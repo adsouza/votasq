@@ -127,7 +127,7 @@ service cloud.firestore {
           (
             request.resource.data.votes is int
             && request.resource.data.lastActiveAt is timestamp
-            && request.resource.data.votes > resource.data.votes 
+            && request.resource.data.votes > resource.data.votes
             && request.resource.data.votes - resource.data.votes < 10
           )
           ||
@@ -136,7 +136,45 @@ service cloud.firestore {
             request.resource.data.votes == resource.data.votes
             && request.resource.data.lastActiveAt is timestamp
           )
+          ||
+          // Notification preferences and/or locale update (votes unchanged)
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['notificationPreferences', 'locale', 'lastActiveAt'])
+            && request.resource.data.votes == resource.data.votes
+          )
         );
+
+      match /notifications/{notificationId} {
+        // Recipient can read their own notifications and mark them read.
+        // Cloud Functions (admin SDK) bypass these rules and own create/delete.
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow update: if
+          request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt'])
+          && request.resource.data.readAt is timestamp;
+        allow create, delete: if false;
+      }
+
+      match /fcmTokens/{tokenId} {
+        // Device-level FCM registration owned by the user.
+        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        allow create: if
+          request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.keys().hasAll(['token', 'platform', 'createdAt', 'lastUsedAt'])
+          && request.resource.data.token is string
+          && request.resource.data.token.size() > 0
+          && request.resource.data.platform is string
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.lastUsedAt is timestamp;
+        allow update: if
+          request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastUsedAt'])
+          && request.resource.data.lastUsedAt is timestamp;
+      }
     }
 
     match /feedback/{feedbackId} {

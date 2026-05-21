@@ -274,5 +274,60 @@
     "unlinkProblemTooltip": "Unlink this problem",
     "@unlinkProblemTooltip": {
         "description": "Tooltip for the button that unlinks a problem from its cluster"
+    },
+    "notificationVoteReceivedTitle": "New vote",
+    "@notificationVoteReceivedTitle": {
+        "description": "Title of a notification when someone votes on the user's problem"
+    },
+    "notificationVoteReceivedBody": "{actorName} voted on your problem",
+    "@notificationVoteReceivedBody": {
+        "description": "Body of a notification when someone votes on the user's problem",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemForkedTitle": "Your problem was forked",
+    "@notificationProblemForkedTitle": {
+        "description": "Title of a notification when someone forks the user's problem"
+    },
+    "notificationProblemForkedBody": "{actorName} created a fork of your problem",
+    "@notificationProblemForkedBody": {
+        "description": "Body of a notification when someone forks the user's problem",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemLinkedTitle": "Your problem was linked",
+    "@notificationProblemLinkedTitle": {
+        "description": "Title of a notification when someone links the user's problem from another"
+    },
+    "notificationProblemLinkedBody": "{actorName} linked your problem from another",
+    "@notificationProblemLinkedBody": {
+        "description": "Body of a notification when someone links the user's problem from another",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemRevisedTitle": "Problem updated",
+    "@notificationProblemRevisedTitle": {
+        "description": "Title of a notification sent to voters when a problem they voted on has a new revision"
+    },
+    "notificationProblemRevisedBody": "A problem you voted on has a new version",
+    "@notificationProblemRevisedBody": {
+        "description": "Body of a notification sent to voters when a problem they voted on has a new revision"
+    },
+    "notificationForkAdoptedTitle": "Your fork was adopted",
+    "@notificationForkAdoptedTitle": {
+        "description": "Title of a notification sent to a fork owner when the original problem's owner incorporates their contribution"
+    },
+    "notificationForkAdoptedBody": "Your contribution was incorporated into the original problem",
+    "@notificationForkAdoptedBody": {
+        "description": "Body of a notification sent to a fork owner when the original problem's owner incorporates their contribution"
     }
 }

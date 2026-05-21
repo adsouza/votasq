@@ -15,13 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Problem {
 
- String get id; String get description; DateTime get createdAt; DateTime get lastUpdatedAt; String get ownerId; String get goal; String get geoscope; String? get lang; int get votes; List<String> get complaints; bool get solved; int get version;// Source ProblemRevision that inspired this problem (set when forked).
-// The two `inspo*` fields together identify a revision and must be set
-// or null as a pair. Kept as two flat fields rather than a composite
-// string so `inspoProblemId` can be queried directly to enumerate all
-// forks of a problem. Write-once: only populated at creation time and
-// never modified afterwards.
- String? get inspoProblemId; int? get inspoVersion; List<String> get linkedProblemIds;
+ String get id; String get description; DateTime get createdAt; DateTime get lastUpdatedAt; String get ownerId; String get goal; String get geoscope; String? get lang; int get votes; List<String> get complaints; bool get solved; int get version; String? get inspoProblemId; int? get inspoVersion; List<String> get linkedProblemIds;
 /// Create a copy of Problem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -250,12 +244,6 @@ class _Problem implements Problem {
 
 @override@JsonKey() final  bool solved;
 @override@JsonKey() final  int version;
-// Source ProblemRevision that inspired this problem (set when forked).
-// The two `inspo*` fields together identify a revision and must be set
-// or null as a pair. Kept as two flat fields rather than a composite
-// string so `inspoProblemId` can be queried directly to enumerate all
-// forks of a problem. Write-once: only populated at creation time and
-// never modified afterwards.
 @override final  String? inspoProblemId;
 @override final  int? inspoVersion;
  final  List<String> _linkedProblemIds;
