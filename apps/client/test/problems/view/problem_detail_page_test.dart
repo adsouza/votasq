@@ -39,6 +39,7 @@ Problem _problem({
   String ownerId = 'owner1',
   String geoscope = '/',
   int votes = 7,
+  String? lang,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -48,6 +49,7 @@ Problem _problem({
     ownerId: ownerId,
     geoscope: geoscope,
     votes: votes,
+    lang: lang,
     createdAt: now,
     lastUpdatedAt: now,
   );
@@ -530,6 +532,250 @@ void main() {
       // Heading (with count) remains visible.
       expect(find.text('Forks (1)'), findsOneWidget);
     });
+
+    testWidgets(
+      'compare icon hidden when fork matches current problem in all fields',
+      (tester) async {
+        // Owner viewing their own problem. The fork is identical in
+        // description/goal/geoscope, so there is nothing to compare and the
+        // compare icon must not render.
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [_problem(id: 'fork-a')],
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.compare_arrows), findsNothing);
+      },
+    );
+
+    testWidgets('compare icon hidden for non-owners even when forks differ', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => repo.getForksOfProblem(any())).thenAnswer(
+        (_) async => [_problem(id: 'fork-a', description: 'A different desc')],
+      );
+      // Authenticated but not the owner.
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.compare_arrows), findsNothing);
+    });
+
+    testWidgets(
+      'owner can replace one field with a fork value via "Use this here"',
+      (tester) async {
+        final current = _problem(description: 'original desc', goal: 'g1');
+        final fork = _problem(
+          id: 'fork-a',
+          description: 'forked desc',
+          goal: 'g1', // same goal — should NOT appear in the panel
+        );
+        when(() => repo.getProblem(any())).thenAnswer((_) async => current);
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [fork],
+        );
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // The compare icon is present (description differs).
+        await tester.tap(find.byIcon(Icons.compare_arrows));
+        await tester.pumpAndSettle();
+
+        // Only the differing field is listed in the panel; the matching
+        // goal is omitted entirely. The field-label string ("Description")
+        // is what uniquely identifies the panel — the fork's description
+        // also renders in the row title, so we check the label rather than
+        // the value.
+        expect(find.text('Description'), findsOneWidget);
+        expect(find.text('Goal'), findsNothing);
+        expect(find.text('Use this here'), findsOneWidget);
+
+        await tester.tap(find.text('Use this here'));
+        await tester.pumpAndSettle();
+
+        // updateProblem was called once with the fork's description merged
+        // into the current problem; other fields are unchanged.
+        final captured =
+            verify(
+                  () => repo.updateProblem(
+                    captureAny(),
+                    userLanguage: any(named: 'userLanguage'),
+                  ),
+                ).captured.single
+                as Problem;
+        expect(captured.description, 'forked desc');
+        expect(captured.goal, 'g1');
+        expect(captured.id, current.id);
+
+        // Notifies the list cubit, shows the standard "saved" toast.
+        verify(() => problemsCubit.applyLocalUpdate(any())).called(1);
+        expect(find.text('Your changes have been saved'), findsOneWidget);
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'different-language fork bundles description and goal into one button',
+      (tester) async {
+        // Bundling is required because updateProblem's language validator
+        // would reject a mixed-language result if we copied just one of
+        // the two text fields. A single bundled button replaces both.
+        final current = _problem(
+          description: 'english desc',
+          goal: 'english goal',
+          lang: 'en',
+        );
+        final fork = _problem(
+          id: 'fork-a',
+          description: 'french desc',
+          goal: 'french goal',
+          lang: 'fr',
+        );
+        when(() => repo.getProblem(any())).thenAnswer((_) async => current);
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [fork],
+        );
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.compare_arrows));
+        await tester.pumpAndSettle();
+
+        // Both field labels render inside the same diff row.
+        expect(find.text('Description'), findsOneWidget);
+        expect(find.text('Goal'), findsOneWidget);
+        // Exactly one "Use this here" button — not one per field.
+        expect(find.text('Use this here'), findsOneWidget);
+
+        await tester.tap(find.text('Use this here'));
+        await tester.pumpAndSettle();
+
+        // updateProblem received both text fields swapped at once.
+        final captured =
+            verify(
+                  () => repo.updateProblem(
+                    captureAny(),
+                    userLanguage: any(named: 'userLanguage'),
+                  ),
+                ).captured.single
+                as Problem;
+        expect(captured.description, 'french desc');
+        expect(captured.goal, 'french goal');
+
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'different-language fork still offers geoscope independently',
+      (tester) async {
+        // Geoscope is language-independent, so it stays its own row even
+        // when the text fields are bundled.
+        final current = _problem(
+          description: 'english desc',
+          goal: 'english goal',
+          lang: 'en',
+        );
+        final fork = _problem(
+          id: 'fork-a',
+          description: 'french desc',
+          goal: 'french goal',
+          geoscope: 'eu/fr',
+          lang: 'fr',
+        );
+        when(() => repo.getProblem(any())).thenAnswer((_) async => current);
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [fork],
+        );
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.compare_arrows));
+        await tester.pumpAndSettle();
+
+        // One bundled text entry + one geoscope entry = two buttons.
+        expect(find.text('Use this here'), findsNWidgets(2));
+        expect(find.text('Location'), findsOneWidget);
+
+        // Tap the geoscope button (the second "Use this here").
+        await tester.tap(find.text('Use this here').last);
+        await tester.pumpAndSettle();
+
+        final captured =
+            verify(
+                  () => repo.updateProblem(
+                    captureAny(),
+                    userLanguage: any(named: 'userLanguage'),
+                  ),
+                ).captured.single
+                as Problem;
+        // Geoscope swapped, text fields untouched.
+        expect(captured.geoscope, 'eu/fr');
+        expect(captured.description, 'english desc');
+        expect(captured.goal, 'english goal');
+
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
 
     testWidgets(
       'shows linked problems section with count when linked problems exist',

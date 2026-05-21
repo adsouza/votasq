@@ -205,10 +205,15 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   }
 
   Widget _buildForksList() {
+    final problem = _problem;
     final forks = _forks;
-    if (forks == null || forks.isEmpty) return const SizedBox.shrink();
+    if (problem == null || forks == null || forks.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final userId = context.read<AuthCubit>().state.userId;
+    final isOwner = userId != null && userId == problem.ownerId;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: ExpansionTile(
@@ -223,19 +228,55 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         collapsedShape: const RoundedRectangleBorder(),
         children: [
           for (final fork in forks)
-            ListTile(
-              dense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-              title: Text(
-                fork.description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              onTap: () => context.push('/problems/${fork.id}'),
+            _ForkRow(
+              current: problem,
+              fork: fork,
+              canCompare: isOwner,
+              onUseField: _useForkField,
             ),
         ],
       ),
     );
+  }
+
+  /// Replace one field of [_problem] with the corresponding value from a
+  /// fork, persist the change as a new revision, and reflect the result
+  /// locally. Called by [_ForkRow] when the owner taps "Use this here".
+  Future<void> _useForkField(Problem updated) async {
+    final l10n = context.l10n;
+    final repo = context.read<FirestoreRepository>();
+    ProblemsCubit? problemsCubit;
+    try {
+      problemsCubit = context.read<ProblemsCubit>();
+    } on Object {
+      problemsCubit = null;
+    }
+    final userLang = Localizations.localeOf(context).languageCode;
+    try {
+      await repo.updateProblem(updated, userLanguage: userLang);
+    } on LanguageMismatchException catch (e) {
+      if (!mounted) return;
+      showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
+      return;
+    } on Exception catch (e) {
+      log('Failed to apply fork field: $e');
+      if (!mounted) return;
+      showToast(l10n.saveProblemError);
+      return;
+    }
+    if (!mounted) return;
+    // Mirror updateProblem's server-side `newVersion = version + 1` so a
+    // subsequent "Use this here" tap doesn't pass the stale version and
+    // overwrite the revision we just wrote at `versions/{newVersion}`.
+    final saved = updated.copyWith(version: updated.version + 1);
+    setState(() {
+      _problem = saved;
+      _controller.text = saved.description;
+      _goalController.text = saved.goal;
+      _geoscope = saved.geoscope;
+    });
+    problemsCubit?.applyLocalUpdate(saved);
+    showToast(l10n.problemSavedToast);
   }
 
   Widget _buildLinkedProblemsList() {
@@ -633,6 +674,217 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                 : _buildReadOnlyBody(problem),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// One row in the forks list. Owns the per-fork "expanded" state so each
+/// fork can be opened independently. When the viewer owns the parent
+/// problem and at least one of (description, goal, geoscope) differs
+/// between the parent and this fork, a compare icon is shown; tapping it
+/// expands an inline panel that lets the owner copy any differing field
+/// into the parent problem as a new revision.
+class _ForkRow extends StatefulWidget {
+  const _ForkRow({
+    required this.current,
+    required this.fork,
+    required this.canCompare,
+    required this.onUseField,
+  });
+
+  final Problem current;
+  final Problem fork;
+  final bool canCompare;
+
+  /// Invoked with [current] copied to include the fork's value for one or
+  /// more fields. The callback persists the change and updates ambient
+  /// state.
+  final Future<void> Function(Problem updated) onUseField;
+
+  @override
+  State<_ForkRow> createState() => _ForkRowState();
+}
+
+class _ForkRowState extends State<_ForkRow> {
+  bool _expanded = false;
+
+  List<_ForkFieldDiff> _computeDiffs() {
+    final l10n = context.l10n;
+    final diffs = <_ForkFieldDiff>[];
+    final descDiffers = widget.fork.description != widget.current.description;
+    final goalDiffers = widget.fork.goal != widget.current.goal;
+    final geoDiffers = widget.fork.geoscope != widget.current.geoscope;
+    // updateProblem requires description and goal to share a language;
+    // when the fork's lang doesn't match the current problem's, copying
+    // a single text field would leave the result mixed-language and
+    // trigger LanguageMismatchException. In that case we bundle the
+    // text fields into one diff entry so they're replaced together.
+    // Geoscope is language-independent and stays a separate entry.
+    final compatibleLangs = widget.fork.lang == widget.current.lang;
+
+    if (compatibleLangs) {
+      if (descDiffers) {
+        diffs.add(
+          _ForkFieldDiff(
+            fields: [
+              (
+                label: l10n.problemDescriptionFieldLabel,
+                display: widget.fork.description,
+              ),
+            ],
+            apply: () =>
+                widget.current.copyWith(description: widget.fork.description),
+          ),
+        );
+      }
+      if (goalDiffers) {
+        diffs.add(
+          _ForkFieldDiff(
+            fields: [
+              (
+                label: l10n.problemGoalFieldLabel,
+                display: widget.fork.goal,
+              ),
+            ],
+            apply: () => widget.current.copyWith(goal: widget.fork.goal),
+          ),
+        );
+      }
+    } else if (descDiffers || goalDiffers) {
+      diffs.add(
+        _ForkFieldDiff(
+          fields: [
+            (
+              label: l10n.problemDescriptionFieldLabel,
+              display: widget.fork.description,
+            ),
+            (
+              label: l10n.problemGoalFieldLabel,
+              display: widget.fork.goal,
+            ),
+          ],
+          apply: () => widget.current.copyWith(
+            description: widget.fork.description,
+            goal: widget.fork.goal,
+          ),
+        ),
+      );
+    }
+
+    if (geoDiffers) {
+      diffs.add(
+        _ForkFieldDiff(
+          fields: [
+            (
+              label: l10n.problemGeoscopeFieldLabel,
+              display: geoscopeLabel(context, widget.fork.geoscope),
+            ),
+          ],
+          apply: () => widget.current.copyWith(geoscope: widget.fork.geoscope),
+        ),
+      );
+    }
+    return diffs;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final diffs = _computeDiffs();
+    final showCompareIcon = widget.canCompare && diffs.isNotEmpty;
+    final panelOpen = _expanded && showCompareIcon;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+          title: Text(
+            widget.fork.description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: showCompareIcon
+              ? IconButton(
+                  tooltip: panelOpen
+                      ? l10n.hideForkCompareTooltip
+                      : l10n.compareForkTooltip,
+                  icon: Icon(
+                    panelOpen ? Icons.expand_less : Icons.compare_arrows,
+                  ),
+                  onPressed: () => setState(() => _expanded = !_expanded),
+                )
+              : null,
+          onTap: () => context.push('/problems/${widget.fork.id}'),
+        ),
+        if (panelOpen)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 8, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final diff in diffs)
+                  _ForkFieldDiffRow(diff: diff, onUse: widget.onUseField),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// A single entry in the fork-comparison panel. Usually one field, but
+/// description and goal are bundled together when the fork's language
+/// differs from the current problem's — see `_computeDiffs` for why.
+class _ForkFieldDiff {
+  _ForkFieldDiff({required this.fields, required this.apply});
+
+  final List<({String label, String display})> fields;
+  final Problem Function() apply;
+}
+
+class _ForkFieldDiffRow extends StatelessWidget {
+  const _ForkFieldDiffRow({required this.diff, required this.onUse});
+
+  final _ForkFieldDiff diff;
+  final Future<void> Function(Problem updated) onUse;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < diff.fields.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  Text(
+                    diff.fields[i].label,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    diff.fields[i].display,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => onUse(diff.apply()),
+            child: Text(l10n.useForkFieldButton),
+          ),
+        ],
       ),
     );
   }
