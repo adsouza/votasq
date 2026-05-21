@@ -5,6 +5,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/notifications/notifications.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
@@ -101,27 +102,71 @@ class _AppState extends State<App> {
               return cubit;
             },
           ),
+          BlocProvider(
+            create: (context) => NotificationsCubit(
+              repo: context.read<FirestoreRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => NotificationsCountCubit(
+              repo: context.read<FirestoreRepository>(),
+            ),
+          ),
         ],
-        child: _LastActiveTracker(
-          child: BetterFeedback(
-            child: ToastificationWrapper(
-              child: MaterialApp.router(
-                theme: ThemeData(
-                  appBarTheme: AppBarTheme(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.inversePrimary,
+        child: _NotificationAuthSync(
+          child: _LastActiveTracker(
+            child: BetterFeedback(
+              child: ToastificationWrapper(
+                child: MaterialApp.router(
+                  theme: ThemeData(
+                    appBarTheme: AppBarTheme(
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.inversePrimary,
+                    ),
+                    useMaterial3: true,
                   ),
-                  useMaterial3: true,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  routerConfig: _router,
                 ),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                routerConfig: _router,
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Drives [NotificationsCubit] and [NotificationsCountCubit] off [AuthCubit]
+/// state. Subscribes the live notifications stream when a user signs in and
+/// clears it on sign-out.
+class _NotificationAuthSync extends StatelessWidget {
+  const _NotificationAuthSync({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthCubit, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.userId != current.userId,
+      listener: (context, state) {
+        final notifsCubit = context.read<NotificationsCubit>();
+        final countCubit = context.read<NotificationsCountCubit>();
+        final uid = state.userId;
+        if (state.status == AuthStatus.authenticated && uid != null) {
+          notifsCubit.subscribe(uid);
+          unawaited(countCubit.watch(uid));
+        } else {
+          unawaited(notifsCubit.clear());
+          countCubit.reset();
+        }
+      },
+      child: child,
     );
   }
 }
@@ -159,6 +204,7 @@ class _LastActiveTrackerState extends State<_LastActiveTracker> {
     final userId = context.read<AuthCubit>().state.userId;
     if (userId == null) return;
     unawaited(context.read<FirestoreRepository>().grantVotesAndTouch(userId));
+    unawaited(context.read<NotificationsCountCubit>().refresh());
   }
 
   @override

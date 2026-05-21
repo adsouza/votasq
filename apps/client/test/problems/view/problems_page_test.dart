@@ -3,6 +3,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/notifications/notifications.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/view/problems_page.dart';
@@ -27,6 +28,9 @@ class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
+
+class _MockNotificationsCountCubit extends MockCubit<int>
+    implements NotificationsCountCubit {}
 
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
@@ -69,6 +73,7 @@ void main() {
   late ProblemsCubit problemsCubit;
   late AuthCubit authCubit;
   late GeoscopeCubit geoscopeCubit;
+  late NotificationsCountCubit notificationsCountCubit;
   late FirestoreRepository firestoreRepo;
   late FeedbackRepository feedbackRepo;
   late LanguageDetectionService languageDetectionService;
@@ -84,6 +89,7 @@ void main() {
     problemsCubit = _MockProblemsCubit();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
+    notificationsCountCubit = _MockNotificationsCountCubit();
     firestoreRepo = _MockFirestoreRepository();
     feedbackRepo = _MockFeedbackRepository();
     languageDetectionService = _MockLanguageDetectionService();
@@ -93,6 +99,7 @@ void main() {
     when(() => problemsCubit.state).thenReturn(const ProblemsState());
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
+    when(() => notificationsCountCubit.state).thenReturn(0);
     when(
       () => languageDetectionService.needsTranslation(
         text: any(named: 'text'),
@@ -110,6 +117,9 @@ void main() {
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
         BlocProvider<AutoTranslateCubit>(
           create: (_) => AutoTranslateCubit(prefsForTesting: mockPrefs),
+        ),
+        BlocProvider<NotificationsCountCubit>.value(
+          value: notificationsCountCubit,
         ),
       ],
       child: MultiRepositoryProvider(

@@ -5,6 +5,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/notifications/notifications.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/widgets/add_problem_row.dart';
@@ -458,7 +459,7 @@ class _ProblemsViewState extends State<ProblemsView> {
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
               if (authState.status == AuthStatus.authenticated) {
-                return const SizedBox.shrink();
+                return const NotificationsBadge();
               }
               return Tooltip(
                 message: l10n.signInButtonTooltip,

@@ -1,3 +1,4 @@
+import 'package:client/notifications/notifications.dart';
 import 'package:client/problems/problems.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,10 @@ GoRouter buildRouter() {
               // page keeps showing stale data.
               return ProblemDetailPage(key: ValueKey(id), problemId: id);
             },
+          ),
+          GoRoute(
+            path: 'notifications',
+            builder: (context, state) => const NotificationsPage(),
           ),
         ],
       ),

@@ -575,6 +575,87 @@ class FirestoreRepository {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Notifications
+  // ---------------------------------------------------------------------------
+
+  Query<Map<String, dynamic>> _notificationsQuery(String uid) => _firestore
+      .collection('users')
+      .doc(uid)
+      .collection('notifications')
+      .orderBy('updatedAt', descending: true)
+      .orderBy(FieldPath.documentId, descending: true);
+
+  /// Real-time stream of the first page of notifications for [uid], ordered
+  /// by `updatedAt` descending (so re-emitted notifications resurface at the
+  /// top).
+  Stream<({List<AppNotification> notifications, DocumentSnapshot? lastDoc})>
+  watchNotifications(String uid, {int limit = _pageSize}) {
+    return _notificationsQuery(uid).limit(limit).snapshots().map((snapshot) {
+      final notifications = snapshot.docs.map(_docToNotification).toList();
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+      return (notifications: notifications, lastDoc: lastDoc);
+    });
+  }
+
+  /// Fetch the next page of notifications for [uid] (used by infinite scroll).
+  Future<({List<AppNotification> notifications, DocumentSnapshot? lastDoc})>
+  getNotifications(
+    String uid, {
+    int pageSize = _pageSize,
+    DocumentSnapshot? startAfter,
+  }) async {
+    var query = _notificationsQuery(uid).limit(pageSize);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    final snapshot = await query.get();
+    final notifications = snapshot.docs.map(_docToNotification).toList();
+    final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+    return (notifications: notifications, lastDoc: lastDoc);
+  }
+
+  /// Returns the current unread notification count for [uid].
+  ///
+  /// Uses Firestore's `count()` aggregation so the call doesn't depend on the
+  /// loaded page — the badge stays accurate even with many unread.
+  Future<int> unreadNotificationCount(String uid) async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .where('readAt', isNull: true)
+        .count()
+        .get();
+    return snapshot.count ?? 0;
+  }
+
+  /// Stamp `readAt = serverTimestamp` on a notification. The security rules
+  /// permit this exact one-field update and reject anything else.
+  Future<void> markNotificationRead(String uid, String notificationId) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .doc(notificationId)
+        .update({'readAt': FieldValue.serverTimestamp()});
+  }
+
+  AppNotification _docToNotification(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data()!;
+    final payloadData = Map<String, dynamic>.from(data['payload'] as Map);
+    return AppNotification(
+      id: doc.id,
+      recipientUid: data['recipientUid'] as String,
+      payload: NotificationPayload.fromJson(payloadData),
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      readAt: (data['readAt'] as Timestamp?)?.toDate(),
+    );
+  }
+
   /// Symmetrically link two problems together into a merged cluster (clique).
   Future<void> linkProblems(String problemIdA, String problemIdB) async {
     final problemA = await getProblem(problemIdA);

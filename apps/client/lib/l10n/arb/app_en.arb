@@ -275,6 +275,22 @@
     "@unlinkProblemTooltip": {
         "description": "Tooltip for the button that unlinks a problem from its cluster"
     },
+    "notificationsBadgeTooltip": "Notifications",
+    "@notificationsBadgeTooltip": {
+        "description": "Tooltip for the notifications bell icon in the app bar"
+    },
+    "notificationsPageTitle": "Notifications",
+    "@notificationsPageTitle": {
+        "description": "Title of the notifications page"
+    },
+    "notificationsEmpty": "You don't have any notifications yet",
+    "@notificationsEmpty": {
+        "description": "Message shown on the notifications page when there are no notifications"
+    },
+    "notificationOpenButton": "Open",
+    "@notificationOpenButton": {
+        "description": "Label for the link/button on a notification card that opens the related problem"
+    },
     "notificationVoteReceivedTitle": "New vote",
     "@notificationVoteReceivedTitle": {
         "description": "Title of a notification when someone votes on the user's problem"
