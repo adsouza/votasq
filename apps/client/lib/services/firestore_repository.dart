@@ -5,6 +5,7 @@ import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/language_validator.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:shared/shared.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,15 +21,26 @@ export 'package:client/services/language_validator.dart'
 class FirestoreRepository {
   FirestoreRepository({
     FirebaseFirestore? firestore,
+    FirebaseFunctions? functions,
     LanguageDetectionService? languageDetectionService,
     TranslationRepository? translationRepository,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _functions = functions,
        _langValidator = LanguageValidator(
          langService: languageDetectionService ?? LanguageDetectionService(),
          translationRepo: translationRepository,
        );
 
   final FirebaseFirestore _firestore;
+
+  // Lazy: `FirebaseFunctions.instance` looks up the default Firebase app,
+  // which throws in tests that haven't initialized Firebase. Keeping this
+  // nullable lets repository methods that don't use Functions construct
+  // and run in isolation.
+  final FirebaseFunctions? _functions;
+  FirebaseFunctions get _functionsInstance =>
+      _functions ?? FirebaseFunctions.instance;
+
   final LanguageValidator _langValidator;
   static const _collection = 'problems';
   static const _pageSize = 20;
@@ -643,6 +655,20 @@ class FirestoreRepository {
         .collection('notifications')
         .doc(notificationId)
         .update({'readAt': FieldValue.serverTimestamp()});
+  }
+
+  /// Invokes the `markAllNotificationsRead` callable Cloud Function, which
+  /// stamps `readAt = serverTimestamp` on every unread notification for the
+  /// signed-in caller in batches. Returns the count of notifications that
+  /// were flipped (zero if none were unread).
+  Future<int> markAllNotificationsRead() async {
+    final callable = _functionsInstance.httpsCallable(
+      'markAllNotificationsRead',
+    );
+    final result = await callable.call<Map<Object?, Object?>>();
+    final marked = result.data['marked'];
+    if (marked is num) return marked.toInt();
+    return 0;
   }
 
   AppNotification _docToNotification(

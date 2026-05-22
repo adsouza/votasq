@@ -91,6 +91,17 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     }
   }
 
+  /// Mark every unread notification as read via the callable Cloud Function.
+  /// The live subscription will pick up the resulting state changes.
+  Future<void> markAllAsRead() async {
+    if (_uid == null) return;
+    try {
+      await _repo.markAllNotificationsRead();
+    } on Exception catch (e, st) {
+      log('markAllNotificationsRead failed: $e', stackTrace: st);
+    }
+  }
+
   @override
   Future<void> close() async {
     await _subscription?.cancel();

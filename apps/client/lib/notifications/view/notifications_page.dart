@@ -50,11 +50,28 @@ class _NotificationsPageState extends State<NotificationsPage> {
     await context.read<NotificationsCountCubit>().refresh();
   }
 
+  Future<void> _markAllRead() async {
+    await context.read<NotificationsCubit>().markAllAsRead();
+    if (!mounted) return;
+    await context.read<NotificationsCountCubit>().refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.notificationsPageTitle)),
+      appBar: AppBar(
+        title: Text(l10n.notificationsPageTitle),
+        actions: [
+          BlocBuilder<NotificationsCountCubit, int>(
+            builder: (context, count) => IconButton(
+              icon: const Icon(Icons.done_all),
+              tooltip: l10n.notificationsMarkAllReadTooltip,
+              onPressed: count == 0 ? null : () => unawaited(_markAllRead()),
+            ),
+          ),
+        ],
+      ),
       body: BlocBuilder<NotificationsCubit, NotificationsState>(
         builder: (context, state) {
           return switch (state.status) {

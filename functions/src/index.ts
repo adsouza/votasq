@@ -11,3 +11,4 @@ export {onVoterWritten} from "./triggers/vote";
 export {onProblemForked} from "./triggers/fork";
 export {onProblemLinkedWritten} from "./triggers/link";
 export {onRevisionCreated} from "./triggers/revision";
+export {markAllNotificationsRead} from "./callables/markAllNotificationsRead";

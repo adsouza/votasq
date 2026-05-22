@@ -12,6 +12,7 @@ resolution: workspace
 dependencies:
   bloc: ^9.2.0
   cloud_firestore: ^6.2.0 # Official FlutterFire
+  cloud_functions: ^6.1.0
   cupertino_icons: ^1.0.9
   feedback: ^3.1.0
   firebase_auth: ^6.3.0

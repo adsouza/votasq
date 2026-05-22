@@ -106,6 +106,36 @@ void main() {
     );
 
     blocTest<NotificationsCubit, NotificationsState>(
+      'markAllAsRead delegates to the repo',
+      build: () {
+        when(
+          () => repo.watchNotifications(
+            any(),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) => const Stream.empty());
+        when(() => repo.markAllNotificationsRead()).thenAnswer((_) async => 3);
+        return NotificationsCubit(repo: repo);
+      },
+      act: (cubit) async {
+        cubit.subscribe('ownerA');
+        await cubit.markAllAsRead();
+      },
+      verify: (_) {
+        verify(() => repo.markAllNotificationsRead()).called(1);
+      },
+    );
+
+    blocTest<NotificationsCubit, NotificationsState>(
+      'markAllAsRead is a no-op when no user is subscribed',
+      build: () => NotificationsCubit(repo: repo),
+      act: (cubit) => cubit.markAllAsRead(),
+      verify: (_) {
+        verifyNever(() => repo.markAllNotificationsRead());
+      },
+    );
+
+    blocTest<NotificationsCubit, NotificationsState>(
       'clear resets state to initial',
       build: () {
         when(

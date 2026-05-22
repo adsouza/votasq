@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'package:bloc/bloc.dart';
 import 'package:client/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -79,9 +80,10 @@ Future<void> _connectToEmulators() async {
   );
   await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8081);
+  FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
   log(
     'Bootstrap: connected to Firebase emulators at $host '
-    '(auth:9099, firestore:8081)',
+    '(auth:9099, firestore:8081, functions:5001)',
   );
 }
 

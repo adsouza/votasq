@@ -291,6 +291,10 @@
     "@notificationOpenButton": {
         "description": "Label for the link/button on a notification card that opens the related problem"
     },
+    "notificationsMarkAllReadTooltip": "Mark all as read",
+    "@notificationsMarkAllReadTooltip": {
+        "description": "Tooltip for the app bar action on the notifications page that marks every unread notification as read"
+    },
     "notificationVoteReceivedTitle": "New vote",
     "@notificationVoteReceivedTitle": {
         "description": "Title of a notification when someone votes on the user's problem"
