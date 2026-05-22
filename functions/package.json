@@ -7,8 +7,10 @@
   },
   "main": "lib/index.js",
   "scripts": {
+    "prebuild": "node tool/sync-arbs.mjs",
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "sync:arbs": "node tool/sync-arbs.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "vitest run",

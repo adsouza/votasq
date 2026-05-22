@@ -1,0 +1,353 @@
+{
+    "@@locale": "en",
+    "problemsAppBarTitle": "Problems we can solve together",
+    "@problemsAppBarTitle": {
+        "description": "Text shown in the AppBar of the Problems Page"
+    },
+    "signInButton": "Sign In",
+    "@signInButton": {
+        "description": "Label for the sign-in button"
+    },
+    "signOutButton": "Sign Out",
+    "@signOutButton": {
+        "description": "Tooltip for the sign-out button"
+    },
+    "addProblemHint": "Contribute your own problem here",
+    "@addProblemHint": {
+        "description": "Placeholder text for the add-problem text field"
+    },
+    "addProblemButton": "Add",
+    "@addProblemButton": {
+        "description": "Label for the add-problem button"
+    },
+    "addProblemTooltip": "Include your problem in the list",
+    "@addProblemTooltip": {
+        "description": "Tooltip for the add-problem button"
+    },
+    "editProblemHint": "Edit problem description",
+    "@editProblemHint": {
+        "description": "Placeholder text for the inline edit text field"
+    },
+    "editProblemButton": "Edit this problem",
+    "@editProblemButton": {
+        "description": "Tooltip for the edit button on a problem list item"
+    },
+    "flagProblemButton": "Flag this problem as abuse",
+    "@flagProblemButton": {
+        "description": "Tooltip for the flag/complaint button on a problem list item"
+    },
+    "feedbackButton": "Send feedback",
+    "@feedbackButton": {
+        "description": "Tooltip for the feedback button in the app bar"
+    },
+    "feedbackSuccess": "Thank you for your feedback!",
+    "@feedbackSuccess": {
+        "description": "SnackBar message shown after successful feedback submission"
+    },
+    "feedbackError": "Could not send feedback. Please try again.",
+    "@feedbackError": {
+        "description": "SnackBar message shown when feedback submission fails"
+    },
+    "geoscopeGlobal": "Global",
+    "@geoscopeGlobal": {
+        "description": "Label for the global geoscope option in the picker"
+    },
+    "geoscopeChangeMenuItem": "Change location",
+    "@geoscopeChangeMenuItem": {
+        "description": "Menu item label to open the geoscope picker"
+    },
+    "showOnlyOwnedMenuItem": "Show only my problems",
+    "@showOnlyOwnedMenuItem": {
+        "description": "Menu item label to toggle showing only problems owned by the current user"
+    },
+    "showOnlyWithGoalsMenuItem": "Show only problems with goals",
+    "@showOnlyWithGoalsMenuItem": {
+        "description": "Menu item label to toggle showing only problems that have a non-empty goal"
+    },
+    "problemDetailPageTitle": "Problem Details",
+    "@problemDetailPageTitle": {
+        "description": "Title in the AppBar of the problem detail page"
+    },
+    "newProblemPageTitle": "What is a collective problem that vexes you?",
+    "@newProblemPageTitle": {
+        "description": "Title in the AppBar of the page for creating a new problem"
+    },
+    "problemNotFound": "Problem not found",
+    "@problemNotFound": {
+        "description": "Error message when a problem cannot be found by ID"
+    },
+    "problemDetailSaveButton": "Save",
+    "@problemDetailSaveButton": {
+        "description": "Label for the save button on the problem detail page"
+    },
+    "problemDetailBackButton": "See everybody's problems",
+    "@problemDetailBackButton": {
+        "description": "Label for the back button on the problem detail page that returns the user to the global problems list"
+    },
+    "geoscopeLabel": "Geographic scope:",
+    "@geoscopeLabel": {
+        "description": "Label shown next to the geoscope dropdown on the problem detail page"
+    },
+    "copyProblemLink": "Copy link to this problem",
+    "@copyProblemLink": {
+        "description": "Tooltip for the copy-link button on a problem list item"
+    },
+    "problemLinkCopied": "Link copied to clipboard",
+    "@problemLinkCopied": {
+        "description": "SnackBar message shown after copying a problem link"
+    },
+    "geoscopeDropdownTooltip": "Select the geo scope for your problem",
+    "@geoscopeDropdownTooltip": {
+        "description": "Tooltip shown when hovering over the geoscope dropdown"
+    },
+    "votesChipTooltip": "Votes",
+    "@votesChipTooltip": {
+        "description": "Tooltip shown when hovering over the votes chip on a problem card"
+    },
+    "autoTranslateMenuItem": "Translate text automatically",
+    "@autoTranslateMenuItem": {
+        "description": "Menu item label to toggle automatic on-device translation of problems in foreign languages"
+    },
+    "showOriginalLanguageTooltip": "Show text in original language instead",
+    "@showOriginalLanguageTooltip": {
+        "description": "Tooltip on the translate toggle button when the translated text is currently shown; tapping flips the view to the original (untranslated) text"
+    },
+    "showTranslationTooltip": "Show translation instead",
+    "@showTranslationTooltip": {
+        "description": "Tooltip on the translate toggle button when the original (untranslated) text is currently shown; tapping flips the view back to the translation"
+    },
+    "addGoalHint": "(Optional) What outcome would solve this?",
+    "@addGoalHint": {
+        "description": "Placeholder text for the add-goal text field"
+    },
+    "editGoalHint": "Edit desired outcome",
+    "@editGoalHint": {
+        "description": "Placeholder text for the edit-goal text field"
+    },
+    "goalLabel": "Goal",
+    "@goalLabel": {
+        "description": "Label for the goal field"
+    },
+    "languageMismatchError": "Language mismatch: description appears to be in {descLang} but goal appears to be in {goalLang}. Both fields must be in the same language.",
+    "@languageMismatchError": {
+        "description": "Error toast shown when the problem description and goal are detected as different languages",
+        "placeholders": {
+            "descLang": {
+                "type": "String"
+            },
+            "goalLang": {
+                "type": "String"
+            }
+        }
+    },
+    "voteButtonTooltip": "Vote for this problem",
+    "@voteButtonTooltip": {
+        "description": "Tooltip shown when hovering over the tappable vote chip for authenticated users"
+    },
+    "signInButtonTooltip": "Log in to vote on problems or add your own problems to the list",
+    "@signInButtonTooltip": {
+        "description": "Tooltip for the sign-in button explaining what signing in enables"
+    },
+    "signInHintToast": "Sign in via the icon in the top right to unlock voting and propose your own problems.",
+    "@signInHintToast": {
+        "description": "SnackBar message shown to anonymous users when lifecycle checks run"
+    },
+    "menuVotesRemaining": "{count, plural, one{1 vote remaining} other{{count} votes remaining}}",
+    "@menuVotesRemaining": {
+        "description": "Label in the hamburger menu showing how many votes the user has left",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "menuVotesReplenishHint": "Votes replenish after 3 hours away",
+    "@menuVotesReplenishHint": {
+        "description": "Label in the hamburger menu shown when the user has no votes remaining"
+    },
+    "votersHeading": "Voters",
+    "@votersHeading": {
+        "description": "Section heading for the voter leaderboard on the problem detail page"
+    },
+    "voterAnonymous": "Anonymous",
+    "@voterAnonymous": {
+        "description": "Fallback name for voters who have no display name"
+    },
+    "complaintSubmitted": "Complaint submitted",
+    "@complaintSubmitted": {
+        "description": "SnackBar message shown after successfully flagging a problem"
+    },
+    "failedToLoadProblems": "Failed to load problems",
+    "@failedToLoadProblems": {
+        "description": "Error message shown when problems cannot be loaded"
+    },
+    "geoscopeFilterHint": "Type partial name of current location here to narrow down the list.",
+    "@geoscopeFilterHint": {
+        "description": "Placeholder text for the substring filter field at the top of the geoscope picker"
+    },
+    "geoscopePickerHeading": "Select your location with the highest available precision from the list below:",
+    "@geoscopePickerHeading": {
+        "description": "Heading shown at the top of the geoscope picker overlay, above the substring filter field"
+    },
+    "forkProblemTooltip": "Fork this problem into your own copy",
+    "@forkProblemTooltip": {
+        "description": "Tooltip for the fork icon button on the problem detail page"
+    },
+    "forkProblemError": "Could not fork this problem. Please try again.",
+    "@forkProblemError": {
+        "description": "SnackBar message shown when forking a problem fails"
+    },
+    "forkedFromOriginalLink": "Forked from original",
+    "@forkedFromOriginalLink": {
+        "description": "Label on the backlink shown above the description of a forked problem; tapping navigates to the source problem"
+    },
+    "forksHeading": "Forks ({count})",
+    "@forksHeading": {
+        "description": "Title of the collapsible section listing every fork of the current problem; the count is shown whether expanded or collapsed",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "compareForkTooltip": "Compare with your problem",
+    "@compareForkTooltip": {
+        "description": "Tooltip for the icon that reveals the per-field comparison panel for a fork"
+    },
+    "hideForkCompareTooltip": "Hide comparison",
+    "@hideForkCompareTooltip": {
+        "description": "Tooltip for the icon that hides the per-field comparison panel for a fork once it is open"
+    },
+    "useForkFieldButton": "Use this here",
+    "@useForkFieldButton": {
+        "description": "Button next to a forked problem's field value; tapping copies that value into the current problem as a new revision"
+    },
+    "problemDescriptionFieldLabel": "Description",
+    "@problemDescriptionFieldLabel": {
+        "description": "Field label used in the per-field fork comparison panel above the description value"
+    },
+    "problemGoalFieldLabel": "Goal",
+    "@problemGoalFieldLabel": {
+        "description": "Field label used in the per-field fork comparison panel above the goal value"
+    },
+    "problemGeoscopeFieldLabel": "Location",
+    "@problemGeoscopeFieldLabel": {
+        "description": "Field label used in the per-field fork comparison panel above the geoscope value"
+    },
+    "problemSavedToast": "Your changes have been saved",
+    "@problemSavedToast": {
+        "description": "SnackBar message shown after a problem is successfully saved from the detail page"
+    },
+    "saveProblemError": "Could not save your changes. Please try again.",
+    "@saveProblemError": {
+        "description": "SnackBar message shown when saving a problem fails for any reason other than language mismatch"
+    },
+    "linkedProblemsHeading": "Linked Problems ({count})",
+    "@linkedProblemsHeading": {
+        "description": "Heading for the section showing linked problems",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "linkProblemButton": "Link another problem",
+    "@linkProblemButton": {
+        "description": "Label for the button that opens the link problem dialog"
+    },
+    "linkProblemDialogTitle": "Link a Problem",
+    "@linkProblemDialogTitle": {
+        "description": "Title of the dialog for linking a similar problem"
+    },
+    "linkProblemSearchHint": "Search by text, paste problem ID, or full URL...",
+    "@linkProblemSearchHint": {
+        "description": "Placeholder hint text in the search bar of the link problem dialog"
+    },
+    "linkProblemError": "Could not link problem. Please try again.",
+    "@linkProblemError": {
+        "description": "Toast message shown when linking a problem fails"
+    },
+    "unlinkProblemError": "Could not unlink problem. Please try again.",
+    "@unlinkProblemError": {
+        "description": "Toast message shown when unlinking a problem fails"
+    },
+    "unlinkProblemTooltip": "Unlink this problem",
+    "@unlinkProblemTooltip": {
+        "description": "Tooltip for the button that unlinks a problem from its cluster"
+    },
+    "notificationsBadgeTooltip": "Notifications",
+    "@notificationsBadgeTooltip": {
+        "description": "Tooltip for the notifications bell icon in the app bar"
+    },
+    "notificationsPageTitle": "Notifications",
+    "@notificationsPageTitle": {
+        "description": "Title of the notifications page"
+    },
+    "notificationsEmpty": "You don't have any notifications yet",
+    "@notificationsEmpty": {
+        "description": "Message shown on the notifications page when there are no notifications"
+    },
+    "notificationOpenButton": "Open",
+    "@notificationOpenButton": {
+        "description": "Label for the link/button on a notification card that opens the related problem"
+    },
+    "notificationsMarkAllReadTooltip": "Mark all as read",
+    "@notificationsMarkAllReadTooltip": {
+        "description": "Tooltip for the app bar action on the notifications page that marks every unread notification as read"
+    },
+    "notificationVoteReceivedTitle": "New vote",
+    "@notificationVoteReceivedTitle": {
+        "description": "Title of a notification when someone votes on the user's problem"
+    },
+    "notificationVoteReceivedBody": "{actorName} voted on your problem",
+    "@notificationVoteReceivedBody": {
+        "description": "Body of a notification when someone votes on the user's problem",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemForkedTitle": "Your problem was forked",
+    "@notificationProblemForkedTitle": {
+        "description": "Title of a notification when someone forks the user's problem"
+    },
+    "notificationProblemForkedBody": "{actorName} created a fork of your problem",
+    "@notificationProblemForkedBody": {
+        "description": "Body of a notification when someone forks the user's problem",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemLinkedTitle": "Your problem was linked",
+    "@notificationProblemLinkedTitle": {
+        "description": "Title of a notification when someone links the user's problem from another"
+    },
+    "notificationProblemLinkedBody": "{actorName} linked your problem from another",
+    "@notificationProblemLinkedBody": {
+        "description": "Body of a notification when someone links the user's problem from another",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemRevisedTitle": "Problem updated",
+    "@notificationProblemRevisedTitle": {
+        "description": "Title of a notification sent to voters when a problem they voted on has a new revision"
+    },
+    "notificationProblemRevisedBody": "A problem you voted on has a new version",
+    "@notificationProblemRevisedBody": {
+        "description": "Body of a notification sent to voters when a problem they voted on has a new revision"
+    },
+    "notificationForkAdoptedTitle": "Your fork was adopted",
+    "@notificationForkAdoptedTitle": {
+        "description": "Title of a notification sent to a fork owner when the original problem's owner incorporates their contribution"
+    },
+    "notificationForkAdoptedBody": "Your contribution was incorporated into the original problem",
+    "@notificationForkAdoptedBody": {
+        "description": "Body of a notification sent to a fork owner when the original problem's owner incorporates their contribution"
+    }
+}
