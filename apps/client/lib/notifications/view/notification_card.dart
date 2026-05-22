@@ -28,32 +28,36 @@ class NotificationCard extends StatelessWidget {
         onTap: isUnread ? () => onMarkRead(notification.id) : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              _ReadStateIndicator(isUnread: isUnread),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      body,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
+          child: Opacity(
+            // Read notifications fade so unread ones visually dominate.
+            opacity: isUnread ? 1.0 : 0.5,
+            child: Row(
+              children: [
+                _ReadStateIndicator(isUnread: isUnread),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        body,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              TextButton(
-                onPressed: () => context.go('/problems/$targetProblemId'),
-                child: Text(l10n.notificationOpenButton),
-              ),
-            ],
+                const SizedBox(width: 12),
+                TextButton(
+                  onPressed: () => context.go('/problems/$targetProblemId'),
+                  child: Text(l10n.notificationOpenButton),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -118,32 +122,24 @@ class NotificationCard extends StatelessWidget {
   String _actorDisplay(String uid) => 'Someone';
 }
 
-/// A small rounded-square dot to the left of each notification.
+/// Checkbox-style indicator to the left of each notification.
 ///
-/// Filled with the primary color when the notification is unread; an
-/// outlined empty square when read (preserves alignment between the
-/// two states without shifting layout).
+/// An empty outlined square when the notification is unread (waiting to be
+/// acknowledged); a checked square in the primary color when read. Same
+/// glyph footprint between states so the layout doesn't shift.
 class _ReadStateIndicator extends StatelessWidget {
   const _ReadStateIndicator({required this.isUnread});
 
   final bool isUnread;
 
-  static const _size = 14.0;
-  static const _radius = 4.0;
-
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: _size,
-      height: _size,
-      decoration: BoxDecoration(
-        color: isUnread ? scheme.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(_radius),
-        border: isUnread
-            ? null
-            : Border.all(color: Theme.of(context).disabledColor),
-      ),
+    return Icon(
+      isUnread ? Icons.check_box_outline_blank : Icons.check_box,
+      size: 20,
+      color: isUnread
+          ? Theme.of(context).colorScheme.onSurface
+          : Theme.of(context).colorScheme.primary,
     );
   }
 }
