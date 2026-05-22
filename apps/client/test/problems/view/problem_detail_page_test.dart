@@ -2,6 +2,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/problems/cubit/problems_cubit.dart';
+import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/view/problem_detail_page.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
+import 'package:toastification/toastification.dart';
 
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
@@ -19,6 +22,9 @@ class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
+
+class _MockProblemsCubit extends MockCubit<ProblemsState>
+    implements ProblemsCubit {}
 
 class _MockLanguageDetectionService extends Mock
     implements LanguageDetectionService {}
@@ -33,6 +39,7 @@ Problem _problem({
   String ownerId = 'owner1',
   String geoscope = '/',
   int votes = 7,
+  String? lang,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -42,6 +49,7 @@ Problem _problem({
     ownerId: ownerId,
     geoscope: geoscope,
     votes: votes,
+    lang: lang,
     createdAt: now,
     lastUpdatedAt: now,
   );
@@ -51,6 +59,7 @@ void main() {
   late FirestoreRepository repo;
   late AuthCubit authCubit;
   late GeoscopeCubit geoscopeCubit;
+  late ProblemsCubit problemsCubit;
   late LanguageDetectionService languageDetectionService;
   late TranslationRepository translationRepo;
 
@@ -62,11 +71,14 @@ void main() {
     repo = _MockFirestoreRepository();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
+    problemsCubit = _MockProblemsCubit();
     languageDetectionService = _MockLanguageDetectionService();
     translationRepo = _MockTranslationRepository();
 
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
+    when(() => problemsCubit.state).thenReturn(const ProblemsState());
+    when(() => problemsCubit.applyLocalUpdate(any())).thenReturn(null);
     when(
       () => repo.getVotersForProblem(
         any(),
@@ -74,6 +86,7 @@ void main() {
         anonymous: any(named: 'anonymous'),
       ),
     ).thenAnswer((_) async => []);
+    when(() => repo.getForksOfProblem(any())).thenAnswer((_) async => []);
     when(
       () => languageDetectionService.needsTranslation(
         text: any(named: 'text'),
@@ -108,6 +121,7 @@ void main() {
       providers: [
         BlocProvider<AuthCubit>.value(value: authCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
+        BlocProvider<ProblemsCubit>.value(value: problemsCubit),
       ],
       child: MultiRepositoryProvider(
         providers: [
@@ -119,10 +133,12 @@ void main() {
             value: translationRepo,
           ),
         ],
-        child: MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
+        child: ToastificationWrapper(
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
         ),
       ),
     );
@@ -176,20 +192,71 @@ void main() {
       when(() => repo.getProblem(any())).thenAnswer((_) async => null);
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Back'));
+      await tester.tap(find.text("See everybody's problems"));
       await tester.pumpAndSettle();
       expect(find.text('home'), findsOneWidget);
     });
 
-    testWidgets('save calls updateProblem and navigates home', (tester) async {
+    testWidgets(
+      'save calls updateProblem, stays on the page, and shows a toast',
+      (tester) async {
+        final problem = _problem();
+        when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byType(TextField).first,
+          'updated problem description',
+        );
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
+          ),
+        ).called(1);
+        // Notifies the list cubit so the list won't show stale data on return.
+        verify(() => problemsCubit.applyLocalUpdate(any())).called(1);
+        // Still on the detail page, not navigated home.
+        expect(find.text('home'), findsNothing);
+        // Confirmation toast is visible.
+        expect(find.text('Your changes have been saved'), findsOneWidget);
+        // Dismiss so the toast's auto-close timer doesn't outlive the test.
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets('save shows an error toast when updateProblem throws', (
+      tester,
+    ) async {
       final problem = _problem();
       when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
       when(
         () => repo.updateProblem(
           any(),
           userLanguage: any(named: 'userLanguage'),
+          copiedFromProblemId: any(named: 'copiedFromProblemId'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenThrow(Exception('boom'));
       when(() => authCubit.state).thenReturn(
         const AuthState(
           status: AuthStatus.authenticated,
@@ -200,7 +267,6 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      // Modify the description.
       await tester.enterText(
         find.byType(TextField).first,
         'updated problem description',
@@ -208,13 +274,18 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
-      verify(
-        () => repo.updateProblem(
-          any(),
-          userLanguage: any(named: 'userLanguage'),
-        ),
-      ).called(1);
-      expect(find.text('home'), findsOneWidget);
+      expect(find.text('home'), findsNothing);
+      expect(
+        find.text('Could not save your changes. Please try again.'),
+        findsOneWidget,
+      );
+      // Success toast must NOT appear on failure.
+      expect(find.text('Your changes have been saved'), findsNothing);
+      // List cubit must NOT be notified on failure.
+      verifyNever(() => problemsCubit.applyLocalUpdate(any()));
+      // Dismiss so the toast's auto-close timer doesn't outlive the test.
+      toastification.dismissAll(delayForAnimation: false);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('vote chip is tappable for authenticated non-owner', (
@@ -420,5 +491,468 @@ void main() {
         ),
       ).called(2);
     });
+
+    testWidgets('hides forks section when there are no forks', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExpansionTile), findsNothing);
+    });
+
+    testWidgets('shows forks section with count when forks exist', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => repo.getForksOfProblem(any())).thenAnswer(
+        (_) async => [
+          _problem(id: 'fork-a', description: 'Forked problem A'),
+          _problem(id: 'fork-b', description: 'Forked problem B'),
+        ],
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Heading shows the count.
+      expect(find.text('Forks (2)'), findsOneWidget);
+      // Initially expanded — both fork titles visible.
+      expect(find.text('Forked problem A'), findsOneWidget);
+      expect(find.text('Forked problem B'), findsOneWidget);
+    });
+
+    testWidgets('collapsing the forks section hides the items', (tester) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => repo.getForksOfProblem(any())).thenAnswer(
+        (_) async => [_problem(id: 'fork-a', description: 'Forked problem A')],
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Forked problem A'), findsOneWidget);
+      await tester.tap(find.text('Forks (1)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Forked problem A'), findsNothing);
+      // Heading (with count) remains visible.
+      expect(find.text('Forks (1)'), findsOneWidget);
+    });
+
+    testWidgets(
+      'compare icon hidden when fork matches current problem in all fields',
+      (tester) async {
+        // Owner viewing their own problem. The fork is identical in
+        // description/goal/geoscope, so there is nothing to compare and the
+        // compare icon must not render.
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [_problem(id: 'fork-a')],
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.compare_arrows), findsNothing);
+      },
+    );
+
+    testWidgets('compare icon hidden for non-owners even when forks differ', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => repo.getForksOfProblem(any())).thenAnswer(
+        (_) async => [_problem(id: 'fork-a', description: 'A different desc')],
+      );
+      // Authenticated but not the owner.
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'other-user',
+        ),
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.compare_arrows), findsNothing);
+    });
+
+    testWidgets(
+      'owner can replace one field with a fork value via "Use this here"',
+      (tester) async {
+        final current = _problem(description: 'original desc', goal: 'g1');
+        final fork = _problem(
+          id: 'fork-a',
+          description: 'forked desc',
+          goal: 'g1', // same goal — should NOT appear in the panel
+        );
+        when(() => repo.getProblem(any())).thenAnswer((_) async => current);
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [fork],
+        );
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // The compare icon is present (description differs).
+        await tester.tap(find.byIcon(Icons.compare_arrows));
+        await tester.pumpAndSettle();
+
+        // Only the differing field is listed in the panel; the matching
+        // goal is omitted entirely. The field-label string ("Description")
+        // is what uniquely identifies the panel — the fork's description
+        // also renders in the row title, so we check the label rather than
+        // the value.
+        expect(find.text('Description'), findsOneWidget);
+        expect(find.text('Goal'), findsNothing);
+        expect(find.text('Use this here'), findsOneWidget);
+
+        await tester.tap(find.text('Use this here'));
+        await tester.pumpAndSettle();
+
+        // updateProblem was called once with the fork's description merged
+        // into the current problem; other fields are unchanged.
+        final captured =
+            verify(
+                  () => repo.updateProblem(
+                    captureAny(),
+                    userLanguage: any(named: 'userLanguage'),
+                    copiedFromProblemId: any(named: 'copiedFromProblemId'),
+                  ),
+                ).captured.single
+                as Problem;
+        expect(captured.description, 'forked desc');
+        expect(captured.goal, 'g1');
+        expect(captured.id, current.id);
+
+        // Notifies the list cubit, shows the standard "saved" toast.
+        verify(() => problemsCubit.applyLocalUpdate(any())).called(1);
+        expect(find.text('Your changes have been saved'), findsOneWidget);
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'different-language fork bundles description and goal into one button',
+      (tester) async {
+        // Bundling is required because updateProblem's language validator
+        // would reject a mixed-language result if we copied just one of
+        // the two text fields. A single bundled button replaces both.
+        final current = _problem(
+          description: 'english desc',
+          goal: 'english goal',
+          lang: 'en',
+        );
+        final fork = _problem(
+          id: 'fork-a',
+          description: 'french desc',
+          goal: 'french goal',
+          lang: 'fr',
+        );
+        when(() => repo.getProblem(any())).thenAnswer((_) async => current);
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [fork],
+        );
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.compare_arrows));
+        await tester.pumpAndSettle();
+
+        // Both field labels render inside the same diff row.
+        expect(find.text('Description'), findsOneWidget);
+        expect(find.text('Goal'), findsOneWidget);
+        // Exactly one "Use this here" button — not one per field.
+        expect(find.text('Use this here'), findsOneWidget);
+
+        await tester.tap(find.text('Use this here'));
+        await tester.pumpAndSettle();
+
+        // updateProblem received both text fields swapped at once.
+        final captured =
+            verify(
+                  () => repo.updateProblem(
+                    captureAny(),
+                    userLanguage: any(named: 'userLanguage'),
+                    copiedFromProblemId: any(named: 'copiedFromProblemId'),
+                  ),
+                ).captured.single
+                as Problem;
+        expect(captured.description, 'french desc');
+        expect(captured.goal, 'french goal');
+
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'different-language fork still offers geoscope independently',
+      (tester) async {
+        // Geoscope is language-independent, so it stays its own row even
+        // when the text fields are bundled.
+        final current = _problem(
+          description: 'english desc',
+          goal: 'english goal',
+          lang: 'en',
+        );
+        final fork = _problem(
+          id: 'fork-a',
+          description: 'french desc',
+          goal: 'french goal',
+          geoscope: 'eu/fr',
+          lang: 'fr',
+        );
+        when(() => repo.getProblem(any())).thenAnswer((_) async => current);
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [fork],
+        );
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.compare_arrows));
+        await tester.pumpAndSettle();
+
+        // One bundled text entry + one geoscope entry = two buttons.
+        expect(find.text('Use this here'), findsNWidgets(2));
+        expect(find.text('Location'), findsOneWidget);
+
+        // Tap the geoscope button (the second "Use this here").
+        await tester.tap(find.text('Use this here').last);
+        await tester.pumpAndSettle();
+
+        final captured =
+            verify(
+                  () => repo.updateProblem(
+                    captureAny(),
+                    userLanguage: any(named: 'userLanguage'),
+                    copiedFromProblemId: any(named: 'copiedFromProblemId'),
+                  ),
+                ).captured.single
+                as Problem;
+        // Geoscope swapped, text fields untouched.
+        expect(captured.geoscope, 'eu/fr');
+        expect(captured.description, 'english desc');
+        expect(captured.goal, 'english goal');
+
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'shows linked problems section with count when linked problems exist',
+      (tester) async {
+        final mainProblem = _problem(
+          id: 'p1',
+        ).copyWith(linkedProblemIds: ['p2']);
+        final linkedProblem = _problem(
+          id: 'p2',
+          description: 'Linked problem description',
+        );
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getProblem('p2'),
+        ).thenAnswer((_) async => linkedProblem);
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // Heading shows the count.
+        expect(find.text('Linked Problems (1)'), findsOneWidget);
+        // Linked problem description is visible.
+        expect(find.text('Linked problem description'), findsOneWidget);
+      },
+    );
+
+    testWidgets('allows unlinking when authenticated', (tester) async {
+      final mainProblem = _problem(id: 'p1').copyWith(linkedProblemIds: ['p2']);
+      final linkedProblem = _problem(
+        id: 'p2',
+        description: 'Linked problem description',
+      );
+
+      when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+      when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
+      when(() => repo.unlinkProblem('p2')).thenAnswer((_) async {});
+      when(() => authCubit.state).thenReturn(
+        const AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'owner1',
+        ),
+      );
+
+      await tester.pumpWidget(buildSubject(problemId: 'p1'));
+      await tester.pumpAndSettle();
+
+      // Unlink button should be present
+      final unlinkBtn = find.byIcon(Icons.link_off);
+      expect(unlinkBtn, findsOneWidget);
+
+      await tester.tap(unlinkBtn);
+      await tester.pumpAndSettle();
+
+      verify(() => repo.unlinkProblem('p2')).called(1);
+    });
+
+    testWidgets('hides unlink button when unauthenticated', (tester) async {
+      final mainProblem = _problem(id: 'p1').copyWith(linkedProblemIds: ['p2']);
+      final linkedProblem = _problem(
+        id: 'p2',
+        description: 'Linked problem description',
+      );
+
+      when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+      when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
+      when(() => authCubit.state).thenReturn(const AuthState());
+
+      await tester.pumpWidget(buildSubject(problemId: 'p1'));
+      await tester.pumpAndSettle();
+
+      // Unlink button should not be present
+      expect(find.byIcon(Icons.link_off), findsNothing);
+    });
+
+    testWidgets(
+      'clicking link button opens dialog and allows linking via search',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1');
+        final searchResult = _problem(
+          id: 'p2',
+          description: 'Matching problem description',
+        );
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getGlobalProblemsForSearch(),
+        ).thenAnswer((_) async => [searchResult]);
+        when(() => repo.linkProblems('p1', 'p2')).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // Dialog trigger button (link icon) should be in app bar actions
+        final linkBtn = find.byIcon(Icons.link);
+        expect(linkBtn, findsOneWidget);
+
+        await tester.tap(linkBtn);
+        await tester.pumpAndSettle();
+
+        // Dialog is open
+        expect(find.text('Link a Problem'), findsOneWidget);
+        expect(find.text('Matching problem description'), findsOneWidget);
+
+        // Tap on link icon of the search result
+        final confirmLinkBtn = find.descendant(
+          of: find.byType(ListTile),
+          matching: find.byIcon(Icons.link),
+        );
+        await tester.tap(confirmLinkBtn);
+        await tester.pumpAndSettle();
+
+        verify(() => repo.linkProblems('p1', 'p2')).called(1);
+        expect(find.text('Link a Problem'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'typing in search query debounces and filters list correctly',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1');
+        final result1 = _problem(id: 'p2', description: 'Apple problem');
+        final result2 = _problem(id: 'p3', description: 'Banana problem');
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(() => repo.getGlobalProblemsForSearch()).thenAnswer(
+          (_) async => [result1, result2],
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // Open dialog
+        await tester.tap(find.byIcon(Icons.link));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Apple problem'), findsOneWidget);
+        expect(find.text('Banana problem'), findsOneWidget);
+
+        // Type "Apple"
+        await tester.enterText(find.byType(TextField).last, 'Apple');
+
+        // Before 300ms debounce, nothing should change
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(find.text('Apple problem'), findsOneWidget);
+        expect(find.text('Banana problem'), findsOneWidget);
+
+        // Pump 300ms to trigger debounce and perform search
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pumpAndSettle();
+
+        // Now only "Apple problem" should be visible, and "Banana problem"
+        // should be gone
+        expect(find.text('Apple problem'), findsOneWidget);
+        expect(find.text('Banana problem'), findsNothing);
+      },
+    );
   });
 }

@@ -64,6 +64,10 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Create a new problem with the given description.
   /// If [geoscope] is provided it overrides the current viewing geoscope.
+  ///
+  /// Optimistically prepends the new problem to local state. The watch stream
+  /// will not emit when the new doc falls past the first page's `limit`, so
+  /// this keeps the UI in sync regardless.
   Future<void> addProblem({
     required String description,
     required String ownerId,
@@ -72,13 +76,14 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     String goal = '',
   }) async {
     try {
-      await _repo.addProblem(
+      final created = await _repo.addProblem(
         description: description,
         goal: goal,
         ownerId: ownerId,
         geoscope: geoscope ?? state.geoscope,
         userLanguage: userLanguage,
       );
+      emit(state.copyWith(problems: [created, ...state.problems]));
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {
@@ -104,6 +109,25 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     }
   }
 
+  /// Flag a problem as objectionable on behalf of [userId]. Optimistically
+  /// hides it from the local list (the page-level filter drops problems whose
+  /// `complaints` contain the viewer's uid) instead of waiting on the watch
+  /// stream. No-op if the user has already flagged this problem.
+  Future<void> flagProblem({
+    required Problem problem,
+    required String userId,
+  }) async {
+    if (problem.complaints.contains(userId)) return;
+    try {
+      await _repo.addComplaint(problemId: problem.id, userId: userId);
+      applyLocalUpdate(
+        problem.copyWith(complaints: [...problem.complaints, userId]),
+      );
+    } on Exception catch (e, st) {
+      log('flagProblem failed: $e', stackTrace: st);
+    }
+  }
+
   /// Update an existing problem.
   Future<void> updateProblem(
     Problem problem, {
@@ -111,11 +135,25 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }) async {
     try {
       await _repo.updateProblem(problem, userLanguage: userLanguage);
+      applyLocalUpdate(problem);
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {
       log('updateProblem failed: $e', stackTrace: st);
     }
+  }
+
+  /// Replace [problem] in the local list when present. Use this after a
+  /// successful out-of-band write (e.g. from the detail page, which goes
+  /// through the repo directly) so the list reflects the edit immediately
+  /// on return instead of relying on the Firestore watch stream's delivery
+  /// latency. A no-op if the problem isn't in the current page of results.
+  void applyLocalUpdate(Problem problem) {
+    final index = state.problems.indexWhere((p) => p.id == problem.id);
+    if (index == -1) return;
+    final updated = [...state.problems];
+    updated[index] = problem;
+    emit(state.copyWith(problems: updated));
   }
 
   @override

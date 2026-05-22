@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/language_validator.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:crypto/crypto.dart';
 import 'package:shared/shared.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,15 +23,26 @@ export 'package:client/services/language_validator.dart'
 class FirestoreRepository {
   FirestoreRepository({
     FirebaseFirestore? firestore,
+    FirebaseFunctions? functions,
     LanguageDetectionService? languageDetectionService,
     TranslationRepository? translationRepository,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _functions = functions,
        _langValidator = LanguageValidator(
          langService: languageDetectionService ?? LanguageDetectionService(),
          translationRepo: translationRepository,
        );
 
   final FirebaseFirestore _firestore;
+
+  // Lazy: `FirebaseFunctions.instance` looks up the default Firebase app,
+  // which throws in tests that haven't initialized Firebase. Keeping this
+  // nullable lets repository methods that don't use Functions construct
+  // and run in isolation.
+  final FirebaseFunctions? _functions;
+  FirebaseFunctions get _functionsInstance =>
+      _functions ?? FirebaseFunctions.instance;
+
   final LanguageValidator _langValidator;
   static const _collection = 'problems';
   static const _pageSize = 20;
@@ -82,10 +96,13 @@ class FirestoreRepository {
     return _docToProblem(doc);
   }
 
-  /// Create a new problem with a client-generated UUID.
+  /// Create a new problem with a client-generated UUID. Returns the created
+  /// [Problem] so callers can update local state without waiting for the
+  /// Firestore listener (which won't emit if the new doc falls outside the
+  /// limited query's first page).
   /// Uses a batched write to atomically create the main document and its
   /// first revision snapshot.
-  Future<void> addProblem({
+  Future<Problem> addProblem({
     required String description,
     required String ownerId,
     required String geoscope,
@@ -136,6 +153,111 @@ class FirestoreRepository {
     if (english != null) {
       unawaited(saveTranslation(id, 'en', english));
     }
+
+    return Problem(
+      id: id,
+      description: description,
+      goal: goal,
+      ownerId: ownerId,
+      geoscope: geoscope,
+      lang: result.lang,
+      createdAt: now,
+      lastUpdatedAt: now,
+    );
+  }
+
+  /// Create a fork of the problem identified by [sourceProblemId], owned by
+  /// [ownerId]. Copies description, goal, geoscope, lang, and any cached
+  /// translations, and stamps the new problem with `inspoProblemId` +
+  /// `inspoVersion` referencing the source's latest revision at fork time.
+  /// Skips language detection because the text isn't user-authored on this
+  /// flow.
+  Future<Problem> forkProblem({
+    required String sourceProblemId,
+    required String ownerId,
+  }) async {
+    // Re-read the source so the inspo fields reference whatever the latest
+    // revision is right now, not whatever the caller's snapshot says.
+    final source = await getProblem(sourceProblemId);
+    if (source == null) {
+      throw StateError(
+        'Cannot fork: source problem $sourceProblemId not found',
+      );
+    }
+    final id = const Uuid().v4();
+    final now = DateTime.now().toUtc();
+    const version = 1;
+    final problemData = <String, Object?>{
+      'description': source.description,
+      'goal': source.goal,
+      'ownerId': ownerId,
+      'geoscope': source.geoscope,
+      'lang': ?source.lang,
+      'votes': 1,
+      'solved': false,
+      'version': version,
+      'createdAt': now,
+      'lastUpdatedAt': now,
+      'inspoProblemId': source.id,
+      'inspoVersion': source.version,
+    };
+    final revisionData = {
+      'description': source.description,
+      'goal': source.goal,
+      'version': version,
+      'archivedAt': now,
+    };
+
+    final translations = await _problemsRef
+        .doc(source.id)
+        .collection('translations')
+        .get();
+
+    final batch = _firestore.batch()
+      ..set(_problemsRef.doc(id), problemData)
+      ..set(
+        _problemsRef.doc(id).collection('versions').doc('$version'),
+        revisionData,
+      )
+      ..set(
+        _problemsRef.doc(id).collection('voters').doc(ownerId),
+        {'uid': ownerId, 'votes': 1},
+      );
+    for (final doc in translations.docs) {
+      batch.set(
+        _problemsRef.doc(id).collection('translations').doc(doc.id),
+        doc.data(),
+      );
+    }
+    await batch.commit();
+
+    return Problem(
+      id: id,
+      description: source.description,
+      goal: source.goal,
+      ownerId: ownerId,
+      geoscope: source.geoscope,
+      lang: source.lang,
+      createdAt: now,
+      lastUpdatedAt: now,
+      inspoProblemId: source.id,
+      inspoVersion: source.version,
+    );
+  }
+
+  /// Fetch every problem that was forked from [sourceProblemId], sorted by
+  /// votes descending (then by document id for stable ordering). Sorts in
+  /// memory rather than via a server `orderBy` so we don't need a composite
+  /// index — fork counts are expected to stay small.
+  Future<List<Problem>> getForksOfProblem(String sourceProblemId) async {
+    final snapshot = await _problemsRef
+        .where('inspoProblemId', isEqualTo: sourceProblemId)
+        .get();
+    return snapshot.docs.map(_docToProblem).toList()..sort((a, b) {
+      final cmp = b.votes.compareTo(a.votes);
+      if (cmp != 0) return cmp;
+      return a.id.compareTo(b.id);
+    });
   }
 
   /// Update a problem's fields.
@@ -143,9 +265,12 @@ class FirestoreRepository {
   /// a new revision snapshot.
   ///
   /// If [userLanguage] is provided, re-detects the description language.
+  /// If [copiedFromProblemId] is provided, the new revision is stamped with
+  /// that fork's id so the notifications producer can emit `forkAdopted`.
   Future<void> updateProblem(
     Problem problem, {
     String? userLanguage,
+    String? copiedFromProblemId,
   }) async {
     final result = userLanguage != null
         ? await _langValidator.detectAndValidateLang(
@@ -177,11 +302,12 @@ class FirestoreRepository {
       'version': newVersion,
       'lastUpdatedAt': now,
     };
-    final revisionData = {
+    final revisionData = <String, Object?>{
       'description': problem.description,
       'goal': problem.goal,
       'version': newVersion,
       'archivedAt': now,
+      'copiedFromProblemId': ?copiedFromProblemId,
     };
 
     final batch = _firestore.batch()
@@ -262,17 +388,20 @@ class FirestoreRepository {
 
   /// Ensure a user document exists in the `users` collection.
   /// Creates one from [user] if missing. Returns the stored [User].
+  ///
+  /// Does not touch `lastActiveAt` for existing users — that timer is owned
+  /// by [grantVotesAndTouch], and resetting it here would zero out the
+  /// elapsed-time calculation that drives vote grants.
   Future<User> ensureUserDoc(User user) async {
     final doc = await _firestore.collection('users').doc(user.uid).get();
     if (doc.exists) {
-      // Update displayName and lastActiveAt but preserve votes budget.
-      await doc.reference.update({
-        if (user.displayName != null) 'displayName': user.displayName,
-        'lastActiveAt': user.lastActiveAt,
-      });
-      return _docToUser(
-        await _firestore.collection('users').doc(user.uid).get(),
-      );
+      if (user.displayName != null) {
+        await doc.reference.update({'displayName': user.displayName});
+        return _docToUser(
+          await _firestore.collection('users').doc(user.uid).get(),
+        );
+      }
+      return _docToUser(doc);
     }
     final data = {
       'uid': user.uid,
@@ -416,7 +545,8 @@ class FirestoreRepository {
 
   /// Fetch available geoscopes from the `geoscopes` collection,
   /// sorted by population descending.
-  Future<List<({String id, String label})>> getGeoscopes() async {
+  Future<List<({String id, String label, int population})>>
+  getGeoscopes() async {
     final snapshot = await _firestore.collection('geoscopes').get();
     final docs = snapshot.docs.toList()
       ..sort((a, b) {
@@ -429,6 +559,7 @@ class FirestoreRepository {
       return (
         id: data['id'] as String? ?? doc.id,
         label: data['label'] as String? ?? doc.id,
+        population: ((data['population'] as num?) ?? 0).toInt(),
       );
     }).toList();
   }
@@ -452,6 +583,215 @@ class FirestoreRepository {
       version: (data['version'] as num?)?.toInt() ?? 1,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp).toDate(),
+      inspoProblemId: data['inspoProblemId'] as String?,
+      inspoVersion: (data['inspoVersion'] as num?)?.toInt(),
+      linkedProblemIds:
+          (data['linkedProblemIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Notifications
+  // ---------------------------------------------------------------------------
+
+  Query<Map<String, dynamic>> _notificationsQuery(String uid) => _firestore
+      .collection('users')
+      .doc(uid)
+      .collection('notifications')
+      .orderBy('updatedAt', descending: true)
+      .orderBy(FieldPath.documentId, descending: true);
+
+  /// Real-time stream of the first page of notifications for [uid], ordered
+  /// by `updatedAt` descending (so re-emitted notifications resurface at the
+  /// top).
+  Stream<({List<AppNotification> notifications, DocumentSnapshot? lastDoc})>
+  watchNotifications(String uid, {int limit = _pageSize}) {
+    return _notificationsQuery(uid).limit(limit).snapshots().map((snapshot) {
+      final notifications = snapshot.docs.map(_docToNotification).toList();
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+      return (notifications: notifications, lastDoc: lastDoc);
+    });
+  }
+
+  /// Fetch the next page of notifications for [uid] (used by infinite scroll).
+  Future<({List<AppNotification> notifications, DocumentSnapshot? lastDoc})>
+  getNotifications(
+    String uid, {
+    int pageSize = _pageSize,
+    DocumentSnapshot? startAfter,
+  }) async {
+    var query = _notificationsQuery(uid).limit(pageSize);
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+    final snapshot = await query.get();
+    final notifications = snapshot.docs.map(_docToNotification).toList();
+    final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+    return (notifications: notifications, lastDoc: lastDoc);
+  }
+
+  /// Returns the current unread notification count for [uid].
+  ///
+  /// Uses Firestore's `count()` aggregation so the call doesn't depend on the
+  /// loaded page — the badge stays accurate even with many unread.
+  Future<int> unreadNotificationCount(String uid) async {
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .where('readAt', isNull: true)
+        .count()
+        .get();
+    return snapshot.count ?? 0;
+  }
+
+  /// Stamp `readAt = serverTimestamp` on a notification. The security rules
+  /// permit this exact one-field update and reject anything else.
+  Future<void> markNotificationRead(String uid, String notificationId) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .doc(notificationId)
+        .update({'readAt': FieldValue.serverTimestamp()});
+  }
+
+  /// Invokes the `markAllNotificationsRead` callable Cloud Function, which
+  /// stamps `readAt = serverTimestamp` on every unread notification for the
+  /// signed-in caller in batches. Returns the count of notifications that
+  /// were flipped (zero if none were unread).
+  Future<int> markAllNotificationsRead() async {
+    final callable = _functionsInstance.httpsCallable(
+      'markAllNotificationsRead',
+    );
+    final result = await callable.call<Map<Object?, Object?>>();
+    final marked = result.data['marked'];
+    if (marked is num) return marked.toInt();
+    return 0;
+  }
+
+  /// Stable doc id for an FCM [token] — sha256 hex digest. We use a hash
+  /// rather than the token verbatim because tokens can contain characters
+  /// outside the safe Firestore doc-id alphabet (rare but defended). The
+  /// hash also gives us deterministic dedupe: re-registering the same
+  /// token on the same device upserts the existing doc.
+  static String _fcmTokenDocId(String token) {
+    return sha256.convert(utf8.encode(token)).toString();
+  }
+
+  /// Upsert this device's FCM registration under
+  /// `users/{uid}/fcmTokens/{sha256(token)}`. Safe to call repeatedly with
+  /// the same token (e.g. on every app start); only `lastUsedAt` updates.
+  Future<void> registerFcmToken({
+    required String uid,
+    required String token,
+    required String platform,
+  }) async {
+    final docRef = _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('fcmTokens')
+        .doc(_fcmTokenDocId(token));
+    final now = DateTime.now().toUtc();
+    final existing = await docRef.get();
+    if (existing.exists) {
+      // Only lastUsedAt changes — the security rule rejects anything else
+      // on update, so we don't try to bump platform/token here even if
+      // they were stored slightly differently.
+      await docRef.update({'lastUsedAt': now});
+    } else {
+      await docRef.set({
+        'token': token,
+        'platform': platform,
+        'createdAt': now,
+        'lastUsedAt': now,
+      });
+    }
+  }
+
+  /// Delete this device's FCM registration (called on sign-out).
+  Future<void> unregisterFcmToken({
+    required String uid,
+    required String token,
+  }) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('fcmTokens')
+        .doc(_fcmTokenDocId(token))
+        .delete();
+  }
+
+  AppNotification _docToNotification(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data()!;
+    final payloadData = Map<String, dynamic>.from(data['payload'] as Map);
+    return AppNotification(
+      id: doc.id,
+      recipientUid: data['recipientUid'] as String,
+      payload: NotificationPayload.fromJson(payloadData),
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      readAt: (data['readAt'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  /// Symmetrically link two problems together into a merged cluster (clique).
+  Future<void> linkProblems(String problemIdA, String problemIdB) async {
+    final problemA = await getProblem(problemIdA);
+    final problemB = await getProblem(problemIdB);
+    if (problemA == null || problemB == null) return;
+
+    final allIds = {
+      problemIdA,
+      problemIdB,
+      ...problemA.linkedProblemIds,
+      ...problemB.linkedProblemIds,
+    };
+
+    final batch = _firestore.batch();
+    for (final id in allIds) {
+      final otherIds = allIds.difference({id}).toList();
+      batch.update(_problemsRef.doc(id), {
+        'linkedProblemIds': otherIds,
+      });
+    }
+    await batch.commit();
+  }
+
+  /// Unlink a problem from its cluster symmetrically.
+  Future<void> unlinkProblem(String problemId) async {
+    final problem = await getProblem(problemId);
+    if (problem == null || problem.linkedProblemIds.isEmpty) return;
+
+    final clusterIds = problem.linkedProblemIds;
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(problemId), {
+        'linkedProblemIds': <String>[],
+      });
+
+    // Remove this problem ID from all other problems in the cluster
+    for (final otherId in clusterIds) {
+      batch.update(_problemsRef.doc(otherId), {
+        'linkedProblemIds': FieldValue.arrayRemove([problemId]),
+      });
+    }
+    await batch.commit();
+  }
+
+  /// Fetch up to 100 unsolved problems globally, sorted by votes DESC,
+  /// then doc ID ASC, for search.
+  Future<List<Problem>> getGlobalProblemsForSearch({int limit = 100}) async {
+    final snapshot = await _problemsRef
+        .where('solved', isEqualTo: false)
+        .orderBy('votes', descending: true)
+        .orderBy(FieldPath.documentId)
+        .limit(limit)
+        .get();
+    return snapshot.docs.map(_docToProblem).toList();
   }
 }

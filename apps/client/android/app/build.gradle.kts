@@ -63,17 +63,17 @@ android {
         create("production") {
             dimension = "default"
             applicationIdSuffix = ""
-            manifestPlaceholders["appName"] = "Client"
+            manifestPlaceholders["appName"] = "Votasq Client"
         }
         create("staging") {
             dimension = "default"
             applicationIdSuffix = ".stg"
-            manifestPlaceholders["appName"] = "[STG] Client"
+            manifestPlaceholders["appName"] = "[STG] Votasq Client"
         }
         create("development") {
             dimension = "default"
             applicationIdSuffix = ".dev"
-            manifestPlaceholders["appName"] = "[DEV] Client"
+            manifestPlaceholders["appName"] = "[DEV] Votasq Client"
         }
     }
 

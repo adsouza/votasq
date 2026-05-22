@@ -1,4 +1,5 @@
 import 'package:client/auto_translate/auto_translate.dart';
+import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/translation_repository.dart';
@@ -56,11 +57,8 @@ void main() {
         ],
         child: MaterialApp(
           locale: locale,
-          supportedLocales: const [Locale('en'), Locale('es')],
-          localizationsDelegates: const [
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           home: Scaffold(
             body: ProblemTranslation(
               problemId: problemId,
@@ -119,7 +117,7 @@ void main() {
       await tester.pumpWidget(buildSubject(lang: 'es'));
       await tester.pumpAndSettle(); // Complete auto cache check.
 
-      expect(find.textContaining('hola mundo amigos'), findsOneWidget);
+      expect(find.text('hola mundo amigos'), findsOneWidget);
       expect(find.byIcon(Icons.translate), findsOneWidget);
     });
   });
@@ -138,10 +136,11 @@ void main() {
       await tester.pumpWidget(buildSubject(lang: 'es'));
       await tester.pumpAndSettle();
 
-      // Translation appears without any tap.
+      // Translation appears without any tap; original is hidden.
       expect(find.text('hello world friends'), findsOneWidget);
-      expect(find.text('hola mundo amigos'), findsOneWidget);
-      expect(find.byIcon(Icons.translate), findsNothing);
+      expect(find.text('hola mundo amigos'), findsNothing);
+      // Toggle button stays visible (pressed in) so the user can flip back.
+      expect(find.byIcon(Icons.translate), findsOneWidget);
 
       // Should NOT have called on-device or server translation.
       verifyNever(
@@ -342,10 +341,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Translation should appear without any tap.
+      // Translation should appear without any tap; original is hidden.
       expect(find.text('hello world friends'), findsOneWidget);
-      expect(find.text('hola mundo amigos'), findsOneWidget);
-      expect(find.byIcon(Icons.translate), findsNothing);
+      expect(find.text('hola mundo amigos'), findsNothing);
+      // Toggle stays visible so the user can switch back to the original.
+      expect(find.byIcon(Icons.translate), findsOneWidget);
     });
 
     testWidgets('shows spinner (not icon) when auto-translate is enabled', (
@@ -420,14 +420,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Two translate icons (description + goal); tapping either triggers
-      // translation of both fields since ProblemTranslation translates once.
-      await tester.tap(find.byIcon(Icons.translate).first);
+      await tester.tap(find.byIcon(Icons.translate));
       await tester.pumpAndSettle();
 
       // Both translations should appear.
       expect(find.text('hello world friends'), findsOneWidget);
       expect(find.text('less traffic'), findsOneWidget);
+      // Originals should be hidden.
+      expect(find.text('hola mundo amigos'), findsNothing);
+      expect(find.text('menos tráfico'), findsNothing);
 
       // translate() should have been called twice: once for description,
       // once for goal.
@@ -465,6 +466,94 @@ void main() {
           sourceLanguage: any(named: 'sourceLanguage'),
         ),
       ).called(1);
+    });
+  });
+
+  group('Show-original toggle', () {
+    testWidgets('clicking toggle swaps translation for original', (
+      tester,
+    ) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            const TranslatedProblem(description: 'hello world friends'),
+      );
+
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle();
+
+      // Starts on the translation side.
+      expect(find.text('hello world friends'), findsOneWidget);
+      expect(find.text('hola mundo amigos'), findsNothing);
+
+      // Tap the toggle — should flip to showing the original.
+      await tester.tap(find.byIcon(Icons.translate));
+      await tester.pumpAndSettle();
+
+      expect(find.text('hola mundo amigos'), findsOneWidget);
+      expect(find.text('hello world friends'), findsNothing);
+      // Toggle stays visible so user can flip back.
+      expect(find.byIcon(Icons.translate), findsOneWidget);
+
+      // Tap again — back to the translation.
+      await tester.tap(find.byIcon(Icons.translate));
+      await tester.pumpAndSettle();
+
+      expect(find.text('hello world friends'), findsOneWidget);
+      expect(find.text('hola mundo amigos'), findsNothing);
+    });
+
+    testWidgets('tooltip text flips with the toggle state', (tester) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            const TranslatedProblem(description: 'hello world friends'),
+      );
+
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle();
+
+      final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+
+      // Pressed-in: the translation is shown, so tooltip offers original.
+      expect(
+        find.byTooltip(l10n.showOriginalLanguageTooltip),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(l10n.showTranslationTooltip),
+        findsNothing,
+      );
+
+      await tester.tap(find.byIcon(Icons.translate));
+      await tester.pumpAndSettle();
+
+      // Pressed-out: now offers to switch back to the translation.
+      expect(
+        find.byTooltip(l10n.showTranslationTooltip),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(l10n.showOriginalLanguageTooltip),
+        findsNothing,
+      );
+    });
+
+    testWidgets('translated text is rendered in italics', (tester) async {
+      when(
+        () => firestoreRepo.getTranslation(any(), any()),
+      ).thenAnswer(
+        (_) async =>
+            const TranslatedProblem(description: 'hello world friends'),
+      );
+
+      await tester.pumpWidget(buildSubject(lang: 'es'));
+      await tester.pumpAndSettle();
+
+      final textWidget = tester.widget<Text>(find.text('hello world friends'));
+      expect(textWidget.style?.fontStyle, FontStyle.italic);
     });
   });
 }

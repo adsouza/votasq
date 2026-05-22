@@ -4,6 +4,7 @@ import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/services/firestore_repository.dart'
     show LanguageMismatchException;
+import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,7 +39,6 @@ class _AddProblemRowState extends State<AddProblemRow> {
   final _addController = TextEditingController();
   final _addGoalController = TextEditingController();
   final _addFocusNode = FocusNode();
-  final _addRowFocusNode = FocusNode();
   final _keyboardListenerFocusNode = FocusNode();
   bool _addGoalVisible = false;
   String? _addProblemGeoscope;
@@ -49,7 +49,6 @@ class _AddProblemRowState extends State<AddProblemRow> {
     _addController.dispose();
     _addGoalController.dispose();
     _addFocusNode.dispose();
-    _addRowFocusNode.dispose();
     _keyboardListenerFocusNode.dispose();
     super.dispose();
   }
@@ -75,15 +74,8 @@ class _AddProblemRowState extends State<AddProblemRow> {
       });
     } on LanguageMismatchException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.l10n.languageMismatchError(
-                e.descriptionLang,
-                e.goalLang,
-              ),
-            ),
-          ),
+        showToast(
+          context.l10n.languageMismatchError(e.descriptionLang, e.goalLang),
         );
       }
     } finally {
@@ -95,15 +87,15 @@ class _AddProblemRowState extends State<AddProblemRow> {
     _updateAddGoalVisibility();
   }
 
-  /// Show the goal field when the description has enough words and anything
-  /// in the add-problem row is focused. We defer the check by one frame so
-  /// that focus has settled on the new target when tabbing between fields.
+  /// Show the goal field and geoscope picker once the description has enough
+  /// words. We deliberately do not gate this on focus — the geoscope dropdown
+  /// opens a `PopupRoute` whose own `FocusScope` would otherwise pull focus
+  /// out of our row and collapse it mid-interaction. Explicit dismissal still
+  /// happens via escape or successful submit.
   void _updateAddGoalVisibility() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final hasWords = hasEnoughWords(_addController.text);
-      final rowHasFocus = _addRowFocusNode.hasFocus;
-      final shouldShow = hasWords && rowHasFocus;
+      final shouldShow = hasEnoughWords(_addController.text);
       if (shouldShow != _addGoalVisible) {
         setState(() => _addGoalVisible = shouldShow);
       }
@@ -125,102 +117,98 @@ class _AddProblemRowState extends State<AddProblemRow> {
             setState(() => _addGoalVisible = false);
           }
         },
-        child: Focus(
-          focusNode: _addRowFocusNode,
-          onFocusChange: (_) => _updateAddGoalVisibility(),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ListenableBuilder(
-                  listenable: Listenable.merge([
-                    _addController,
-                    _addGoalController,
-                  ]),
-                  builder: (context, child) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ListenableBuilder(
+                listenable: Listenable.merge([
+                  _addController,
+                  _addGoalController,
+                ]),
+                builder: (context, child) {
+                  final selectedGeoscope = context
+                      .read<GeoscopeCubit>()
+                      .state
+                      .selectedGeoscope;
+                  final geoscopeDropdown = buildGeoscopeDropdown(
+                    context,
+                    geoscope: selectedGeoscope,
+                    currentValue: _addProblemGeoscope ?? selectedGeoscope,
+                    compact: false,
+                    onChanged: (value) => setState(() {
+                      _addProblemGeoscope = value;
+                    }),
+                  );
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: _addController,
+                        focusNode: _addFocusNode,
+                        readOnly: _submitting,
+                        maxLength: maxProblemTextLength,
+                        decoration: InputDecoration(
+                          hintText: l10n.addProblemHint,
+                        ),
+                        onChanged: (_) => _onAddDescriptionChanged(),
+                        onSubmitted:
+                            hasEnoughWords(_addController.text) && !_submitting
+                            ? (_) => _submitProblem()
+                            : null,
+                      ),
+                      if (_addGoalVisible)
                         TextField(
-                          controller: _addController,
-                          focusNode: _addFocusNode,
+                          controller: _addGoalController,
                           readOnly: _submitting,
                           maxLength: maxProblemTextLength,
                           decoration: InputDecoration(
-                            hintText: l10n.addProblemHint,
+                            hintText: l10n.addGoalHint,
                           ),
-                          onChanged: (_) => _onAddDescriptionChanged(),
                           onSubmitted:
                               hasEnoughWords(_addController.text) &&
                                   !_submitting
                               ? (_) => _submitProblem()
                               : null,
                         ),
-                        if (_addGoalVisible)
-                          TextField(
-                            controller: _addGoalController,
-                            readOnly: _submitting,
-                            maxLength: maxProblemTextLength,
-                            decoration: InputDecoration(
-                              hintText: l10n.addGoalHint,
-                            ),
-                            onSubmitted:
-                                hasEnoughWords(_addController.text) &&
-                                    !_submitting
-                                ? (_) => _submitProblem()
-                                : null,
+                      if (_addGoalVisible && geoscopeDropdown.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(l10n.geoscopeLabel),
+                              ...geoscopeDropdown,
+                            ],
                           ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              ListenableBuilder(
-                listenable: Listenable.merge([
-                  _addController,
-                  _addGoalController,
-                ]),
-                builder: (context, child) {
-                  final hasWords =
-                      hasEnoughWords(_addController.text) &&
-                      (_addGoalController.text.isEmpty ||
-                          hasEnoughWords(_addGoalController.text));
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ...buildGeoscopeDropdown(
-                        context,
-                        geoscope: context
-                            .read<GeoscopeCubit>()
-                            .state
-                            .selectedGeoscope,
-                        currentValue:
-                            _addProblemGeoscope ??
-                            context
-                                .read<GeoscopeCubit>()
-                                .state
-                                .selectedGeoscope,
-                        onChanged: (value) => setState(() {
-                          _addProblemGeoscope = value;
-                        }),
-                        enabled: hasWords,
-                      ),
-                      const SizedBox(width: 8),
-                      Tooltip(
-                        message: l10n.addProblemTooltip,
-                        child: ElevatedButton(
-                          onPressed: hasWords && !_submitting
-                              ? _submitProblem
-                              : null,
-                          child: Text(l10n.addProblemButton),
                         ),
-                      ),
                     ],
                   );
                 },
               ),
-            ],
-          ),
+            ),
+            ListenableBuilder(
+              listenable: Listenable.merge([
+                _addController,
+                _addGoalController,
+              ]),
+              builder: (context, child) {
+                final hasWords =
+                    hasEnoughWords(_addController.text) &&
+                    (_addGoalController.text.isEmpty ||
+                        hasEnoughWords(_addGoalController.text));
+                return Tooltip(
+                  message: l10n.addProblemTooltip,
+                  child: ElevatedButton(
+                    onPressed: hasWords && !_submitting ? _submitProblem : null,
+                    child: Text(l10n.addProblemButton),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

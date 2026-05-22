@@ -14,7 +14,8 @@ graph TD
     client -- "depends on" --> shared
     server -- "depends on" --> shared
     client -- "HTTP / JSON" --> server
-    server -- "Firestore REST API" --> Firestore[(Cloud Firestore)]
+    client -- "FlutterFire SDK" --> Firestore[(Cloud Firestore)]
+    server -- "Firestore REST API" --> Firestore
 ```
 
 The root `pubspec.yaml` declares a Dart
@@ -43,6 +44,8 @@ classDiagram
         +int version = 1
         +DateTime createdAt
         +DateTime lastUpdatedAt
+        +String? inspoProblemId
+        +int? inspoVersion
     }
 
     class ProblemRevision {
@@ -72,6 +75,16 @@ irrelevant to the revision history.
 
 `TranslatedProblem` caches the translation of both text fields for a given
 language, stored at `problems/{id}/translations/{langCode}`.
+
+`Problem.inspoProblemId` + `Problem.inspoVersion` together identify the
+`ProblemRevision` that inspired this problem (must be set or null as a pair).
+They are populated only when a user "forks" another user's problem to suggest
+changes — the fork starts a fresh revision history but retains a pointer back
+to the exact snapshot it was copied from. Kept as two flat fields rather than
+a composite string so all forks of a given problem can be enumerated with a
+direct equality query on `inspoProblemId`. Write-once: set at fork creation
+and never modified afterwards (`FirestoreRepository.updateProblem` never
+includes them in its update map).
 
 The `@freezed` annotation generates immutability, equality, `copyWith`, and
 pattern matching. `json_serializable` generates `toJson` / `fromJson`. Both
@@ -245,20 +258,19 @@ the new filter.
 ### Geoscope (location scoping)
 
 Problems are scoped by geography via a `geoscope` field — a slash-delimited
-hierarchical string (e.g. `"us/ny/nyc"`, `"eu/gb/eng/london"`, `"/"` for
-global). The hierarchy supports up to 6 levels: root, continent, country,
-region, city, neighborhood.
+hierarchical string (e.g. `"us/ny/nyc"`, `"eu/fr/paris"`, `"/"` for global).
+The hierarchy supports up to 5 levels: root (global), superstate, state, metro,
+town/neighborhood.
 
 ```mermaid
 graph TD
     Root["/  (global)"]
-    Root --> NA["na"]
+    Root --> USA["us"]
     Root --> EU["eu"]
-    NA --> US["na/us"]
-    US --> NY["na/us/ny"]
-    NY --> NYC["na/us/ny/nyc"]
-    NYC --> BK["na/us/ny/nyc/brooklyn"]
-    EU --> GB["eu/gb"]
+    USA --> CA["us/ca"]
+    CA --> SF["us/ca/sfbay"]
+    SF --> Mission["us/ca/sfbay/mission"]
+    EU --> France["eu/fr"]
 ```
 
 Queries are **ancestor-inclusive**: viewing `"us/ny/nyc"` uses a Firestore
@@ -267,10 +279,23 @@ and global problems appear alongside city-scoped ones.
 
 Available geoscopes are stored in a Firestore `geoscopes` collection (each
 document has `id`, `label`, and `population` fields). The `GeoscopeCubit`
-manages selection, persists the user's choice in `SharedPreferences`, and
-infers a default from the device locale on first launch. If the persisted value
-becomes stale (e.g. after a hierarchy migration), it falls back via suffix
-matching against available geoscopes.
+manages selection and persists the user's choice in `SharedPreferences`.
+
+**First-launch flow.** When no value is stored in `SharedPreferences`,
+`initialize()` infers a default from the device locale but does **not** persist
+it, and emits `needsSelection: true`. `ProblemsPage` listens for this transition
+and auto-opens the `showGeoscopePicker` bottom sheet so the user makes an
+explicit choice. Only `selectGeoscope` (an explicit pick — including "Global")
+writes to `SharedPreferences`, so the absence of a stored value remains the
+signal for "user hasn't picked yet." If the user dismisses the sheet without
+picking, the picker re-opens on the next cold start. `acknowledgeSelectionPrompt`
+clears the flag for the current session so the sheet doesn't re-trigger on
+subsequent rebuilds.
+
+If a persisted value becomes stale (e.g. after a hierarchy migration like
+`us` → `na/us`), `initialize()` falls back via suffix matching against
+available geoscopes and writes the migrated id back — this is a real prior
+selection expressed under a stale id, so it bypasses the first-launch prompt.
 
 ### Language detection & translation
 
@@ -352,6 +377,27 @@ ARB files in `lib/l10n/arb/` define localized strings for 23 languages.
 Flutter generates `AppLocalizations` at build time. Access in widgets via the
 `context.l10n` extension.
 
+### App Check
+
+The client talks to Firestore both directly (via `cloud_firestore` —
+`FirestoreRepository`, `FeedbackRepository`) and indirectly (via the Dart Frog
+server). Firebase App Check protects only the *direct* path: `bootstrap()`
+calls `FirebaseAppCheck.instance.activate(...)` after `Firebase.initializeApp`,
+attaching attestation tokens to every subsequent Firestore, Auth, Functions,
+and Storage call. Providers per platform: `ReCaptchaV3Provider` on web,
+`AndroidPlayIntegrityProvider` / `AppleAppAttestProvider` in release builds,
+debug providers otherwise. Activation is skipped when `useEmulators=true`
+because the Firestore emulator does not check tokens.
+
+The reCAPTCHA v3 site key is inlined in `bootstrap.dart` — it is a public
+value by design (clients must read it to call `grecaptcha`). The matching
+secret lives only in Firebase Console.
+
+App Check does **not** cover the Dart Frog REST endpoints — those are an
+independent origin from Firebase's perspective. Gating them would require
+manually verifying the `X-Firebase-AppCheck` JWT in `apps/server/routes/api/
+_middleware.dart` against Firebase's JWKS.
+
 ---
 
 ## Build & Deployment
@@ -388,6 +434,15 @@ graph LR
 
 The server's `GET /` route serves `public/index.html`, so the web client is
 bundled directly into the server container.
+
+**Adding workspace members.** The build context copies the entire `packages/`
+tree, so a new `packages/<name>/` entry needs no Dockerfile change. A new
+`apps/<name>/` entry does: each stage explicitly `COPY`s only the `apps/*`
+it needs and `sed`s the others out of the root `pubspec.yaml`'s `workspace:`
+list, since the workspace constraint solver requires every listed member to
+exist on disk. Additionally, any new package that depends on the Flutter SDK
+(like the vendored MLKit plugins) must be `sed`-removed from the workspace
+in Stage 2, which runs in a Dart-only image.
 
 ### Cloud Run deployment
 

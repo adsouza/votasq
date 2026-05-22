@@ -23,6 +23,13 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
       const [],
   solved: json['solved'] as bool? ?? false,
   version: (json['version'] as num?)?.toInt() ?? 1,
+  inspoProblemId: json['inspoProblemId'] as String?,
+  inspoVersion: (json['inspoVersion'] as num?)?.toInt(),
+  linkedProblemIds:
+      (json['linkedProblemIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
@@ -38,4 +45,7 @@ Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
   'complaints': instance.complaints,
   'solved': instance.solved,
   'version': instance.version,
+  'inspoProblemId': instance.inspoProblemId,
+  'inspoVersion': instance.inspoVersion,
+  'linkedProblemIds': instance.linkedProblemIds,
 };

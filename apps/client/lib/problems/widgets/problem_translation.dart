@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:client/auto_translate/auto_translate.dart';
+import 'package:client/l10n/l10n.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,8 @@ class ProblemTranslationState {
     required this.isTranslating,
     required this.isCheckingCache,
     required this.translate,
+    required this.showOriginal,
+    required this.toggleShowOriginal,
     this.autoTranslate = false,
   });
 
@@ -65,6 +68,11 @@ class ProblemTranslationState {
   final bool isTranslating;
   final bool isCheckingCache;
   final VoidCallback translate;
+
+  /// When `true`, [TranslatedField] renders the original text even though a
+  /// translation is available. Toggled by [ProblemTranslateButton].
+  final bool showOriginal;
+  final VoidCallback toggleShowOriginal;
   final bool autoTranslate;
 }
 
@@ -72,6 +80,7 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
   TranslatedProblem? _translation;
   bool _translating = false;
   bool _cacheChecked = false;
+  bool _showOriginal = false;
 
   @override
   void didUpdateWidget(ProblemTranslation oldWidget) {
@@ -83,8 +92,13 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
       _translation = null;
       _translating = false;
       _cacheChecked = false;
+      _showOriginal = false;
       _scheduleAutoTranslate();
     }
+  }
+
+  void _toggleShowOriginal() {
+    setState(() => _showOriginal = !_showOriginal);
   }
 
   void _scheduleAutoTranslate() {
@@ -218,6 +232,8 @@ class _ProblemTranslationState extends State<ProblemTranslation> {
         isTranslating: _translating,
         isCheckingCache: _needsTranslation && !_cacheChecked,
         translate: _translate,
+        showOriginal: _showOriginal,
+        toggleShowOriginal: _toggleShowOriginal,
         autoTranslate: autoTranslate,
       ),
       child: widget.child,
@@ -239,17 +255,15 @@ class _ProblemTranslationScope extends InheritedWidget {
       state.needsTranslation != oldWidget.state.needsTranslation ||
       state.isTranslating != oldWidget.state.isTranslating ||
       state.isCheckingCache != oldWidget.state.isCheckingCache ||
+      state.showOriginal != oldWidget.state.showOriginal ||
       state.autoTranslate != oldWidget.state.autoTranslate;
 }
 
 /// Displays a single translatable text field within a [ProblemTranslation].
 ///
 /// Reads the translation state from the nearest [ProblemTranslation] ancestor.
-/// When a translation is available, shows the original with strikethrough and
-/// the translated text below. Otherwise shows the original text as-is.
-///
-/// Use [ProblemTranslateButton] to show a single translate trigger for the
-/// entire problem rather than per-field icons.
+/// When a translation is available, shows the translated text in italics by
+/// default; the user can flip to the original via [ProblemTranslateButton].
 class TranslatedField extends StatelessWidget {
   const TranslatedField(
     this.originalText, {
@@ -270,44 +284,39 @@ class TranslatedField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scope = ProblemTranslation.of(context);
-    final theme = Theme.of(context);
 
     // No translation scope or no translation needed — show plain text.
     if (scope == null || !scope.needsTranslation) {
       return Text(originalText, style: style);
     }
 
-    // Translation available — show original (struck through) + translated.
     final translated = scope.translation != null
         ? fieldSelector(scope.translation!)
         : null;
-    if (translated != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            originalText,
-            style: (style ?? const TextStyle()).copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              decoration: TextDecoration.lineThrough,
-            ),
-          ),
-          Text(translated, style: style),
-        ],
-      );
+
+    // No translation yet, or user has toggled the view to the original.
+    if (translated == null || scope.showOriginal) {
+      return Text(originalText, style: style);
     }
 
-    // Translation not yet available — show original text only.
-    return Text(originalText, style: style);
+    // Translation available and user is viewing it — render in italics.
+    return Text(
+      translated,
+      style: (style ?? const TextStyle()).copyWith(
+        fontStyle: FontStyle.italic,
+      ),
+    );
   }
 }
 
 /// A single translate button for an entire problem.
 ///
-/// Reads the [ProblemTranslation] scope and shows a translate icon (tap to
-/// trigger), a spinner (while translating / checking cache), or nothing
-/// (when translation is complete or not needed).
+/// Three visual states, depending on the [ProblemTranslation] scope:
+///   * spinner while translating or checking the cache
+///   * un-toggled translate icon (tap to trigger translation) when no
+///     translation is loaded yet
+///   * toggle: pushed-in when the translation is being shown; pushed-out
+///     when the original is being shown (tap to flip)
 class ProblemTranslateButton extends StatelessWidget {
   const ProblemTranslateButton({super.key});
 
@@ -316,11 +325,12 @@ class ProblemTranslateButton extends StatelessWidget {
     final scope = ProblemTranslation.of(context);
     final theme = Theme.of(context);
 
-    if (scope == null || !scope.needsTranslation || scope.translation != null) {
+    if (scope == null || !scope.needsTranslation) {
       return const SizedBox.shrink();
     }
 
-    if (scope.isTranslating || scope.isCheckingCache || scope.autoTranslate) {
+    if (scope.translation == null &&
+        (scope.isTranslating || scope.isCheckingCache || scope.autoTranslate)) {
       return SizedBox(
         width: 14,
         height: 14,
@@ -331,12 +341,39 @@ class ProblemTranslateButton extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
-      onTap: scope.translate,
-      child: Icon(
-        Icons.translate,
-        size: 16,
-        color: theme.colorScheme.primary,
+    if (scope.translation == null) {
+      return GestureDetector(
+        onTap: scope.translate,
+        child: Icon(
+          Icons.translate,
+          size: 16,
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
+
+    // Translation is loaded — show a toggle.
+    final l10n = context.l10n;
+    final pressedIn = !scope.showOriginal;
+    return Tooltip(
+      message: pressedIn
+          ? l10n.showOriginalLanguageTooltip
+          : l10n.showTranslationTooltip,
+      child: InkWell(
+        onTap: scope.toggleShowOriginal,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: pressedIn ? theme.colorScheme.primaryContainer : null,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            Icons.translate,
+            size: 16,
+            color: theme.colorScheme.primary,
+          ),
+        ),
       ),
     );
   }

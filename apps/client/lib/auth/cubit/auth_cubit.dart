@@ -62,6 +62,11 @@ class AuthCubit extends Cubit<AuthState> {
           displayName: displayName,
         ),
       );
+      // Web tabs aren't backgrounded the way native apps are, so the
+      // AppLifecycleListener in _LastActiveTracker can't be relied on as the
+      // sole trigger for time-based vote grants. Run a grant on sign-in too —
+      // it's idempotent (zero grant when <3 hours have elapsed).
+      unawaited(_firestoreRepository.grantVotesAndTouch(userId));
       await _userVotesSubscription?.cancel();
       _userVotesSubscription = _firestoreRepository
           .watchUserVotes(userId)

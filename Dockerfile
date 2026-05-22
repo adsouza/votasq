@@ -4,9 +4,10 @@ FROM ghcr.io/cirruslabs/flutter:stable AS flutter-build
 WORKDIR /app
 COPY pubspec.yaml pubspec.lock ./
 COPY apps/client/ apps/client/
-COPY packages/shared/ packages/shared/
+COPY packages/ packages/
 
-# Remove the server from the workspace so flutter pub get succeeds
+# Remove the server from the workspace so flutter pub get succeeds.
+# See ARCHITECTURE.md "Adding workspace members" before adding new apps/*.
 RUN sed -i '/apps\/server/d' pubspec.yaml
 
 WORKDIR /app/apps/client
@@ -18,13 +19,14 @@ FROM dart:stable AS build
 
 WORKDIR /app
 
-# Copy only the server and shared packages (not the Flutter client)
+# Copy server and all workspace packages (not the Flutter client)
 COPY pubspec.yaml pubspec.lock ./
 COPY apps/server/ apps/server/
-COPY packages/shared/ packages/shared/
+COPY packages/ packages/
 
-# Remove the Flutter client from the workspace so dart pub get succeeds
-RUN sed -i '/apps\/client/d' pubspec.yaml
+# Remove the Flutter client and its iOS-only MLKit deps from the workspace
+# so dart pub get succeeds without resolving Flutter SDK dependencies.
+RUN sed -i -e '/apps\/client/d' -e '/google_mlkit/d' pubspec.yaml
 
 # Copy the web build output into the server's public directory
 COPY --from=flutter-build /app/apps/client/build/web/ apps/server/public/

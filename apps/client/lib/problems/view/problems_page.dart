@@ -5,6 +5,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/notifications/notifications.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/widgets/add_problem_row.dart';
@@ -15,12 +16,15 @@ import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository;
 import 'package:client/services/translation_repository.dart';
+import 'package:client/widgets/toast.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
+import 'package:toastification/toastification.dart';
 
 class ProblemsPage extends StatelessWidget {
   const ProblemsPage({super.key});
@@ -33,22 +37,118 @@ class ProblemsPage extends StatelessWidget {
         final geoscope = context.read<GeoscopeCubit>().state.selectedGeoscope;
         return ProblemsCubit(repo)..changeGeoscope(geoscope);
       },
-      child: BlocListener<AuthCubit, AuthState>(
-        listenWhen: (prev, curr) =>
-            prev.status != curr.status &&
-            curr.status == AuthStatus.unauthenticated,
-        listener: (context, authState) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(context.l10n.signInHintToast),
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          });
-        },
-        child: BlocListener<GeoscopeCubit, GeoscopeState>(
+      child: const _ProblemsPageCoordinator(),
+    );
+  }
+}
+
+/// Coordinates the auth sign-in hint toast with the geoscope picker so the
+/// toast isn't immediately obscured by the picker on first launch. The toast
+/// fires once per unauthenticated session, when (a) the user is unauth, (b)
+/// the geoscope cubit has settled, and (c) no picker is currently shown.
+class _ProblemsPageCoordinator extends StatefulWidget {
+  const _ProblemsPageCoordinator();
+
+  @override
+  State<_ProblemsPageCoordinator> createState() =>
+      _ProblemsPageCoordinatorState();
+}
+
+class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
+  bool _pickerActive = false;
+  bool _signInToastShown = false;
+  ToastificationItem? _signInToastItem;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    // Re-attempt the toast when the user pops a child route (e.g. /new),
+    // since no auth/geoscope transition fires on that navigation alone.
+    // Also dismiss any live toast when a child route is pushed on top —
+    // toastification's overlay persists across navigations, so the toast
+    // would otherwise linger on /new for the remainder of its duration.
+    _router = GoRouter.of(context)..routerDelegate.addListener(_onRouterChange);
+  }
+
+  @override
+  void dispose() {
+    _router.routerDelegate.removeListener(_onRouterChange);
+    super.dispose();
+  }
+
+  /// Whether the current top-of-stack location is this page. We read from
+  /// go_router's router delegate rather than `ModalRoute.of(context).isCurrent`
+  /// because the navigator widget hasn't rebuilt yet at the moment route
+  /// listeners fire — `currentConfiguration` reflects the intended state,
+  /// which is what we want to gate on.
+  bool get _isHomeCurrent =>
+      _router.routerDelegate.currentConfiguration.uri.path == '/';
+
+  void _onRouterChange() {
+    if (!mounted) return;
+    if (!_isHomeCurrent) {
+      final item = _signInToastItem;
+      if (item != null) {
+        toastification.dismiss(item);
+        _signInToastItem = null;
+      }
+      return;
+    }
+    _maybeShowSignInToast();
+  }
+
+  Future<void> _openPicker() async {
+    context.read<GeoscopeCubit>().acknowledgeSelectionPrompt();
+    setState(() => _pickerActive = true);
+    try {
+      await showGeoscopePicker(context);
+    } finally {
+      if (mounted) {
+        setState(() => _pickerActive = false);
+        _maybeShowSignInToast();
+      }
+    }
+  }
+
+  /// Try to show the sign-in toast. Returns silently when not yet appropriate
+  /// (picker active, auth still resolving, geoscope still loading, etc.) so
+  /// the next state transition can re-attempt.
+  void _maybeShowSignInToast() {
+    if (!mounted) return;
+    if (_signInToastShown) return;
+    if (_pickerActive) return;
+    // The toast text directs users to the sign-in icon in this page's
+    // app bar. Skip when a child route (e.g. /new) is on top — that page
+    // doesn't have the icon, so the instruction wouldn't apply.
+    if (!_isHomeCurrent) return;
+    final authState = context.read<AuthCubit>().state;
+    if (authState.status != AuthStatus.unauthenticated) return;
+    final geoState = context.read<GeoscopeCubit>().state;
+    if (geoState.status != GeoscopeStatus.success) return;
+    if (geoState.needsSelection) return;
+
+    _signInToastShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Re-check: the user may have navigated away in the frame between
+      // scheduling and now. Reset the flag so a return can re-attempt.
+      if (!_isHomeCurrent) {
+        _signInToastShown = false;
+        return;
+      }
+      _signInToastItem = showToast(
+        context.l10n.signInHintToast,
+        duration: const Duration(seconds: 5),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GeoscopeCubit, GeoscopeState>(
           listenWhen: (prev, curr) =>
               prev.selectedGeoscope != curr.selectedGeoscope,
           listener: (context, geoscopeState) {
@@ -56,9 +156,32 @@ class ProblemsPage extends StatelessWidget {
               geoscopeState.selectedGeoscope,
             );
           },
-          child: const ProblemsView(),
         ),
-      ),
+        BlocListener<GeoscopeCubit, GeoscopeState>(
+          listenWhen: (prev, curr) =>
+              !prev.needsSelection && curr.needsSelection,
+          listener: (_, _) => unawaited(_openPicker()),
+        ),
+        // Re-attempt the toast when the geoscope cubit settles, in case the
+        // auth listener fired before geoscope was ready.
+        BlocListener<GeoscopeCubit, GeoscopeState>(
+          listenWhen: (prev, curr) =>
+              prev.status != GeoscopeStatus.success &&
+              curr.status == GeoscopeStatus.success,
+          listener: (_, _) => _maybeShowSignInToast(),
+        ),
+        BlocListener<AuthCubit, AuthState>(
+          listenWhen: (prev, curr) =>
+              prev.status != curr.status &&
+              curr.status == AuthStatus.unauthenticated,
+          listener: (context, _) {
+            // New unauthenticated session — reset and try.
+            _signInToastShown = false;
+            _maybeShowSignInToast();
+          },
+        ),
+      ],
+      child: const ProblemsView(),
     );
   }
 }
@@ -102,9 +225,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     final base = kIsWeb ? Uri.base : Uri.parse(webBase);
     final url = base.resolve('/problems/${problem.id}').toString();
     unawaited(Clipboard.setData(ClipboardData(text: url)));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.problemLinkCopied)),
-    );
+    showToast(context.l10n.problemLinkCopied);
   }
 
   void _startEdit(Problem problem) {
@@ -116,6 +237,26 @@ class _ProblemsViewState extends State<ProblemsView> {
   void _cancelEdit() {
     setState(() {
       _editingProblemId = null;
+    });
+  }
+
+  void _sendFeedback(AppLocalizations l10n) {
+    BetterFeedback.of(context).show((feedback) async {
+      try {
+        await context.read<FeedbackRepository>().submit(
+          text: feedback.text,
+          screenshot: feedback.screenshot,
+          userId: context.read<AuthCubit>().state.userId!,
+        );
+        if (mounted) {
+          showToast(l10n.feedbackSuccess);
+        }
+      } on Exception catch (e) {
+        log('Feedback submission failed: $e');
+        if (mounted) {
+          showToast(l10n.feedbackError);
+        }
+      }
     });
   }
 
@@ -143,15 +284,13 @@ class _ProblemsViewState extends State<ProblemsView> {
     if (confirmed != true || !mounted) return;
     final userId = context.read<AuthCubit>().state.userId!;
     unawaited(
-      context.read<FirestoreRepository>().addComplaint(
-        problemId: problem.id,
+      context.read<ProblemsCubit>().flagProblem(
+        problem: problem,
         userId: userId,
       ),
     );
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.complaintSubmitted)),
-      );
+      showToast(context.l10n.complaintSubmitted);
     }
   }
 
@@ -180,150 +319,161 @@ class _ProblemsViewState extends State<ProblemsView> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
+        titleSpacing: 0,
         title: BlocBuilder<ProblemsCubit, ProblemsState>(
           builder: (context, state) {
             final userId = context.read<AuthCubit>().state.userId;
             final filtered = _applyFilters(state.problems, userId);
             return Text(
               '${filtered.length} ${l10n.problemsAppBarTitle}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             );
           },
         ),
-        leading: PopupMenuButton<String>(
-          icon: const Icon(Icons.menu),
-          onSelected: (value) {
-            if (value == 'change_location') {
-              showGeoscopePicker(context);
-            } else if (value == 'toggle_owned') {
-              setState(() {
-                _showOnlyOwned = !_showOnlyOwned;
-              });
-            } else if (value == 'toggle_with_goals') {
-              setState(() {
-                _showOnlyWithGoals = !_showOnlyWithGoals;
-              });
-            } else if (value == 'toggle_auto_translate') {
-              unawaited(context.read<AutoTranslateCubit>().toggle());
-            }
-          },
-          itemBuilder: (context) => [
-            if (context.read<AuthCubit>().state.userId != null)
-              PopupMenuItem(
-                value: 'toggle_owned',
-                child: ListTile(
-                  leading: Icon(
-                    _showOnlyOwned
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank,
+        leading: TapRegion(
+          groupId: _editTapRegionGroupId,
+          child: PopupMenuButton<String>(
+            icon: const Icon(Icons.menu),
+            iconSize: 32,
+            onSelected: (value) {
+              if (value == 'change_location') {
+                unawaited(showGeoscopePicker(context));
+              } else if (value == 'toggle_owned') {
+                setState(() {
+                  _showOnlyOwned = !_showOnlyOwned;
+                });
+              } else if (value == 'toggle_with_goals') {
+                setState(() {
+                  _showOnlyWithGoals = !_showOnlyWithGoals;
+                });
+              } else if (value == 'toggle_auto_translate') {
+                unawaited(context.read<AutoTranslateCubit>().toggle());
+              } else if (value == 'add_problem') {
+                context.go('/new');
+              } else if (value == 'send_feedback') {
+                _sendFeedback(l10n);
+              } else if (value == 'sign_out') {
+                unawaited(context.read<AuthCubit>().signOut());
+              }
+            },
+            itemBuilder: (context) {
+              final isAuthenticated =
+                  context.read<AuthCubit>().state.userId != null;
+              return [
+                PopupMenuItem(
+                  value: 'add_problem',
+                  child: ListTile(
+                    leading: const Icon(Icons.add),
+                    title: Text(l10n.addProblemTooltip),
+                    contentPadding: EdgeInsets.zero,
                   ),
-                  title: Text(l10n.showOnlyOwnedMenuItem),
-                  contentPadding: EdgeInsets.zero,
                 ),
-              ),
-            PopupMenuItem(
-              value: 'toggle_with_goals',
-              child: ListTile(
-                leading: Icon(
-                  _showOnlyWithGoals
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank,
-                ),
-                title: Text(l10n.showOnlyWithGoalsMenuItem),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            if (context.read<TranslationRepository>().canTranslateOnDevice)
-              PopupMenuItem(
-                value: 'toggle_auto_translate',
-                child: ListTile(
-                  leading: Icon(
-                    context.read<AutoTranslateCubit>().state
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank,
+                if (isAuthenticated)
+                  PopupMenuItem(
+                    value: 'toggle_owned',
+                    child: ListTile(
+                      leading: Icon(
+                        _showOnlyOwned
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      title: Text(l10n.showOnlyOwnedMenuItem),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                  title: Text(l10n.autoTranslateMenuItem),
-                  contentPadding: EdgeInsets.zero,
+                PopupMenuItem(
+                  value: 'toggle_with_goals',
+                  child: ListTile(
+                    leading: Icon(
+                      _showOnlyWithGoals
+                          ? Icons.check_box
+                          : Icons.check_box_outline_blank,
+                    ),
+                    title: Text(l10n.showOnlyWithGoalsMenuItem),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-            PopupMenuItem(
-              value: 'change_location',
-              child: ListTile(
-                leading: const Icon(Icons.location_on),
-                title: Text(l10n.geoscopeChangeMenuItem),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            if (context.read<AuthCubit>().state.userId != null) ...[
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                enabled: false,
-                child: Text(
-                  (context.read<AuthCubit>().state.remainingVotes ?? 0) > 0
-                      ? l10n.menuVotesRemaining(
-                          context.read<AuthCubit>().state.remainingVotes!,
-                        )
-                      : l10n.menuVotesReplenishHint,
+                if (context.read<TranslationRepository>().canTranslateOnDevice)
+                  PopupMenuItem(
+                    value: 'toggle_auto_translate',
+                    child: ListTile(
+                      leading: Icon(
+                        context.read<AutoTranslateCubit>().state
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      title: Text(l10n.autoTranslateMenuItem),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                PopupMenuItem(
+                  value: 'change_location',
+                  child: ListTile(
+                    leading: const Icon(Icons.location_on),
+                    title: Text(l10n.geoscopeChangeMenuItem),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-            ],
-          ],
+                if (isAuthenticated) ...[
+                  PopupMenuItem(
+                    value: 'send_feedback',
+                    child: ListTile(
+                      leading: Transform.translate(
+                        offset: const Offset(0, -4),
+                        child: const Text(
+                          '🗣️',
+                          style: TextStyle(fontSize: 24, height: 1),
+                        ),
+                      ),
+                      title: Text(l10n.feedbackButton),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'sign_out',
+                    child: ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: Text(l10n.signOutButton),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    enabled: false,
+                    child: Text(
+                      (context.read<AuthCubit>().state.remainingVotes ?? 0) > 0
+                          ? l10n.menuVotesRemaining(
+                              context.read<AuthCubit>().state.remainingVotes!,
+                            )
+                          : l10n.menuVotesReplenishHint,
+                    ),
+                  ),
+                ],
+              ];
+            },
+          ),
         ),
         actions: [
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
-              if (authState.status != AuthStatus.authenticated) {
-                return const SizedBox.shrink();
-              }
-              return TapRegion(
-                groupId: _editTapRegionGroupId,
-                child: IconButton(
-                  icon: const Text('🗣️', style: TextStyle(fontSize: 24)),
-                  tooltip: l10n.feedbackButton,
-                  onPressed: () {
-                    BetterFeedback.of(context).show((feedback) async {
-                      try {
-                        await context.read<FeedbackRepository>().submit(
-                          text: feedback.text,
-                          screenshot: feedback.screenshot,
-                          userId: context.read<AuthCubit>().state.userId!,
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.feedbackSuccess),
-                            ),
-                          );
-                        }
-                      } on Exception catch (e) {
-                        log('Feedback submission failed: $e');
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.feedbackError),
-                            ),
-                          );
-                        }
-                      }
-                    });
-                  },
-                ),
-              );
-            },
-          ),
-          BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, authState) {
               if (authState.status == AuthStatus.authenticated) {
-                return IconButton(
-                  icon: const Icon(Icons.logout),
-                  tooltip: l10n.signOutButton,
-                  onPressed: () => context.read<AuthCubit>().signOut(),
-                );
+                return const NotificationsBadge();
               }
               return Tooltip(
                 message: l10n.signInButtonTooltip,
                 child: TextButton(
                   onPressed: () => context.read<AuthCubit>().signIn(),
-                  child: Text(l10n.signInButton),
+                  child: SizedBox(
+                    width: 64,
+                    child: Text(
+                      l10n.signInButton,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
               );
             },

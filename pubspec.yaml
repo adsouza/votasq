@@ -8,6 +8,9 @@ workspace:
   - apps/client
   - apps/server
   - packages/shared
+  - packages/google_mlkit_commons
+  - packages/google_mlkit_language_id
+  - packages/google_mlkit_translation
 
 dev_dependencies:
   melos: ^7.5.0
@@ -19,20 +22,33 @@ melos:
 
   scripts:
     setup:
-      run: melos bootstrap
-      description: Initialize the workspace and link packages.
+      run: |
+        melos bootstrap && \
+        flutter config --enable-swift-package-manager && \
+        git config core.hooksPath .githooks
+      description: Initialize the workspace and link packages, enable Flutter
+        Swift Package Manager support, and activate the tracked git hooks under
+        .githooks (e.g. pre-push runs format + analyze to mirror CI).
 
     gen:
-      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs" && cd apps/client && flutter gen-l10n
+      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs" &&
+        cd apps/client && flutter gen-l10n
       description: Generate code for all packages and regenerate l10n strings.
       packageFilters:
         dependsOn: "build_runner"
 
+    format:
+      run: |
+        melos exec -c 1 --ignore="client" -- "dart format --set-exit-if-changed ." && \
+        cd apps/client && dart format --set-exit-if-changed lib test tool
+      description: Format Dart sources, skipping vendored SwiftPM checkouts under
+        apps/client/build that have their own analysis_options.yaml. Keep this
+        in sync with CI (`dart format apps packages` in .github/workflows/) —
+        omitting a top-level dir here means CI catches what local format misses.
+
     deploy:server:
       run: >
-        gcloud run deploy votasq-server
-        --source .
-        --region us-central1
+        gcloud run deploy votasq-server --source . --region us-central1
         --allow-unauthenticated
       description: Deploy the Dart server to Cloud Run.
 
@@ -40,3 +56,8 @@ melos:
       run: |
         melos exec --scope="client" -- "flutter build apk --release && flutter build macos --release"
       description: Build the Flutter client for Android and macOS.
+
+    # Note: `flutter run` is launched via tool/run-client.sh, not as a melos
+    # script, because melos doesn't forward stdin to script processes — so
+    # flutter's r/R/q hot-reload keystrokes never reach it through `melos`.
+    # See tool/run-client.sh for the dev-loop entry point.

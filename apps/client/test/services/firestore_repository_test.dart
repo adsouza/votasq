@@ -1,6 +1,7 @@
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -198,6 +199,247 @@ void main() {
       });
     });
 
+    group('forkProblem', () {
+      Future<void> seedProblemWithVersion({
+        required String id,
+        required int version,
+        String description = 'Original problem',
+        String goal = 'Original goal',
+        String ownerId = 'owner1',
+        String geoscope = '/',
+        String? lang = 'en',
+      }) async {
+        final now = DateTime.now().toUtc();
+        await firestore.collection('problems').doc(id).set({
+          'description': description,
+          'goal': goal,
+          'ownerId': ownerId,
+          'geoscope': geoscope,
+          'lang': ?lang,
+          'votes': 17,
+          'solved': false,
+          'version': version,
+          'createdAt': now,
+          'lastUpdatedAt': now,
+        });
+      }
+
+      test(
+        'creates a fork owned by the new user with copied content and inspo',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 4);
+
+          final fork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'forker',
+          );
+
+          expect(fork.description, 'Original problem');
+          expect(fork.goal, 'Original goal');
+          expect(fork.ownerId, 'forker');
+          expect(fork.inspoProblemId, 'src');
+          expect(fork.inspoVersion, 4);
+          // Fork starts fresh: votes=1 (forker's vote), version=1.
+          expect(fork.id, isNot('src'));
+
+          final stored = await firestore
+              .collection('problems')
+              .doc(fork.id)
+              .get();
+          expect(stored.data()!['inspoProblemId'], 'src');
+          expect(stored.data()!['inspoVersion'], 4);
+          expect(stored.data()!['votes'], 1);
+          expect(stored.data()!['version'], 1);
+          expect(stored.data()!['ownerId'], 'forker');
+
+          // Original problem should be untouched.
+          final original = await firestore
+              .collection('problems')
+              .doc('src')
+              .get();
+          expect(original.data()!['ownerId'], 'owner1');
+          expect(original.data()!['votes'], 17);
+          expect(original.data()!.containsKey('inspoProblemId'), isFalse);
+          expect(original.data()!.containsKey('inspoVersion'), isFalse);
+        },
+      );
+
+      test('seeds the fork with a voter doc for the new owner', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+
+        final fork = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'forker',
+        );
+
+        final voters = await firestore
+            .collection('problems')
+            .doc(fork.id)
+            .collection('voters')
+            .get();
+        expect(voters.docs, hasLength(1));
+        expect(voters.docs.first.data()['uid'], 'forker');
+        expect(voters.docs.first.data()['votes'], 1);
+      });
+
+      test('writes a v1 revision snapshot for the fork', () async {
+        await seedProblemWithVersion(id: 'src', version: 4);
+
+        final fork = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'forker',
+        );
+
+        final versions = await firestore
+            .collection('problems')
+            .doc(fork.id)
+            .collection('versions')
+            .get();
+        expect(versions.docs, hasLength(1));
+        expect(versions.docs.first.id, '1');
+        expect(versions.docs.first.data()['description'], 'Original problem');
+      });
+
+      test('copies cached translations into the fork', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+        await firestore
+            .collection('problems')
+            .doc('src')
+            .collection('translations')
+            .doc('es')
+            .set({'description': 'Problema original', 'goal': 'Meta original'});
+
+        final fork = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'forker',
+        );
+
+        final forkTranslation = await firestore
+            .collection('problems')
+            .doc(fork.id)
+            .collection('translations')
+            .doc('es')
+            .get();
+        expect(forkTranslation.exists, isTrue);
+        expect(forkTranslation.data()!['description'], 'Problema original');
+        expect(forkTranslation.data()!['goal'], 'Meta original');
+      });
+
+      test('throws StateError when source does not exist', () async {
+        expect(
+          () => repo.forkProblem(
+            sourceProblemId: 'ghost',
+            ownerId: 'forker',
+          ),
+          throwsStateError,
+        );
+      });
+
+      test(
+        'updateProblem on a fork does not touch the inspo fields',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 2);
+          final fork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'forker',
+          );
+
+          await repo.updateProblem(
+            fork.copyWith(description: 'Edited by forker'),
+          );
+
+          final stored = await firestore
+              .collection('problems')
+              .doc(fork.id)
+              .get();
+          expect(stored.data()!['inspoProblemId'], 'src');
+          expect(stored.data()!['inspoVersion'], 2);
+          expect(stored.data()!['description'], 'Edited by forker');
+        },
+      );
+
+      test(
+        'getForksOfProblem returns only forks of the given source',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 1);
+          final aliceFork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'alice',
+          );
+          final bobFork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'bob',
+          );
+          // Unrelated problem + fork must not show up.
+          await seedProblemWithVersion(id: 'other', version: 1);
+          await repo.forkProblem(sourceProblemId: 'other', ownerId: 'eve');
+
+          final forks = await repo.getForksOfProblem('src');
+          expect(forks.map((f) => f.id).toSet(), {aliceFork.id, bobFork.id});
+        },
+      );
+
+      test('getForksOfProblem sorts by votes desc, then id asc', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+        final a = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'alice',
+        );
+        final b = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'bob',
+        );
+        final c = await repo.forkProblem(
+          sourceProblemId: 'src',
+          ownerId: 'carol',
+        );
+        // Manually adjust votes (all forks start at 1).
+        await firestore.collection('problems').doc(a.id).update({'votes': 5});
+        await firestore.collection('problems').doc(b.id).update({'votes': 9});
+        await firestore.collection('problems').doc(c.id).update({'votes': 9});
+
+        final forks = await repo.getForksOfProblem('src');
+        // c may sort before or after b purely by id comparison; both have
+        // votes=9, then a with votes=5.
+        expect(forks[2].id, a.id);
+        expect({forks[0].id, forks[1].id}, {b.id, c.id});
+        // Stable tiebreak by id ascending.
+        final tied = [forks[0].id, forks[1].id]..sort();
+        expect([forks[0].id, forks[1].id], tied);
+      });
+
+      test(
+        'getForksOfProblem returns empty list when there are no forks',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 1);
+          final forks = await repo.getForksOfProblem('src');
+          expect(forks, isEmpty);
+        },
+      );
+
+      test('enumerates all forks of a problem via inspoProblemId', () async {
+        await seedProblemWithVersion(id: 'src', version: 1);
+        await repo.forkProblem(sourceProblemId: 'src', ownerId: 'alice');
+        // Bump source version and fork again so we cover multiple versions.
+        await firestore.collection('problems').doc('src').update({
+          'version': 2,
+        });
+        await repo.forkProblem(sourceProblemId: 'src', ownerId: 'bob');
+        // Unrelated problem and fork that must not show up.
+        await seedProblemWithVersion(id: 'other', version: 1);
+        await repo.forkProblem(sourceProblemId: 'other', ownerId: 'eve');
+
+        final query = await firestore
+            .collection('problems')
+            .where('inspoProblemId', isEqualTo: 'src')
+            .get();
+        final ownerIds = query.docs
+            .map((d) => d.data()['ownerId'] as String)
+            .toSet();
+        expect(ownerIds, {'alice', 'bob'});
+      });
+    });
+
     group('updateProblem', () {
       test('updates description and creates version', () async {
         await seedProblem(id: 'p1');
@@ -301,6 +543,24 @@ void main() {
           expect(result.displayName, 'NewName');
         },
       );
+
+      test('preserves lastActiveAt on existing doc', () async {
+        final oldTime = DateTime.utc(2024);
+        await firestore.collection('users').doc('u1').set({
+          'uid': 'u1',
+          'votes': 10,
+          'lastActiveAt': oldTime,
+        });
+
+        await repo.ensureUserDoc(
+          User(uid: 'u1', votes: 0, lastActiveAt: DateTime.now().toUtc()),
+        );
+
+        final stored = await firestore.collection('users').doc('u1').get();
+        final actualLastActive = (stored.data()!['lastActiveAt'] as Timestamp)
+            .toDate();
+        expect(actualLastActive.isAtSameMomentAs(oldTime), isTrue);
+      });
     });
 
     group('vote', () {
@@ -536,6 +796,69 @@ void main() {
       test('does nothing for nonexistent user', () async {
         // Should not throw.
         await repo.grantVotesAndTouch('ghost');
+      });
+    });
+
+    group('linking and search', () {
+      test('linkProblems merges cliques symmetrically', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await seedProblem(id: 'p3');
+
+        // Link p1 and p2 first
+        await repo.linkProblems('p1', 'p2');
+
+        var updatedP1 = await repo.getProblem('p1');
+        var updatedP2 = await repo.getProblem('p2');
+        expect(updatedP1!.linkedProblemIds, ['p2']);
+        expect(updatedP2!.linkedProblemIds, ['p1']);
+
+        // Merge p3 into the cluster
+        await repo.linkProblems('p2', 'p3');
+
+        updatedP1 = await repo.getProblem('p1');
+        updatedP2 = await repo.getProblem('p2');
+        final updatedP3 = await repo.getProblem('p3');
+
+        // Fully connected clique: p1, p2, p3 each linked to all others
+        expect(updatedP1!.linkedProblemIds.toSet(), {'p2', 'p3'});
+        expect(updatedP2!.linkedProblemIds.toSet(), {'p1', 'p3'});
+        expect(updatedP3!.linkedProblemIds.toSet(), {'p1', 'p2'});
+      });
+
+      test('unlinkProblem removes a problem symmetrically', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await seedProblem(id: 'p3');
+
+        // Link p1, p2, p3
+        await repo.linkProblems('p1', 'p2');
+        await repo.linkProblems('p2', 'p3');
+
+        // Unlink p3
+        await repo.unlinkProblem('p3');
+
+        final updatedP1 = await repo.getProblem('p1');
+        final updatedP2 = await repo.getProblem('p2');
+        final updatedP3 = await repo.getProblem('p3');
+
+        // p1 and p2 should still be linked together
+        expect(updatedP1!.linkedProblemIds, ['p2']);
+        expect(updatedP2!.linkedProblemIds, ['p1']);
+        // p3 should be completely unlinked
+        expect(updatedP3!.linkedProblemIds, isEmpty);
+      });
+
+      test('getGlobalProblemsForSearch returns active problems', () async {
+        await seedProblem(id: 'p1', votes: 10);
+        await seedProblem(id: 'p2', solved: true, votes: 50);
+        await seedProblem(id: 'p3', votes: 20);
+
+        final results = await repo.getGlobalProblemsForSearch();
+        expect(results, hasLength(2));
+        // Sorted by votes DESC, then ID ASC
+        expect(results[0].id, 'p3');
+        expect(results[1].id, 'p1');
       });
     });
   });

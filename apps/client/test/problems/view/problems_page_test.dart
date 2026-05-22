@@ -3,6 +3,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/notifications/notifications.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/view/problems_page.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared/shared.dart';
+import 'package:toastification/toastification.dart';
 
 import '../../helpers/helpers.dart';
 
@@ -26,6 +28,9 @@ class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
+
+class _MockNotificationsCountCubit extends MockCubit<int>
+    implements NotificationsCountCubit {}
 
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
@@ -60,21 +65,31 @@ Problem _problem({
   );
 }
 
+Finder _menuItem(String value) => find.byWidgetPredicate(
+  (w) => w is PopupMenuItem<String> && w.value == value,
+);
+
 void main() {
   late ProblemsCubit problemsCubit;
   late AuthCubit authCubit;
   late GeoscopeCubit geoscopeCubit;
+  late NotificationsCountCubit notificationsCountCubit;
   late FirestoreRepository firestoreRepo;
   late FeedbackRepository feedbackRepo;
   late LanguageDetectionService languageDetectionService;
   late TranslationRepository translationRepo;
   late MockSharedPreferencesWithCache mockPrefs;
 
+  setUpAll(() {
+    registerFallbackValue(_problem());
+  });
+
   setUp(() {
     mockPrefs = createMockSharedPreferences();
     problemsCubit = _MockProblemsCubit();
     authCubit = _MockAuthCubit();
     geoscopeCubit = _MockGeoscopeCubit();
+    notificationsCountCubit = _MockNotificationsCountCubit();
     firestoreRepo = _MockFirestoreRepository();
     feedbackRepo = _MockFeedbackRepository();
     languageDetectionService = _MockLanguageDetectionService();
@@ -84,6 +99,7 @@ void main() {
     when(() => problemsCubit.state).thenReturn(const ProblemsState());
     when(() => authCubit.state).thenReturn(const AuthState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
+    when(() => notificationsCountCubit.state).thenReturn(0);
     when(
       () => languageDetectionService.needsTranslation(
         text: any(named: 'text'),
@@ -102,6 +118,9 @@ void main() {
         BlocProvider<AutoTranslateCubit>(
           create: (_) => AutoTranslateCubit(prefsForTesting: mockPrefs),
         ),
+        BlocProvider<NotificationsCountCubit>.value(
+          value: notificationsCountCubit,
+        ),
       ],
       child: MultiRepositoryProvider(
         providers: [
@@ -114,11 +133,13 @@ void main() {
             value: translationRepo,
           ),
         ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          // Test ProblemsView directly — ProblemsPage creates its own cubit.
-          home: Scaffold(body: ProblemsView()),
+        child: const ToastificationWrapper(
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            // Test ProblemsView directly — ProblemsPage creates its own cubit.
+            home: Scaffold(body: ProblemsView()),
+          ),
         ),
       ),
     );
@@ -487,9 +508,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      // Find the "Show only my problems" menu item and tap it.
-      final ownedItem = find.byType(PopupMenuItem<String>).first;
-      await tester.tap(ownedItem);
+      await tester.tap(_menuItem('toggle_owned'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -523,9 +542,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      // The goals toggle is the first item for unauthenticated users.
-      final goalsItem = find.byType(PopupMenuItem<String>).first;
-      await tester.tap(goalsItem);
+      await tester.tap(_menuItem('toggle_with_goals'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -553,7 +570,7 @@ void main() {
       verify(() => authCubit.signIn()).called(1);
     });
 
-    testWidgets('sign out button shown when authenticated', (
+    testWidgets('sign out menu item shown when authenticated', (
       tester,
     ) async {
       when(() => authCubit.state).thenReturn(
@@ -568,9 +585,13 @@ void main() {
       );
       await tester.pumpWidget(buildSubject());
 
-      expect(find.byIcon(Icons.logout), findsOneWidget);
+      // Logout is no longer in the app bar — it's a hamburger menu item.
+      expect(find.byIcon(Icons.logout), findsNothing);
 
-      await tester.tap(find.byIcon(Icons.logout));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(_menuItem('sign_out'));
       await tester.pump();
       verify(() => authCubit.signOut()).called(1);
     });
@@ -605,17 +626,16 @@ void main() {
           userId: 'user1',
         ),
       );
+      final problem = _problem(ownerId: 'other', description: 'offensive');
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
           status: ProblemsStatus.success,
-          problems: [
-            _problem(ownerId: 'other', description: 'offensive'),
-          ],
+          problems: [problem],
         ),
       );
       when(
-        () => firestoreRepo.addComplaint(
-          problemId: any(named: 'problemId'),
+        () => problemsCubit.flagProblem(
+          problem: any(named: 'problem'),
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async {});
@@ -635,11 +655,15 @@ void main() {
       await tester.pump();
 
       verify(
-        () => firestoreRepo.addComplaint(
-          problemId: '1',
+        () => problemsCubit.flagProblem(
+          problem: problem,
           userId: 'user1',
         ),
       ).called(1);
+      // Dismiss and pump past the dismiss-animation + delayed-dispose so the
+      // toast's internal timers don't outlive the disposed widget tree.
+      toastification.dismissAll(delayForAnimation: false);
+      await tester.pump(const Duration(seconds: 1));
     });
 
     testWidgets('complaint dialog cancel does not submit', (
@@ -668,8 +692,8 @@ void main() {
       await tester.pump();
 
       verifyNever(
-        () => firestoreRepo.addComplaint(
-          problemId: any(named: 'problemId'),
+        () => problemsCubit.flagProblem(
+          problem: any(named: 'problem'),
           userId: any(named: 'userId'),
         ),
       );

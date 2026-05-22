@@ -44,6 +44,8 @@ Future<Response> _put(RequestContext context, String id) async {
       'version': existing.version + 1,
       'createdAt': existing.createdAt.toIso8601String(),
       'lastUpdatedAt': DateTime.now().toUtc().toIso8601String(),
+      if (!body.containsKey('linkedProblemIds'))
+        'linkedProblemIds': existing.linkedProblemIds,
     });
     if (body['description'] != existing.description ||
         body['goal'] != existing.goal) {

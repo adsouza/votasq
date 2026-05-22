@@ -19,7 +19,7 @@ void main() {
   });
 
   Widget buildSubject({
-    List<({String id, String label})> geoscopes = const [],
+    List<({String id, String label, int population})> geoscopes = const [],
     String selectedGeoscope = '/',
   }) {
     when(() => geoscopeCubit.state).thenReturn(
@@ -61,9 +61,9 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
-              (id: 'in', label: 'India'),
-              (id: 'eu', label: 'European Union'),
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'in', label: 'India', population: 1400000000),
+              (id: 'eu', label: 'European Union', population: 450000000),
             ],
           ),
         );
@@ -96,8 +96,8 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
-              (id: 'us/ca', label: 'California'),
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
             ],
           ),
         );
@@ -119,7 +119,7 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
+              (id: 'us', label: 'United States', population: 330000000),
             ],
             selectedGeoscope: 'us',
           ),
@@ -138,9 +138,9 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States'),
-              (id: 'us/ca', label: 'California'),
-              (id: 'us/ny', label: 'New York'),
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ny', label: 'New York', population: 19000000),
             ],
             selectedGeoscope: 'us',
           ),
@@ -150,6 +150,408 @@ void main() {
 
         expect(find.text('California'), findsOneWidget);
         expect(find.text('New York'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'top-level metro list hides metros under 10M population',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              // Megacity — should appear at top level.
+              (id: 'us/ny/nyc', label: 'New York City', population: 19000000),
+              // Below threshold — should be hidden at top level.
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('New York City'), findsOneWidget);
+        expect(find.text('SF Bay Area'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'opens drilled into a 1-part non-superstate country '
+      '(locale-inferred default like Canada / "ca")',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'ca', label: 'Canada', population: 38000000),
+              // Sub-megacity that would be hidden without a drill-in.
+              (id: 'ca/toronto', label: 'Toronto', population: 6700000),
+            ],
+            // Mimics the cubit's locale resolution for en-CA: an exact-match
+            // 1-part id that isn't a superstate.
+            selectedGeoscope: 'ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // Sub-region surfaces because the picker drilled in to "ca".
+        expect(find.text('Toronto'), findsOneWidget);
+        // The filter field is disabled while drilled in.
+        final field = tester.widget<TextField>(find.byType(TextField));
+        expect(field.enabled, isFalse);
+      },
+    );
+
+    testWidgets(
+      'population threshold is lifted once a superstate is selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              // Below 10M — hidden at top level, but visible under "us".
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('SF Bay Area'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'filter field hint text is configured on the sheet',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        final field = tester.widget<TextField>(find.byType(TextField));
+        expect(
+          field.decoration?.hintText,
+          'Type partial name of current location here to '
+          'narrow down the list.',
+        );
+      },
+    );
+
+    testWidgets(
+      'typing a substring filters the list across sections and bypasses '
+      'the population threshold',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              // Superstate.
+              (id: 'us', label: 'United States', population: 330000000),
+              // Sub-megacity metro that would normally be hidden at top level.
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              // A metro that doesn't match the query.
+              (id: 'us/ny/nyc', label: 'New York City', population: 19000000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'sf');
+        await tester.pumpAndSettle();
+
+        // Matches across the (formerly) hidden metro tier — case-insensitive.
+        expect(find.text('SF Bay Area'), findsOneWidget);
+        // Non-matching entries are filtered out.
+        expect(find.text('United States'), findsNothing);
+        expect(find.text('New York City'), findsNothing);
+        // Section headers don't render while filtering.
+        expect(find.text('Superstates'), findsNothing);
+        expect(find.text('Metro areas'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'clearing the filter restores the full hierarchical list',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'in', label: 'India', population: 1400000000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'india');
+        await tester.pumpAndSettle();
+        expect(find.text('United States'), findsNothing);
+
+        await tester.enterText(find.byType(TextField), '');
+        await tester.pumpAndSettle();
+        expect(find.text('United States'), findsOneWidget);
+        expect(find.text('India'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'filter field is disabled when a superstate is selected and '
+      're-enabled when deselected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+            ],
+            // Opens the picker already drilled into the "us" superstate.
+            selectedGeoscope: 'us',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        TextField findField() =>
+            tester.widget<TextField>(find.byType(TextField));
+        expect(findField().enabled, isFalse);
+
+        // Tapping the active superstate clears the drill-in and brings the
+        // selection back to global, which should re-enable the filter.
+        await tester.tap(find.text('United States'));
+        await tester.pumpAndSettle();
+        expect(findField().enabled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'filter field is disabled when a state is selected and '
+      're-enabled when deselected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              // Non-superstate country so the country row appears in the
+              // States section even with no superstate selected.
+              (
+                id: 'mx/mexico-city',
+                label: 'Mexico City',
+                population: 22000000,
+              ),
+            ],
+            selectedGeoscope: 'mx/mexico-city',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        TextField findField() =>
+            tester.widget<TextField>(find.byType(TextField));
+        expect(findField().enabled, isFalse);
+
+        // Tapping the active state collapses the drill-in.
+        await tester.tap(find.text('mx'));
+        await tester.pumpAndSettle();
+        expect(findField().enabled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'tapping a filtered leaf result selects that geoscope and closes '
+      'the sheet',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'bay');
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('SF Bay Area'));
+        await tester.pumpAndSettle();
+
+        verify(() => geoscopeCubit.selectGeoscope('us/ca/sfbay')).called(1);
+        // SF Bay Area has no children in this fixture, so the sheet closes.
+        expect(find.byType(TextField), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'tapping a filtered superstate drills in instead of dismissing',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'united');
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('United States'));
+        await tester.pumpAndSettle();
+
+        verify(() => geoscopeCubit.selectGeoscope('us')).called(1);
+        // Sheet still open: TextField still present.
+        expect(find.byType(TextField), findsOneWidget);
+        // The drill-in surfaces "California" (the state under "us") which
+        // was not visible at the top level before.
+        expect(find.text('California'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping a filtered state with metros drills in to its metros',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              // Sub-megacity metro that wouldn't show without drill-in.
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'cali');
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('California'));
+        await tester.pumpAndSettle();
+
+        verify(() => geoscopeCubit.selectGeoscope('us/ca')).called(1);
+        // Sheet still open.
+        expect(find.byType(TextField), findsOneWidget);
+        // California's metros are now reachable.
+        expect(find.text('SF Bay Area'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'superstates section heading is visible but collapsed when a state is '
+      'selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us/ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // The state (California) and its metro areas are visible.
+        expect(find.text('California'), findsOneWidget);
+        expect(find.text('SF Bay Area'), findsOneWidget);
+
+        // Superstates heading is visible, but list items are hidden/collapsed.
+        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('United States'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'superstates section is expanded when no state is selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+            ],
+            selectedGeoscope: 'us',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // No state is selected (only superstate is selected).
+        // Superstates heading and items are visible.
+        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('United States'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'superstates section expands automatically when a selected state is '
+      'deselected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us/ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // Superstates heading is visible but list items are collapsed.
+        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('United States'), findsNothing);
+
+        // Deselect the state by tapping on California again.
+        await tester.tap(find.text('California'));
+        await tester.pumpAndSettle();
+
+        // Superstates list items are now automatically expanded.
+        expect(find.text('United States'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'user can manually toggle the superstates section by tapping the heading',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (id: 'us', label: 'United States', population: 330000000),
+              (id: 'us/ca', label: 'California', population: 39000000),
+              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+            ],
+            selectedGeoscope: 'us/ca',
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+
+        // Initially collapsed due to active state.
+        expect(find.text('United States'), findsNothing);
+
+        // Tap the heading to manually expand it.
+        await tester.tap(find.text('Superstates'));
+        await tester.pumpAndSettle();
+
+        // Now expanded.
+        expect(find.text('United States'), findsOneWidget);
+
+        // Tap the heading again to manually collapse it.
+        await tester.tap(find.text('Superstates'));
+        await tester.pumpAndSettle();
+
+        // Collapsed again.
+        expect(find.text('United States'), findsNothing);
       },
     );
   });

@@ -4,6 +4,8 @@ include:
 analyzer:
   exclude:
     - lib/l10n/gen/*
+    - build/**
+    - ios/build/**
 linter:
   rules:
     public_member_api_docs: false

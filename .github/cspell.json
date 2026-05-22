@@ -19,20 +19,40 @@
     }
   ],
   "useGitignore": true,
+  "ignorePaths": [
+    "**/docs/superpowers/plans/**",
+    "**/google_mlkit_*/**"
+  ],
   "words": [
+    "affordances",
+    "behaviour",
+    "codesign",
     "Contador",
     "contador",
+    "deintegrate",
     "Geoscope",
     "geoscope",
     "geoscopes",
+    "grecaptcha",
+    "infoplist",
+    "inspo",
+    "iphoneos",
     "mlkit",
     "mostrado",
+    "Notif",
+    "oneline",
     "página",
+    "pbxproj",
+    "Podfile",
+    "podspec",
     "Prefs",
+    "sfbay",
     "shared",
     "subcollection",
+    "swiftpm",
     "Texto",
     "Votasq",
-    "votasq"
+    "votasq",
+    "xcworkspacedata"
   ]
 }

@@ -1,0 +1,5 @@
+node_modules/
+# Build output (anchored so it doesn't match src/lib/ source).
+/lib/
+*.log
+.firebase/

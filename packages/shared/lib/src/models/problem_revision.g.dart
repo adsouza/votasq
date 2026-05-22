@@ -13,6 +13,7 @@ _ProblemRevision _$ProblemRevisionFromJson(Map<String, dynamic> json) =>
       archivedAt: DateTime.parse(json['archivedAt'] as String),
       goal: json['goal'] as String? ?? '',
       restoredFrom: (json['restoredFrom'] as num?)?.toInt(),
+      copiedFromProblemId: json['copiedFromProblemId'] as String?,
     );
 
 Map<String, dynamic> _$ProblemRevisionToJson(_ProblemRevision instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$ProblemRevisionToJson(_ProblemRevision instance) =>
       'archivedAt': instance.archivedAt.toIso8601String(),
       'goal': instance.goal,
       'restoredFrom': instance.restoredFrom,
+      'copiedFromProblemId': instance.copiedFromProblemId,
     };
