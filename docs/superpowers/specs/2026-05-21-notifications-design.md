@@ -23,7 +23,7 @@ The codebase has no existing notification, inbox, or messaging surface, though F
 - **State:** a single shared `readAt` timestamp. Channels do not write per-channel delivery flags on the notification doc; per-channel bookkeeping (FCM send results, future email cursor) lives in each channel worker's state.
 - **Idempotency:** deterministic doc ids derived from `(type, subject, actor)` collapse duplicate triggers and retries into a single notification.
 
-```
+```text
 ┌─────────────────────────┐  onCreate / onUpdate / onDelete    ┌────────────────┐
 │ voters/{uid}            │────────────────────────────────────▶│ Cloud Function│
 │ problems/{pid}          │  (Firestore triggers)               │ writeNotif    │
@@ -45,13 +45,13 @@ The codebase has no existing notification, inbox, or messaging surface, though F
 
 ## Triggers in v1
 
-| Type | Firestore trigger | Recipient(s) | Behavior |
-|---|---|---|---|
-| `voteReceived` | `onDocumentWritten(problems/{pid}/voters/{actorUid})` | problem owner | See "Vote lifecycle" below; skip if `actorUid == ownerId` |
-| `problemForked` | `onDocumentCreated(problems/{forkId})` when `inspoProblemId != null` | owner of `inspoProblemId` | Skip if actor == original owner |
-| `problemLinked` | `onDocumentWritten(problems/{linkerId})` for each id newly added to `linkedProblemIds` | owner of each linked problem | Skip self-links and links to your own problems |
-| `problemRevised` | `onDocumentCreated(problems/{pid}/versions/{version})` | each voter under `problems/{pid}/voters` | Skip the problem owner (who made the revision) |
-| `forkAdopted` | `onDocumentCreated(problems/{originalId}/versions/{version})` when the revision references a fork (e.g., `copiedFromProblemId` set) | owner of the referenced fork problem | Skip if fork owner == original owner |
+| Type             | Firestore trigger                                                                                                                   | Recipient(s)                             | Behavior                                                  |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------|
+| `voteReceived`   | `onDocumentWritten(problems/{pid}/voters/{actorUid})`                                                                               | problem owner                            | See "Vote lifecycle" below; skip if `actorUid == ownerId` |
+| `problemForked`  | `onDocumentCreated(problems/{forkId})` when `inspoProblemId != null`                                                                | owner of `inspoProblemId`                | Skip if actor == original owner                           |
+| `problemLinked`  | `onDocumentWritten(problems/{linkerId})` for each id newly added to `linkedProblemIds`                                              | owner of each linked problem             | Skip self-links and links to your own problems            |
+| `problemRevised` | `onDocumentCreated(problems/{pid}/versions/{version})`                                                                              | each voter under `problems/{pid}/voters` | Skip the problem owner (who made the revision)            |
+| `forkAdopted`    | `onDocumentCreated(problems/{originalId}/versions/{version})` when the revision references a fork (e.g., `copiedFromProblemId` set) | owner of the referenced fork problem     | Skip if fork owner == original owner                      |
 
 ### Vote lifecycle (the interesting one)
 
@@ -147,13 +147,13 @@ Preferences live as a `notificationPreferences` field on the existing `users/{ui
 
 Defaults (applied in code on read, not stored):
 
-| Type | inApp | push | email |
-|---|---|---|---|
-| voteReceived | true | true | false |
-| problemForked | true | true | false |
-| problemLinked | true | true | false |
-| problemRevised | true | true | false |
-| forkAdopted | true | true | false |
+| Type           | inApp | push | email |
+|----------------|-------|------|-------|
+| voteReceived   | true  | true | false |
+| problemForked  | true  | true | false |
+| problemLinked  | true  | true | false |
+| problemRevised | true  | true | false |
+| forkAdopted    | true  | true | false |
 
 Email defaults to false because no email worker exists yet; flipping it does nothing today. The schema is set so when email lands, no migration is needed. Missing keys mean "use the default for that type/channel".
 
@@ -161,13 +161,13 @@ Export both new models from the shared library entry point. Run `melos gen` afte
 
 ## Deterministic doc ids
 
-| Type | Doc id |
-|---|---|
-| `voteReceived` | `voteReceived__{problemId}__{actorUid}` |
-| `problemForked` | `problemForked__{forkProblemId}` |
-| `problemLinked` | `problemLinked__{linkedProblemId}__{linkerProblemId}` |
-| `problemRevised` | `problemRevised__{problemId}__v{newVersion}` |
-| `forkAdopted` | `forkAdopted__{forkProblemId}__{originalProblemId}__v{newVersion}` |
+| Type             | Doc id                                                             |
+|------------------|--------------------------------------------------------------------|
+| `voteReceived`   | `voteReceived__{problemId}__{actorUid}`                            |
+| `problemForked`  | `problemForked__{forkProblemId}`                                   |
+| `problemLinked`  | `problemLinked__{linkedProblemId}__{linkerProblemId}`              |
+| `problemRevised` | `problemRevised__{problemId}__v{newVersion}`                       |
+| `forkAdopted`    | `forkAdopted__{forkProblemId}__{originalProblemId}__v{newVersion}` |
 
 Functions use `.create()` on initial write so a second emission for the same logical event silently no-ops (catch `ALREADY_EXISTS`). On vote-count increase, Function uses `.update()` to clear `readAt` and bump `updatedAt`.
 
@@ -175,7 +175,7 @@ Functions use `.create()` on initial write so a second emission for the same log
 
 New top-level `functions/` directory (TypeScript + `firebase-functions` v2 — Dart on Functions is not first-class). Layout:
 
-```
+```text
 functions/
 ├── package.json
 ├── tsconfig.json
@@ -219,6 +219,7 @@ New feature directory: `apps/client/lib/notifications/`.
 - `cubit/notifications_cubit.dart` — mirrors `apps/client/lib/problems/cubit/problems_cubit.dart`. Subscribes to `users/{currentUid}/notifications` ordered by **`updatedAt desc`**, cursor-paginated. Exposes `markAsRead(id)` which updates `readAt = serverTimestamp` (security rules permit only that field).
 - `cubit/notifications_count_cubit.dart` — small cubit holding the unread badge count. Uses Firestore aggregation **`count()` query** on `users/{uid}/notifications where readAt == null`, refreshed on app focus and on `markAsRead` invocations.
 - `view/notifications_page.dart` — list of cards, one card widget per payload variant. Uses Dart sealed-class pattern matching:
+
   ```dart
   Widget build(BuildContext context) => switch (notification.payload) {
         VoteReceivedPayload(:final problemId, :final actorUid) => VoteReceivedCard(...),
@@ -228,6 +229,7 @@ New feature directory: `apps/client/lib/notifications/`.
         ForkAdoptedPayload(...) => ForkAdoptedCard(...),
       };
   ```
+
 - `view/notifications_badge.dart` — small badge widget for the app shell that shows the unread count from `NotificationsCountCubit`.
 
 ### Repository
@@ -337,6 +339,7 @@ index.
 ## Files changed / created
 
 **New:**
+
 - `packages/shared/lib/src/models/notification.dart`
 - `packages/shared/lib/src/models/notification_preferences.dart`
 - `functions/` (whole new directory tree, including `src/l10n/` ARB copies and `src/callables/markAllNotificationsRead.ts`)
@@ -344,6 +347,7 @@ index.
 - `apps/client/web/firebase-messaging-sw.js`
 
 **Modified:**
+
 - `packages/shared/lib/shared.dart` (export new models)
 - `apps/client/pubspec.yaml` (add `firebase_messaging` and `cloud_functions`)
 - `apps/client/lib/services/firestore_repository.dart` (add notification + token methods; callable invocation)

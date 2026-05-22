@@ -24,6 +24,8 @@
     "**/google_mlkit_*/**"
   ],
   "words": [
+    "affordances",
+    "behaviour",
     "codesign",
     "Contador",
     "contador",
@@ -36,6 +38,7 @@
     "iphoneos",
     "mlkit",
     "mostrado",
+    "Notif",
     "oneline",
     "página",
     "pbxproj",
