@@ -57,6 +57,15 @@ melos:
         melos exec --scope="client" -- "flutter build apk --release && flutter build macos --release"
       description: Build the Flutter client for Android and macOS.
 
+    release:
+      run: ./tool/release.sh "$@"
+      description: |
+        Cut a new client release. Usage:
+          melos run release -- <vX.Y.Z[-suffix]> "<annotated tag message>"
+        Runs format + analyze, bumps the build number in
+        apps/client/pubspec.yaml, commits, pushes, and pushes an annotated tag
+        that triggers .github/workflows/release.yaml. See tool/release.sh.
+
     # Note: `flutter run` is launched via tool/run-client.sh, not as a melos
     # script, because melos doesn't forward stdin to script processes — so
     # flutter's r/R/q hot-reload keystrokes never reach it through `melos`.

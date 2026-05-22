@@ -138,6 +138,24 @@ The production Docker build is a multi-stage process:
 and compiles it to a native executable.
 3. Produces a minimal `scratch` image containing only the binary and web assets.
 
+### Cutting a Client Release
+
+Releases are tag-driven — pushing a `v*` tag fires
+[release.yaml](.github/workflows/release.yaml), which builds Android, Web,
+and macOS artifacts and publishes them as a GitHub Release.
+
+```sh
+melos run release -- v0.5.1 "Short message for the annotated tag"
+```
+
+This wraps the manual ritual (format, analyze, bump
+`apps/client/pubspec.yaml`'s build number, commit, push, create annotated
+tag, push tag) in [tool/release.sh](tool/release.sh). Pre-flight checks
+require a clean working tree on `main` that's in sync with `origin/main`,
+and refuse to reuse an existing tag. The message argument becomes the
+annotated-tag message only — the GitHub Release body stays auto-generated
+from PR titles since the last tag.
+
 ## CI/CD
 
 GitHub Actions workflows in `.github/workflows/`:
