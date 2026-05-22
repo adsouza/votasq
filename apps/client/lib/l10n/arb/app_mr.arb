@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "मजकुराद्वारे शोधा, समस्या आयडी किंवा पूर्ण URL पेस्ट करा...",
     "linkProblemError": "समस्या लिंक करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
     "unlinkProblemError": "समस्या अनलिंक करता आली नाही. कृपया पुन्हा प्रयत्न करा.",
-    "unlinkProblemTooltip": "ही समस्या अनलिंक करा"
+    "unlinkProblemTooltip": "ही समस्या अनलिंक करा",
+    "notificationsBadgeTooltip": "सूचना",
+    "notificationsPageTitle": "सूचना",
+    "notificationsEmpty": "तुमच्याकडे अद्याप कोणत्याही सूचना नाहीत",
+    "notificationOpenButton": "उघडा",
+    "notificationsMarkAllReadTooltip": "सर्व वाचलेले म्हणून चिन्हांकित करा",
+    "notificationVoteReceivedTitle": "नवीन मत",
+    "notificationVoteReceivedBody": "{actorName} ने तुमच्या समस्येला मत दिले",
+    "notificationProblemForkedTitle": "तुमची समस्या फोर्क केली",
+    "notificationProblemForkedBody": "{actorName} ने तुमच्या समस्येचा फोर्क तयार केला",
+    "notificationProblemLinkedTitle": "तुमची समस्या जोडली",
+    "notificationProblemLinkedBody": "{actorName} ने तुमची समस्या इतर समस्येशी जोडली",
+    "notificationProblemRevisedTitle": "समस्या अद्यतनित",
+    "notificationProblemRevisedBody": "तुम्ही मत दिलेल्या समस्येला नवीन आवृत्ती आहे",
+    "notificationForkAdoptedTitle": "तुमचा फोर्क स्वीकारला",
+    "notificationForkAdoptedBody": "तुमचे योगदान मूळ समस्येत समाविष्ट केले"
 }

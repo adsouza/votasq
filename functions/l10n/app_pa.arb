@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "ਟੈਕਸट ਦੁਆਰਾ ਖੋਜੋ, ਸਮੱਸਿਆ ਆਈਡੀ ਜਾਂ ਪੂਰਾ URL ਪੇਸਟ ਕਰੋ...",
     "linkProblemError": "ਸਮੱਸਿਆ ਲਿੰਕ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
     "unlinkProblemError": "ਸਮੱਸਿਆ ਅਣਲਿੰਕ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
-    "unlinkProblemTooltip": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਅਣਲਿੰਕ ਕਰੋ"
+    "unlinkProblemTooltip": "ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਅਣਲਿੰਕ ਕਰੋ",
+    "notificationsBadgeTooltip": "ਸੂਚਨਾਵਾਂ",
+    "notificationsPageTitle": "ਸੂਚਨਾਵਾਂ",
+    "notificationsEmpty": "ਤੁਹਾਡੇ ਕੋਲ ਅਜੇ ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ ਹਨ",
+    "notificationOpenButton": "ਖੋਲ੍ਹੋ",
+    "notificationsMarkAllReadTooltip": "ਸਾਰੇ ਪੜ੍ਹੇ ਹੋਏ ਵਜੋਂ ਨਿਸ਼ਾਨਬੱਧ ਕਰੋ",
+    "notificationVoteReceivedTitle": "ਨਵੀਂ ਵੋਟ",
+    "notificationVoteReceivedBody": "{actorName} ਨੇ ਤੁਹਾਡੀ ਸਮੱਸਿਆ 'ਤੇ ਵੋਟ ਪਾਈ",
+    "notificationProblemForkedTitle": "ਤੁਹਾਡੀ ਸਮੱਸਿਆ ਫੋਰਕ ਹੋਈ",
+    "notificationProblemForkedBody": "{actorName} ਨੇ ਤੁਹਾਡੀ ਸਮੱਸਿਆ ਦਾ ਫੋਰਕ ਬਣਾਇਆ",
+    "notificationProblemLinkedTitle": "ਤੁਹਾਡੀ ਸਮੱਸਿਆ ਲਿੰਕ ਕੀਤੀ ਗਈ",
+    "notificationProblemLinkedBody": "{actorName} ਨੇ ਤੁਹਾਡੀ ਸਮੱਸਿਆ ਨੂੰ ਕਿਸੇ ਹੋਰ ਨਾਲ ਲਿੰਕ ਕੀਤਾ",
+    "notificationProblemRevisedTitle": "ਸਮੱਸਿਆ ਅੱਪਡੇਟ ਹੋਈ",
+    "notificationProblemRevisedBody": "ਜਿਸ ਸਮੱਸਿਆ 'ਤੇ ਤੁਸੀਂ ਵੋਟ ਪਾਈ ਸੀ ਉਸਦਾ ਨਵਾਂ ਸੰਸਕਰਣ ਹੈ",
+    "notificationForkAdoptedTitle": "ਤੁਹਾਡਾ ਫੋਰਕ ਅਪਣਾਇਆ ਗਿਆ",
+    "notificationForkAdoptedBody": "ਤੁਹਾਡਾ ਯੋਗਦਾਨ ਮੂਲ ਸਮੱਸਿਆ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"
 }

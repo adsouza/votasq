@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "متن سے تلاش کریں، مسئلہ ID یا مکمل یو آر ایل پیسٹ کریں...",
     "linkProblemError": "مسئلہ منسلک نہیں کیا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔",
     "unlinkProblemError": "مسئلہ غیر منسلک نہیں کیا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔",
-    "unlinkProblemTooltip": "اس مسئلے کو غیر منسلک کریں"
+    "unlinkProblemTooltip": "اس مسئلے کو غیر منسلک کریں",
+    "notificationsBadgeTooltip": "اطلاعات",
+    "notificationsPageTitle": "اطلاعات",
+    "notificationsEmpty": "آپ کے پاس ابھی کوئی اطلاع نہیں ہے",
+    "notificationOpenButton": "کھولیں",
+    "notificationsMarkAllReadTooltip": "سب کو پڑھا ہوا نشان زد کریں",
+    "notificationVoteReceivedTitle": "نیا ووٹ",
+    "notificationVoteReceivedBody": "{actorName} نے آپ کے مسئلے پر ووٹ دیا",
+    "notificationProblemForkedTitle": "آپ کا مسئلہ فورک کیا گیا",
+    "notificationProblemForkedBody": "{actorName} نے آپ کے مسئلے کا فورک بنایا",
+    "notificationProblemLinkedTitle": "آپ کا مسئلہ منسلک کیا گیا",
+    "notificationProblemLinkedBody": "{actorName} نے آپ کے مسئلے کو کسی اور سے منسلک کیا",
+    "notificationProblemRevisedTitle": "مسئلہ اپ ڈیٹ ہو گیا",
+    "notificationProblemRevisedBody": "جس مسئلے پر آپ نے ووٹ دیا تھا اس کا نیا ورژن ہے",
+    "notificationForkAdoptedTitle": "آپ کا فورک اپنایا گیا",
+    "notificationForkAdoptedBody": "آپ کا تعاون اصل مسئلے میں شامل کیا گیا"
 }

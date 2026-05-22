@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "テキストで検索、課題IDまたはURLを貼り付け...",
     "linkProblemError": "課題をリンクできませんでした。もう一度お試しください。",
     "unlinkProblemError": "課題のリンクを解除できませんでした。もう一度お試しください。",
-    "unlinkProblemTooltip": "この課題のリンクを解除"
+    "unlinkProblemTooltip": "この課題のリンクを解除",
+    "notificationsBadgeTooltip": "通知",
+    "notificationsPageTitle": "通知",
+    "notificationsEmpty": "通知はまだありません",
+    "notificationOpenButton": "開く",
+    "notificationsMarkAllReadTooltip": "すべて既読にする",
+    "notificationVoteReceivedTitle": "新しい投票",
+    "notificationVoteReceivedBody": "{actorName}があなたの問題に投票しました",
+    "notificationProblemForkedTitle": "あなたの問題がフォークされました",
+    "notificationProblemForkedBody": "{actorName}があなたの問題のフォークを作成しました",
+    "notificationProblemLinkedTitle": "あなたの問題がリンクされました",
+    "notificationProblemLinkedBody": "{actorName}があなたの問題を別の問題にリンクしました",
+    "notificationProblemRevisedTitle": "問題が更新されました",
+    "notificationProblemRevisedBody": "あなたが投票した問題に新しいバージョンがあります",
+    "notificationForkAdoptedTitle": "あなたのフォークが採用されました",
+    "notificationForkAdoptedBody": "あなたの貢献が元の問題に組み込まれました"
 }

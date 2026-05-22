@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "جستجو با متن، چسباندن شناسه مسئله، یا آدرس کامل...",
     "linkProblemError": "پیوند دادن مسئله امکان‌پذیر نبود. لطفاً دوباره تلاش کنید.",
     "unlinkProblemError": "حذف پیوند مسئله امکان‌پذیر نبود. لطفاً دوباره تلاش کنید.",
-    "unlinkProblemTooltip": "حذف پیوند این مسئله"
+    "unlinkProblemTooltip": "حذف پیوند این مسئله",
+    "notificationsBadgeTooltip": "اعلان‌ها",
+    "notificationsPageTitle": "اعلان‌ها",
+    "notificationsEmpty": "هنوز اعلانی ندارید",
+    "notificationOpenButton": "باز کردن",
+    "notificationsMarkAllReadTooltip": "علامت‌گذاری همه به‌عنوان خوانده‌شده",
+    "notificationVoteReceivedTitle": "رأی جدید",
+    "notificationVoteReceivedBody": "{actorName} به مشکل شما رأی داد",
+    "notificationProblemForkedTitle": "مشکل شما فورک شد",
+    "notificationProblemForkedBody": "{actorName} یک فورک از مشکل شما ایجاد کرد",
+    "notificationProblemLinkedTitle": "مشکل شما پیوند داده شد",
+    "notificationProblemLinkedBody": "{actorName} مشکل شما را به مشکل دیگری پیوند داد",
+    "notificationProblemRevisedTitle": "مشکل به‌روزرسانی شد",
+    "notificationProblemRevisedBody": "مشکلی که به آن رأی دادید نسخه جدیدی دارد",
+    "notificationForkAdoptedTitle": "فورک شما پذیرفته شد",
+    "notificationForkAdoptedBody": "مشارکت شما در مشکل اصلی گنجانده شد"
 }

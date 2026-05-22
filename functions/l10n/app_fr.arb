@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Rechercher par texte, coller l'ID du problème ou l'URL complète...",
     "linkProblemError": "Impossible de lier le problème. Veuillez réessayer.",
     "unlinkProblemError": "Impossible de délier le problème. Veuillez réessayer.",
-    "unlinkProblemTooltip": "Délier ce problème"
+    "unlinkProblemTooltip": "Délier ce problème",
+    "notificationsBadgeTooltip": "Notifications",
+    "notificationsPageTitle": "Notifications",
+    "notificationsEmpty": "Vous n'avez pas encore de notifications",
+    "notificationOpenButton": "Ouvrir",
+    "notificationsMarkAllReadTooltip": "Tout marquer comme lu",
+    "notificationVoteReceivedTitle": "Nouveau vote",
+    "notificationVoteReceivedBody": "{actorName} a voté pour votre problème",
+    "notificationProblemForkedTitle": "Votre problème a été dupliqué",
+    "notificationProblemForkedBody": "{actorName} a créé une bifurcation de votre problème",
+    "notificationProblemLinkedTitle": "Votre problème a été lié",
+    "notificationProblemLinkedBody": "{actorName} a lié votre problème depuis un autre",
+    "notificationProblemRevisedTitle": "Problème mis à jour",
+    "notificationProblemRevisedBody": "Un problème pour lequel vous avez voté a une nouvelle version",
+    "notificationForkAdoptedTitle": "Votre bifurcation a été adoptée",
+    "notificationForkAdoptedBody": "Votre contribution a été incorporée au problème original"
 }

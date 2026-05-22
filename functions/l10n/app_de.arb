@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Suche nach Text, Problem-ID oder vollständiger URL...",
     "linkProblemError": "Problem konnte nicht verknüpft werden. Bitte erneut versuchen.",
     "unlinkProblemError": "Problemverknüpfung konnte nicht aufgehoben werden. Bitte erneut versuchen.",
-    "unlinkProblemTooltip": "Verknüpfung aufheben"
+    "unlinkProblemTooltip": "Verknüpfung aufheben",
+    "notificationsBadgeTooltip": "Benachrichtigungen",
+    "notificationsPageTitle": "Benachrichtigungen",
+    "notificationsEmpty": "Du hast noch keine Benachrichtigungen",
+    "notificationOpenButton": "Öffnen",
+    "notificationsMarkAllReadTooltip": "Alle als gelesen markieren",
+    "notificationVoteReceivedTitle": "Neue Stimme",
+    "notificationVoteReceivedBody": "{actorName} hat für dein Problem abgestimmt",
+    "notificationProblemForkedTitle": "Dein Problem wurde geforkt",
+    "notificationProblemForkedBody": "{actorName} hat einen Fork deines Problems erstellt",
+    "notificationProblemLinkedTitle": "Dein Problem wurde verknüpft",
+    "notificationProblemLinkedBody": "{actorName} hat dein Problem mit einem anderen verknüpft",
+    "notificationProblemRevisedTitle": "Problem aktualisiert",
+    "notificationProblemRevisedBody": "Ein Problem, für das du abgestimmt hast, hat eine neue Version",
+    "notificationForkAdoptedTitle": "Dein Fork wurde übernommen",
+    "notificationForkAdoptedBody": "Dein Beitrag wurde in das ursprüngliche Problem übernommen"
 }

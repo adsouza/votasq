@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Tìm theo văn bản, dán ID vấn đề, hoặc URL đầy đủ...",
     "linkProblemError": "Không thể liên kết vấn đề. Vui lòng thử lại.",
     "unlinkProblemError": "Không thể hủy liên kết vấn đề. Vui lòng thử lại.",
-    "unlinkProblemTooltip": "Hủy liên kết vấn đề này"
+    "unlinkProblemTooltip": "Hủy liên kết vấn đề này",
+    "notificationsBadgeTooltip": "Thông báo",
+    "notificationsPageTitle": "Thông báo",
+    "notificationsEmpty": "Bạn chưa có thông báo nào",
+    "notificationOpenButton": "Mở",
+    "notificationsMarkAllReadTooltip": "Đánh dấu tất cả là đã đọc",
+    "notificationVoteReceivedTitle": "Phiếu bầu mới",
+    "notificationVoteReceivedBody": "{actorName} đã bỏ phiếu cho vấn đề của bạn",
+    "notificationProblemForkedTitle": "Vấn đề của bạn đã được fork",
+    "notificationProblemForkedBody": "{actorName} đã tạo một nhánh từ vấn đề của bạn",
+    "notificationProblemLinkedTitle": "Vấn đề của bạn đã được liên kết",
+    "notificationProblemLinkedBody": "{actorName} đã liên kết vấn đề của bạn từ một vấn đề khác",
+    "notificationProblemRevisedTitle": "Vấn đề đã được cập nhật",
+    "notificationProblemRevisedBody": "Một vấn đề bạn đã bình chọn có phiên bản mới",
+    "notificationForkAdoptedTitle": "Nhánh của bạn đã được áp dụng",
+    "notificationForkAdoptedBody": "Đóng góp của bạn đã được tích hợp vào vấn đề gốc"
 }

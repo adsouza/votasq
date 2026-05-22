@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Пошук за текстом, вставка ID проблеми або повного посилання...",
     "linkProblemError": "Не вдалося пов'язати проблему. Спробуйте ще раз.",
     "unlinkProblemError": "Не вдалося відв'язати проблему. Спробуйте ще раз.",
-    "unlinkProblemTooltip": "Відв'язати цю проблему"
+    "unlinkProblemTooltip": "Відв'язати цю проблему",
+    "notificationsBadgeTooltip": "Сповіщення",
+    "notificationsPageTitle": "Сповіщення",
+    "notificationsEmpty": "У вас поки немає сповіщень",
+    "notificationOpenButton": "Відкрити",
+    "notificationsMarkAllReadTooltip": "Позначити всі як прочитані",
+    "notificationVoteReceivedTitle": "Новий голос",
+    "notificationVoteReceivedBody": "{actorName} проголосував за вашу проблему",
+    "notificationProblemForkedTitle": "Вашу проблему форкнули",
+    "notificationProblemForkedBody": "{actorName} створив форк вашої проблеми",
+    "notificationProblemLinkedTitle": "Вашу проблему пов'язали",
+    "notificationProblemLinkedBody": "{actorName} пов'язав вашу проблему з іншою",
+    "notificationProblemRevisedTitle": "Проблему оновлено",
+    "notificationProblemRevisedBody": "Проблема, за яку ви голосували, має нову версію",
+    "notificationForkAdoptedTitle": "Ваш форк прийнято",
+    "notificationForkAdoptedBody": "Ваш внесок було включено до початкової проблеми"
 }

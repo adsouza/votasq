@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Metinle ara, sorun kimliğini veya tam URL'yi yapıştır...",
     "linkProblemError": "Sorun bağlanamadı. Lütfen tekrar deneyin.",
     "unlinkProblemError": "Sorun bağlantısı kesilemedi. Lütfen tekrar deneyin.",
-    "unlinkProblemTooltip": "Bu sorunun bağlantısını kes"
+    "unlinkProblemTooltip": "Bu sorunun bağlantısını kes",
+    "notificationsBadgeTooltip": "Bildirimler",
+    "notificationsPageTitle": "Bildirimler",
+    "notificationsEmpty": "Henüz hiç bildiriminiz yok",
+    "notificationOpenButton": "Aç",
+    "notificationsMarkAllReadTooltip": "Tümünü okundu olarak işaretle",
+    "notificationVoteReceivedTitle": "Yeni oy",
+    "notificationVoteReceivedBody": "{actorName} sorununuz için oy verdi",
+    "notificationProblemForkedTitle": "Sorununuz fork edildi",
+    "notificationProblemForkedBody": "{actorName} sorununuzun bir fork'unu oluşturdu",
+    "notificationProblemLinkedTitle": "Sorununuz bağlandı",
+    "notificationProblemLinkedBody": "{actorName} sorununuzu başka bir sorundan bağladı",
+    "notificationProblemRevisedTitle": "Sorun güncellendi",
+    "notificationProblemRevisedBody": "Oy verdiğiniz sorunun yeni bir sürümü var",
+    "notificationForkAdoptedTitle": "Fork'unuz benimsendi",
+    "notificationForkAdoptedBody": "Katkınız orijinal soruna dahil edildi"
 }

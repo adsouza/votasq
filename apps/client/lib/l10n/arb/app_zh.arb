@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "按文本搜索、粘贴问题 ID 或完整 URL...",
     "linkProblemError": "无法关联问题。请重试。",
     "unlinkProblemError": "无法取消关联问题。请重试。",
-    "unlinkProblemTooltip": "取消关联此问题"
+    "unlinkProblemTooltip": "取消关联此问题",
+    "notificationsBadgeTooltip": "通知",
+    "notificationsPageTitle": "通知",
+    "notificationsEmpty": "您还没有通知",
+    "notificationOpenButton": "打开",
+    "notificationsMarkAllReadTooltip": "全部标记为已读",
+    "notificationVoteReceivedTitle": "新投票",
+    "notificationVoteReceivedBody": "{actorName}为您的问题投了票",
+    "notificationProblemForkedTitle": "您的问题已被分叉",
+    "notificationProblemForkedBody": "{actorName}创建了您问题的分叉",
+    "notificationProblemLinkedTitle": "您的问题已被链接",
+    "notificationProblemLinkedBody": "{actorName}将您的问题与另一个链接",
+    "notificationProblemRevisedTitle": "问题已更新",
+    "notificationProblemRevisedBody": "您投票的问题有了新版本",
+    "notificationForkAdoptedTitle": "您的分叉已被采用",
+    "notificationForkAdoptedBody": "您的贡献已被纳入原始问题"
 }

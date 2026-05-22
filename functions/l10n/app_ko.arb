@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "텍스트로 검색, 문제 ID 또는 전체 URL 붙여넣기...",
     "linkProblemError": "문제를 연결할 수 없습니다. 다시 시도해 주세요.",
     "unlinkProblemError": "문제 연결을 해제할 수 없습니다. 다시 시도해 주세요.",
-    "unlinkProblemTooltip": "이 문제 연결 해제"
+    "unlinkProblemTooltip": "이 문제 연결 해제",
+    "notificationsBadgeTooltip": "알림",
+    "notificationsPageTitle": "알림",
+    "notificationsEmpty": "아직 알림이 없습니다",
+    "notificationOpenButton": "열기",
+    "notificationsMarkAllReadTooltip": "모두 읽음으로 표시",
+    "notificationVoteReceivedTitle": "새 투표",
+    "notificationVoteReceivedBody": "{actorName}님이 회원님의 문제에 투표했습니다",
+    "notificationProblemForkedTitle": "회원님의 문제가 포크되었습니다",
+    "notificationProblemForkedBody": "{actorName}님이 회원님의 문제의 포크를 만들었습니다",
+    "notificationProblemLinkedTitle": "회원님의 문제가 연결되었습니다",
+    "notificationProblemLinkedBody": "{actorName}님이 다른 문제에서 회원님의 문제를 연결했습니다",
+    "notificationProblemRevisedTitle": "문제 업데이트됨",
+    "notificationProblemRevisedBody": "투표하신 문제에 새 버전이 있습니다",
+    "notificationForkAdoptedTitle": "회원님의 포크가 채택되었습니다",
+    "notificationForkAdoptedBody": "회원님의 기여가 원본 문제에 통합되었습니다"
 }

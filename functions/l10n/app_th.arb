@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "ค้นหาด้วยข้อความ วาง ID ปัญหา หรือ URL แบบเต็ม...",
     "linkProblemError": "ไม่สามารถเชื่อมโยงปัญหาได้ กรุณาลองอีกครั้ง",
     "unlinkProblemError": "ไม่สามารถยกเลิกการเชื่อมโยงปัญหาได้ กรุณาลองอีกครั้ง",
-    "unlinkProblemTooltip": "ยกเลิกการเชื่อมโยงปัญหานี้"
+    "unlinkProblemTooltip": "ยกเลิกการเชื่อมโยงปัญหานี้",
+    "notificationsBadgeTooltip": "การแจ้งเตือน",
+    "notificationsPageTitle": "การแจ้งเตือน",
+    "notificationsEmpty": "คุณยังไม่มีการแจ้งเตือน",
+    "notificationOpenButton": "เปิด",
+    "notificationsMarkAllReadTooltip": "ทำเครื่องหมายว่าอ่านทั้งหมด",
+    "notificationVoteReceivedTitle": "การโหวตใหม่",
+    "notificationVoteReceivedBody": "{actorName} โหวตให้ปัญหาของคุณ",
+    "notificationProblemForkedTitle": "ปัญหาของคุณถูกฟอร์ก",
+    "notificationProblemForkedBody": "{actorName} สร้างฟอร์กของปัญหาคุณ",
+    "notificationProblemLinkedTitle": "ปัญหาของคุณถูกลิงก์",
+    "notificationProblemLinkedBody": "{actorName} ลิงก์ปัญหาของคุณจากปัญหาอื่น",
+    "notificationProblemRevisedTitle": "อัปเดตปัญหาแล้ว",
+    "notificationProblemRevisedBody": "ปัญหาที่คุณโหวตมีเวอร์ชันใหม่",
+    "notificationForkAdoptedTitle": "ฟอร์กของคุณถูกนำมาใช้",
+    "notificationForkAdoptedBody": "การมีส่วนร่วมของคุณถูกรวมเข้ากับปัญหาต้นฉบับ"
 }

@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "টেক্সট দিয়ে খুঁজুন, সমস্যা আইডি পেस्ट করুন, বা সম্পূর্ণ ইউআরএল...",
     "linkProblemError": "সমস্যা সংযুক্ত করা যায়নি। আবার চেষ্টা করুন।",
     "unlinkProblemError": "সমস্যা বিচ্ছিন্ন করা যায়নি। আবার চেষ্টা করুন।",
-    "unlinkProblemTooltip": "এই সমস্যাটি বিচ্ছিন্ন করুন"
+    "unlinkProblemTooltip": "এই সমস্যাটি বিচ্ছিন্ন করুন",
+    "notificationsBadgeTooltip": "বিজ্ঞপ্তি",
+    "notificationsPageTitle": "বিজ্ঞপ্তি",
+    "notificationsEmpty": "আপনার এখনও কোনো বিজ্ঞপ্তি নেই",
+    "notificationOpenButton": "খুলুন",
+    "notificationsMarkAllReadTooltip": "সবগুলি পঠিত হিসেবে চিহ্নিত করুন",
+    "notificationVoteReceivedTitle": "নতুন ভোট",
+    "notificationVoteReceivedBody": "{actorName} আপনার সমস্যায় ভোট দিয়েছেন",
+    "notificationProblemForkedTitle": "আপনার সমস্যাটি ফর্ক করা হয়েছে",
+    "notificationProblemForkedBody": "{actorName} আপনার সমস্যার একটি ফর্ক তৈরি করেছেন",
+    "notificationProblemLinkedTitle": "আপনার সমস্যাটি সংযুক্ত হয়েছে",
+    "notificationProblemLinkedBody": "{actorName} আপনার সমস্যাটি অন্য একটি থেকে সংযুক্ত করেছেন",
+    "notificationProblemRevisedTitle": "সমস্যা আপডেট হয়েছে",
+    "notificationProblemRevisedBody": "আপনি যে সমস্যায় ভোট দিয়েছিলেন তার একটি নতুন সংস্করণ আছে",
+    "notificationForkAdoptedTitle": "আপনার ফর্ক গৃহীত হয়েছে",
+    "notificationForkAdoptedBody": "আপনার অবদান মূল সমস্যায় অন্তর্ভুক্ত করা হয়েছে"
 }

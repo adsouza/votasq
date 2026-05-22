@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "टेक्स्ट द्वारा खोजें, समस्या आईडी या पूरा यूआरएल पेस्ट करें...",
     "linkProblemError": "समस्या को जोड़ा नहीं जा सका। कृपया पुनः प्रयास करें।",
     "unlinkProblemError": "समस्या को अलग नहीं किया जा सका। कृपया पुनः प्रयास करें।",
-    "unlinkProblemTooltip": "इस समस्या को अलग करें"
+    "unlinkProblemTooltip": "इस समस्या को अलग करें",
+    "notificationsBadgeTooltip": "सूचनाएं",
+    "notificationsPageTitle": "सूचनाएं",
+    "notificationsEmpty": "आपके पास अभी तक कोई सूचना नहीं है",
+    "notificationOpenButton": "खोलें",
+    "notificationsMarkAllReadTooltip": "सभी को पढ़ा हुआ चिह्नित करें",
+    "notificationVoteReceivedTitle": "नया वोट",
+    "notificationVoteReceivedBody": "{actorName} ने आपकी समस्या पर वोट किया",
+    "notificationProblemForkedTitle": "आपकी समस्या को फोर्क किया गया",
+    "notificationProblemForkedBody": "{actorName} ने आपकी समस्या का फोर्क बनाया",
+    "notificationProblemLinkedTitle": "आपकी समस्या लिंक की गई",
+    "notificationProblemLinkedBody": "{actorName} ने आपकी समस्या को किसी और से लिंक किया",
+    "notificationProblemRevisedTitle": "समस्या अपडेट हुई",
+    "notificationProblemRevisedBody": "जिस समस्या पर आपने वोट किया था, उसका नया संस्करण है",
+    "notificationForkAdoptedTitle": "आपका फोर्क अपनाया गया",
+    "notificationForkAdoptedBody": "आपका योगदान मूल समस्या में शामिल किया गया"
 }

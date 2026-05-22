@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Cari dengan teks, tempel ID masalah, atau URL lengkap...",
     "linkProblemError": "Tidak dapat menautkan masalah. Silakan coba lagi.",
     "unlinkProblemError": "Tidak dapat melepaskan tautan masalah. Silakan coba lagi.",
-    "unlinkProblemTooltip": "Lepaskan tautan masalah ini"
+    "unlinkProblemTooltip": "Lepaskan tautan masalah ini",
+    "notificationsBadgeTooltip": "Notifikasi",
+    "notificationsPageTitle": "Notifikasi",
+    "notificationsEmpty": "Anda belum memiliki notifikasi",
+    "notificationOpenButton": "Buka",
+    "notificationsMarkAllReadTooltip": "Tandai semua sudah dibaca",
+    "notificationVoteReceivedTitle": "Suara baru",
+    "notificationVoteReceivedBody": "{actorName} memilih masalah Anda",
+    "notificationProblemForkedTitle": "Masalah Anda telah di-fork",
+    "notificationProblemForkedBody": "{actorName} membuat fork dari masalah Anda",
+    "notificationProblemLinkedTitle": "Masalah Anda telah ditautkan",
+    "notificationProblemLinkedBody": "{actorName} menautkan masalah Anda dari yang lain",
+    "notificationProblemRevisedTitle": "Masalah diperbarui",
+    "notificationProblemRevisedBody": "Masalah yang Anda pilih memiliki versi baru",
+    "notificationForkAdoptedTitle": "Fork Anda diadopsi",
+    "notificationForkAdoptedBody": "Kontribusi Anda dimasukkan ke dalam masalah asli"
 }

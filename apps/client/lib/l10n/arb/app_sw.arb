@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Tafuta kwa maandishi, bandika ID ya changamoto, au URL kamili...",
     "linkProblemError": "Imeshindwa kuunganisha changamoto. Tafadhali jaribu tena.",
     "unlinkProblemError": "Imeshindwa kutenganisha changamoto. Tafadhali jaribu tena.",
-    "unlinkProblemTooltip": "Tenganisha changamoto hii"
+    "unlinkProblemTooltip": "Tenganisha changamoto hii",
+    "notificationsBadgeTooltip": "Arifa",
+    "notificationsPageTitle": "Arifa",
+    "notificationsEmpty": "Bado huna arifa zozote",
+    "notificationOpenButton": "Fungua",
+    "notificationsMarkAllReadTooltip": "Weka alama zote kuwa zimesomwa",
+    "notificationVoteReceivedTitle": "Kura mpya",
+    "notificationVoteReceivedBody": "{actorName} alipiga kura kwa tatizo lako",
+    "notificationProblemForkedTitle": "Tatizo lako limeforkiwa",
+    "notificationProblemForkedBody": "{actorName} aliunda fork ya tatizo lako",
+    "notificationProblemLinkedTitle": "Tatizo lako limeunganishwa",
+    "notificationProblemLinkedBody": "{actorName} aliunganisha tatizo lako kutoka lingine",
+    "notificationProblemRevisedTitle": "Tatizo limesasishwa",
+    "notificationProblemRevisedBody": "Tatizo ulilopiga kura lina toleo jipya",
+    "notificationForkAdoptedTitle": "Fork yako imekubaliwa",
+    "notificationForkAdoptedBody": "Mchango wako uliingizwa katika tatizo asili"
 }

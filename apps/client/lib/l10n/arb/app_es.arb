@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Buscar por texto, pegar ID de problema o URL completa...",
     "linkProblemError": "No se pudo vincular el problema. Inténtalo de nuevo.",
     "unlinkProblemError": "No se pudo desvincular el problema. Inténtalo de nuevo.",
-    "unlinkProblemTooltip": "Desvincular este problema"
+    "unlinkProblemTooltip": "Desvincular este problema",
+    "notificationsBadgeTooltip": "Notificaciones",
+    "notificationsPageTitle": "Notificaciones",
+    "notificationsEmpty": "Aún no tienes notificaciones",
+    "notificationOpenButton": "Abrir",
+    "notificationsMarkAllReadTooltip": "Marcar todo como leído",
+    "notificationVoteReceivedTitle": "Nuevo voto",
+    "notificationVoteReceivedBody": "{actorName} votó por tu problema",
+    "notificationProblemForkedTitle": "Tu problema fue bifurcado",
+    "notificationProblemForkedBody": "{actorName} creó una bifurcación de tu problema",
+    "notificationProblemLinkedTitle": "Tu problema fue vinculado",
+    "notificationProblemLinkedBody": "{actorName} vinculó tu problema desde otro",
+    "notificationProblemRevisedTitle": "Problema actualizado",
+    "notificationProblemRevisedBody": "Un problema por el que votaste tiene una nueva versión",
+    "notificationForkAdoptedTitle": "Tu bifurcación fue adoptada",
+    "notificationForkAdoptedBody": "Tu contribución se incorporó al problema original"
 }

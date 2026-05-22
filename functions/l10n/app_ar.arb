@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "ابحث بالنص، أو الصق معرف المشكلة، أو عنوان URL الكامل...",
     "linkProblemError": "تعذر ربط المشكلة. يرجى المحاولة مرة أخرى.",
     "unlinkProblemError": "تعذر إلغاء ربط المشكلة. يرجى المحاولة مرة أخرى.",
-    "unlinkProblemTooltip": "إلغاء ربط هذه المشكلة"
+    "unlinkProblemTooltip": "إلغاء ربط هذه المشكلة",
+    "notificationsBadgeTooltip": "الإشعارات",
+    "notificationsPageTitle": "الإشعارات",
+    "notificationsEmpty": "ليس لديك أي إشعارات بعد",
+    "notificationOpenButton": "فتح",
+    "notificationsMarkAllReadTooltip": "وضع علامة مقروء على الكل",
+    "notificationVoteReceivedTitle": "تصويت جديد",
+    "notificationVoteReceivedBody": "صوّت {actorName} على مشكلتك",
+    "notificationProblemForkedTitle": "تم تفريع مشكلتك",
+    "notificationProblemForkedBody": "أنشأ {actorName} تفريعًا لمشكلتك",
+    "notificationProblemLinkedTitle": "تم ربط مشكلتك",
+    "notificationProblemLinkedBody": "ربط {actorName} مشكلتك من مشكلة أخرى",
+    "notificationProblemRevisedTitle": "تم تحديث المشكلة",
+    "notificationProblemRevisedBody": "هناك إصدار جديد لمشكلة صوّتت عليها",
+    "notificationForkAdoptedTitle": "تم اعتماد تفريعك",
+    "notificationForkAdoptedBody": "تم دمج مساهمتك في المشكلة الأصلية"
 }

@@ -72,5 +72,20 @@
     "linkProblemSearchHint": "Поиск по тексту, вставка ID проблемы или полной ссылки...",
     "linkProblemError": "Не удалось связать проблему. Попробуйте еще раз.",
     "unlinkProblemError": "Не удалось отвязать проблему. Попробуйте еще раз.",
-    "unlinkProblemTooltip": "Отвязать эту проблему"
+    "unlinkProblemTooltip": "Отвязать эту проблему",
+    "notificationsBadgeTooltip": "Уведомления",
+    "notificationsPageTitle": "Уведомления",
+    "notificationsEmpty": "У вас пока нет уведомлений",
+    "notificationOpenButton": "Открыть",
+    "notificationsMarkAllReadTooltip": "Отметить все как прочитанные",
+    "notificationVoteReceivedTitle": "Новый голос",
+    "notificationVoteReceivedBody": "{actorName} проголосовал за вашу проблему",
+    "notificationProblemForkedTitle": "Вашу проблему форкнули",
+    "notificationProblemForkedBody": "{actorName} создал форк вашей проблемы",
+    "notificationProblemLinkedTitle": "Вашу проблему связали",
+    "notificationProblemLinkedBody": "{actorName} связал вашу проблему с другой",
+    "notificationProblemRevisedTitle": "Проблема обновлена",
+    "notificationProblemRevisedBody": "У проблемы, за которую вы проголосовали, новая версия",
+    "notificationForkAdoptedTitle": "Ваш форк принят",
+    "notificationForkAdoptedBody": "Ваш вклад был включён в исходную проблему"
 }
