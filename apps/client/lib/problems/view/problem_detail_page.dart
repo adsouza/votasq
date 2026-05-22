@@ -82,9 +82,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       if (!mounted) return;
       List<Problem>? linkedProblems;
       try {
-        if (problem.linkedProblemIds.isNotEmpty) {
+        final allIds = {
+          ...problem.linkedProblemIds,
+          ...problem.typedLinks.map((l) => l.targetId),
+        };
+        if (allIds.isNotEmpty) {
           linkedProblems = await Future.wait(
-            problem.linkedProblemIds.map(repo.getProblem),
+            allIds.map(repo.getProblem),
           ).then((list) => list.whereType<Problem>().toList());
         } else {
           linkedProblems = [];
@@ -288,16 +292,64 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
 
   Widget _buildLinkedProblemsList() {
     final linked = _linkedProblems;
-    if (linked == null || linked.isEmpty) return const SizedBox.shrink();
+    final problem = _problem;
+    if (linked == null || linked.isEmpty || problem == null) {
+      return const SizedBox.shrink();
+    }
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final userId = context.read<AuthCubit>().state.userId;
+
+    final byId = {for (final p in linked) p.id: p};
+
+    final generalizations = <Problem>[
+      for (final l in problem.typedLinks)
+        if (l.kind == ProblemLinkKind.generalization &&
+            byId.containsKey(l.targetId))
+          byId[l.targetId]!,
+    ];
+    final specializations = <Problem>[
+      for (final l in problem.typedLinks)
+        if (l.kind == ProblemLinkKind.specialization &&
+            byId.containsKey(l.targetId))
+          byId[l.targetId]!,
+    ];
+    final generic = <Problem>[
+      for (final id in problem.linkedProblemIds)
+        if (byId.containsKey(id)) byId[id]!,
+    ];
+
+    final totalCount =
+        generalizations.length + generic.length + specializations.length;
+    if (totalCount == 0) return const SizedBox.shrink();
+
+    Widget genericTile(Problem p) => _linkedTile(
+      p,
+      trailing: userId != null
+          ? IconButton(
+              tooltip: l10n.unlinkProblemTooltip,
+              icon: const Icon(Icons.link_off),
+              onPressed: () => _unlink(p.id),
+            )
+          : null,
+    );
+
+    Widget typedTile(Problem p) => _linkedTile(
+      p,
+      trailing: userId != null
+          ? IconButton(
+              tooltip: l10n.untagProblemLinkTooltip,
+              icon: const Icon(Icons.link_off),
+              onPressed: () => _untagLink(p.id),
+            )
+          : null,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: ExpansionTile(
         title: Text(
-          l10n.linkedProblemsHeading(linked.length),
+          l10n.linkedProblemsHeading(totalCount),
           style: theme.textTheme.titleMedium,
         ),
         initiallyExpanded: true,
@@ -306,36 +358,60 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         shape: const RoundedRectangleBorder(),
         collapsedShape: const RoundedRectangleBorder(),
         children: [
-          for (final p in linked)
-            ListTile(
-              dense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-              title: Text(
-                p.description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: p.goal.isNotEmpty
-                  ? Text(
-                      p.goal,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    )
-                  : null,
-              trailing: userId != null
-                  ? IconButton(
-                      tooltip: l10n.unlinkProblemTooltip,
-                      icon: const Icon(Icons.link_off),
-                      onPressed: () => _unlink(p.id),
-                    )
-                  : null,
-              onTap: () => context.push('/problems/${p.id}'),
+          if (generalizations.isNotEmpty) ...[
+            _linkedSubsectionHeader(
+              l10n.generalizationsHeading(generalizations.length),
+              theme,
             ),
+            for (final p in generalizations) typedTile(p),
+          ],
+          if (generic.isNotEmpty) ...[
+            for (final p in generic) genericTile(p),
+          ],
+          if (specializations.isNotEmpty) ...[
+            _linkedSubsectionHeader(
+              l10n.specializationsHeading(specializations.length),
+              theme,
+            ),
+            for (final p in specializations) typedTile(p),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _linkedSubsectionHeader(String text, ThemeData theme) => Padding(
+    padding: const EdgeInsets.only(top: 4, bottom: 2, left: 8),
+    child: Text(
+      text,
+      style: theme.textTheme.labelMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    ),
+  );
+
+  Widget _linkedTile(Problem p, {Widget? trailing}) {
+    final theme = Theme.of(context);
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      title: Text(
+        p.description,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: p.goal.isNotEmpty
+          ? Text(
+              p.goal,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            )
+          : null,
+      trailing: trailing,
+      onTap: () => context.push('/problems/${p.id}'),
     );
   }
 
@@ -353,7 +429,10 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
-  Future<void> _showLinkProblemDialog(BuildContext context) async {
+  Future<void> _showLinkProblemDialog(
+    BuildContext context, {
+    ProblemLinkKind? mode,
+  }) async {
     final problem = _problem;
     if (problem == null) return;
     final result = await showDialog<bool>(
@@ -361,10 +440,64 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       builder: (context) => _LinkProblemDialog(
         currentProblem: problem,
         linkedProblemIds: problem.linkedProblemIds,
+        typedLinkTargetIds: problem.typedLinks.map((l) => l.targetId).toList(),
+        mode: mode,
       ),
     );
     if (result == true && mounted) {
       await _load();
+    }
+  }
+
+  List<Widget> _buildLinkButton(BuildContext context, AppLocalizations l10n) {
+    return [
+      IconButton(
+        tooltip: l10n.linkProblemButton,
+        icon: const Icon(Icons.link),
+        onPressed: () => _showLinkProblemDialog(context),
+      ),
+      MenuAnchor(
+        builder: (context, controller, _) => IconButton(
+          tooltip: l10n.linkAsTypedTooltip,
+          icon: const Icon(Icons.arrow_drop_down),
+          onPressed: () =>
+              controller.isOpen ? controller.close() : controller.open(),
+        ),
+        menuChildren: [
+          MenuItemButton(
+            leadingIcon: const Icon(Icons.subdirectory_arrow_right),
+            onPressed: () => _showLinkProblemDialog(
+              context,
+              mode: ProblemLinkKind.specialization,
+            ),
+            child: Text(l10n.linkAsSpecializationButton),
+          ),
+          MenuItemButton(
+            leadingIcon: const Icon(Icons.subdirectory_arrow_left),
+            onPressed: () => _showLinkProblemDialog(
+              context,
+              mode: ProblemLinkKind.generalization,
+            ),
+            child: Text(l10n.linkAsGeneralizationButton),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Future<void> _untagLink(String targetId) async {
+    final problem = _problem;
+    if (problem == null) return;
+    final repo = context.read<FirestoreRepository>();
+    try {
+      await repo.untagProblemLink(sourceId: problem.id, targetId: targetId);
+      if (!mounted) return;
+      await _load();
+    } on Exception catch (e) {
+      log('Failed to untag problem link: $e');
+      if (mounted) {
+        showToast(context.l10n.untagProblemLinkError);
+      }
     }
   }
 
@@ -667,12 +800,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                   icon: const Icon(Icons.call_split),
                   onPressed: () => _fork(problem, userId),
                 ),
-              if (userId != null)
-                IconButton(
-                  tooltip: l10n.linkProblemButton,
-                  icon: const Icon(Icons.link),
-                  onPressed: () => _showLinkProblemDialog(context),
-                ),
+              if (userId != null) ..._buildLinkButton(context, l10n),
             ],
           ),
           body: SingleChildScrollView(
@@ -910,10 +1038,17 @@ class _LinkProblemDialog extends StatefulWidget {
   const _LinkProblemDialog({
     required this.currentProblem,
     required this.linkedProblemIds,
+    required this.typedLinkTargetIds,
+    this.mode,
   });
 
   final Problem currentProblem;
   final List<String> linkedProblemIds;
+  final List<String> typedLinkTargetIds;
+
+  /// Null for a generic clique link; otherwise the directional kind to
+  /// assign to the new link (target is `mode`-of `currentProblem`).
+  final ProblemLinkKind? mode;
 
   @override
   State<_LinkProblemDialog> createState() => _LinkProblemDialogState();
@@ -1037,7 +1172,8 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
     _searchResults = _searchResults.where((p) {
       final isSelf = p.id == widget.currentProblem.id;
       final isAlreadyLinked = widget.linkedProblemIds.contains(p.id);
-      return !isSelf && !isAlreadyLinked;
+      final isAlreadyTyped = widget.typedLinkTargetIds.contains(p.id);
+      return !isSelf && !isAlreadyLinked && !isAlreadyTyped;
     }).toList();
   }
 
@@ -1045,7 +1181,16 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
     final repo = context.read<FirestoreRepository>();
     final l10n = context.l10n;
     try {
-      await repo.linkProblems(widget.currentProblem.id, target.id);
+      final mode = widget.mode;
+      if (mode == null) {
+        await repo.linkProblems(widget.currentProblem.id, target.id);
+      } else {
+        await repo.tagProblemLink(
+          sourceId: widget.currentProblem.id,
+          targetId: target.id,
+          kind: mode,
+        );
+      }
       if (mounted) {
         Navigator.of(context).pop(true);
       }
@@ -1054,6 +1199,12 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
       showToast(l10n.linkProblemError);
     }
   }
+
+  String _dialogTitle(AppLocalizations l10n) => switch (widget.mode) {
+    null => l10n.linkProblemDialogTitle,
+    ProblemLinkKind.specialization => l10n.linkProblemDialogTitleSpecialization,
+    ProblemLinkKind.generalization => l10n.linkProblemDialogTitleGeneralization,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -1070,12 +1221,15 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  l10n.linkProblemDialogTitle,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    _dialogTitle(l10n),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(

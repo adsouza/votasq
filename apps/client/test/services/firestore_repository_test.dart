@@ -849,6 +849,133 @@ void main() {
         expect(updatedP3!.linkedProblemIds, isEmpty);
       });
 
+      test('tagProblemLink writes mirrored kinds on both sides', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p2',
+            kind: ProblemLinkKind.specialization,
+          ),
+        ]);
+        expect(p2!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p1',
+            kind: ProblemLinkKind.generalization,
+          ),
+        ]);
+      });
+
+      test('tagProblemLink severs pre-existing generic link', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await repo.linkProblems('p1', 'p2');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.linkedProblemIds, isEmpty);
+        expect(p2!.linkedProblemIds, isEmpty);
+        expect(p1.typedLinks, hasLength(1));
+        expect(p2.typedLinks, hasLength(1));
+      });
+
+      test('tagProblemLink replacing kind deduplicates', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.generalization,
+        );
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p2',
+            kind: ProblemLinkKind.generalization,
+          ),
+        ]);
+        expect(p2!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p1',
+            kind: ProblemLinkKind.specialization,
+          ),
+        ]);
+      });
+
+      test('untagProblemLink removes both sides without restoring '
+          'generic link', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+
+        await repo.untagProblemLink(sourceId: 'p1', targetId: 'p2');
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.typedLinks, isEmpty);
+        expect(p2!.typedLinks, isEmpty);
+        expect(p1.linkedProblemIds, isEmpty);
+        expect(p2.linkedProblemIds, isEmpty);
+      });
+
+      test('invariant: a pair never appears in both lists at once', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await seedProblem(id: 'p3');
+
+        await repo.linkProblems('p1', 'p2');
+        await repo.linkProblems('p2', 'p3');
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.generalization,
+        );
+
+        Future<void> assertInvariant(String id) async {
+          final p = await repo.getProblem(id);
+          final genericIds = p!.linkedProblemIds.toSet();
+          final typedIds = p.typedLinks.map((l) => l.targetId).toSet();
+          expect(
+            genericIds.intersection(typedIds),
+            isEmpty,
+            reason:
+                'problem $id has overlap between linkedProblemIds and '
+                'typedLinks',
+          );
+        }
+
+        await assertInvariant('p1');
+        await assertInvariant('p2');
+        await assertInvariant('p3');
+      });
+
       test('getGlobalProblemsForSearch returns active problems', () async {
         await seedProblem(id: 'p1', votes: 10);
         await seedProblem(id: 'p2', solved: true, votes: 50);

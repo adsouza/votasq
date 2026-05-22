@@ -590,8 +590,38 @@ class FirestoreRepository {
               ?.map((e) => e as String)
               .toList() ??
           [],
+      typedLinks: _decodeTypedLinks(data['typedLinks']),
     );
   }
+
+  static List<ProblemLink> _decodeTypedLinks(dynamic value) {
+    if (value is! List) return const [];
+    final out = <ProblemLink>[];
+    for (final entry in value) {
+      if (entry is! Map) continue;
+      final targetId = entry['targetId'];
+      final kindWire = entry['kind'];
+      if (targetId is! String || kindWire is! String) continue;
+      final kind = switch (kindWire) {
+        'specialization' => ProblemLinkKind.specialization,
+        'generalization' => ProblemLinkKind.generalization,
+        _ => null,
+      };
+      if (kind == null) continue;
+      out.add(ProblemLink(targetId: targetId, kind: kind));
+    }
+    return out;
+  }
+
+  static String _typedLinkKindToWire(ProblemLinkKind kind) => switch (kind) {
+    ProblemLinkKind.specialization => 'specialization',
+    ProblemLinkKind.generalization => 'generalization',
+  };
+
+  static Map<String, dynamic> _typedLinkToMap(ProblemLink link) => {
+    'targetId': link.targetId,
+    'kind': _typedLinkKindToWire(link.kind),
+  };
 
   // ---------------------------------------------------------------------------
   // Notifications
@@ -760,6 +790,77 @@ class FirestoreRepository {
         'linkedProblemIds': otherIds,
       });
     }
+    await batch.commit();
+  }
+
+  /// Tag (or re-tag) a directional relationship between [sourceId] and
+  /// [targetId]. Removes the pair from either side's generic
+  /// `linkedProblemIds` to preserve the cross-list invariant; writes the
+  /// directional entry to [sourceId] and the mirrored inverse to [targetId].
+  Future<void> tagProblemLink({
+    required String sourceId,
+    required String targetId,
+    required ProblemLinkKind kind,
+  }) async {
+    if (sourceId == targetId) return;
+    final source = await getProblem(sourceId);
+    final target = await getProblem(targetId);
+    if (source == null || target == null) return;
+
+    final sourceLinked = source.linkedProblemIds
+        .where((id) => id != targetId)
+        .toList();
+    final sourceTyped = [
+      ...source.typedLinks.where((l) => l.targetId != targetId),
+      ProblemLink(targetId: targetId, kind: kind),
+    ];
+
+    final targetLinked = target.linkedProblemIds
+        .where((id) => id != sourceId)
+        .toList();
+    final targetTyped = [
+      ...target.typedLinks.where((l) => l.targetId != sourceId),
+      ProblemLink(targetId: sourceId, kind: kind.inverse),
+    ];
+
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(sourceId), {
+        'linkedProblemIds': sourceLinked,
+        'typedLinks': sourceTyped.map(_typedLinkToMap).toList(),
+      })
+      ..update(_problemsRef.doc(targetId), {
+        'linkedProblemIds': targetLinked,
+        'typedLinks': targetTyped.map(_typedLinkToMap).toList(),
+      });
+    await batch.commit();
+  }
+
+  /// Remove the directional relationship between [sourceId] and [targetId]
+  /// from both sides' `typedLinks`. Does NOT restore the generic clique
+  /// link — re-linking is an explicit user action.
+  Future<void> untagProblemLink({
+    required String sourceId,
+    required String targetId,
+  }) async {
+    if (sourceId == targetId) return;
+    final source = await getProblem(sourceId);
+    final target = await getProblem(targetId);
+    if (source == null || target == null) return;
+
+    final sourceTyped = source.typedLinks
+        .where((l) => l.targetId != targetId)
+        .toList();
+    final targetTyped = target.typedLinks
+        .where((l) => l.targetId != sourceId)
+        .toList();
+
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(sourceId), {
+        'typedLinks': sourceTyped.map(_typedLinkToMap).toList(),
+      })
+      ..update(_problemsRef.doc(targetId), {
+        'typedLinks': targetTyped.map(_typedLinkToMap).toList(),
+      });
     await batch.commit();
   }
 

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shared/src/models/problem_link.dart';
 
 part 'problem.freezed.dart';
 part 'problem.g.dart';
@@ -29,6 +30,12 @@ abstract class Problem with _$Problem {
     String? inspoProblemId,
     int? inspoVersion,
     @Default([]) List<String> linkedProblemIds,
+    // Outgoing typed links from this problem's perspective. An entry
+    // `{targetId: B, kind: specialization}` means "B is a specialization of
+    // this problem"; the inverse `{targetId: this.id, kind: generalization}`
+    // is mirrored onto B by paired writes. A pair appears in at most one of
+    // `linkedProblemIds` or `typedLinks`, never both.
+    @Default(<ProblemLink>[]) List<ProblemLink> typedLinks,
   }) = _Problem;
 
   /// This factory is what the Server uses to encode and Client uses to decode

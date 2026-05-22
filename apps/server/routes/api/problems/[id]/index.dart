@@ -46,6 +46,8 @@ Future<Response> _put(RequestContext context, String id) async {
       'lastUpdatedAt': DateTime.now().toUtc().toIso8601String(),
       if (!body.containsKey('linkedProblemIds'))
         'linkedProblemIds': existing.linkedProblemIds,
+      if (!body.containsKey('typedLinks'))
+        'typedLinks': existing.typedLinks.map((l) => l.toJson()).toList(),
     });
     if (body['description'] != existing.description ||
         body['goal'] != existing.goal) {

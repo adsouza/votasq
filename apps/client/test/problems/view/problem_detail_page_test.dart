@@ -65,6 +65,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(_problem());
+    registerFallbackValue(ProblemLinkKind.specialization);
   });
 
   setUp(() {
@@ -952,6 +953,200 @@ void main() {
         // should be gone
         expect(find.text('Apple problem'), findsOneWidget);
         expect(find.text('Banana problem'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'split-button menu opens dialog in specialization mode',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1');
+        final searchResult = _problem(id: 'p2', description: 'Candidate');
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getGlobalProblemsForSearch(),
+        ).thenAnswer((_) async => [searchResult]);
+        when(
+          () => repo.tagProblemLink(
+            sourceId: any(named: 'sourceId'),
+            targetId: any(named: 'targetId'),
+            kind: any(named: 'kind'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // App bar shows the link icon AND the chevron dropdown
+        expect(find.byIcon(Icons.link), findsOneWidget);
+        final chevron = find.byIcon(Icons.arrow_drop_down);
+        expect(chevron, findsOneWidget);
+
+        await tester.tap(chevron);
+        await tester.pumpAndSettle();
+
+        // Menu items
+        expect(find.text('Link as specialization'), findsOneWidget);
+        expect(find.text('Link as generalization'), findsOneWidget);
+
+        await tester.tap(find.text('Link as specialization'));
+        await tester.pumpAndSettle();
+
+        // Dialog opens with the specialization title
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Link as specialization'),
+          ),
+          findsOneWidget,
+        );
+
+        // Tap the per-row link icon to confirm
+        await tester.tap(
+          find.descendant(
+            of: find.byType(ListTile),
+            matching: find.byIcon(Icons.link),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repo.tagProblemLink(
+            sourceId: 'p1',
+            targetId: 'p2',
+            kind: ProblemLinkKind.specialization,
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'renders typed-link subsections and untag fires repository call',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1').copyWith(
+          typedLinks: const [
+            ProblemLink(
+              targetId: 'gen',
+              kind: ProblemLinkKind.generalization,
+            ),
+            ProblemLink(
+              targetId: 'spec',
+              kind: ProblemLinkKind.specialization,
+            ),
+          ],
+        );
+        final generalProblem = _problem(
+          id: 'gen',
+          description: 'Broader problem',
+        );
+        final specProblem = _problem(
+          id: 'spec',
+          description: 'Narrower problem',
+        );
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getProblem('gen'),
+        ).thenAnswer((_) async => generalProblem);
+        when(
+          () => repo.getProblem('spec'),
+        ).thenAnswer((_) async => specProblem);
+        when(
+          () => repo.untagProblemLink(
+            sourceId: any(named: 'sourceId'),
+            targetId: any(named: 'targetId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Generalizations (1)'), findsOneWidget);
+        expect(find.text('Specializations (1)'), findsOneWidget);
+        expect(find.text('Broader problem'), findsOneWidget);
+        expect(find.text('Narrower problem'), findsOneWidget);
+
+        // Untag the generalization (find the link-off near "Broader problem")
+        final broaderTile = find.widgetWithText(ListTile, 'Broader problem');
+        await tester.tap(
+          find.descendant(
+            of: broaderTile,
+            matching: find.byIcon(Icons.link_off),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repo.untagProblemLink(sourceId: 'p1', targetId: 'gen'),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'dialog already-linked guard excludes typed-link targets',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1').copyWith(
+          typedLinks: const [
+            ProblemLink(
+              targetId: 'p2',
+              kind: ProblemLinkKind.specialization,
+            ),
+          ],
+        );
+        final alreadyTaggedProblem = _problem(
+          id: 'p2',
+          description: 'Already tagged',
+        );
+        final freshProblem = _problem(id: 'p3', description: 'Fresh candidate');
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getProblem('p2'),
+        ).thenAnswer((_) async => alreadyTaggedProblem);
+        when(() => repo.getGlobalProblemsForSearch()).thenAnswer(
+          (_) async => [alreadyTaggedProblem, freshProblem],
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.link).first);
+        await tester.pumpAndSettle();
+
+        // Fresh candidate should appear inside the dialog; the already-tagged
+        // one should be filtered out.
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Fresh candidate'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Already tagged'),
+          ),
+          findsNothing,
+        );
       },
     );
   });

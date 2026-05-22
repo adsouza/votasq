@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shared/src/models/problem_link.dart';
 
 part 'notification.freezed.dart';
 part 'notification.g.dart';
@@ -42,11 +43,17 @@ sealed class NotificationPayload with _$NotificationPayload {
     required String actorUid,
   }) = ProblemForkedPayload;
 
-  /// Someone linked your problem from another problem's `linkedProblemIds`.
+  /// Someone linked your problem from another problem.
+  ///
+  /// For generic clique links, [kind] is null. For typed links, [kind] is
+  /// the relationship from the recipient's perspective — e.g.,
+  /// [ProblemLinkKind.specialization] means the linker's problem is a
+  /// specialization of the recipient's problem.
   const factory NotificationPayload.problemLinked({
     required String linkedProblemId,
     required String linkerProblemId,
     required String actorUid,
+    ProblemLinkKind? kind,
   }) = ProblemLinkedPayload;
 
   /// A problem you've voted on has a new revision (sent to voters, not the

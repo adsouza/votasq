@@ -46,6 +46,28 @@ void main() {
       expect(decoded.readAt, equals(DateTime.utc(2026, 5, 21, 12)));
     });
 
+    test('roundtrips a problemLinked payload with a kind', () {
+      final original = AppNotification(
+        id: 'problemLinked__linked__linker__special',
+        recipientUid: 'ownerA',
+        payload: const NotificationPayload.problemLinked(
+          linkedProblemId: 'linked',
+          linkerProblemId: 'linker',
+          actorUid: 'u1',
+          kind: ProblemLinkKind.specialization,
+        ),
+        createdAt: DateTime.utc(2026, 5, 22, 10),
+        updatedAt: DateTime.utc(2026, 5, 22, 10),
+      );
+
+      final json = original.toJson();
+      expect(json['payload'], containsPair('type', 'problemLinked'));
+      expect(json['payload'], containsPair('kind', 'specialization'));
+
+      final decoded = AppNotification.fromJson(json);
+      expect(decoded, equals(original));
+    });
+
     test('discriminates all five payload variants by their type key', () {
       final variants = <NotificationPayload, String>{
         const NotificationPayload.voteReceived(

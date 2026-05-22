@@ -490,6 +490,7 @@ class Db {
       inspoProblemId: doc.fields?['inspoProblemId']?.stringValue,
       inspoVersion: _parseOptionalInt(doc.fields?['inspoVersion']),
       linkedProblemIds: _parseStringList(doc.fields?['linkedProblemIds']),
+      typedLinks: _parseProblemLinkList(doc.fields?['typedLinks']),
     );
   }
 
@@ -525,6 +526,24 @@ class Db {
           arrayValue: fs.ArrayValue(
             values: problem.linkedProblemIds
                 .map((id) => fs.Value(stringValue: id))
+                .toList(),
+          ),
+        ),
+        'typedLinks': fs.Value(
+          arrayValue: fs.ArrayValue(
+            values: problem.typedLinks
+                .map(
+                  (link) => fs.Value(
+                    mapValue: fs.MapValue(
+                      fields: {
+                        'targetId': fs.Value(stringValue: link.targetId),
+                        'kind': fs.Value(
+                          stringValue: _problemLinkKindToWire(link.kind),
+                        ),
+                      },
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -570,4 +589,34 @@ class Db {
 
   static List<String> _parseStringList(fs.Value? value) =>
       value?.arrayValue?.values?.map((v) => v.stringValue!).toList() ?? [];
+
+  static List<ProblemLink> _parseProblemLinkList(fs.Value? value) {
+    final entries = value?.arrayValue?.values;
+    if (entries == null) return const [];
+    return entries.map((v) {
+      final fields = v.mapValue?.fields ?? const <String, fs.Value>{};
+      final targetId =
+          fields['targetId']?.stringValue ??
+          (throw StateError('Missing required field: typedLinks.targetId'));
+      final wire =
+          fields['kind']?.stringValue ??
+          (throw StateError('Missing required field: typedLinks.kind'));
+      return ProblemLink(
+        targetId: targetId,
+        kind: _problemLinkKindFromWire(wire),
+      );
+    }).toList();
+  }
+
+  static String _problemLinkKindToWire(ProblemLinkKind kind) => switch (kind) {
+    ProblemLinkKind.specialization => 'specialization',
+    ProblemLinkKind.generalization => 'generalization',
+  };
+
+  static ProblemLinkKind _problemLinkKindFromWire(String wire) =>
+      switch (wire) {
+        'specialization' => ProblemLinkKind.specialization,
+        'generalization' => ProblemLinkKind.generalization,
+        _ => throw StateError('Unknown ProblemLinkKind: $wire'),
+      };
 }

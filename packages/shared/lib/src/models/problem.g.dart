@@ -30,6 +30,11 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  typedLinks:
+      (json['typedLinks'] as List<dynamic>?)
+          ?.map((e) => ProblemLink.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ProblemLink>[],
 );
 
 Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
@@ -48,4 +53,5 @@ Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
   'inspoProblemId': instance.inspoProblemId,
   'inspoVersion': instance.inspoVersion,
   'linkedProblemIds': instance.linkedProblemIds,
+  'typedLinks': instance.typedLinks.map((e) => e.toJson()).toList(),
 };

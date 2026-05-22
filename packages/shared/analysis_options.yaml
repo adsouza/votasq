@@ -1,1 +1,9 @@
 include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  errors:
+    # json_serializable emits `const _$EnumMap = {...}` without a type
+    # annotation and uses a redundant `!` after enum-map lookups. Both are
+    # generator artifacts we can't influence without forking the generator.
+    specify_nonobvious_property_types: ignore
+    unnecessary_null_checks: ignore

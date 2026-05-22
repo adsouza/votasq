@@ -69,6 +69,7 @@ ProblemLinkedPayload _$ProblemLinkedPayloadFromJson(
   linkedProblemId: json['linkedProblemId'] as String,
   linkerProblemId: json['linkerProblemId'] as String,
   actorUid: json['actorUid'] as String,
+  kind: $enumDecodeNullable(_$ProblemLinkKindEnumMap, json['kind']),
   $type: json['type'] as String?,
 );
 
@@ -78,7 +79,13 @@ Map<String, dynamic> _$ProblemLinkedPayloadToJson(
   'linkedProblemId': instance.linkedProblemId,
   'linkerProblemId': instance.linkerProblemId,
   'actorUid': instance.actorUid,
+  'kind': _$ProblemLinkKindEnumMap[instance.kind],
   'type': instance.$type,
+};
+
+const _$ProblemLinkKindEnumMap = {
+  ProblemLinkKind.specialization: 'specialization',
+  ProblemLinkKind.generalization: 'generalization',
 };
 
 ProblemRevisedPayload _$ProblemRevisedPayloadFromJson(
