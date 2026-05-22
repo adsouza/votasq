@@ -10,6 +10,9 @@ melos format
 echo "[pre-push] flutter analyze..."
 flutter analyze apps packages
 
+echo "[pre-push] cspell..."
+npx --yes cspell --no-progress --no-summary --config .github/cspell.json "**/*.md"
+
 echo "[pre-push] AGENTS.md / CLAUDE.md sync..."
 if ! diff -q \
   <(sed -e '1s|^# AGENTS\.md$|# CLAUDE.md|' \
