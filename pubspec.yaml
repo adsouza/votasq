@@ -54,3 +54,8 @@ melos:
       run: |
         melos exec --scope="client" -- "flutter build apk --release && flutter build macos --release"
       description: Build the Flutter client for Android and macOS.
+
+    # Note: `flutter run` is launched via tool/run-client.sh, not as a melos
+    # script, because melos doesn't forward stdin to script processes — so
+    # flutter's r/R/q hot-reload keystrokes never reach it through `melos`.
+    # See tool/run-client.sh for the dev-loop entry point.
