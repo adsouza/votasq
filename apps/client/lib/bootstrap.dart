@@ -66,8 +66,17 @@ Future<void> bootstrap(
 /// Hosts default to `localhost`; on Android the loopback to the host machine
 /// is `10.0.2.2`. Ports match the values in `firebase.json` (auth: 9099,
 /// firestore: 8081).
+///
+/// Persistence is disabled on emulator runs so the on-disk cache (which is
+/// keyed by Firestore instance, not by backend) doesn't carry emulator data
+/// over into subsequent prod/staging sessions on the same machine. Without
+/// this, an empty emulator collection could shadow the real collection for
+/// the SDK's first cache-served reads.
 Future<void> _connectToEmulators() async {
   final host = _emulatorHost();
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: false,
+  );
   await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8081);
   log(
