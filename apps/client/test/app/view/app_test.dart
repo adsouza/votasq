@@ -5,6 +5,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/problems/problems.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:client/services/notification_registration_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,16 +16,21 @@ class _MockFeedbackRepository extends Mock implements FeedbackRepository {}
 
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
+class _MockNotificationRegistrationService extends Mock
+    implements NotificationRegistrationService {}
+
 void main() {
   group('App', () {
     late FirestoreRepository repo;
     late FeedbackRepository feedbackRepo;
     late AuthRepository authRepo;
+    late NotificationRegistrationService notificationRegistration;
 
     setUp(() {
       repo = _MockFirestoreRepository();
       feedbackRepo = _MockFeedbackRepository();
       authRepo = _MockAuthRepository();
+      notificationRegistration = _MockNotificationRegistrationService();
       when(
         () => repo.watchProblems(
           geoscope: any(named: 'geoscope'),
@@ -45,6 +51,7 @@ void main() {
           firestoreRepository: repo,
           feedbackRepository: feedbackRepo,
           authRepository: authRepo,
+          notificationRegistration: notificationRegistration,
         ),
       );
       expect(find.byType(ProblemsPage), findsOneWidget);

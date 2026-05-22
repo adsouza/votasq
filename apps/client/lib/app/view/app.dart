@@ -9,6 +9,7 @@ import 'package:client/notifications/notifications.dart';
 import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
+import 'package:client/services/notification_registration_service.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:client/services/visibility_listener.dart';
 import 'package:feedback/feedback.dart';
@@ -24,6 +25,7 @@ class App extends StatefulWidget {
     this.authRepository,
     this.languageDetectionService,
     this.translationRepository,
+    this.notificationRegistration,
     this.router,
     super.key,
   });
@@ -33,6 +35,7 @@ class App extends StatefulWidget {
   final AuthRepository? authRepository;
   final LanguageDetectionService? languageDetectionService;
   final TranslationRepository? translationRepository;
+  final NotificationRegistrationService? notificationRegistration;
   final GoRouter? router;
 
   @override
@@ -83,6 +86,13 @@ class _AppState extends State<App> {
         RepositoryProvider.value(value: langService),
         RepositoryProvider.value(value: translationRepo),
         RepositoryProvider.value(value: authRepo),
+        RepositoryProvider<NotificationRegistrationService>(
+          create: (context) =>
+              widget.notificationRegistration ??
+              NotificationRegistrationService(
+                repo: context.read<FirestoreRepository>(),
+              ),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -140,13 +150,24 @@ class _AppState extends State<App> {
   }
 }
 
-/// Drives [NotificationsCubit] and [NotificationsCountCubit] off [AuthCubit]
-/// state. Subscribes the live notifications stream when a user signs in and
-/// clears it on sign-out.
-class _NotificationAuthSync extends StatelessWidget {
+/// Drives [NotificationsCubit], [NotificationsCountCubit], and
+/// [NotificationRegistrationService] off [AuthCubit] state. On sign-in,
+/// the live subscription starts, the badge count refreshes, and FCM
+/// permission + token registration kicks off. On sign-out, the cubits
+/// reset and the device's FCM token doc is deleted. Captures the previous
+/// uid so the unregister can target it even after the AuthCubit has moved
+/// past it.
+class _NotificationAuthSync extends StatefulWidget {
   const _NotificationAuthSync({required this.child});
 
   final Widget child;
+
+  @override
+  State<_NotificationAuthSync> createState() => _NotificationAuthSyncState();
+}
+
+class _NotificationAuthSyncState extends State<_NotificationAuthSync> {
+  String? _previousUid;
 
   @override
   Widget build(BuildContext context) {
@@ -157,16 +178,24 @@ class _NotificationAuthSync extends StatelessWidget {
       listener: (context, state) {
         final notifsCubit = context.read<NotificationsCubit>();
         final countCubit = context.read<NotificationsCountCubit>();
+        final registration = context.read<NotificationRegistrationService>();
         final uid = state.userId;
         if (state.status == AuthStatus.authenticated && uid != null) {
           notifsCubit.subscribe(uid);
           unawaited(countCubit.watch(uid));
+          unawaited(registration.register(uid));
+          _previousUid = uid;
         } else {
           unawaited(notifsCubit.clear());
           countCubit.reset();
+          final priorUid = _previousUid;
+          if (priorUid != null) {
+            unawaited(registration.unregister(priorUid));
+            _previousUid = null;
+          }
         }
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

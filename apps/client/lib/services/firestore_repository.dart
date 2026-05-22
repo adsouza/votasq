@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:client/services/language_detection_service.dart';
@@ -6,6 +7,7 @@ import 'package:client/services/language_validator.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:crypto/crypto.dart';
 import 'package:shared/shared.dart';
 import 'package:uuid/uuid.dart';
 
@@ -669,6 +671,58 @@ class FirestoreRepository {
     final marked = result.data['marked'];
     if (marked is num) return marked.toInt();
     return 0;
+  }
+
+  /// Stable doc id for an FCM [token] — sha256 hex digest. We use a hash
+  /// rather than the token verbatim because tokens can contain characters
+  /// outside the safe Firestore doc-id alphabet (rare but defended). The
+  /// hash also gives us deterministic dedupe: re-registering the same
+  /// token on the same device upserts the existing doc.
+  static String _fcmTokenDocId(String token) {
+    return sha256.convert(utf8.encode(token)).toString();
+  }
+
+  /// Upsert this device's FCM registration under
+  /// `users/{uid}/fcmTokens/{sha256(token)}`. Safe to call repeatedly with
+  /// the same token (e.g. on every app start); only `lastUsedAt` updates.
+  Future<void> registerFcmToken({
+    required String uid,
+    required String token,
+    required String platform,
+  }) async {
+    final docRef = _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('fcmTokens')
+        .doc(_fcmTokenDocId(token));
+    final now = DateTime.now().toUtc();
+    final existing = await docRef.get();
+    if (existing.exists) {
+      // Only lastUsedAt changes — the security rule rejects anything else
+      // on update, so we don't try to bump platform/token here even if
+      // they were stored slightly differently.
+      await docRef.update({'lastUsedAt': now});
+    } else {
+      await docRef.set({
+        'token': token,
+        'platform': platform,
+        'createdAt': now,
+        'lastUsedAt': now,
+      });
+    }
+  }
+
+  /// Delete this device's FCM registration (called on sign-out).
+  Future<void> unregisterFcmToken({
+    required String uid,
+    required String token,
+  }) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('fcmTokens')
+        .doc(_fcmTokenDocId(token))
+        .delete();
   }
 
   AppNotification _docToNotification(
