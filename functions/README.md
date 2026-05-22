@@ -30,9 +30,25 @@ src/
 ```sh
 npm install
 npm run build       # tsc → lib/
+npm run build:watch # tsc --watch (rebuilds lib/ on every src/ change)
 npm run typecheck   # tsc --noEmit
 npm test            # vitest run
 ```
+
+## Running the emulator with live rebuilds
+
+The Firebase Functions emulator reads from `lib/` (the tsc output), not
+from `src/`, and doesn't re-read it after startup. So edits under `src/`
+are invisible until lib/ is regenerated. To avoid stopping and restarting
+the emulator on every change, use the repo's wrapper script which runs
+`tsc --watch` alongside the emulator:
+
+```sh
+tool/emulators.sh                 # auth + firestore + functions (default)
+tool/emulators.sh auth,firestore  # custom subset
+```
+
+Ctrl+C stops both the emulator and the background watcher.
 
 ## Tests
 
