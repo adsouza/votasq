@@ -34,9 +34,10 @@ Future<void> main(List<String> args) async {
     if (args[i] == '--project') project = args[i + 1];
   }
 
-  final host = Platform.environment['FIRESTORE_EMULATOR_HOST'] ??
-      _emulatorHostDefault;
-  final base = 'http://$host/v1/projects/$project/databases/(default)/documents';
+  final host =
+      Platform.environment['FIRESTORE_EMULATOR_HOST'] ?? _emulatorHostDefault;
+  final base =
+      'http://$host/v1/projects/$project/databases/(default)/documents';
   final headers = {
     'Authorization': 'Bearer owner',
     'Content-Type': 'application/json',

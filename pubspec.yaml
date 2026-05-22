@@ -40,9 +40,11 @@ melos:
     format:
       run: |
         melos exec -c 1 --ignore="client" -- "dart format --set-exit-if-changed ." && \
-        cd apps/client && dart format --set-exit-if-changed lib test
+        cd apps/client && dart format --set-exit-if-changed lib test tool
       description: Format Dart sources, skipping vendored SwiftPM checkouts under
-        apps/client/build that have their own analysis_options.yaml.
+        apps/client/build that have their own analysis_options.yaml. Keep this
+        in sync with CI (`dart format apps packages` in .github/workflows/) —
+        omitting a top-level dir here means CI catches what local format misses.
 
     deploy:server:
       run: >
