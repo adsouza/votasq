@@ -169,6 +169,12 @@ class _AppState extends State<App> {
 /// reset and the device's FCM token doc is deleted. Captures the previous
 /// uid so the unregister can target it even after the AuthCubit has moved
 /// past it.
+///
+/// Also re-runs the unread-count aggregation whenever the live
+/// notifications subscription emits — without this, an incoming push (or
+/// any out-of-band notification doc write) would land in the list but the
+/// badge would stay at its stale value until the user navigated to the
+/// page or backgrounded/foregrounded the app.
 class _NotificationAuthSync extends StatefulWidget {
   const _NotificationAuthSync({required this.child});
 
@@ -183,30 +189,45 @@ class _NotificationAuthSyncState extends State<_NotificationAuthSync> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
-      listenWhen: (previous, current) =>
-          previous.status != current.status ||
-          previous.userId != current.userId,
-      listener: (context, state) {
-        final notifsCubit = context.read<NotificationsCubit>();
-        final countCubit = context.read<NotificationsCountCubit>();
-        final registration = context.read<NotificationRegistrationService>();
-        final uid = state.userId;
-        if (state.status == AuthStatus.authenticated && uid != null) {
-          notifsCubit.subscribe(uid);
-          unawaited(countCubit.watch(uid));
-          unawaited(registration.register(uid));
-          _previousUid = uid;
-        } else {
-          unawaited(notifsCubit.clear());
-          countCubit.reset();
-          final priorUid = _previousUid;
-          if (priorUid != null) {
-            unawaited(registration.unregister(priorUid));
-            _previousUid = null;
-          }
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listenWhen: (previous, current) =>
+              previous.status != current.status ||
+              previous.userId != current.userId,
+          listener: (context, state) {
+            final notifsCubit = context.read<NotificationsCubit>();
+            final countCubit = context.read<NotificationsCountCubit>();
+            final registration = context
+                .read<NotificationRegistrationService>();
+            final uid = state.userId;
+            if (state.status == AuthStatus.authenticated && uid != null) {
+              notifsCubit.subscribe(uid);
+              unawaited(countCubit.watch(uid));
+              unawaited(registration.register(uid));
+              _previousUid = uid;
+            } else {
+              unawaited(notifsCubit.clear());
+              countCubit.reset();
+              final priorUid = _previousUid;
+              if (priorUid != null) {
+                unawaited(registration.unregister(priorUid));
+                _previousUid = null;
+              }
+            }
+          },
+        ),
+        BlocListener<NotificationsCubit, NotificationsState>(
+          // Whenever the live list changes, the unread count could have
+          // changed too (new doc arrived, or readAt flipped). Re-query the
+          // aggregation so the bell badge stays in sync without polling.
+          listenWhen: (previous, current) =>
+              previous.notifications != current.notifications,
+          listener: (context, _) {
+            unawaited(context.read<NotificationsCountCubit>().refresh());
+          },
+        ),
+      ],
       child: widget.child,
     );
   }
