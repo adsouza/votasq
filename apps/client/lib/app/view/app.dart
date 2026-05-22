@@ -91,6 +91,18 @@ class _AppState extends State<App> {
               widget.notificationRegistration ??
               NotificationRegistrationService(
                 repo: context.read<FirestoreRepository>(),
+                // VAPID public key for web push (only needed on Chrome /
+                // Firefox etc.; ignored on native). Generate in Firebase
+                // Console → Cloud Messaging → Web Push certificates, then
+                // pass at run time:
+                //   tool/run-client.sh dev -d chrome \
+                //     --dart-define=VAPID_KEY=BJ...
+                // Empty string means "not configured" — `getToken` on web
+                // will fail and registration is skipped, which is fine
+                // outside web flavors.
+                webVapidKey: const String.fromEnvironment('VAPID_KEY').isEmpty
+                    ? null
+                    : const String.fromEnvironment('VAPID_KEY'),
               ),
         ),
       ],
