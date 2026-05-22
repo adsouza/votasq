@@ -6,9 +6,10 @@ import 'package:bloc/bloc.dart';
 import 'package:client/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
@@ -37,6 +38,24 @@ Future<void> bootstrap(
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  if (!useEmulators) {
+    // The Firestore emulator does not check App Check tokens, so activation
+    // is only useful (and only succeeds reliably) against real Firebase.
+    // In non-release builds, mobile providers emit a debug token to the log
+    // that must be registered in Firebase Console → App Check → Apps.
+    await FirebaseAppCheck.instance.activate(
+      providerWeb: ReCaptchaV3Provider(
+        '6LehEfcsAAAAAKNdlzalCBUJXYvJngj1lFTKYpC6',
+      ),
+      providerAndroid: kReleaseMode
+          ? const AndroidPlayIntegrityProvider()
+          : const AndroidDebugProvider(),
+      providerApple: kReleaseMode
+          ? const AppleAppAttestProvider()
+          : const AppleDebugProvider(),
+    );
+  }
 
   if (useEmulators) {
     await _connectToEmulators();

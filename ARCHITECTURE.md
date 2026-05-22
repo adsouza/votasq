@@ -14,7 +14,8 @@ graph TD
     client -- "depends on" --> shared
     server -- "depends on" --> shared
     client -- "HTTP / JSON" --> server
-    server -- "Firestore REST API" --> Firestore[(Cloud Firestore)]
+    client -- "FlutterFire SDK" --> Firestore[(Cloud Firestore)]
+    server -- "Firestore REST API" --> Firestore
 ```
 
 The root `pubspec.yaml` declares a Dart
@@ -375,6 +376,27 @@ the Cloud Run URL in release builds.
 ARB files in `lib/l10n/arb/` define localized strings for 23 languages.
 Flutter generates `AppLocalizations` at build time. Access in widgets via the
 `context.l10n` extension.
+
+### App Check
+
+The client talks to Firestore both directly (via `cloud_firestore` —
+`FirestoreRepository`, `FeedbackRepository`) and indirectly (via the Dart Frog
+server). Firebase App Check protects only the *direct* path: `bootstrap()`
+calls `FirebaseAppCheck.instance.activate(...)` after `Firebase.initializeApp`,
+attaching attestation tokens to every subsequent Firestore, Auth, Functions,
+and Storage call. Providers per platform: `ReCaptchaV3Provider` on web,
+`AndroidPlayIntegrityProvider` / `AppleAppAttestProvider` in release builds,
+debug providers otherwise. Activation is skipped when `useEmulators=true`
+because the Firestore emulator does not check tokens.
+
+The reCAPTCHA v3 site key is inlined in `bootstrap.dart` — it is a public
+value by design (clients must read it to call `grecaptcha`). The matching
+secret lives only in Firebase Console.
+
+App Check does **not** cover the Dart Frog REST endpoints — those are an
+independent origin from Firebase's perspective. Gating them would require
+manually verifying the `X-Firebase-AppCheck` JWT in `apps/server/routes/api/
+_middleware.dart` against Firebase's JWKS.
 
 ---
 
