@@ -162,8 +162,8 @@ GitHub Actions workflows in `.github/workflows/`:
 
 - **main.yaml** — Runs on every push/PR to `main`: semantic PR check, spell
   check, dependency resolution, formatting, analysis, and tests with coverage.
-- **release.yaml** — Triggered by `v*` tags: builds Android, Web, macOS, and
-  Linux artifacts and publishes them as a GitHub Release.
+- **release.yaml** — Triggered by `v*` tags: builds Android, Web, and macOS
+  artifacts and publishes them as a GitHub Release.
 - **license_check.yaml** — Validates that all dependencies use allowed licenses
   (MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0) when `pubspec.yaml` files change.
 
