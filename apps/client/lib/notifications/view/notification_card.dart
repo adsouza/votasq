@@ -30,15 +30,7 @@ class NotificationCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Icon(
-                isUnread
-                    ? Icons.fiber_manual_record
-                    : Icons.fiber_manual_record_outlined,
-                size: 12,
-                color: isUnread
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).disabledColor,
-              ),
+              _ReadStateIndicator(isUnread: isUnread),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -124,4 +116,34 @@ class NotificationCard extends StatelessWidget {
   /// `users/{uid}`, which we'll add when the UI gains a place to surface
   /// it. For now we show a short, anonymized form so the body is readable.
   String _actorDisplay(String uid) => 'Someone';
+}
+
+/// A small rounded-square dot to the left of each notification.
+///
+/// Filled with the primary color when the notification is unread; an
+/// outlined empty square when read (preserves alignment between the
+/// two states without shifting layout).
+class _ReadStateIndicator extends StatelessWidget {
+  const _ReadStateIndicator({required this.isUnread});
+
+  final bool isUnread;
+
+  static const _size = 14.0;
+  static const _radius = 4.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: _size,
+      height: _size,
+      decoration: BoxDecoration(
+        color: isUnread ? scheme.primary : Colors.transparent,
+        borderRadius: BorderRadius.circular(_radius),
+        border: isUnread
+            ? null
+            : Border.all(color: Theme.of(context).disabledColor),
+      ),
+    );
+  }
 }

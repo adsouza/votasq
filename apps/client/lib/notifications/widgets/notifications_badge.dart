@@ -21,7 +21,14 @@ class NotificationsBadge extends StatelessWidget {
           onPressed: () => context.go('/notifications'),
         );
         if (count == 0) return icon;
-        return Badge.count(count: count, child: icon);
+        // Anchored to the top-start (top-left in LTR) so the count doesn't
+        // get clipped by the right edge of the window when the bell sits
+        // at the end of the AppBar actions list.
+        return Badge.count(
+          count: count,
+          alignment: AlignmentDirectional.topStart,
+          child: icon,
+        );
       },
     );
   }
