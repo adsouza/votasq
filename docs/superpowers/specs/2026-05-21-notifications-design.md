@@ -287,10 +287,14 @@ Verify the existing rules file's `users` rule allows the listed update fields (`
 
 ## Firestore indexes
 
-Extend the existing `firestore.indexes.json`:
-
-- `users/{uid}/notifications` composite on `updatedAt DESC, __name__ DESC` (cursor pagination).
-- The `readAt == null` aggregation count query needs no extra index for a single-field equality on a single subcollection; if Firestore prompts for one, add it then.
+No extra composite indexes are needed for the notifications subcollection.
+Firestore auto-generates a single-field index on every field by default
+(both ascending and descending), and `__name__` is always indexed. A query
+like `orderBy('updatedAt', descending: true).orderBy(FieldPath.documentId,
+descending: true)` is served by those auto-indexes — Firestore rejects a
+manual composite for `(updatedAt, __name__)` as redundant. The
+`readAt == null` count aggregation also runs against the single-field
+index.
 
 ## Mark-as-read affordances
 
