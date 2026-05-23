@@ -34,6 +34,12 @@ Future<void> bootstrap(
   bool useEmulators = false,
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // print() (not log()) so this is reliably visible in `flutter run`'s
+  // terminal. The single most useful diagnostic at startup: which
+  // backend did this build connect to? Tells us in one line whether
+  // dart-defines / build flavor wiring did what we expect.
+  // ignore: avoid_print
+  print('Bootstrap: useEmulators=$useEmulators');
   usePathUrlStrategy();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
