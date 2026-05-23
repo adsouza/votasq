@@ -28,11 +28,20 @@ export interface ProblemForkedPayload {
   actorUid: string;
 }
 
+/**
+ * Typed-link relationship from the recipient's perspective. Mirrors the
+ * Dart `ProblemLinkKind` enum in
+ * packages/shared/lib/src/models/problem_link.dart. `null` means a generic
+ * (untyped) clique link.
+ */
+export type ProblemLinkKind = "specialization" | "generalization";
+
 export interface ProblemLinkedPayload {
   type: "problemLinked";
   linkedProblemId: string;
   linkerProblemId: string;
   actorUid: string;
+  kind: ProblemLinkKind | null;
 }
 
 export interface ProblemRevisedPayload {

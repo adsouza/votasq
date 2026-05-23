@@ -53,6 +53,12 @@ export const onProblemLinkedWritten = onDocumentWritten(
         linkedProblemId,
         linkerProblemId: linkerId,
         actorUid,
+        // This trigger fires on changes to `linkedProblemIds`, which is the
+        // generic-clique link surface — typed links (specialization /
+        // generalization) write elsewhere and produce their own payloads
+        // with `kind` set. null marks the resulting notification as
+        // untyped so the recipient's UI / push body uses the un-kinded ARB.
+        kind: null,
       });
     }
   },

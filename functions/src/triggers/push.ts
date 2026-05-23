@@ -110,11 +110,25 @@ async function _renderText(
         title: strings.notificationProblemForkedTitle,
         body: format(strings.notificationProblemForkedBody, {actorName}),
       };
-    case "problemLinked":
+    case "problemLinked": {
+      // Mirrors the kind-aware switch in
+      // apps/client/lib/notifications/view/notification_card.dart so push
+      // and in-app render the same body for typed links.
+      const titleKey = payload.kind === "specialization"
+        ? "notificationProblemLinkedAsSpecializationTitle"
+        : payload.kind === "generalization"
+        ? "notificationProblemLinkedAsGeneralizationTitle"
+        : "notificationProblemLinkedTitle";
+      const bodyKey = payload.kind === "specialization"
+        ? "notificationProblemLinkedAsSpecializationBody"
+        : payload.kind === "generalization"
+        ? "notificationProblemLinkedAsGeneralizationBody"
+        : "notificationProblemLinkedBody";
       return {
-        title: strings.notificationProblemLinkedTitle,
-        body: format(strings.notificationProblemLinkedBody, {actorName}),
+        title: strings[titleKey],
+        body: format(strings[bodyKey], {actorName}),
       };
+    }
     case "problemRevised":
       return {
         title: strings.notificationProblemRevisedTitle,
