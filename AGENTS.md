@@ -103,6 +103,16 @@ Two debug sessions in May 2026 hit the same meta-bug: a test fixture provided so
 
 When adding a feature that touches multiple layers, write at least one **integration test** that exercises the production widget hierarchy / wire shape end-to-end — not just mocked unit tests for each layer. If you find yourself adding a convenience to a test fixture (a default value, a provider at the root), ask whether that convenience holds in production. If it doesn't, the test isn't testing what you think it is.
 
+### Running the mac (or iOS) app against the local emulator
+
+Two macOS-specific footguns the web flavor doesn't have. Both surface the same way: `[cloud_firestore/unavailable] The service is currently unavailable.` in the Flutter run console plus an empty listing.
+
+**(1) Emulator host must be a literal IPv4 address.** macOS resolves `localhost` to both `::1` (IPv6, listed first by `dscacheutil`) and `127.0.0.1` (IPv4). The Firebase Local Emulator Suite binds only to `127.0.0.1`, and the Firestore Flutter plugin on Apple platforms uses gRPC, which doesn't reliably happy-eyeballs from IPv6 to IPv4 — a failed `::1` attempt surfaces as "unavailable" instead of falling back. `_emulatorHost()` in `apps/client/lib/bootstrap.dart` already returns `'127.0.0.1'` for non-web, non-Android platforms; don't change it back to `'localhost'`. (Auth and Functions emulators happen to work via `localhost` because their plugins use URLSession which does fall back, but Firestore's gRPC doesn't.)
+
+**(2) App Check debug token must be registered in Firebase Console.** When the `firebase_app_check` plugin is loaded (which it always is — it's in `pubspec.yaml`), the Firestore Apple SDK automatically attempts to fetch an App Check token before each request. `bootstrap.dart` activates `AppleDebugProvider` for all native runs including emulator, but the debug UUID it generates (printed to the run console on first launch as `Firebase App Check Debug Token: <UUID>`) must be registered in **Firebase Console → App Check → the macOS app row → Manage debug tokens**. Without registration, the exchange returns HTTP 403 and the Firestore SDK closes the WatchStream — emulator listing stays empty, prod listing eventually limps along because Firestore enforcement is off (but the console floods with App Check failures). Same registered token works for both prod-mac and emulator-mac because they share the macOS Firebase app config.
+
+See `apps/client/macos/README.md` for the debug-token registration walkthrough.
+
 ### Keep CI's `flutter-version` aligned with your local Flutter
 
 CI pins `flutter-version` in three workflow files (`.github/workflows/main.yaml`, `license_check.yaml`, `release.yaml`). The bundled `dart format` (and `dart analyze`) varies by SDK version, so a stale CI pin against a newer local Flutter produces formatter disagreements that pre-push checks can't catch — `melos format` uses your local SDK. When you bump local Flutter, bump those three files together.
