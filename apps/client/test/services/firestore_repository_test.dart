@@ -203,6 +203,68 @@ void main() {
           'Achieve this outcome',
         );
       });
+
+      test(
+        'round-trip: a newly-created problem appears in getProblems '
+        '(regression for missing-hidden creates)',
+        () async {
+          // The listing query filters `where("hidden", isEqualTo: false)`,
+          // which excludes docs where the field is missing. addProblem
+          // must therefore stamp `hidden: false` on the wire. This test
+          // exercises the create → query round-trip end-to-end so that
+          // any future writer-path gap is caught — the layer-specific
+          // tests (rules e2e, query filter, cubit, widget) each test
+          // their own slice and do not catch wire-shape gaps.
+          //
+          // Predates the fix in 153a8fd: would fail with `actual: []`
+          // because the missing-hidden doc was silently filtered out.
+          await repo.addProblem(
+            description: 'A round-trippable problem',
+            ownerId: 'user1',
+            geoscope: '/',
+            userLanguage: 'en',
+          );
+
+          final result = await repo.getProblems(geoscope: '/');
+          expect(result.problems, hasLength(1));
+          expect(
+            result.problems.first.description,
+            'A round-trippable problem',
+          );
+        },
+      );
+
+      test(
+        'round-trip: a newly-forked problem appears in getProblems',
+        () async {
+          // Same rationale as the addProblem round-trip above: forkProblem
+          // also builds the doc map by hand and must stamp hidden:false.
+          // Seed a source problem first; forkProblem reads it before
+          // creating the fork.
+          final now = DateTime.now().toUtc();
+          await firestore.collection('problems').doc('src').set({
+            'description': 'Source problem',
+            'goal': '',
+            'ownerId': 'owner-of-src',
+            'geoscope': '/',
+            'votes': 5,
+            'solved': false,
+            'hidden': false,
+            'version': 1,
+            'createdAt': now,
+            'lastUpdatedAt': now,
+          });
+
+          final fork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'forker',
+          );
+
+          final result = await repo.getProblems(geoscope: '/');
+          final ids = result.problems.map((p) => p.id).toSet();
+          expect(ids, contains(fork.id));
+        },
+      );
     });
 
     group('forkProblem', () {
