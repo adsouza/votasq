@@ -53,12 +53,17 @@ cd apps/server && gcloud auth application-default login && dart_frog dev
 
 ### E2E Tests
 
-Requires Firebase emulators (Auth on :9099, Firestore on :8081) to be running. **Must be run from the project root** (the test uses relative `workingDirectory: 'apps/server'`):
+Requires Firebase emulators (Auth on :9099, Firestore on :8081) to be running. **Must be run from the project root** (tests read `firestore.rules` and use relative `workingDirectory: 'apps/server'`):
 
 ```sh
 firebase emulators:start --only auth,firestore   # in a separate terminal
 dart test apps/server/e2e/ --tags e2e
 ```
+
+Two test files live here:
+
+- `problems_e2e_test.dart` — exercises the Dart Frog server's `/problems` HTTP API end-to-end (writes bypass rules via the server's Admin-credentials path).
+- `firestore_rules_e2e_test.dart` — exercises `firestore.rules` directly via the Firestore REST API with a real ID token from the Auth emulator, so rule changes are validated against the actual rules engine (the client's `fake_cloud_firestore` unit tests don't model rules). Pushes the current rules file into the emulator at setup time, so it's self-contained even if the emulator was started before a rules edit.
 
 ### Build & Deploy
 

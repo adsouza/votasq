@@ -108,7 +108,7 @@ Link operations write Firestore directly from the client (see [firestore_reposit
 
 The existing "Problem linking / clustering update" clause in [firestore.rules](firestore.rules) is gated by `affectedKeys().hasOnly(['linkedProblemIds'])`, which rejects any write that also touches `typedLinks`. Broaden the clause to `hasOnly(['linkedProblemIds', 'typedLinks'])` and add a parallel `typedLinks.size() <= 100` cap for DoS protection.
 
-**Test gap:** the client unit tests use `fake_cloud_firestore`, which does not enforce security rules. This class of bug only manifests against a real emulator or production. Verification of rule changes is currently manual; a future improvement is to add an emulator-backed rules test.
+**Test coverage:** Closed by [apps/server/e2e/firestore_rules_e2e_test.dart](apps/server/e2e/firestore_rules_e2e_test.dart), which exercises `firestore.rules` directly via the Firestore emulator's REST API with a real ID token. Six scenarios cover the regression (the exact tag-link pattern that previously failed), the orthogonal clique-link path, unauthed rejection, the 100-entry size cap, and rejection of writes that piggyback unrelated fields. The test uploads the current rules file to the emulator at setup time via the `:securityRules` PUT endpoint, so it is self-contained regardless of when the emulator was started.
 
 ---
 
