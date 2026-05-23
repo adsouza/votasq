@@ -100,7 +100,12 @@ Future<void> _connectToEmulators() async {
   await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8081);
   FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
-  log(
+  // print() (not log()) so this is reliably visible in `flutter run`'s
+  // terminal — dart:developer.log() routes through the VM service and
+  // may not surface depending on Flutter / IDE configuration. This is
+  // a one-line bootstrap log; the noise is worth the diagnosability.
+  // ignore: avoid_print
+  print(
     'Bootstrap: connected to Firebase emulators at $host '
     '(auth:9099, firestore:8081, functions:5001)',
   );
