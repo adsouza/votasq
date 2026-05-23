@@ -96,11 +96,13 @@ When a new field on a Firestore document type becomes part of a `where(...)` fil
 
 We shipped the `hidden` flag with this exact gap in May 2026: `addProblem` and `forkProblem` built their `problemData` map without `hidden`, every new problem was missing the field, and Firestore's `where('hidden', isEqualTo: false)` filter excluded them — every newly-created problem silently vanished from the listing. The freezed model and the query-filter test both passed because the test helpers (`seedProblem` in `firestore_repository_test.dart`) wrote complete docs by hand, papering over the production wire shape.
 
+There is a symmetric read-side trap: `_docToProblem` in `firestore_repository.dart` constructs the `Problem` field-by-field from `doc.data()`. If you add a field to the model and forget to read it here, freezed's `@Default` kicks in on every read and the server's value is silently dropped. We shipped this gap in May 2026 too (the read side of the `hidden` flag): the Hide button updated the doc on the server, but reload always showed unhidden because `_docToProblem` never read `hidden`. No exception, no log line — just wrong data flowing through silently.
+
 Mitigation pattern, in order of strength:
 
-1. **Add the field to every writer.** Grep for `_problemsRef.doc(...).set(` (and equivalent for other collections) and add the new field to every map literal.
+1. **Add the field to every writer AND every manual reader.** Grep `_problemsRef.doc(...).set(` for write sites; grep `_docToProblem` (and any sibling hand-rolled deserializers) for read sites; add the new field to every map literal and every constructor call.
 2. **Tighten the `firestore.rules` create branch** to require the field with a specific initial value (e.g. `&& request.resource.data.hidden == false`). The rule then enforces the invariant at the database, not just at the client.
-3. **Add a round-trip integration test** that calls the create method (e.g. `addProblem`) and then queries via the filtered method (e.g. `getProblems`), asserting the new doc appears. The existing layer-specific tests (rules e2e, repo unit, cubit, widget) each test their own slice — only a round-trip catches wire-shape gaps.
+3. **Add a round-trip integration test** that calls the create method (e.g. `addProblem`) and then queries via the filtered method (e.g. `getProblems`), asserting the new doc appears. The existing layer-specific tests (rules e2e, repo unit, cubit, widget) each test their own slice — only a round-trip catches wire-shape gaps. For the **read** side, seed a doc with the field set to a non-default value and assert it round-trips through `getProblem` — otherwise `_docToProblem` can silently drop the field and tests still pass against the default.
 
 ### Test fixtures can paper over production widget-tree / wire-shape gaps
 

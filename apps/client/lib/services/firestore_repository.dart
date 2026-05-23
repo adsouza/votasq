@@ -622,6 +622,7 @@ class FirestoreRepository {
               .toList() ??
           [],
       solved: data['solved'] as bool? ?? false,
+      hidden: data['hidden'] as bool? ?? false,
       version: (data['version'] as num?)?.toInt() ?? 1,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       lastUpdatedAt: (data['lastUpdatedAt'] as Timestamp).toDate(),

@@ -145,6 +145,30 @@ void main() {
         final problem = await repo.getProblem('nonexistent');
         expect(problem, isNull);
       });
+
+      test(
+        'deserializes hidden=true correctly '
+        '(regression for missing-hidden in _docToProblem)',
+        () async {
+          // The prior bug: _docToProblem constructed the Problem field by
+          // field but omitted `hidden`, so freezed's @Default(false) kicked
+          // in and every Problem read as hidden:false regardless of the
+          // server doc's actual value. Symptom: the Hide button updates
+          // the server doc but reload always shows hidden:false because
+          // _docToProblem silently drops the field on the way out.
+          await seedProblem(id: 'hd1', hidden: true);
+          final problem = await repo.getProblem('hd1');
+          expect(problem, isNotNull);
+          expect(problem!.hidden, isTrue);
+        },
+      );
+
+      test('deserializes hidden=false correctly', () async {
+        await seedProblem(id: 'hd2');
+        final problem = await repo.getProblem('hd2');
+        expect(problem, isNotNull);
+        expect(problem!.hidden, isFalse);
+      });
     });
 
     group('addProblem', () {
