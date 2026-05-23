@@ -140,6 +140,7 @@ void main() {
       'geoscope': sVal('/'),
       'votes': iVal(1),
       'solved': {'booleanValue': false},
+      'hidden': {'booleanValue': false},
       'version': iVal(1),
       'createdAt': tsVal(now),
       'lastUpdatedAt': tsVal(now),
@@ -470,5 +471,71 @@ void main() {
       );
       expect(resp.statusCode, 403, reason: resp.body);
     });
+  });
+
+  group('firestore.rules — problem create', () {
+    // POSTs a problem doc creation to the emulator via the documents:create
+    // endpoint. Unlike `seedProblem` above, which uses PATCH-as-upsert and
+    // is always shaped to match the create rule, this helper lets the test
+    // construct an arbitrary fields map so we can exercise rule rejection
+    // on incomplete or wrong-valued payloads.
+    Future<http.Response> createProblem(
+      String id,
+      Map<String, dynamic> fields,
+    ) {
+      final url = Uri.parse(
+        'http://$firestoreHost/v1/projects/$projectId/databases/(default)'
+        '/documents/problems?documentId=$id',
+      );
+      return client.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $idToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'fields': fields}),
+      );
+    }
+
+    Map<String, dynamic> baseFields() {
+      final now = DateTime.now().toUtc();
+      return <String, dynamic>{
+        'description': sVal('a problem'),
+        'goal': sVal(''),
+        'ownerId': sVal(uid),
+        'geoscope': sVal('/'),
+        'votes': iVal(1),
+        'solved': {'booleanValue': false},
+        'hidden': {'booleanValue': false},
+        'version': iVal(1),
+        'createdAt': tsVal(now),
+        'lastUpdatedAt': tsVal(now),
+      };
+    }
+
+    test('create with hidden: false succeeds', () async {
+      final resp = await createProblem('c1', baseFields());
+      expect(resp.statusCode, 200, reason: resp.body);
+    });
+
+    test('create with hidden: true is rejected', () async {
+      final fields = baseFields()..['hidden'] = {'booleanValue': true};
+      final resp = await createProblem('c2', fields);
+      expect(resp.statusCode, 403, reason: resp.body);
+    });
+
+    test(
+      'create without `hidden` field is rejected '
+      '(regression for missing-hidden writers)',
+      () async {
+        // This is the exact wire shape that addProblem and forkProblem
+        // produced before 153a8fd. The tightened create rule rejects it,
+        // so a future writer that forgets `hidden` fails at the database
+        // boundary, not silently in a query result.
+        final fields = baseFields()..remove('hidden');
+        final resp = await createProblem('c3', fields);
+        expect(resp.statusCode, 403, reason: resp.body);
+      },
+    );
   });
 }

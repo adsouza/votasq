@@ -4,7 +4,7 @@ service cloud.firestore {
     match /problems/{problemId} {
       allow read: if true;
       allow create: if
-        request.resource.data.keys().hasAll(['description', 'votes', 'solved', 'version', 'geoscope'])
+        request.resource.data.keys().hasAll(['description', 'votes', 'solved', 'hidden', 'version', 'geoscope'])
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 80
@@ -15,6 +15,8 @@ service cloud.firestore {
         && request.resource.data.votes == 1
         && request.resource.data.solved is bool
         && request.resource.data.solved == false
+        && request.resource.data.hidden is bool
+        && request.resource.data.hidden == false
         && request.resource.data.version is int
         && request.resource.data.version == 1;
       allow update: if
