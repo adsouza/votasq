@@ -102,7 +102,7 @@ Add an analogous guard for `typedLinks`. Without it, a PUT that touches only `de
 
 ### No new endpoints
 
-Link operations write Firestore directly from the client (see [firestore_repository.dart:744](apps/client/lib/services/firestore_repository.dart:744)). The server reads/writes `Problem` documents for adjacent flows (GET, notification fanout, translation invalidation), so updating the parse/serialize layer is sufficient.
+Link operations write Firestore directly from the client (see [firestore_repository.dart:744](apps/client/lib/services/firestore_repository.dart:744)). The server reads/writes `Problem` documents for adjacent flows (GET, notification fan-out, translation invalidation), so updating the parse/serialize layer is sufficient.
 
 ### Firestore security rules
 
