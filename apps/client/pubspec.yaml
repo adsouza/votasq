@@ -1,6 +1,6 @@
 name: client
 description: The Flutter client for Votasq.
-version: 0.5.1+1
+version: 0.5.2+1
 publish_to: none
 
 environment:
