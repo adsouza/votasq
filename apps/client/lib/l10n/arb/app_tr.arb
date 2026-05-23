@@ -56,7 +56,7 @@
     "menuVotesReplenishHint": "Oylar 3 saat uzak kaldıktan sonra yenilenir",
     "votersHeading": "Oy verenler",
     "voterAnonymous": "Anonim",
-    "signInHintBanner": "Sağ üst köşedeki simgeden oturum açarak oylamayı açın ve kendi sorunlarınızı önerin.",
+    "signInHintBanner": "Sorunlara oy vermek ve kendi sorunlarınızı önermek için sağ üst köşedeki bağlantıdan oturum açın.",
     "doubleTapHintToast": "Ayrıntılar için sorunlara çift dokunun.",
     "complaintSubmitted": "Şikayet gönderildi",
     "failedToLoadProblems": "Sorunlar yüklenemedi",

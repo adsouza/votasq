@@ -56,7 +56,7 @@
     "menuVotesReplenishHint": "Votos se renovam após 3 horas de ausência",
     "votersHeading": "Votantes",
     "voterAnonymous": "Anônimo",
-    "signInHintBanner": "Entre por meio do ícone no canto superior direito para desbloquear votação e propor seus próprios problemas.",
+    "signInHintBanner": "Entre pelo link no canto superior direito para votar em problemas e propor os seus.",
     "doubleTapHintToast": "Toque duas vezes em um problema para ver os detalhes.",
     "complaintSubmitted": "Denúncia enviada",
     "failedToLoadProblems": "Não foi possível carregar os problemas",

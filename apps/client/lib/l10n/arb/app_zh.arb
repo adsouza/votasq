@@ -56,7 +56,7 @@
     "menuVotesReplenishHint": "离开 3 小时后投票会自动补充",
     "votersHeading": "投票者",
     "voterAnonymous": "匿名",
-    "signInHintBanner": "通过右上角的图标登录以解锁投票并提议您自己的问题。",
+    "signInHintBanner": "通过右上角的链接登录，为问题投票并提议您自己的问题。",
     "doubleTapHintToast": "双击问题以查看详细信息。",
     "complaintSubmitted": "举报已提交",
     "failedToLoadProblems": "无法加载问题",
