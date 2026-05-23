@@ -319,4 +319,136 @@ void main() {
       },
     );
   });
+
+  group('firestore.rules — problem hidden flag', () {
+    // Mint a second authed user so we can exercise "non-owner cannot set
+    // hidden". Done lazily inside this group (not setUpAll) to keep the
+    // top-level setup focused.
+    Future<({String uid, String idToken})> signUpSecondUser() async {
+      final signUpUrl = Uri.parse(
+        'http://$authHost/identitytoolkit.googleapis.com/v1/accounts:signUp'
+        '?key=fake-api-key',
+      );
+      final resp = await client.post(
+        signUpUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'returnSecureToken': true}),
+      );
+      if (resp.statusCode != 200) {
+        fail('second signUp failed: ${resp.statusCode} ${resp.body}');
+      }
+      final body = jsonDecode(resp.body) as Map<String, dynamic>;
+      return (
+        uid: body['localId'] as String,
+        idToken: body['idToken'] as String,
+      );
+    }
+
+    test('owner: can set hidden=true on their own problem', () async {
+      await seedProblem('h1');
+      final resp = await patchProblem(
+        'h1',
+        {'hidden': {'booleanValue': true}},
+        updateMask: ['hidden'],
+      );
+      expect(resp.statusCode, 200, reason: resp.body);
+    });
+
+    test('owner: can set hidden=false (unhide)', () async {
+      await seedProblem('h2');
+      // First hide it.
+      final hide = await patchProblem(
+        'h2',
+        {'hidden': {'booleanValue': true}},
+        updateMask: ['hidden'],
+      );
+      expect(hide.statusCode, 200, reason: hide.body);
+      // Then unhide.
+      final unhide = await patchProblem(
+        'h2',
+        {'hidden': {'booleanValue': false}},
+        updateMask: ['hidden'],
+      );
+      expect(unhide.statusCode, 200, reason: unhide.body);
+    });
+
+    test('non-owner authed user cannot set hidden', () async {
+      await seedProblem('h3');
+      final other = await signUpSecondUser();
+
+      final url = Uri.parse(
+        '${docUri('problems/h3')}?updateMask.fieldPaths=hidden',
+      );
+      final resp = await client.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer ${other.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'fields': {'hidden': {'booleanValue': true}},
+        }),
+      );
+      expect(
+        resp.statusCode,
+        403,
+        reason: 'Expected 403 for non-owner hide write. Got '
+            '${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test('unauthed write setting hidden is rejected', () async {
+      await seedProblem('h4');
+      final resp = await patchProblem(
+        'h4',
+        {'hidden': {'booleanValue': true}},
+        updateMask: ['hidden'],
+        auth: false,
+      );
+      expect(resp.statusCode, 403, reason: resp.body);
+    });
+
+    test('hide-toggle write that also changes description is rejected', () async {
+      await seedProblem('h5');
+      // The hide-toggle branch requires affectedKeys().hasOnly(['hidden']),
+      // so a write that also touches description must fail through that
+      // branch. The full-update branch should also reject it (the new
+      // guard forbids hidden changes there). Net: 403.
+      final resp = await patchProblem(
+        'h5',
+        {
+          'hidden': {'booleanValue': true},
+          'description': sVal('changed description'),
+        },
+        updateMask: ['hidden', 'description'],
+      );
+      expect(resp.statusCode, 403, reason: resp.body);
+    });
+
+    test('full-update write that flips hidden is rejected', () async {
+      await seedProblem('h6');
+      // Send a full-update-shaped payload that also flips hidden. The
+      // full-update branch will be guarded by hidden==get('hidden', false),
+      // so this must fail.
+      final now = DateTime.now().toUtc();
+      final resp = await patchProblem(
+        'h6',
+        {
+          'description': sVal('updated'),
+          'goal': sVal(''),
+          'geoscope': sVal('/'),
+          'votes': iVal(1),
+          'solved': {'booleanValue': false},
+          'version': iVal(2),
+          'lastUpdatedAt': tsVal(now),
+          'hidden': {'booleanValue': true},
+        },
+        updateMask: [
+          'description', 'goal', 'geoscope', 'votes', 'solved',
+          'version', 'lastUpdatedAt', 'hidden',
+        ],
+      );
+      expect(resp.statusCode, 403, reason: resp.body);
+    });
+  });
 }
