@@ -10,10 +10,19 @@
 # release.yaml. Keeping pubspec in sync with the tag is for human readability.
 #
 # Usage:
-#   tool/release.sh <vX.Y.Z[-suffix]> "<annotated tag message>"
+#   tool/release.sh <vX.Y.Z[-suffix]> <annotated tag message...>
 #
 # Typically invoked via:
 #   melos run release -- v0.5.3 "Release notes for humans"
+#
+# All positional args after the tag are joined with a single space to form
+# the message. This is defensive against melos's `"$@"` arg-forwarding,
+# which re-tokenizes quoted strings on whitespace before they reach the
+# script — so `melos run release -- v0.5.3 "two words"` arrives here as
+# three argv entries (v0.5.3, two, words) rather than two. Joining via
+# `"$*"` reassembles them into "two words" regardless. Direct invocation
+# `tool/release.sh v0.5.3 "two words"` still works (one quoted argv
+# entry collapses to itself via $*).
 #
 # Pre-flight checks run before any state is mutated. If anything fails after
 # the pubspec bump, the script bails loudly rather than attempting rollback;
@@ -22,13 +31,14 @@
 
 set -eo pipefail
 
-if [ $# -ne 2 ]; then
-  echo "Usage: melos run release -- <vX.Y.Z[-suffix]> \"<annotated tag message>\"" >&2
+if [ $# -lt 2 ]; then
+  echo "Usage: melos run release -- <vX.Y.Z[-suffix]> <annotated tag message...>" >&2
   exit 1
 fi
 
 TAG="$1"
-MESSAGE="$2"
+shift
+MESSAGE="$*"
 
 if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$ ]]; then
   echo "Error: tag must match vX.Y.Z or vX.Y.Z-suffix (got: $TAG)" >&2
