@@ -109,5 +109,12 @@ Future<void> _connectToEmulators() async {
 String _emulatorHost() {
   if (kIsWeb) return 'localhost';
   if (Platform.isAndroid) return '10.0.2.2';
-  return 'localhost';
+  // macOS / iOS / desktop: use 127.0.0.1 literally rather than 'localhost'.
+  // macOS resolves 'localhost' to both ::1 (IPv6) and 127.0.0.1 (IPv4),
+  // and the Firebase Local Emulator Suite binds only to 127.0.0.1. The
+  // Firestore client uses gRPC, which on Apple platforms doesn't reliably
+  // happy-eyeballs from IPv6 to IPv4 — so a connection to ::1:8081 fails
+  // with "Connection refused" and surfaces as [cloud_firestore/unavailable].
+  // (Auth works because its REST/URLSession path does proper fallback.)
+  return '127.0.0.1';
 }
