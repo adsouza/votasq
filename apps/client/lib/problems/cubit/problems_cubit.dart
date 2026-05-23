@@ -65,9 +65,12 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   /// Create a new problem with the given description.
   /// If [geoscope] is provided it overrides the current viewing geoscope.
   ///
-  /// Optimistically prepends the new problem to local state. The watch stream
-  /// will not emit when the new doc falls past the first page's `limit`, so
-  /// this keeps the UI in sync regardless.
+  /// Optimistically prepends the new problem to local state. The watch
+  /// stream may not emit when the new doc falls past the first page's
+  /// `limit`, so this keeps the UI in sync regardless. Dedupes by id
+  /// because on web the Firestore listener fires synchronously from
+  /// local cache before `await` returns, so a blind prepend would
+  /// duplicate the new problem at the top and at its sorted position.
   Future<void> addProblem({
     required String description,
     required String ownerId,
@@ -83,7 +86,8 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         geoscope: geoscope ?? state.geoscope,
         userLanguage: userLanguage,
       );
-      emit(state.copyWith(problems: [created, ...state.problems]));
+      final others = state.problems.where((p) => p.id != created.id).toList();
+      emit(state.copyWith(problems: [created, ...others]));
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {

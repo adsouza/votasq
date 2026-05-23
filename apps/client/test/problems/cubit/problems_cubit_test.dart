@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
@@ -239,6 +241,78 @@ void main() {
           ['new', 'existing'],
         ),
       ],
+    );
+
+    // Reproduces the web-only doubling: on web the Firestore JS SDK fires
+    // the watch listener synchronously from the local cache before
+    // `await repo.addProblem(...)` returns, so the cubit's subscribe
+    // handler has already inserted the new problem (at its sorted
+    // position) by the time `addProblem` reaches its prepend. A blind
+    // prepend would then duplicate the doc. We model that ordering by
+    // pushing a snapshot onto the watch stream from inside the mocked
+    // addProblem call.
+    test(
+      'addProblem does not duplicate when watch stream already emitted the '
+      'new problem',
+      () async {
+        final existing = _problem(id: 'existing', votes: 5);
+        final created = _problem(
+          id: 'new',
+          description: 'a new problem',
+        );
+        final controller =
+            StreamController<
+              ({List<Problem> problems, DocumentSnapshot? lastDoc})
+            >();
+        addTearDown(controller.close);
+
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) => controller.stream);
+
+        when(
+          () => repo.addProblem(
+            description: any(named: 'description'),
+            goal: any(named: 'goal'),
+            ownerId: any(named: 'ownerId'),
+            geoscope: any(named: 'geoscope'),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {
+          // Simulate the web JS SDK firing the listener from cache
+          // (snapshot lists existing first by votes DESC, then the new
+          // problem at its sorted position) before this future resolves.
+          controller.add(
+            (
+              problems: [existing, created],
+              lastDoc: _FakeDocumentSnapshot(),
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+          return created;
+        });
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+        controller.add(
+          (problems: [existing], lastDoc: _FakeDocumentSnapshot()),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        await cubit.addProblem(
+          description: 'a new problem',
+          ownerId: 'user1',
+          userLanguage: 'en',
+        );
+
+        expect(
+          cubit.state.problems.map((p) => p.id).toList(),
+          ['new', 'existing'],
+        );
+      },
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
