@@ -438,5 +438,103 @@ void main() {
           cubit.applyLocalUpdate(_problem(id: 'missing', description: 'X')),
       expect: () => <ProblemsState>[],
     );
+
+    group('setHidden', () {
+      blocTest<ProblemsCubit, ProblemsState>(
+        'setHidden(true) calls repo and drops the problem from state',
+        build: () {
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenAnswer((_) async {});
+          return ProblemsCubit(repo);
+        },
+        seed: () => ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(id: 'a'),
+            _problem(id: 'b'),
+          ],
+        ),
+        act: (cubit) => cubit.setHidden(
+          problem: _problem(id: 'a'),
+          hidden: true,
+        ),
+        expect: () => [
+          isA<ProblemsState>().having(
+            (s) => s.problems.map((p) => p.id).toList(),
+            'problems ids',
+            ['b'],
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => repo.setHidden(problemId: 'a', hidden: true),
+          ).called(1);
+        },
+      );
+
+      blocTest<ProblemsCubit, ProblemsState>(
+        'setHidden(false) calls repo and applies local update without dropping',
+        build: () {
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenAnswer((_) async {});
+          return ProblemsCubit(repo);
+        },
+        seed: () => ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(id: 'a'),
+            _problem(id: 'b'),
+          ],
+        ),
+        act: (cubit) => cubit.setHidden(
+          problem: _problem(id: 'a'),
+          hidden: false,
+        ),
+        // The problem under id 'a' was already not-hidden in the local
+        // state, so applyLocalUpdate emits a state with the same shape.
+        expect: () => [
+          isA<ProblemsState>().having(
+            (s) => s.problems.map((p) => p.id).toList(),
+            'problems ids',
+            ['a', 'b'],
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => repo.setHidden(problemId: 'a', hidden: false),
+          ).called(1);
+        },
+      );
+
+      blocTest<ProblemsCubit, ProblemsState>(
+        'setHidden swallows repo errors',
+        build: () {
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenThrow(Exception('boom'));
+          return ProblemsCubit(repo);
+        },
+        seed: () => ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(id: 'a')],
+        ),
+        act: (cubit) => cubit.setHidden(
+          problem: _problem(id: 'a'),
+          hidden: true,
+        ),
+        expect: () => <ProblemsState>[],
+      );
+    });
   });
 }

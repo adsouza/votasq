@@ -128,6 +128,32 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     }
   }
 
+  /// Toggle a problem's `hidden` flag (owner-only at the rules layer).
+  /// On hide, optimistically drops the problem from the local list so a
+  /// back-navigation to the listing doesn't briefly show the stale entry
+  /// before the watch snapshot reconciles. On unhide, applies a local
+  /// update if the problem is still in the visible page (the watch
+  /// stream will refresh it independently).
+  Future<void> setHidden({
+    required Problem problem,
+    required bool hidden,
+  }) async {
+    try {
+      await _repo.setHidden(problemId: problem.id, hidden: hidden);
+      if (hidden) {
+        emit(
+          state.copyWith(
+            problems: state.problems.where((p) => p.id != problem.id).toList(),
+          ),
+        );
+      } else {
+        applyLocalUpdate(problem.copyWith(hidden: false));
+      }
+    } on Exception catch (e, st) {
+      log('setHidden failed: $e', stackTrace: st);
+    }
+  }
+
   /// Update an existing problem.
   Future<void> updateProblem(
     Problem problem, {
