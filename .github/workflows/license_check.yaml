@@ -19,7 +19,7 @@ on:
       - ".github/workflows/license_check.yaml"
 
 env:
-  FLUTTER_VERSION: "3.41.4"
+  FLUTTER_VERSION: "3.44.0"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:

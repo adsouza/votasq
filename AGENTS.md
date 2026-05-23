@@ -82,15 +82,11 @@ When you change `firestore.rules`, add or update a case in `apps/server/e2e/fire
 
 The Firestore emulator caches rules at startup and does not reliably hot-reload on file edit. The e2e test pushes the current rules file into the emulator via the `:securityRules` PUT endpoint at setUpAll time, so the test is self-contained — but if you're testing rules manually against a long-running emulator, restart it or you'll be debugging stale rules.
 
-### `dart format` is bundled with the Dart SDK and varies by Flutter version
+### Keep CI's `flutter-version` aligned with your local Flutter
 
-CI pins `flutter-version: 3.41.4` (`.github/workflows/main.yaml`), which ships Dart 3.11.4. The `dart format` it runs comes from that SDK and can disagree with a newer local Flutter — `melos format` passing locally is not a guarantee CI's format step passes, and the pre-push hook can't catch this.
+CI pins `flutter-version` in three workflow files (`.github/workflows/main.yaml`, `license_check.yaml`, `release.yaml`). The bundled `dart format` (and `dart analyze`) varies by SDK version, so a stale CI pin against a newer local Flutter produces formatter disagreements that pre-push checks can't catch — `melos format` uses your local SDK. When you bump local Flutter, bump those three files together.
 
-Known disagreements observed in this repo:
-
-- **Enum-with-members trailing separator:** Dart 3.11.4 wants `\n  ;` on its own line after the last constant if that constant has metadata (`@JsonValue(...)` etc.); Dart 3.12 wants `constant;` inline. There is no single form both accept. **Workaround:** define member methods as an extension on the enum, not enum members, so there is no `;`-separator.
-
-If you hit a formatter disagreement, download the matching Dart SDK at https://dart.dev/get-dart/archive (~200MB vs Flutter's ~6GB) and run `<sdk>/bin/dart format --output=show --set-exit-if-changed <file>` to see exactly what CI wants. Then either match it (if both formatters accept the same form) or refactor away the syntax (if they disagree, like the enum case above).
+If you do hit a formatter disagreement, download just the matching Dart SDK from https://dart.dev/get-dart/archive (~200MB vs a full Flutter at ~6GB) and run `<sdk>/bin/dart format --output=show --set-exit-if-changed <file>` to see exactly what CI wants.
 
 ## Architecture
 

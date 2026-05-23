@@ -16,24 +16,13 @@ enum ProblemLinkKind {
 
   /// The target is more general than the source.
   @JsonValue('generalization')
-  generalization,
-}
+  generalization;
 
-/// Extension methods on [ProblemLinkKind]. Defined as an extension rather
-/// than enum members so the enum body has no `;`-separator after the last
-/// constant — Dart 3.11 and Dart 3.12 disagree on how to format that
-/// separator when the trailing constant has metadata, and there is no
-/// single form both formatters accept.
-extension ProblemLinkKindX on ProblemLinkKind {
   /// The inverse kind used when mirroring the edge on the other problem.
-  ProblemLinkKind get inverse {
-    switch (this) {
-      case ProblemLinkKind.specialization:
-        return ProblemLinkKind.generalization;
-      case ProblemLinkKind.generalization:
-        return ProblemLinkKind.specialization;
-    }
-  }
+  ProblemLinkKind get inverse => switch (this) {
+    ProblemLinkKind.specialization => ProblemLinkKind.generalization,
+    ProblemLinkKind.generalization => ProblemLinkKind.specialization,
+  };
 }
 
 @freezed
