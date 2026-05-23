@@ -13,6 +13,14 @@ flutter analyze apps packages
 echo "[pre-push] cspell..."
 npx --yes cspell --no-progress --no-summary --config .github/cspell.json "**/*.md"
 
+echo "[pre-push] web/index.html flutter_bootstrap_js token..."
+if ! grep -qF '{{flutter_bootstrap_js}}' apps/client/web/index.html; then
+  echo "[pre-push] apps/client/web/index.html is missing the literal token {{flutter_bootstrap_js}}."
+  echo "[pre-push] An HTML formatter probably added whitespace inside the braces — Flutter's build system"
+  echo "[pre-push] only substitutes the exact unspaced token, so the web app fails to bootstrap."
+  exit 1
+fi
+
 echo "[pre-push] AGENTS.md / CLAUDE.md sync..."
 if ! diff -q \
   <(sed -e '1s|^# AGENTS\.md$|# CLAUDE.md|' \
