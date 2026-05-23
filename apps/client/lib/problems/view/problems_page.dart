@@ -323,7 +323,9 @@ class _ProblemsViewState extends State<ProblemsView> {
         titleSpacing: 0,
         title: BlocBuilder<ProblemsCubit, ProblemsState>(
           builder: (context, state) {
-            final userId = context.read<AuthCubit>().state.userId;
+            // watch (not read) so the filtered count reacts to sign-in /
+            // sign-out — _applyFilters with _showOnlyOwned uses userId.
+            final userId = context.watch<AuthCubit>().state.userId;
             final filtered = _applyFilters(state.problems, userId);
             return Text(
               '${filtered.length} ${l10n.problemsAppBarTitle}',
@@ -535,7 +537,12 @@ class _ProblemsViewState extends State<ProblemsView> {
                   ),
                   _ => Builder(
                     builder: (context) {
-                      final userId = context.read<AuthCubit>().state.userId;
+                      // watch (not read) so showEditButton / showComplaintButton
+                      // on each tile react to sign-in / sign-out without a
+                      // separate rebuild trigger. The vote chip inside
+                      // ProblemReadTile already watches AuthCubit; this is the
+                      // matching subscription for the owner-driven props.
+                      final userId = context.watch<AuthCubit>().state.userId;
                       final filtered = _applyFilters(state.problems, userId);
                       return ListView.builder(
                         controller: _scrollController,

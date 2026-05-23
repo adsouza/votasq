@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
@@ -197,6 +199,59 @@ void main() {
       // Edit button renders as 🖊️.
       expect(find.text('🖊️'), findsOneWidget);
     });
+
+    testWidgets(
+      'signing in immediately surfaces the edit and flag buttons '
+      'without any other rebuild trigger',
+      (tester) async {
+        // Regression test for the stale-userId bug: the ListView's outer
+        // Builder used context.read<AuthCubit>() rather than watch(), so
+        // showEditButton / showComplaintButton were computed once from the
+        // unauthenticated userId and never updated when auth resolved.
+        // The vote chip already worked because ProblemReadTile watches
+        // AuthCubit internally.
+        final authController = StreamController<AuthState>.broadcast();
+        addTearDown(authController.close);
+        const initial = AuthState();
+        const signedIn = AuthState(
+          status: AuthStatus.authenticated,
+          userId: 'owner1',
+        );
+        whenListen(
+          authCubit,
+          authController.stream,
+          initialState: initial,
+        );
+        when(() => problemsCubit.state).thenReturn(
+          ProblemsState(
+            status: ProblemsStatus.success,
+            problems: [
+              _problem(), // owned by 'owner1'
+              _problem(
+                id: '2',
+                description: 'someone else problem',
+                ownerId: 'other',
+              ),
+            ],
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+
+        // Unauthenticated: neither button is shown on any tile.
+        expect(find.text('🖊️'), findsNothing);
+        expect(find.text('🙈'), findsNothing);
+
+        // Drive the sign-in transition; no other interaction.
+        authController.add(signedIn);
+        await tester.pump();
+
+        // Owner of problem #1 sees the edit button on it AND the flag
+        // button on the foreign #2.
+        expect(find.text('🖊️'), findsOneWidget);
+        expect(find.text('🙈'), findsOneWidget);
+      },
+    );
 
     testWidgets('shows flag button for non-owned problems', (tester) async {
       when(() => authCubit.state).thenReturn(
