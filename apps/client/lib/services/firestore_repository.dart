@@ -50,11 +50,12 @@ class FirestoreRepository {
   CollectionReference<Map<String, dynamic>> get _problemsRef =>
       _firestore.collection(_collection);
 
-  /// Unsolved problems matching the given geoscope or any ancestor,
-  /// ordered by votes DESC then doc ID ASC.
+  /// Unsolved, non-hidden problems matching the given geoscope or any
+  /// ancestor, ordered by votes DESC then doc ID ASC.
   Query<Map<String, dynamic>> _geoscopedQuery(String geoscope) => _problemsRef
       .where('geoscope', whereIn: geoscopeAncestors(geoscope))
       .where('solved', isEqualTo: false)
+      .where('hidden', isEqualTo: false)
       .orderBy('votes', descending: true)
       .orderBy(FieldPath.documentId);
 
@@ -385,6 +386,14 @@ class FirestoreRepository {
       'complaints': FieldValue.arrayUnion([userId]),
     });
   }
+
+  /// Owner-only single-field write that flips a problem's `hidden` flag.
+  /// Targets just the one field so the rules' hide-toggle branch
+  /// (`affectedKeys().hasOnly(['hidden'])`) matches the wire payload.
+  Future<void> setHidden({
+    required String problemId,
+    required bool hidden,
+  }) => _problemsRef.doc(problemId).update({'hidden': hidden});
 
   /// Ensure a user document exists in the `users` collection.
   /// Creates one from [user] if missing. Returns the stored [User].

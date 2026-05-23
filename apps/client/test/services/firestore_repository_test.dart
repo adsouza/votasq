@@ -115,6 +115,7 @@ void main() {
       String geoscope = '/',
       int votes = 1,
       bool solved = false,
+      bool hidden = false,
     }) async {
       final now = DateTime.now().toUtc();
       await firestore.collection('problems').doc(id).set({
@@ -124,6 +125,7 @@ void main() {
         'geoscope': geoscope,
         'votes': votes,
         'solved': solved,
+        'hidden': hidden,
         'version': 1,
         'createdAt': now,
         'lastUpdatedAt': now,
@@ -495,6 +497,55 @@ void main() {
         final doc = await firestore.collection('problems').doc('p1').get();
         final complaints = (doc.data()!['complaints'] as List).cast<String>();
         expect(complaints, contains('complainer1'));
+      });
+    });
+
+    group('setHidden', () {
+      test('sets hidden=true on the doc', () async {
+        await seedProblem(id: 'h1');
+        await repo.setHidden(problemId: 'h1', hidden: true);
+        final doc = await firestore.collection('problems').doc('h1').get();
+        expect(doc.data()!['hidden'], isTrue);
+      });
+
+      test('sets hidden=false on the doc', () async {
+        await seedProblem(id: 'h2');
+        await repo.setHidden(problemId: 'h2', hidden: true);
+        await repo.setHidden(problemId: 'h2', hidden: false);
+        final doc = await firestore.collection('problems').doc('h2').get();
+        expect(doc.data()!['hidden'], isFalse);
+      });
+
+      test('does not touch other fields', () async {
+        await seedProblem(id: 'h3', description: 'untouched');
+        await repo.setHidden(problemId: 'h3', hidden: true);
+        final doc = await firestore.collection('problems').doc('h3').get();
+        expect(doc.data()!['description'], 'untouched');
+      });
+    });
+
+    group('watchProblems / getProblems hidden filter', () {
+      test('excludes problems with hidden=true', () async {
+        await seedProblem(id: 'visible');
+        await seedProblem(id: 'hidden');
+        await firestore
+            .collection('problems')
+            .doc('hidden')
+            .update({'hidden': true});
+
+        final result = await repo.getProblems(geoscope: '/');
+        expect(result.problems.map((p) => p.id), ['visible']);
+      });
+
+      test('includes problems with hidden=false', () async {
+        await seedProblem(id: 'v1');
+        await firestore
+            .collection('problems')
+            .doc('v1')
+            .update({'hidden': false});
+
+        final result = await repo.getProblems(geoscope: '/');
+        expect(result.problems.map((p) => p.id), ['v1']);
       });
     });
 
