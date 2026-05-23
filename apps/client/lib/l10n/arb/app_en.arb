@@ -218,7 +218,7 @@
     "@geoscopeFilterHint": {
         "description": "Placeholder text for the substring filter field at the top of the geoscope picker"
     },
-    "geoscopePickerHeading": "Select your location with the highest available precision from the list below:",
+    "geoscopePickerHeading": "Select your location from the list below with the highest available precision:",
     "@geoscopePickerHeading": {
         "description": "Heading shown at the top of the geoscope picker overlay, above the substring filter field"
     },
