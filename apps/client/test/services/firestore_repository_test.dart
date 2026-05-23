@@ -164,6 +164,10 @@ void main() {
         expect(doc.data()['ownerId'], 'user1');
         expect(doc.data()['votes'], 1);
         expect(doc.data()['solved'], false);
+        // Regression: the listing query filters `hidden == false`, and
+        // Firestore excludes docs where the field is missing. addProblem
+        // must always stamp this on the wire.
+        expect(doc.data()['hidden'], false);
 
         // Check voter doc was created.
         final voters = await firestore
@@ -253,6 +257,9 @@ void main() {
           expect(stored.data()!['votes'], 1);
           expect(stored.data()!['version'], 1);
           expect(stored.data()!['ownerId'], 'forker');
+          // Regression: forks must stamp `hidden: false` too, same
+          // rationale as addProblem.
+          expect(stored.data()!['hidden'], false);
 
           // Original problem should be untouched.
           final original = await firestore

@@ -126,6 +126,10 @@ class FirestoreRepository {
       'lang': result.lang,
       'votes': 1,
       'solved': false,
+      // Required: the listing query filters `where('hidden', isEqualTo:
+      // false)`, which excludes docs where the field is missing. Always
+      // stamp it on create or the new problem won't appear in any list.
+      'hidden': false,
       'version': version,
       'createdAt': now,
       'lastUpdatedAt': now,
@@ -196,6 +200,9 @@ class FirestoreRepository {
       'lang': ?source.lang,
       'votes': 1,
       'solved': false,
+      // Same rationale as addProblem: the listing query excludes docs
+      // missing the `hidden` field.
+      'hidden': false,
       'version': version,
       'createdAt': now,
       'lastUpdatedAt': now,
