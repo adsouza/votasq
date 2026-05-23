@@ -68,6 +68,30 @@
     "@problemDetailPageTitle": {
         "description": "Title in the AppBar of the problem detail page"
     },
+    "hideProblemButton": "Hide from listing",
+    "@hideProblemButton": {
+        "description": "Label of the button on the problem detail page that hides the problem from the main listing. Only visible to the problem's owner when the problem is not yet hidden."
+    },
+    "unhideProblemButton": "Show in listing",
+    "@unhideProblemButton": {
+        "description": "Label of the button on the problem detail page that unhides a previously hidden problem so it reappears in the main listing. Only visible to the problem's owner when the problem is currently hidden."
+    },
+    "problemHiddenOwnerBannerTitle": "This problem is hidden from the main listing.",
+    "@problemHiddenOwnerBannerTitle": {
+        "description": "Banner title shown to the owner on the detail page of a problem they have hidden."
+    },
+    "problemHiddenOwnerBannerBody": "Nobody — including you — sees it on the listing. People can still reach it through direct links and notifications.",
+    "@problemHiddenOwnerBannerBody": {
+        "description": "Banner body shown to the owner on the detail page of a hidden problem. Clarifies the consequences of hiding."
+    },
+    "problemHiddenViewerBannerTitle": "The owner has hidden this problem from the main listing.",
+    "@problemHiddenViewerBannerTitle": {
+        "description": "Banner title shown to any non-owner viewer of a hidden problem's detail page."
+    },
+    "problemHiddenViewerBannerBody": "You can still see it here because you followed a direct link.",
+    "@problemHiddenViewerBannerBody": {
+        "description": "Banner body shown to non-owner viewers of a hidden problem's detail page. Explains why they can still see the page."
+    },
     "newProblemPageTitle": "What is a collective problem that vexes you?",
     "@newProblemPageTitle": {
         "description": "Title in the AppBar of the page for creating a new problem"
