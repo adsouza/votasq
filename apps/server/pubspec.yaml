@@ -1,6 +1,6 @@
 name: server
 description: The Dart Frog server for Votasq
-version: 1.0.0+2
+version: 0.5.1+1
 publish_to: none
 
 environment:
