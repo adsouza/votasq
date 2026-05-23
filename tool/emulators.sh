@@ -14,6 +14,11 @@
 #   tool/emulators.sh auth,firestore            # custom subset
 #
 # Press Ctrl+C to stop both the emulators and the background watcher.
+#
+# Persists emulator state to .emulator-data/ across restarts via
+# --import + --export-on-exit. Without this, the emulator runs purely
+# in-memory; the first restart wipes every seeded user and problem doc.
+# The state directory is gitignored.
 
 # `set -u` is intentionally omitted (macOS bash 3.2 trips on the empty
 # arg case below — same constraint as tool/run-client.sh).
@@ -33,4 +38,8 @@ watch_pid=$!
 # Kill the background watcher when this script exits, however it exits.
 trap 'kill "$watch_pid" 2>/dev/null || true' EXIT INT TERM
 
-exec firebase emulators:start --only "$only"
+# --import only loads if the directory already exists (no-op on first
+# run); --export-on-exit writes the snapshot when the emulator stops
+# cleanly via SIGINT/SIGTERM.
+exec firebase emulators:start --only "$only" \
+  --import=.emulator-data --export-on-exit=.emulator-data
