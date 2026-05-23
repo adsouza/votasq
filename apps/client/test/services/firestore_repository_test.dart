@@ -528,10 +528,9 @@ void main() {
       test('excludes problems with hidden=true', () async {
         await seedProblem(id: 'visible');
         await seedProblem(id: 'hidden');
-        await firestore
-            .collection('problems')
-            .doc('hidden')
-            .update({'hidden': true});
+        await firestore.collection('problems').doc('hidden').update({
+          'hidden': true,
+        });
 
         final result = await repo.getProblems(geoscope: '/');
         expect(result.problems.map((p) => p.id), ['visible']);
@@ -539,10 +538,9 @@ void main() {
 
       test('includes problems with hidden=false', () async {
         await seedProblem(id: 'v1');
-        await firestore
-            .collection('problems')
-            .doc('v1')
-            .update({'hidden': false});
+        await firestore.collection('problems').doc('v1').update({
+          'hidden': false,
+        });
 
         final result = await repo.getProblems(geoscope: '/');
         expect(result.problems.map((p) => p.id), ['v1']);
