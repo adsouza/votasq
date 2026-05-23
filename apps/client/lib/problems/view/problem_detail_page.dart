@@ -119,10 +119,33 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   }
 
   Future<void> _setHidden(Problem problem, bool hidden) async {
-    await context.read<ProblemsCubit>().setHidden(
-      problem: problem,
-      hidden: hidden,
-    );
+    // ProblemsCubit is provided by the parent listing route. On direct-URL
+    // navigation (notifications, shared links, bookmarks) the cubit isn't
+    // in scope — context.read throws ProviderNotFoundException. Fall back
+    // to a direct repo write; the listing's watch stream will reconcile
+    // on next visit. Matches the defensive pattern used in `_save` above.
+    ProblemsCubit? problemsCubit;
+    try {
+      problemsCubit = context.read<ProblemsCubit>();
+    } on Object {
+      problemsCubit = null;
+    }
+    final repo = context.read<FirestoreRepository>();
+    try {
+      if (problemsCubit != null) {
+        await problemsCubit.setHidden(problem: problem, hidden: hidden);
+      } else {
+        await repo.setHidden(problemId: problem.id, hidden: hidden);
+      }
+    } on Object catch (e, st) {
+      // Catch Object (not Exception) so unexpected Error subtypes from the
+      // SDK / bloc layer surface as a logged failure rather than an
+      // uncaught error that aborts setState. The prod bug this fixes was
+      // a tree-shaken ProviderNotFoundException showing up as bare
+      // "Uncaught Error" in the browser console.
+      log('setHidden failed: $e', stackTrace: st);
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _problem = problem.copyWith(hidden: hidden);

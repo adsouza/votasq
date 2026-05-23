@@ -329,6 +329,101 @@ void main() {
           ),
         ).called(1);
       });
+
+      testWidgets(
+        'tapping Hide works when ProblemsCubit is NOT in scope '
+        '(direct-URL navigation regression test)',
+        (tester) async {
+          // Reproduces the prod bug from 2026-05-23: the detail page is
+          // reachable by direct URL (e.g. from a notification or a shared
+          // link) without going through the listing route, so the
+          // ProblemsCubit provided by ProblemsPage is not in the
+          // ancestor chain. context.read<ProblemsCubit>() throws
+          // ProviderNotFoundException there; the fix falls back to the
+          // FirestoreRepository directly.
+          when(() => repo.getProblem(any())).thenAnswer(
+            (_) async => _problem(),
+          );
+          when(() => authCubit.state).thenReturn(
+            const AuthState(
+              status: AuthStatus.authenticated,
+              userId: 'owner1',
+            ),
+          );
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenAnswer((_) async {});
+
+          // Build a subject WITHOUT BlocProvider<ProblemsCubit>.
+          final router = GoRouter(
+            initialLocation: '/problems/test-id',
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const Scaffold(body: Text('home')),
+                routes: [
+                  GoRoute(
+                    path: 'problems/:id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return ProblemDetailPage(problemId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          );
+          await tester.pumpWidget(
+            MultiBlocProvider(
+              providers: [
+                BlocProvider<AuthCubit>.value(value: authCubit),
+                BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
+                // Intentionally no BlocProvider<ProblemsCubit>.
+              ],
+              child: MultiRepositoryProvider(
+                providers: [
+                  RepositoryProvider<FirestoreRepository>.value(value: repo),
+                  RepositoryProvider<LanguageDetectionService>.value(
+                    value: languageDetectionService,
+                  ),
+                  RepositoryProvider<TranslationRepository>.value(
+                    value: translationRepo,
+                  ),
+                ],
+                child: ToastificationWrapper(
+                  child: MaterialApp.router(
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    routerConfig: router,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('hideProblemButton')), findsOneWidget);
+          await tester.tap(find.byKey(const Key('hideProblemButton')));
+          await tester.pumpAndSettle();
+
+          // Repo was called directly (cubit fallback path).
+          verify(
+            () => repo.setHidden(problemId: 'test-id', hidden: true),
+          ).called(1);
+
+          // UI flipped to hidden state despite the missing cubit.
+          expect(find.byKey(const Key('hiddenBanner')), findsOneWidget);
+          expect(find.byKey(const Key('hideProblemButton')), findsNothing);
+          expect(
+            find.byKey(const Key('unhideProblemButton')),
+            findsOneWidget,
+          );
+        },
+      );
     });
 
     testWidgets('back button navigates to home', (tester) async {
