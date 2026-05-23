@@ -72,6 +72,16 @@ melos build:client         # Build APK + macOS release
 melos deploy:server        # Deploy server to Cloud Run
 ```
 
+## Gotchas
+
+### Changes to `firestore.rules` need an e2e test case
+
+The client's unit tests use `fake_cloud_firestore`, which does **not** enforce security rules. A rules mistake (omitted field in an allowlist, wrong `affectedKeys` predicate, missing `request.auth` check) passes every unit test and only fails against a real emulator or production. We've shipped this class of bug before.
+
+When you change `firestore.rules`, add or update a case in `apps/server/e2e/firestore_rules_e2e_test.dart` that exercises the new path. The test goes through the Firestore REST API with a real ID token from the Auth emulator, so rules are evaluated exactly as in production. ~10 lines per scenario; permanent regression protection.
+
+The Firestore emulator caches rules at startup and does not reliably hot-reload on file edit. The e2e test pushes the current rules file into the emulator via the `:securityRules` PUT endpoint at setUpAll time, so the test is self-contained — but if you're testing rules manually against a long-running emulator, restart it or you'll be debugging stale rules.
+
 ## Architecture
 
 Update the `ARCHITECTURE.md` file in the project root dir after making architectural changes.
