@@ -84,7 +84,13 @@ The Firestore emulator caches rules at startup and does not reliably hot-reload 
 
 ### `dart format` is bundled with the Dart SDK and varies by Flutter version
 
-CI pins `flutter-version: 3.41.4` (`.github/workflows/main.yaml`). The `dart format` it runs comes from that SDK and can disagree with a newer local Flutter — `melos format` passing locally is not a guarantee CI's format step passes. Prefer language constructs whose formatting has been stable across versions (block-bodied methods, explicit `switch` statements) over newer-syntax shortcuts (`=>` arrow with multi-line `switch` expression body, method chains across `=>`) when the syntactic sugar is marginal. The dart_style changelog ([3.0.x → 3.1.x notes](https://pub.dev/packages/dart_style/changelog)) lists which patterns shifted between versions. If you must use a pattern that recently shifted, run `dart pub global activate dart_style <version>` matching CI's SDK and verify locally before pushing.
+CI pins `flutter-version: 3.41.4` (`.github/workflows/main.yaml`), which ships Dart 3.11.4. The `dart format` it runs comes from that SDK and can disagree with a newer local Flutter — `melos format` passing locally is not a guarantee CI's format step passes, and the pre-push hook can't catch this.
+
+Known disagreements observed in this repo:
+
+- **Enum-with-members trailing separator:** Dart 3.11.4 wants `\n  ;` on its own line after the last constant if that constant has metadata (`@JsonValue(...)` etc.); Dart 3.12 wants `constant;` inline. There is no single form both accept. **Workaround:** define member methods as an extension on the enum, not enum members, so there is no `;`-separator.
+
+If you hit a formatter disagreement, download the matching Dart SDK at https://dart.dev/get-dart/archive (~200MB vs Flutter's ~6GB) and run `<sdk>/bin/dart format --output=show --set-exit-if-changed <file>` to see exactly what CI wants. Then either match it (if both formatters accept the same form) or refactor away the syntax (if they disagree, like the enum case above).
 
 ## Architecture
 
