@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "Chỉ hiển thị vấn đề của tôi",
     "showOnlyWithGoalsMenuItem": "Chỉ hiển thị vấn đề có mục tiêu",
     "problemDetailPageTitle": "Chi tiết vấn đề",
+    "problemPostedBy": "Đăng bởi {name}",
     "hideProblemButton": "Ẩn khỏi danh sách",
     "unhideProblemButton": "Hiển thị trong danh sách",
     "problemHiddenOwnerBannerTitle": "Vấn đề này đã bị ẩn khỏi danh sách chính.",

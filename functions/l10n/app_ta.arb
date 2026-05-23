@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "எனது பிரச்சனைகளை மட்டும் காட்டு",
     "showOnlyWithGoalsMenuItem": "இலக்குகள் உள்ள பிரச்சனைகளை மட்டும் காட்டு",
     "problemDetailPageTitle": "பிரச்சனை விவரங்கள்",
+    "problemPostedBy": "{name} இடுகையிட்டார்",
     "hideProblemButton": "பட்டியலிலிருந்து மறை",
     "unhideProblemButton": "பட்டியலில் காட்டு",
     "problemHiddenOwnerBannerTitle": "இந்தப் பிரச்சனை முதன்மை பட்டியலிலிருந்து மறைக்கப்பட்டுள்ளது.",

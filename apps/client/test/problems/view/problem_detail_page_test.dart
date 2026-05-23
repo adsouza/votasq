@@ -90,6 +90,7 @@ void main() {
       ),
     ).thenAnswer((_) async => []);
     when(() => repo.getForksOfProblem(any())).thenAnswer((_) async => []);
+    when(() => repo.getDisplayName(any())).thenAnswer((_) async => null);
     when(
       () => languageDetectionService.needsTranslation(
         text: any(named: 'text'),
@@ -685,6 +686,44 @@ void main() {
       expect(find.text('test problem description'), findsOneWidget);
       expect(find.byType(TextField), findsNothing);
     });
+
+    testWidgets(
+      "shows 'Posted by {name}' when the owner has a displayName",
+      (tester) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(
+          () => repo.getDisplayName('owner1'),
+        ).thenAnswer((_) async => 'Alice');
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Posted by Alice'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      "omits the 'Posted by' line when the owner has no displayName",
+      (tester) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        // Default stub returns null; assert no attribution line renders.
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Posted by'), findsNothing);
+      },
+    );
 
     testWidgets('excludes owner from voter list', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());

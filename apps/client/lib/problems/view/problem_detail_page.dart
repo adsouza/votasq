@@ -30,6 +30,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   final _controller = TextEditingController();
   final _goalController = TextEditingController();
   Problem? _problem;
+  String? _ownerName;
   List<({String name, int votes})>? _voters;
   List<Problem>? _forks;
   List<Problem>? _linkedProblems;
@@ -72,6 +73,8 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         anonymous: context.l10n.voterAnonymous,
       );
       if (!mounted) return;
+      final ownerName = await repo.getDisplayName(problem.ownerId);
+      if (!mounted) return;
       // Fork-list failure is non-fatal — the section just won't render.
       List<Problem>? forks;
       try {
@@ -99,6 +102,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       if (!mounted) return;
       setState(() {
         _problem = problem;
+        _ownerName = ownerName;
         _voters = voters;
         _forks = forks;
         _linkedProblems = linkedProblems;
@@ -236,6 +240,21 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     });
     problemsCubit?.applyLocalUpdate(updated);
     showToast(l10n.problemSavedToast);
+  }
+
+  Widget _buildOwnerLine() {
+    final name = _ownerName;
+    if (name == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        context.l10n.problemPostedBy(name),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
   }
 
   Widget _buildInspoBacklink(Problem problem) {
@@ -619,6 +638,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                     ),
                   ),
                 ],
+                _buildOwnerLine(),
                 const SizedBox(height: 16),
                 Wrap(
                   spacing: 8,
@@ -741,6 +761,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               );
             },
           ),
+          _buildOwnerLine(),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,

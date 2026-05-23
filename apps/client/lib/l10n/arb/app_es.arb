@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "Mostrar solo mis problemas",
     "showOnlyWithGoalsMenuItem": "Mostrar solo problemas con metas",
     "problemDetailPageTitle": "Detalles del problema",
+    "problemPostedBy": "Publicado por {name}",
     "hideProblemButton": "Ocultar de la lista",
     "unhideProblemButton": "Mostrar en la lista",
     "problemHiddenOwnerBannerTitle": "Este problema está oculto de la lista principal.",

@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "শুধুমাত্র আমার সমস্যাগুলো দেখান",
     "showOnlyWithGoalsMenuItem": "শুধুমাত্র লক্ষ্যযুক্ত সমস্যাগুলো দেখান",
     "problemDetailPageTitle": "সমস্যার বিবরণ",
+    "problemPostedBy": "{name} পোস্ট করেছেন",
     "hideProblemButton": "তালিকা থেকে লুকান",
     "unhideProblemButton": "তালিকায় দেখান",
     "problemHiddenOwnerBannerTitle": "এই সমস্যাটি মূল তালিকা থেকে লুকানো রয়েছে।",

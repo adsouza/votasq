@@ -68,6 +68,15 @@
     "@problemDetailPageTitle": {
         "description": "Title in the AppBar of the problem detail page"
     },
+    "problemPostedBy": "Posted by {name}",
+    "@problemPostedBy": {
+        "description": "Attribution line on the problem detail page showing the display name of the user who owns the problem. Omitted when the owner has no displayName set.",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
     "hideProblemButton": "Hide from listing",
     "@hideProblemButton": {
         "description": "Label of the button on the problem detail page that hides the problem from the main listing. Only visible to the problem's owner when the problem is not yet hidden."

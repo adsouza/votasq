@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "فقط مشکلات من نمایش داده شود",
     "showOnlyWithGoalsMenuItem": "فقط مشکلات دارای هدف نمایش داده شود",
     "problemDetailPageTitle": "جزئیات مشکل",
+    "problemPostedBy": "ارسال شده توسط {name}",
     "hideProblemButton": "پنهان کردن از فهرست",
     "unhideProblemButton": "نمایش در فهرست",
     "problemHiddenOwnerBannerTitle": "این مشکل از فهرست اصلی پنهان شده است.",

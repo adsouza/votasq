@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "Tampilkan hanya masalah saya",
     "showOnlyWithGoalsMenuItem": "Tampilkan hanya masalah dengan tujuan",
     "problemDetailPageTitle": "Detail Masalah",
+    "problemPostedBy": "Diposting oleh {name}",
     "hideProblemButton": "Sembunyikan dari daftar",
     "unhideProblemButton": "Tampilkan di daftar",
     "problemHiddenOwnerBannerTitle": "Masalah ini disembunyikan dari daftar utama.",

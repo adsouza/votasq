@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "Onyesha matatizo yangu pekee",
     "showOnlyWithGoalsMenuItem": "Onyesha matatizo yenye malengo pekee",
     "problemDetailPageTitle": "Maelezo ya Tatizo",
+    "problemPostedBy": "Imechapishwa na {name}",
     "hideProblemButton": "Ficha kutoka kwenye orodha",
     "unhideProblemButton": "Onyesha kwenye orodha",
     "problemHiddenOwnerBannerTitle": "Tatizo hili limefichwa kutoka kwenye orodha kuu.",

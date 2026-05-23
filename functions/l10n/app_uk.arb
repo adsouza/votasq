@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "Показати лише мої проблеми",
     "showOnlyWithGoalsMenuItem": "Показати лише проблеми з цілями",
     "problemDetailPageTitle": "Деталі проблеми",
+    "problemPostedBy": "Опублікував(ла) {name}",
     "hideProblemButton": "Сховати зі списку",
     "unhideProblemButton": "Показати у списку",
     "problemHiddenOwnerBannerTitle": "Цю проблему сховано з основного списку.",

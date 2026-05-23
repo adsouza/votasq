@@ -17,6 +17,7 @@
     "showOnlyOwnedMenuItem": "फक्त माझ्या समस्या दाखवा",
     "showOnlyWithGoalsMenuItem": "फक्त ध्येय असलेल्या समस्या दाखवा",
     "problemDetailPageTitle": "समस्या तपशील",
+    "problemPostedBy": "{name} ने पोस्ट केले",
     "hideProblemButton": "यादीतून लपवा",
     "unhideProblemButton": "यादीत दाखवा",
     "problemHiddenOwnerBannerTitle": "ही समस्या मुख्य यादीतून लपवली आहे.",
