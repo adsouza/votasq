@@ -242,6 +242,31 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     showToast(l10n.problemSavedToast);
   }
 
+  /// The edit-view geoscope row. Returns an empty list when
+  /// [buildGeoscopeDropdown] has no items to offer (both the user's and
+  /// the problem's scope are global), so the caller doesn't render an
+  /// orphan label hanging beside an empty dropdown.
+  List<Widget> _buildGeoscopeRow(Problem problem) {
+    final dropdown = buildGeoscopeDropdown(
+      context,
+      geoscope: context.read<GeoscopeCubit>().state.selectedGeoscope,
+      currentValue: _geoscope ?? problem.geoscope,
+      compact: false,
+      onChanged: (value) => setState(() {
+        _geoscope = value;
+      }),
+    );
+    if (dropdown.isEmpty) return const [];
+    return [
+      const SizedBox(height: 8),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [Text(context.l10n.geoscopeLabel), ...dropdown],
+      ),
+    ];
+  }
+
   Widget _buildOwnerLine() {
     final name = _ownerName;
     if (name == null) return const SizedBox.shrink();
@@ -762,23 +787,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             },
           ),
           _buildOwnerLine(),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(l10n.geoscopeLabel),
-              ...buildGeoscopeDropdown(
-                context,
-                geoscope: context.read<GeoscopeCubit>().state.selectedGeoscope,
-                currentValue: _geoscope ?? problem.geoscope,
-                compact: false,
-                onChanged: (value) => setState(() {
-                  _geoscope = value;
-                }),
-              ),
-            ],
-          ),
+          ..._buildGeoscopeRow(problem),
           _buildForksList(),
           _buildLinkedProblemsList(),
           _buildVoterList(),

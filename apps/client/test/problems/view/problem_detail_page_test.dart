@@ -178,6 +178,49 @@ void main() {
       expect(find.byType(TextField), findsNothing);
     });
 
+    testWidgets(
+      'owner editing a global problem from global user scope omits the '
+      'geoscope row entirely (no orphan label hanging beside an empty '
+      'dropdown)',
+      (tester) async {
+        // Default _problem().geoscope and default GeoscopeState are both
+        // '/', which is the exact condition where buildGeoscopeDropdown
+        // returns []. The whole label + dropdown row should disappear.
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Geographic scope:'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'owner editing a non-global problem still shows the geoscope row',
+      (tester) async {
+        // Regression guard for the omit-when-empty fix: it must not hide
+        // the row in the normal editing case.
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(geoscope: 'na/us'),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Geographic scope:'), findsOneWidget);
+      },
+    );
+
     testWidgets('shows editable view for owner', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
       when(() => authCubit.state).thenReturn(
