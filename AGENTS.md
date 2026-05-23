@@ -72,6 +72,14 @@ melos build:client         # Build APK + macOS release
 melos deploy:server        # Deploy server to Cloud Run
 ```
 
+### Release
+
+```sh
+melos run release -- vX.Y.Z "Annotated tag message"
+```
+
+Updates `apps/client/pubspec.yaml` to `X.Y.Z+1` (matching the tag), commits, pushes main, creates a signed annotated tag, and pushes the tag — which triggers `.github/workflows/release.yaml` to build Android, Web, and macOS artifacts and publish a GitHub Release. Pre-flight checks: clean tree, on `main`, up-to-date with origin, tag doesn't exist, `melos format` + `flutter analyze` pass. See `tool/release.sh` for the full sequence.
+
 ## Gotchas
 
 ### Changes to `firestore.rules` need an e2e test case
