@@ -106,7 +106,9 @@ Link operations write Firestore directly from the client (see [firestore_reposit
 
 ### Firestore security rules
 
-Verify the existing rule for `problems/{id}` updates permits writing the new `typedLinks` field. Adjust if needed; no new rule should be required since the field is on an existing collection.
+The existing "Problem linking / clustering update" clause in [firestore.rules](firestore.rules) is gated by `affectedKeys().hasOnly(['linkedProblemIds'])`, which rejects any write that also touches `typedLinks`. Broaden the clause to `hasOnly(['linkedProblemIds', 'typedLinks'])` and add a parallel `typedLinks.size() <= 100` cap for DoS protection.
+
+**Test gap:** the client unit tests use `fake_cloud_firestore`, which does not enforce security rules. This class of bug only manifests against a real emulator or production. Verification of rule changes is currently manual; a future improvement is to add an emulator-backed rules test.
 
 ---
 

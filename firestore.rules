@@ -36,12 +36,20 @@ service cloud.firestore {
           && request.auth.uid in request.resource.data.complaints
         )
         ||
-        // Problem linking / clustering update (auth required, only linkedProblemIds changes, size limited to prevent DoS)
+        // Problem linking / clustering update (auth required, only
+        // linkedProblemIds and/or typedLinks change, both size-limited to
+        // prevent DoS). `typedLinks` carries directional specialization /
+        // generalization tags; tagProblemLink and untagProblemLink in the
+        // client may write either field individually or both together
+        // (promoting a generic clique link into a typed pair severs the
+        // generic edge and writes the typed entries in one batched update).
         (
           request.auth != null
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedProblemIds'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedProblemIds', 'typedLinks'])
           && request.resource.data.get('linkedProblemIds', []) is list
           && request.resource.data.get('linkedProblemIds', []).size() <= 100
+          && request.resource.data.get('typedLinks', []) is list
+          && request.resource.data.get('typedLinks', []).size() <= 100
         )
         ||
         // Full problem update
