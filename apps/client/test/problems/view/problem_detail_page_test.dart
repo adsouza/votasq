@@ -461,6 +461,11 @@ void main() {
           find.byType(TextField).first,
           'updated problem description',
         );
+        // Flush the AnimatedBuilder rebuild that listens to the text
+        // controllers so the Save button picks up its newly-enabled state
+        // before we tap it; without this the button would still hold its
+        // initial (disabled, no-changes) onPressed=null.
+        await tester.pump();
         await tester.tap(find.text('Save'));
         await tester.pumpAndSettle();
 
@@ -478,6 +483,75 @@ void main() {
         // Confirmation toast is visible.
         expect(find.text('Your changes have been saved'), findsOneWidget);
         // Dismiss so the toast's auto-close timer doesn't outlive the test.
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'Save button is disabled until the user edits something and '
+      'becomes disabled again after a successful save',
+      (tester) async {
+        final problem = _problem(goal: 'original goal');
+        when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
+        when(
+          () => repo.updateProblem(
+            any(),
+            userLanguage: any(named: 'userLanguage'),
+            copiedFromProblemId: any(named: 'copiedFromProblemId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        FilledButton saveButton() => tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Save'),
+        );
+
+        // Before any edit, the loaded values equal the persisted ones, so
+        // there is nothing to save — button is disabled.
+        expect(saveButton().onPressed, isNull);
+
+        // Editing the description enables it.
+        await tester.enterText(
+          find.byType(TextField).first,
+          'updated problem description',
+        );
+        await tester.pump();
+        expect(saveButton().onPressed, isNotNull);
+
+        // Reverting the edit (back to the original text) disables it again.
+        await tester.enterText(
+          find.byType(TextField).first,
+          'test problem description',
+        );
+        await tester.pump();
+        expect(saveButton().onPressed, isNull);
+
+        // Editing the *goal* alone (description still pristine) also enables
+        // it — the previous implementation only listened to the description
+        // controller and would have missed this.
+        await tester.enterText(
+          find.byType(TextField).at(1),
+          'new goal',
+        );
+        await tester.pump();
+        expect(saveButton().onPressed, isNotNull);
+
+        // Tapping Save persists the change; afterward _problem reflects the
+        // saved values so the button should disable again without needing
+        // any further input.
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+        expect(saveButton().onPressed, isNull);
+
         toastification.dismissAll(delayForAnimation: false);
         await tester.pumpAndSettle();
       },
@@ -509,6 +583,9 @@ void main() {
         find.byType(TextField).first,
         'updated problem description',
       );
+      // See the success-path test for why this pump() is required between
+      // enterText and the Save tap.
+      await tester.pump();
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 

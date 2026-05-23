@@ -169,9 +169,28 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
+  /// Whether the current edit fields differ from the loaded [_problem].
+  /// Used both to gate the Save button and to short-circuit [_save] when
+  /// there's nothing to persist. Compares the trimmed text the way [_save]
+  /// would write it, so trailing whitespace alone doesn't count as a change.
+  bool _hasChanges() {
+    final problem = _problem;
+    if (problem == null) return false;
+    final newDescription = _controller.text.trim();
+    final newGoal = _goalController.text.trim();
+    final newGeoscope = _geoscope ?? problem.geoscope;
+    return newDescription != problem.description ||
+        newGoal != problem.goal ||
+        newGeoscope != problem.geoscope;
+  }
+
   Future<void> _save() async {
     final problem = _problem;
-    if (problem == null || !hasEnoughWords(_controller.text)) return;
+    if (problem == null ||
+        !hasEnoughWords(_controller.text) ||
+        !_hasChanges()) {
+      return;
+    }
     // Capture context-dependent values before any async gap. Safe here
     // because _save is only invoked from a button tap, which can't happen
     // before the first build completes.
@@ -190,42 +209,32 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
     final userLang = Localizations.localeOf(context).languageCode;
 
-    final newDescription = _controller.text.trim();
-    final newGoal = _goalController.text.trim();
-    final newGeoscope = _geoscope ?? problem.geoscope;
-    final hasChanges =
-        newDescription != problem.description ||
-        newGoal != problem.goal ||
-        newGeoscope != problem.geoscope;
-
-    if (hasChanges) {
-      final updated = problem.copyWith(
-        description: newDescription,
-        goal: newGoal,
-        geoscope: newGeoscope,
-      );
-      try {
-        await repo.updateProblem(updated, userLanguage: userLang);
-      } on LanguageMismatchException catch (e) {
-        if (!mounted) return;
-        showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
-        return;
-      } on Exception catch (e) {
-        log('Failed to save problem: $e');
-        if (!mounted) return;
-        showToast(l10n.saveProblemError);
-        return;
-      }
+    final updated = problem.copyWith(
+      description: _controller.text.trim(),
+      goal: _goalController.text.trim(),
+      geoscope: _geoscope ?? problem.geoscope,
+    );
+    try {
+      await repo.updateProblem(updated, userLanguage: userLang);
+    } on LanguageMismatchException catch (e) {
       if (!mounted) return;
-      // Reflect the saved values locally so subsequent change-detection
-      // works against fresh state, and push the same update into the list
-      // cubit so the previous page doesn't show stale data on return.
-      setState(() {
-        _problem = updated;
-      });
-      problemsCubit?.applyLocalUpdate(updated);
+      showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
+      return;
+    } on Exception catch (e) {
+      log('Failed to save problem: $e');
+      if (!mounted) return;
+      showToast(l10n.saveProblemError);
+      return;
     }
     if (!mounted) return;
+    // Reflect the saved values locally so subsequent change-detection
+    // works against fresh state (and the Save button reverts to its
+    // inactive appearance), and push the same update into the list cubit
+    // so the previous page doesn't show stale data on return.
+    setState(() {
+      _problem = updated;
+    });
+    problemsCubit?.applyLocalUpdate(updated);
     showToast(l10n.problemSavedToast);
   }
 
@@ -753,16 +762,19 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
           _buildLinkedProblemsList(),
           _buildVoterList(),
           const SizedBox(height: 24),
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: _controller,
-            builder: (context, value, child) {
-              final hasWords = hasEnoughWords(_controller.text);
+          // Listen to both text controllers so the Save button enables on any
+          // edit. Geoscope changes already setState, which rebuilds this
+          // subtree and re-runs the merged-Listenable builder anyway.
+          AnimatedBuilder(
+            animation: Listenable.merge([_controller, _goalController]),
+            builder: (context, _) {
+              final canSave = hasEnoughWords(_controller.text) && _hasChanges();
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   FilledButton(
-                    onPressed: hasWords ? _save : null,
+                    onPressed: canSave ? _save : null,
                     child: Text(l10n.problemDetailSaveButton),
                   ),
                   FilledButton.tonal(
