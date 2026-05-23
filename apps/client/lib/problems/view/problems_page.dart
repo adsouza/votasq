@@ -42,10 +42,12 @@ class ProblemsPage extends StatelessWidget {
   }
 }
 
-/// Coordinates the auth sign-in hint toast with the geoscope picker so the
-/// toast isn't immediately obscured by the picker on first launch. The toast
-/// fires once per unauthenticated session, when (a) the user is unauth, (b)
-/// the geoscope cubit has settled, and (c) no picker is currently shown.
+/// Coordinates the double-tap-for-details hint toast with the geoscope picker
+/// so the toast isn't immediately obscured by the picker on first launch. The
+/// toast fires once per session, when (a) the geoscope cubit has settled and
+/// (b) no picker is currently shown. The sign-in CTA that used to live in
+/// this toast is now rendered as a persistent banner below the app bar via
+/// [_SignInHintBanner].
 class _ProblemsPageCoordinator extends StatefulWidget {
   const _ProblemsPageCoordinator();
 
@@ -56,15 +58,15 @@ class _ProblemsPageCoordinator extends StatefulWidget {
 
 class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
   bool _pickerActive = false;
-  bool _signInToastShown = false;
-  ToastificationItem? _signInToastItem;
+  bool _doubleTapToastShown = false;
+  ToastificationItem? _doubleTapToastItem;
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     // Re-attempt the toast when the user pops a child route (e.g. /new),
-    // since no auth/geoscope transition fires on that navigation alone.
+    // since no geoscope transition fires on that navigation alone.
     // Also dismiss any live toast when a child route is pushed on top —
     // toastification's overlay persists across navigations, so the toast
     // would otherwise linger on /new for the remainder of its duration.
@@ -88,14 +90,14 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
   void _onRouterChange() {
     if (!mounted) return;
     if (!_isHomeCurrent) {
-      final item = _signInToastItem;
+      final item = _doubleTapToastItem;
       if (item != null) {
         toastification.dismiss(item);
-        _signInToastItem = null;
+        _doubleTapToastItem = null;
       }
       return;
     }
-    _maybeShowSignInToast();
+    _maybeShowDoubleTapToast();
   }
 
   Future<void> _openPicker() async {
@@ -106,39 +108,37 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
     } finally {
       if (mounted) {
         setState(() => _pickerActive = false);
-        _maybeShowSignInToast();
+        _maybeShowDoubleTapToast();
       }
     }
   }
 
-  /// Try to show the sign-in toast. Returns silently when not yet appropriate
-  /// (picker active, auth still resolving, geoscope still loading, etc.) so
-  /// the next state transition can re-attempt.
-  void _maybeShowSignInToast() {
+  /// Try to show the double-tap-for-details toast. Returns silently when not
+  /// yet appropriate (picker active, geoscope still loading, child route on
+  /// top) so the next state transition can re-attempt.
+  void _maybeShowDoubleTapToast() {
     if (!mounted) return;
-    if (_signInToastShown) return;
+    if (_doubleTapToastShown) return;
     if (_pickerActive) return;
-    // The toast text directs users to the sign-in icon in this page's
-    // app bar. Skip when a child route (e.g. /new) is on top — that page
-    // doesn't have the icon, so the instruction wouldn't apply.
+    // The toast text refers to "problems" — the list shown on this page.
+    // Skip when a child route (e.g. /new) is on top so the hint lands
+    // alongside the list it's describing.
     if (!_isHomeCurrent) return;
-    final authState = context.read<AuthCubit>().state;
-    if (authState.status != AuthStatus.unauthenticated) return;
     final geoState = context.read<GeoscopeCubit>().state;
     if (geoState.status != GeoscopeStatus.success) return;
     if (geoState.needsSelection) return;
 
-    _signInToastShown = true;
+    _doubleTapToastShown = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       // Re-check: the user may have navigated away in the frame between
       // scheduling and now. Reset the flag so a return can re-attempt.
       if (!_isHomeCurrent) {
-        _signInToastShown = false;
+        _doubleTapToastShown = false;
         return;
       }
-      _signInToastItem = showToast(
-        context.l10n.signInHintToast,
+      _doubleTapToastItem = showToast(
+        context.l10n.doubleTapHintToast,
         duration: const Duration(seconds: 5),
       );
     });
@@ -162,23 +162,13 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
               !prev.needsSelection && curr.needsSelection,
           listener: (_, _) => unawaited(_openPicker()),
         ),
-        // Re-attempt the toast when the geoscope cubit settles, in case the
-        // auth listener fired before geoscope was ready.
+        // Show the toast once the geoscope cubit settles (problems are then
+        // visible and the hint applies to them).
         BlocListener<GeoscopeCubit, GeoscopeState>(
           listenWhen: (prev, curr) =>
               prev.status != GeoscopeStatus.success &&
               curr.status == GeoscopeStatus.success,
-          listener: (_, _) => _maybeShowSignInToast(),
-        ),
-        BlocListener<AuthCubit, AuthState>(
-          listenWhen: (prev, curr) =>
-              prev.status != curr.status &&
-              curr.status == AuthStatus.unauthenticated,
-          listener: (context, _) {
-            // New unauthenticated session — reset and try.
-            _signInToastShown = false;
-            _maybeShowSignInToast();
-          },
+          listener: (_, _) => _maybeShowDoubleTapToast(),
         ),
       ],
       child: const ProblemsView(),
@@ -486,6 +476,9 @@ class _ProblemsViewState extends State<ProblemsView> {
         children: [
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, authState) {
+              if (authState.status == AuthStatus.unauthenticated) {
+                return const _SignInHintBanner();
+              }
               if (authState.status != AuthStatus.authenticated) {
                 return const SizedBox.shrink();
               }
@@ -595,6 +588,30 @@ class _ProblemsViewState extends State<ProblemsView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Persistent banner shown to anonymous users below the app bar, replacing
+/// the transient sign-in toast that new users often missed. Colors echo the
+/// app's toast palette so the CTA reads as the same "system hint" surface.
+class _SignInHintBanner extends StatelessWidget {
+  const _SignInHintBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.orange.shade100,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Text(
+        context.l10n.signInHintBanner,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Color(0xFF1A237E),
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
