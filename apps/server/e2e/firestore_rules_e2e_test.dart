@@ -348,7 +348,9 @@ void main() {
       await seedProblem('h1');
       final resp = await patchProblem(
         'h1',
-        {'hidden': {'booleanValue': true}},
+        {
+          'hidden': {'booleanValue': true},
+        },
         updateMask: ['hidden'],
       );
       expect(resp.statusCode, 200, reason: resp.body);
@@ -359,14 +361,18 @@ void main() {
       // First hide it.
       final hide = await patchProblem(
         'h2',
-        {'hidden': {'booleanValue': true}},
+        {
+          'hidden': {'booleanValue': true},
+        },
         updateMask: ['hidden'],
       );
       expect(hide.statusCode, 200, reason: hide.body);
       // Then unhide.
       final unhide = await patchProblem(
         'h2',
-        {'hidden': {'booleanValue': false}},
+        {
+          'hidden': {'booleanValue': false},
+        },
         updateMask: ['hidden'],
       );
       expect(unhide.statusCode, 200, reason: unhide.body);
@@ -386,13 +392,16 @@ void main() {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'fields': {'hidden': {'booleanValue': true}},
+          'fields': {
+            'hidden': {'booleanValue': true},
+          },
         }),
       );
       expect(
         resp.statusCode,
         403,
-        reason: 'Expected 403 for non-owner hide write. Got '
+        reason:
+            'Expected 403 for non-owner hide write. Got '
             '${resp.statusCode}: ${resp.body}',
       );
     });
@@ -401,29 +410,34 @@ void main() {
       await seedProblem('h4');
       final resp = await patchProblem(
         'h4',
-        {'hidden': {'booleanValue': true}},
+        {
+          'hidden': {'booleanValue': true},
+        },
         updateMask: ['hidden'],
         auth: false,
       );
       expect(resp.statusCode, 403, reason: resp.body);
     });
 
-    test('hide-toggle write that also changes description is rejected', () async {
-      await seedProblem('h5');
-      // The hide-toggle branch requires affectedKeys().hasOnly(['hidden']),
-      // so a write that also touches description must fail through that
-      // branch. The full-update branch should also reject it (the new
-      // guard forbids hidden changes there). Net: 403.
-      final resp = await patchProblem(
-        'h5',
-        {
-          'hidden': {'booleanValue': true},
-          'description': sVal('changed description'),
-        },
-        updateMask: ['hidden', 'description'],
-      );
-      expect(resp.statusCode, 403, reason: resp.body);
-    });
+    test(
+      'hide-toggle write that also changes description is rejected',
+      () async {
+        await seedProblem('h5');
+        // The hide-toggle branch requires affectedKeys().hasOnly(['hidden']),
+        // so a write that also touches description must fail through that
+        // branch. The full-update branch should also reject it (the new
+        // guard forbids hidden changes there). Net: 403.
+        final resp = await patchProblem(
+          'h5',
+          {
+            'hidden': {'booleanValue': true},
+            'description': sVal('changed description'),
+          },
+          updateMask: ['hidden', 'description'],
+        );
+        expect(resp.statusCode, 403, reason: resp.body);
+      },
+    );
 
     test('full-update write that flips hidden is rejected', () async {
       await seedProblem('h6');
@@ -444,8 +458,14 @@ void main() {
           'hidden': {'booleanValue': true},
         },
         updateMask: [
-          'description', 'goal', 'geoscope', 'votes', 'solved',
-          'version', 'lastUpdatedAt', 'hidden',
+          'description',
+          'goal',
+          'geoscope',
+          'votes',
+          'solved',
+          'version',
+          'lastUpdatedAt',
+          'hidden',
         ],
       );
       expect(resp.statusCode, 403, reason: resp.body);
