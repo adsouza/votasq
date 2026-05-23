@@ -1038,6 +1038,15 @@ void main() {
         expect(results[0].id, 'p3');
         expect(results[1].id, 'p1');
       });
+
+      test('getGlobalProblemsForSearch excludes hidden problems', () async {
+        await seedProblem(id: 'p1', votes: 10);
+        await seedProblem(id: 'p2', votes: 20, hidden: true);
+        await seedProblem(id: 'p3', votes: 30);
+
+        final results = await repo.getGlobalProblemsForSearch();
+        expect(results.map((p) => p.id).toList(), ['p3', 'p1']);
+      });
     });
   });
 }

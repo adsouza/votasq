@@ -893,11 +893,12 @@ class FirestoreRepository {
     await batch.commit();
   }
 
-  /// Fetch up to 100 unsolved problems globally, sorted by votes DESC,
-  /// then doc ID ASC, for search.
+  /// Fetch up to 100 unsolved, non-hidden problems globally, sorted by
+  /// votes DESC, then doc ID ASC, for the link-to-another-problem search.
   Future<List<Problem>> getGlobalProblemsForSearch({int limit = 100}) async {
     final snapshot = await _problemsRef
         .where('solved', isEqualTo: false)
+        .where('hidden', isEqualTo: false)
         .orderBy('votes', descending: true)
         .orderBy(FieldPath.documentId)
         .limit(limit)
