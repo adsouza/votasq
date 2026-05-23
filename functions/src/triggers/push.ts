@@ -97,13 +97,7 @@ async function _renderText(
   locale: string,
 ): Promise<{title: string; body: string}> {
   const strings = loadStrings(locale);
-
-  // The actor display name is "Someone" for v1 — same as the client
-  // placeholder in apps/client/lib/notifications/view/notification_card.dart.
-  // Looking up users/{actorUid}.displayName would be cleaner; deferred
-  // until the in-app card also does that lookup so the two paths stay
-  // consistent.
-  const actorName = ACTOR_PLACEHOLDER;
+  const actorName = await _resolveActorName(payload);
 
   switch (payload.type) {
     case "voteReceived":
@@ -131,6 +125,43 @@ async function _renderText(
         title: strings.notificationForkAdoptedTitle,
         body: strings.notificationForkAdoptedBody,
       };
+  }
+}
+
+/**
+ * Resolves the actor's displayName from `users/{actorUid}` for payloads
+ * that carry an actor. Falls back to [ACTOR_PLACEHOLDER] when the field
+ * is missing, the doc doesn't exist, or the read fails — the body
+ * template gets a readable string either way.
+ *
+ * problemRevised and forkAdopted have no actor in their body templates,
+ * so we short-circuit to the placeholder without a read.
+ */
+async function _resolveActorName(
+  payload: NotificationPayload,
+): Promise<string> {
+  let actorUid: string | undefined;
+  switch (payload.type) {
+    case "voteReceived":
+    case "problemForked":
+    case "problemLinked":
+      actorUid = payload.actorUid;
+      break;
+    case "problemRevised":
+    case "forkAdopted":
+      return ACTOR_PLACEHOLDER;
+  }
+  if (!actorUid) return ACTOR_PLACEHOLDER;
+  try {
+    const snapshot = await getFirestore().doc(`users/${actorUid}`).get();
+    const name = snapshot.get("displayName");
+    if (typeof name === "string" && name.length > 0) return name;
+    return ACTOR_PLACEHOLDER;
+  } catch (e) {
+    logger.warn(
+      `push: getDisplayName failed for actor ${actorUid}: ${String(e)}`,
+    );
+    return ACTOR_PLACEHOLDER;
   }
 }
 

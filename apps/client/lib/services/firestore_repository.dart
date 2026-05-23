@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:client/services/language_detection_service.dart';
@@ -437,6 +438,31 @@ class FirestoreRepository {
       lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
       displayName: data['displayName'] as String?,
     );
+  }
+
+  // In-memory cache for `users/{uid}.displayName` lookups, keyed by uid.
+  // displayNames change rarely (only when the user updates their profile),
+  // and notifications surface a handful of actor uids at most per page, so
+  // a per-instance Map is plenty — no eviction policy needed at this
+  // scale. Stale entries clear when the FirestoreRepository instance
+  // itself is recreated (e.g., on a fresh app run).
+  final Map<String, String?> _displayNameCache = {};
+
+  /// Fetch the actor's `displayName` from `users/{uid}`, with caching.
+  ///
+  /// Returns `null` if the doc doesn't exist, has no `displayName` field,
+  /// or the read fails. Callers should fall back to a placeholder string.
+  Future<String?> getDisplayName(String uid) async {
+    if (_displayNameCache.containsKey(uid)) return _displayNameCache[uid];
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      final name = doc.data()?['displayName'] as String?;
+      _displayNameCache[uid] = name;
+      return name;
+    } on Exception catch (e, st) {
+      log('getDisplayName failed for $uid: $e', stackTrace: st);
+      return null;
+    }
   }
 
   /// Grant votes based on log₃(hoursElapsed) and update the timestamp.

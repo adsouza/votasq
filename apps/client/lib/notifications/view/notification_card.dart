@@ -1,12 +1,22 @@
+import 'dart:async';
+
 import 'package:client/l10n/l10n.dart';
+import 'package:client/services/firestore_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
 
 /// One card per notification. The whole card surface marks the notification
 /// read when tapped; the explicit "Open" button (in the trailing position)
 /// navigates to the relevant problem detail.
-class NotificationCard extends StatelessWidget {
+///
+/// Stateful because the actor's `displayName` is resolved asynchronously
+/// from `users/{actorUid}` — the card initially renders with a `Someone`
+/// placeholder and re-renders with the real name once the lookup returns.
+/// Caching is in [FirestoreRepository], so duplicate actor uids across the
+/// page share one read.
+class NotificationCard extends StatefulWidget {
   const NotificationCard({
     required this.notification,
     required this.onMarkRead,
@@ -17,15 +27,47 @@ class NotificationCard extends StatelessWidget {
   final ValueChanged<String> onMarkRead;
 
   @override
+  State<NotificationCard> createState() => _NotificationCardState();
+}
+
+class _NotificationCardState extends State<NotificationCard> {
+  static const _actorPlaceholder = 'Someone';
+
+  String? _resolvedActorName;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_resolveActor());
+  }
+
+  Future<void> _resolveActor() async {
+    final uid = _actorUidFor(widget.notification.payload);
+    if (uid == null) return;
+    final name = await context.read<FirestoreRepository>().getDisplayName(uid);
+    if (!mounted) return;
+    if (name != null && name.isNotEmpty) {
+      setState(() => _resolvedActorName = name);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final (title, body, targetProblemId) = _content(notification.payload, l10n);
-    final isUnread = notification.readAt == null;
+    final actorName = _resolvedActorName ?? _actorPlaceholder;
+    final (title, body, targetProblemId) = _content(
+      widget.notification.payload,
+      actorName,
+      l10n,
+    );
+    final isUnread = widget.notification.readAt == null;
 
     return Card(
       color: isUnread ? null : Theme.of(context).colorScheme.surfaceContainer,
       child: InkWell(
-        onTap: isUnread ? () => onMarkRead(notification.id) : null,
+        onTap: isUnread
+            ? () => widget.onMarkRead(widget.notification.id)
+            : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Opacity(
@@ -70,32 +112,24 @@ class NotificationCard extends StatelessWidget {
   /// navigate to — always the problem the recipient cares about (their own
   /// problem for the user-action types; the problem they voted on for
   /// problemRevised; their fork for forkAdopted).
-  ///
-  /// Actor display names aren't fetched here — for v1 we render the actor's
-  /// uid suffix. The cubit could be extended later to enrich actor names
-  /// via a separate user lookup if needed.
   (String, String, String) _content(
     NotificationPayload payload,
+    String actorName,
     AppLocalizations l10n,
   ) {
     return switch (payload) {
-      VoteReceivedPayload(:final problemId, :final actorUid) => (
+      VoteReceivedPayload(:final problemId) => (
         l10n.notificationVoteReceivedTitle,
-        l10n.notificationVoteReceivedBody(_actorDisplay(actorUid)),
+        l10n.notificationVoteReceivedBody(actorName),
         problemId,
       ),
-      ProblemForkedPayload(
-        :final originalProblemId,
-        :final actorUid,
-      ) =>
-        (
-          l10n.notificationProblemForkedTitle,
-          l10n.notificationProblemForkedBody(_actorDisplay(actorUid)),
-          originalProblemId,
-        ),
+      ProblemForkedPayload(:final originalProblemId) => (
+        l10n.notificationProblemForkedTitle,
+        l10n.notificationProblemForkedBody(actorName),
+        originalProblemId,
+      ),
       ProblemLinkedPayload(
         :final linkedProblemId,
-        :final actorUid,
         :final kind,
       ) =>
         (
@@ -107,15 +141,11 @@ class NotificationCard extends StatelessWidget {
               l10n.notificationProblemLinkedAsGeneralizationTitle,
           },
           switch (kind) {
-            null => l10n.notificationProblemLinkedBody(_actorDisplay(actorUid)),
+            null => l10n.notificationProblemLinkedBody(actorName),
             ProblemLinkKind.specialization =>
-              l10n.notificationProblemLinkedAsSpecializationBody(
-                _actorDisplay(actorUid),
-              ),
+              l10n.notificationProblemLinkedAsSpecializationBody(actorName),
             ProblemLinkKind.generalization =>
-              l10n.notificationProblemLinkedAsGeneralizationBody(
-                _actorDisplay(actorUid),
-              ),
+              l10n.notificationProblemLinkedAsGeneralizationBody(actorName),
           },
           linkedProblemId,
         ),
@@ -132,11 +162,18 @@ class NotificationCard extends StatelessWidget {
     };
   }
 
-  /// v1 actor-name placeholder. We only have the actor's uid on the
-  /// notification doc; resolving to a display name requires fetching
-  /// `users/{uid}`, which we'll add when the UI gains a place to surface
-  /// it. For now we show a short, anonymized form so the body is readable.
-  String _actorDisplay(String uid) => 'Someone';
+  /// Extracts the actor uid from payloads that carry one. Returns null for
+  /// types where no actor is relevant (problemRevised / forkAdopted —
+  /// their bodies don't reference an actor).
+  static String? _actorUidFor(NotificationPayload payload) {
+    return switch (payload) {
+      VoteReceivedPayload(:final actorUid) => actorUid,
+      ProblemForkedPayload(:final actorUid) => actorUid,
+      ProblemLinkedPayload(:final actorUid) => actorUid,
+      ProblemRevisedPayload() => null,
+      ForkAdoptedPayload() => null,
+    };
+  }
 }
 
 /// Checkbox-style indicator to the left of each notification.
