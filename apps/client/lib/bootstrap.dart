@@ -45,11 +45,28 @@ Future<void> bootstrap(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  if (!useEmulators) {
-    // The Firestore emulator does not check App Check tokens, so activation
-    // is only useful (and only succeeds reliably) against real Firebase.
-    // In non-release builds, mobile providers emit a debug token to the log
-    // that must be registered in Firebase Console → App Check → Apps.
+  // Activate App Check in every non-(web+emulator) configuration.
+  //
+  // The naive guard `if (!useEmulators)` is wrong on Apple platforms:
+  // when the firebase_app_check plugin is loaded (which is always, it's
+  // in pubspec.yaml), the iOS/macOS Firestore SDK automatically attempts
+  // to fetch an App Check token for every request. Without an explicit
+  // provider, the SDK falls back to DeviceCheck, which can't issue a
+  // token in debug builds — the exchange to `firebaseappcheck.googleapis.com`
+  // fails ("Too many attempts"), the Firestore SDK then refuses to
+  // proceed, and every query surfaces as `[cloud_firestore/unavailable]`.
+  // Activating with the debug provider gives the SDK something to use;
+  // the emulator ignores tokens, so it doesn't matter that the debug
+  // token isn't registered in Firebase Console for emulator runs.
+  //
+  // Web emulator runs skip activation because reCAPTCHA's site-key
+  // verification against localhost is fiddly and the web Firestore SDK
+  // doesn't have the same auto-fallback problem.
+  //
+  // For non-release mobile providers, the debug token is emitted to the
+  // log on first use and must be registered in Firebase Console →
+  // App Check → Apps (for prod runs; emulator runs ignore the result).
+  if (!useEmulators || !kIsWeb) {
     await FirebaseAppCheck.instance.activate(
       providerWeb: ReCaptchaV3Provider(
         '6LehEfcsAAAAAKNdlzalCBUJXYvJngj1lFTKYpC6',
