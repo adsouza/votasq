@@ -19,10 +19,14 @@ enum ProblemLinkKind {
   generalization;
 
   /// The inverse kind used when mirroring the edge on the other problem.
-  ProblemLinkKind get inverse => switch (this) {
-    ProblemLinkKind.specialization => ProblemLinkKind.generalization,
-    ProblemLinkKind.generalization => ProblemLinkKind.specialization,
-  };
+  ProblemLinkKind get inverse {
+    switch (this) {
+      case ProblemLinkKind.specialization:
+        return ProblemLinkKind.generalization;
+      case ProblemLinkKind.generalization:
+        return ProblemLinkKind.specialization;
+    }
+  }
 }
 
 @freezed

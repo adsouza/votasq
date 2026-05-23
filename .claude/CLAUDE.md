@@ -82,6 +82,10 @@ When you change `firestore.rules`, add or update a case in `apps/server/e2e/fire
 
 The Firestore emulator caches rules at startup and does not reliably hot-reload on file edit. The e2e test pushes the current rules file into the emulator via the `:securityRules` PUT endpoint at setUpAll time, so the test is self-contained — but if you're testing rules manually against a long-running emulator, restart it or you'll be debugging stale rules.
 
+### `dart format` is bundled with the Dart SDK and varies by Flutter version
+
+CI pins `flutter-version: 3.41.4` (`.github/workflows/main.yaml`). The `dart format` it runs comes from that SDK and can disagree with a newer local Flutter — `melos format` passing locally is not a guarantee CI's format step passes. Prefer language constructs whose formatting has been stable across versions (block-bodied methods, explicit `switch` statements) over newer-syntax shortcuts (`=>` arrow with multi-line `switch` expression body, method chains across `=>`) when the syntactic sugar is marginal. The dart_style changelog ([3.0.x → 3.1.x notes](https://pub.dev/packages/dart_style/changelog)) lists which patterns shifted between versions. If you must use a pattern that recently shifted, run `dart pub global activate dart_style <version>` matching CI's SDK and verify locally before pushing.
+
 ## Architecture
 
 Update the `ARCHITECTURE.md` file in the project root dir after making architectural changes.
