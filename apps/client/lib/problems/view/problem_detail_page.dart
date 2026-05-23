@@ -118,6 +118,17 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
   }
 
+  Future<void> _setHidden(Problem problem, bool hidden) async {
+    await context.read<ProblemsCubit>().setHidden(
+      problem: problem,
+      hidden: hidden,
+    );
+    if (!mounted) return;
+    setState(() {
+      _problem = problem.copyWith(hidden: hidden);
+    });
+  }
+
   Future<void> _fork(Problem problem, String ownerId) async {
     final repo = context.read<FirestoreRepository>();
     final router = GoRouter.of(context);
@@ -723,17 +734,25 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             valueListenable: _controller,
             builder: (context, value, child) {
               final hasWords = hasEnoughWords(_controller.text);
-              return Row(
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   FilledButton(
                     onPressed: hasWords ? _save : null,
                     child: Text(l10n.problemDetailSaveButton),
                   ),
-                  const SizedBox(width: 8),
                   FilledButton.tonal(
                     onPressed: () => context.go('/'),
                     child: Text(l10n.problemDetailBackButton),
                   ),
+                  if (!problem.hidden)
+                    OutlinedButton.icon(
+                      key: const Key('hideProblemButton'),
+                      icon: const Icon(Icons.visibility_off_outlined),
+                      label: Text(l10n.hideProblemButton),
+                      onPressed: () => _setHidden(problem, true),
+                    ),
                 ],
               );
             },
@@ -804,9 +823,20 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             ],
           ),
           body: SingleChildScrollView(
-            child: isOwner
-                ? _buildEditBody(problem)
-                : _buildReadOnlyBody(problem),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (problem.hidden)
+                  _ProblemHiddenBanner(
+                    isOwner: isOwner,
+                    onUnhide: () => _setHidden(problem, false),
+                  ),
+                if (isOwner)
+                  _buildEditBody(problem)
+                else
+                  _buildReadOnlyBody(problem),
+              ],
+            ),
           ),
         ),
       ),
@@ -1310,6 +1340,60 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Banner shown on a hidden problem's detail page. Renders different copy
+/// for the owner (who also gets a "Show in listing" action) vs anyone
+/// else (who gets a passive explanatory variant).
+class _ProblemHiddenBanner extends StatelessWidget {
+  const _ProblemHiddenBanner({
+    required this.isOwner,
+    required this.onUnhide,
+  });
+
+  final bool isOwner;
+  final Future<void> Function() onUnhide;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return Container(
+      key: const Key('hiddenBanner'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      color: theme.colorScheme.surfaceContainerHigh,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isOwner
+                ? l10n.problemHiddenOwnerBannerTitle
+                : l10n.problemHiddenViewerBannerTitle,
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isOwner
+                ? l10n.problemHiddenOwnerBannerBody
+                : l10n.problemHiddenViewerBannerBody,
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (isOwner) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: FilledButton.tonal(
+                key: const Key('unhideProblemButton'),
+                onPressed: onUnhide,
+                child: Text(l10n.unhideProblemButton),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

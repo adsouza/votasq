@@ -40,6 +40,7 @@ Problem _problem({
   String geoscope = '/',
   int votes = 7,
   String? lang,
+  bool hidden = false,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -50,6 +51,7 @@ Problem _problem({
     geoscope: geoscope,
     votes: votes,
     lang: lang,
+    hidden: hidden,
     createdAt: now,
     lastUpdatedAt: now,
   );
@@ -187,6 +189,146 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNWidgets(2));
       expect(find.text('Save'), findsOneWidget);
+    });
+
+    group('hidden flag', () {
+      testWidgets('owner sees Hide button when problem is not hidden', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('hideProblemButton')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('hiddenBanner')), findsNothing);
+      });
+
+      testWidgets('owner sees owner banner and Show-in-listing when hidden', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(hidden: true),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hiddenBanner')), findsOneWidget);
+        expect(
+          find.byKey(const Key('unhideProblemButton')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('hideProblemButton')),
+          findsNothing,
+        );
+      });
+
+      testWidgets('non-owner sees viewer banner only, no buttons', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(hidden: true),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hiddenBanner')), findsOneWidget);
+        expect(
+          find.byKey(const Key('hideProblemButton')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const Key('unhideProblemButton')),
+          findsNothing,
+        );
+      });
+
+      testWidgets('non-owner sees no banner when problem is not hidden', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hiddenBanner')), findsNothing);
+      });
+
+      testWidgets('tapping Hide calls cubit.setHidden(problem, true)', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        when(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: any(named: 'hidden'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('hideProblemButton')));
+        await tester.pumpAndSettle();
+        verify(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: true,
+          ),
+        ).called(1);
+      });
+
+      testWidgets('tapping Show-in-listing calls cubit.setHidden(false)', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(hidden: true),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        when(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: any(named: 'hidden'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('unhideProblemButton')));
+        await tester.pumpAndSettle();
+        verify(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: false,
+          ),
+        ).called(1);
+      });
     });
 
     testWidgets('back button navigates to home', (tester) async {
