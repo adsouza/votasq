@@ -4,4 +4,5 @@
 .atom/
 build/
 .dart_tool/
+.emulator-data/
 xcuserdata/

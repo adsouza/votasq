@@ -22,6 +22,7 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
           .toList() ??
       const [],
   solved: json['solved'] as bool? ?? false,
+  hidden: json['hidden'] as bool? ?? false,
   version: (json['version'] as num?)?.toInt() ?? 1,
   inspoProblemId: json['inspoProblemId'] as String?,
   inspoVersion: (json['inspoVersion'] as num?)?.toInt(),
@@ -30,6 +31,11 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  typedLinks:
+      (json['typedLinks'] as List<dynamic>?)
+          ?.map((e) => ProblemLink.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ProblemLink>[],
 );
 
 Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
@@ -44,8 +50,10 @@ Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
   'votes': instance.votes,
   'complaints': instance.complaints,
   'solved': instance.solved,
+  'hidden': instance.hidden,
   'version': instance.version,
   'inspoProblemId': instance.inspoProblemId,
   'inspoVersion': instance.inspoVersion,
   'linkedProblemIds': instance.linkedProblemIds,
+  'typedLinks': instance.typedLinks.map((e) => e.toJson()).toList(),
 };

@@ -68,6 +68,30 @@
     "@problemDetailPageTitle": {
         "description": "Title in the AppBar of the problem detail page"
     },
+    "hideProblemButton": "Hide from listing",
+    "@hideProblemButton": {
+        "description": "Label of the button on the problem detail page that hides the problem from the main listing. Only visible to the problem's owner when the problem is not yet hidden."
+    },
+    "unhideProblemButton": "Show in listing",
+    "@unhideProblemButton": {
+        "description": "Label of the button on the problem detail page that unhides a previously hidden problem so it reappears in the main listing. Only visible to the problem's owner when the problem is currently hidden."
+    },
+    "problemHiddenOwnerBannerTitle": "This problem is hidden from the main listing.",
+    "@problemHiddenOwnerBannerTitle": {
+        "description": "Banner title shown to the owner on the detail page of a problem they have hidden."
+    },
+    "problemHiddenOwnerBannerBody": "Nobody — including you — sees it on the listing. People can still reach it through direct links and notifications.",
+    "@problemHiddenOwnerBannerBody": {
+        "description": "Banner body shown to the owner on the detail page of a hidden problem. Clarifies the consequences of hiding."
+    },
+    "problemHiddenViewerBannerTitle": "The owner has hidden this problem from the main listing.",
+    "@problemHiddenViewerBannerTitle": {
+        "description": "Banner title shown to any non-owner viewer of a hidden problem's detail page."
+    },
+    "problemHiddenViewerBannerBody": "You can still see it here because you followed a direct link.",
+    "@problemHiddenViewerBannerBody": {
+        "description": "Banner body shown to non-owner viewers of a hidden problem's detail page. Explains why they can still see the page."
+    },
     "newProblemPageTitle": "What is a collective problem that vexes you?",
     "@newProblemPageTitle": {
         "description": "Title in the AppBar of the page for creating a new problem"
@@ -275,6 +299,52 @@
     "@unlinkProblemTooltip": {
         "description": "Tooltip for the button that unlinks a problem from its cluster"
     },
+    "linkAsTypedTooltip": "More link options",
+    "@linkAsTypedTooltip": {
+        "description": "Tooltip for the dropdown chevron next to the link button that exposes typed-link options"
+    },
+    "linkAsSpecializationButton": "Link as specialization",
+    "@linkAsSpecializationButton": {
+        "description": "Menu item label for linking another problem as a specialization (more specific) of the current one"
+    },
+    "linkAsGeneralizationButton": "Link as generalization",
+    "@linkAsGeneralizationButton": {
+        "description": "Menu item label for linking another problem as a generalization (more general) of the current one"
+    },
+    "linkProblemDialogTitleSpecialization": "Link as specialization",
+    "@linkProblemDialogTitleSpecialization": {
+        "description": "Title of the dialog when linking another problem as a specialization of the current one"
+    },
+    "linkProblemDialogTitleGeneralization": "Link as generalization",
+    "@linkProblemDialogTitleGeneralization": {
+        "description": "Title of the dialog when linking another problem as a generalization of the current one"
+    },
+    "generalizationsHeading": "Generalizations ({count})",
+    "@generalizationsHeading": {
+        "description": "Subsection heading listing problems that are generalizations (more general) of the current one",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "specializationsHeading": "Specializations ({count})",
+    "@specializationsHeading": {
+        "description": "Subsection heading listing problems that are specializations (more specific) of the current one",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "untagProblemLinkTooltip": "Remove relationship",
+    "@untagProblemLinkTooltip": {
+        "description": "Tooltip for the button that removes a typed (specialization/generalization) relationship"
+    },
+    "untagProblemLinkError": "Could not remove the relationship. Please try again.",
+    "@untagProblemLinkError": {
+        "description": "Toast message shown when removing a typed problem-link relationship fails"
+    },
     "notificationsBadgeTooltip": "Notifications",
     "@notificationsBadgeTooltip": {
         "description": "Tooltip for the notifications bell icon in the app bar"
@@ -328,6 +398,32 @@
     "notificationProblemLinkedBody": "{actorName} linked your problem from another",
     "@notificationProblemLinkedBody": {
         "description": "Body of a notification when someone links the user's problem from another",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemLinkedAsSpecializationTitle": "Your problem has a new specialization",
+    "@notificationProblemLinkedAsSpecializationTitle": {
+        "description": "Title of a notification when someone tags their problem as a specialization of the user's problem"
+    },
+    "notificationProblemLinkedAsSpecializationBody": "{actorName} linked their problem as a specialization of yours",
+    "@notificationProblemLinkedAsSpecializationBody": {
+        "description": "Body of a notification when someone tags their problem as a specialization of the user's problem",
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationProblemLinkedAsGeneralizationTitle": "Your problem has a new generalization",
+    "@notificationProblemLinkedAsGeneralizationTitle": {
+        "description": "Title of a notification when someone tags their problem as a generalization of the user's problem"
+    },
+    "notificationProblemLinkedAsGeneralizationBody": "{actorName} linked their problem as a generalization of yours",
+    "@notificationProblemLinkedAsGeneralizationBody": {
+        "description": "Body of a notification when someone tags their problem as a generalization of the user's problem",
         "placeholders": {
             "actorName": {
                 "type": "String"

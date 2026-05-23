@@ -96,10 +96,27 @@ class NotificationCard extends StatelessWidget {
       ProblemLinkedPayload(
         :final linkedProblemId,
         :final actorUid,
+        :final kind,
       ) =>
         (
-          l10n.notificationProblemLinkedTitle,
-          l10n.notificationProblemLinkedBody(_actorDisplay(actorUid)),
+          switch (kind) {
+            null => l10n.notificationProblemLinkedTitle,
+            ProblemLinkKind.specialization =>
+              l10n.notificationProblemLinkedAsSpecializationTitle,
+            ProblemLinkKind.generalization =>
+              l10n.notificationProblemLinkedAsGeneralizationTitle,
+          },
+          switch (kind) {
+            null => l10n.notificationProblemLinkedBody(_actorDisplay(actorUid)),
+            ProblemLinkKind.specialization =>
+              l10n.notificationProblemLinkedAsSpecializationBody(
+                _actorDisplay(actorUid),
+              ),
+            ProblemLinkKind.generalization =>
+              l10n.notificationProblemLinkedAsGeneralizationBody(
+                _actorDisplay(actorUid),
+              ),
+          },
           linkedProblemId,
         ),
       ProblemRevisedPayload(:final problemId) => (

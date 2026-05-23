@@ -40,6 +40,7 @@ Problem _problem({
   String geoscope = '/',
   int votes = 7,
   String? lang,
+  bool hidden = false,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -50,6 +51,7 @@ Problem _problem({
     geoscope: geoscope,
     votes: votes,
     lang: lang,
+    hidden: hidden,
     createdAt: now,
     lastUpdatedAt: now,
   );
@@ -65,6 +67,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(_problem());
+    registerFallbackValue(ProblemLinkKind.specialization);
   });
 
   setUp(() {
@@ -186,6 +189,241 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNWidgets(2));
       expect(find.text('Save'), findsOneWidget);
+    });
+
+    group('hidden flag', () {
+      testWidgets('owner sees Hide button when problem is not hidden', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('hideProblemButton')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('hiddenBanner')), findsNothing);
+      });
+
+      testWidgets('owner sees owner banner and Show-in-listing when hidden', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(hidden: true),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hiddenBanner')), findsOneWidget);
+        expect(
+          find.byKey(const Key('unhideProblemButton')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('hideProblemButton')),
+          findsNothing,
+        );
+      });
+
+      testWidgets('non-owner sees viewer banner only, no buttons', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(hidden: true),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hiddenBanner')), findsOneWidget);
+        expect(
+          find.byKey(const Key('hideProblemButton')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const Key('unhideProblemButton')),
+          findsNothing,
+        );
+      });
+
+      testWidgets('non-owner sees no banner when problem is not hidden', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hiddenBanner')), findsNothing);
+      });
+
+      testWidgets('tapping Hide calls cubit.setHidden(problem, true)', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        when(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: any(named: 'hidden'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('hideProblemButton')));
+        await tester.pumpAndSettle();
+        verify(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: true,
+          ),
+        ).called(1);
+      });
+
+      testWidgets('tapping Show-in-listing calls cubit.setHidden(false)', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer(
+          (_) async => _problem(hidden: true),
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        when(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: any(named: 'hidden'),
+          ),
+        ).thenAnswer((_) async {});
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('unhideProblemButton')));
+        await tester.pumpAndSettle();
+        verify(
+          () => problemsCubit.setHidden(
+            problem: any(named: 'problem'),
+            hidden: false,
+          ),
+        ).called(1);
+      });
+
+      testWidgets(
+        'tapping Hide works when ProblemsCubit is NOT in scope '
+        '(direct-URL navigation regression test)',
+        (tester) async {
+          // Reproduces the prod bug from 2026-05-23: the detail page is
+          // reachable by direct URL (e.g. from a notification or a shared
+          // link) without going through the listing route, so the
+          // ProblemsCubit provided by ProblemsPage is not in the
+          // ancestor chain. context.read<ProblemsCubit>() throws
+          // ProviderNotFoundException there; the fix falls back to the
+          // FirestoreRepository directly.
+          when(() => repo.getProblem(any())).thenAnswer(
+            (_) async => _problem(),
+          );
+          when(() => authCubit.state).thenReturn(
+            const AuthState(
+              status: AuthStatus.authenticated,
+              userId: 'owner1',
+            ),
+          );
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenAnswer((_) async {});
+
+          // Build a subject WITHOUT BlocProvider<ProblemsCubit>.
+          final router = GoRouter(
+            initialLocation: '/problems/test-id',
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const Scaffold(body: Text('home')),
+                routes: [
+                  GoRoute(
+                    path: 'problems/:id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return ProblemDetailPage(problemId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          );
+          await tester.pumpWidget(
+            MultiBlocProvider(
+              providers: [
+                BlocProvider<AuthCubit>.value(value: authCubit),
+                BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
+                // Intentionally no BlocProvider<ProblemsCubit>.
+              ],
+              child: MultiRepositoryProvider(
+                providers: [
+                  RepositoryProvider<FirestoreRepository>.value(value: repo),
+                  RepositoryProvider<LanguageDetectionService>.value(
+                    value: languageDetectionService,
+                  ),
+                  RepositoryProvider<TranslationRepository>.value(
+                    value: translationRepo,
+                  ),
+                ],
+                child: ToastificationWrapper(
+                  child: MaterialApp.router(
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    routerConfig: router,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('hideProblemButton')), findsOneWidget);
+          await tester.tap(find.byKey(const Key('hideProblemButton')));
+          await tester.pumpAndSettle();
+
+          // Repo was called directly (cubit fallback path).
+          verify(
+            () => repo.setHidden(problemId: 'test-id', hidden: true),
+          ).called(1);
+
+          // UI flipped to hidden state despite the missing cubit.
+          expect(find.byKey(const Key('hiddenBanner')), findsOneWidget);
+          expect(find.byKey(const Key('hideProblemButton')), findsNothing);
+          expect(
+            find.byKey(const Key('unhideProblemButton')),
+            findsOneWidget,
+          );
+        },
+      );
     });
 
     testWidgets('back button navigates to home', (tester) async {
@@ -952,6 +1190,200 @@ void main() {
         // should be gone
         expect(find.text('Apple problem'), findsOneWidget);
         expect(find.text('Banana problem'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'split-button menu opens dialog in specialization mode',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1');
+        final searchResult = _problem(id: 'p2', description: 'Candidate');
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getGlobalProblemsForSearch(),
+        ).thenAnswer((_) async => [searchResult]);
+        when(
+          () => repo.tagProblemLink(
+            sourceId: any(named: 'sourceId'),
+            targetId: any(named: 'targetId'),
+            kind: any(named: 'kind'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        // App bar shows the link icon AND the chevron dropdown
+        expect(find.byIcon(Icons.link), findsOneWidget);
+        final chevron = find.byIcon(Icons.arrow_drop_down);
+        expect(chevron, findsOneWidget);
+
+        await tester.tap(chevron);
+        await tester.pumpAndSettle();
+
+        // Menu items
+        expect(find.text('Link as specialization'), findsOneWidget);
+        expect(find.text('Link as generalization'), findsOneWidget);
+
+        await tester.tap(find.text('Link as specialization'));
+        await tester.pumpAndSettle();
+
+        // Dialog opens with the specialization title
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Link as specialization'),
+          ),
+          findsOneWidget,
+        );
+
+        // Tap the per-row link icon to confirm
+        await tester.tap(
+          find.descendant(
+            of: find.byType(ListTile),
+            matching: find.byIcon(Icons.link),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repo.tagProblemLink(
+            sourceId: 'p1',
+            targetId: 'p2',
+            kind: ProblemLinkKind.specialization,
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'renders typed-link subsections and untag fires repository call',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1').copyWith(
+          typedLinks: const [
+            ProblemLink(
+              targetId: 'gen',
+              kind: ProblemLinkKind.generalization,
+            ),
+            ProblemLink(
+              targetId: 'spec',
+              kind: ProblemLinkKind.specialization,
+            ),
+          ],
+        );
+        final generalProblem = _problem(
+          id: 'gen',
+          description: 'Broader problem',
+        );
+        final specProblem = _problem(
+          id: 'spec',
+          description: 'Narrower problem',
+        );
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getProblem('gen'),
+        ).thenAnswer((_) async => generalProblem);
+        when(
+          () => repo.getProblem('spec'),
+        ).thenAnswer((_) async => specProblem);
+        when(
+          () => repo.untagProblemLink(
+            sourceId: any(named: 'sourceId'),
+            targetId: any(named: 'targetId'),
+          ),
+        ).thenAnswer((_) async {});
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Generalizations (1)'), findsOneWidget);
+        expect(find.text('Specializations (1)'), findsOneWidget);
+        expect(find.text('Broader problem'), findsOneWidget);
+        expect(find.text('Narrower problem'), findsOneWidget);
+
+        // Untag the generalization (find the link-off near "Broader problem")
+        final broaderTile = find.widgetWithText(ListTile, 'Broader problem');
+        await tester.tap(
+          find.descendant(
+            of: broaderTile,
+            matching: find.byIcon(Icons.link_off),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repo.untagProblemLink(sourceId: 'p1', targetId: 'gen'),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'dialog already-linked guard excludes typed-link targets',
+      (tester) async {
+        final mainProblem = _problem(id: 'p1').copyWith(
+          typedLinks: const [
+            ProblemLink(
+              targetId: 'p2',
+              kind: ProblemLinkKind.specialization,
+            ),
+          ],
+        );
+        final alreadyTaggedProblem = _problem(
+          id: 'p2',
+          description: 'Already tagged',
+        );
+        final freshProblem = _problem(id: 'p3', description: 'Fresh candidate');
+
+        when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
+        when(
+          () => repo.getProblem('p2'),
+        ).thenAnswer((_) async => alreadyTaggedProblem);
+        when(() => repo.getGlobalProblemsForSearch()).thenAnswer(
+          (_) async => [alreadyTaggedProblem, freshProblem],
+        );
+        when(() => authCubit.state).thenReturn(
+          const AuthState(
+            status: AuthStatus.authenticated,
+            userId: 'owner1',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject(problemId: 'p1'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.link).first);
+        await tester.pumpAndSettle();
+
+        // Fresh candidate should appear inside the dialog; the already-tagged
+        // one should be filtered out.
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Fresh candidate'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(Dialog),
+            matching: find.text('Already tagged'),
+          ),
+          findsNothing,
+        );
       },
     );
   });

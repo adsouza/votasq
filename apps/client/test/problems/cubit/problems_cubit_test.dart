@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
@@ -241,6 +243,78 @@ void main() {
       ],
     );
 
+    // Reproduces the web-only doubling: on web the Firestore JS SDK fires
+    // the watch listener synchronously from the local cache before
+    // `await repo.addProblem(...)` returns, so the cubit's subscribe
+    // handler has already inserted the new problem (at its sorted
+    // position) by the time `addProblem` reaches its prepend. A blind
+    // prepend would then duplicate the doc. We model that ordering by
+    // pushing a snapshot onto the watch stream from inside the mocked
+    // addProblem call.
+    test(
+      'addProblem does not duplicate when watch stream already emitted the '
+      'new problem',
+      () async {
+        final existing = _problem(id: 'existing', votes: 5);
+        final created = _problem(
+          id: 'new',
+          description: 'a new problem',
+        );
+        final controller =
+            StreamController<
+              ({List<Problem> problems, DocumentSnapshot? lastDoc})
+            >();
+        addTearDown(controller.close);
+
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) => controller.stream);
+
+        when(
+          () => repo.addProblem(
+            description: any(named: 'description'),
+            goal: any(named: 'goal'),
+            ownerId: any(named: 'ownerId'),
+            geoscope: any(named: 'geoscope'),
+            userLanguage: any(named: 'userLanguage'),
+          ),
+        ).thenAnswer((_) async {
+          // Simulate the web JS SDK firing the listener from cache
+          // (snapshot lists existing first by votes DESC, then the new
+          // problem at its sorted position) before this future resolves.
+          controller.add(
+            (
+              problems: [existing, created],
+              lastDoc: _FakeDocumentSnapshot(),
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+          return created;
+        });
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+        controller.add(
+          (problems: [existing], lastDoc: _FakeDocumentSnapshot()),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        await cubit.addProblem(
+          description: 'a new problem',
+          ownerId: 'user1',
+          userLanguage: 'en',
+        );
+
+        expect(
+          cubit.state.problems.map((p) => p.id).toList(),
+          ['new', 'existing'],
+        );
+      },
+    );
+
     blocTest<ProblemsCubit, ProblemsState>(
       'addProblem passes goal to repo',
       build: () {
@@ -438,5 +512,103 @@ void main() {
           cubit.applyLocalUpdate(_problem(id: 'missing', description: 'X')),
       expect: () => <ProblemsState>[],
     );
+
+    group('setHidden', () {
+      blocTest<ProblemsCubit, ProblemsState>(
+        'setHidden(true) calls repo and drops the problem from state',
+        build: () {
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenAnswer((_) async {});
+          return ProblemsCubit(repo);
+        },
+        seed: () => ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(id: 'a'),
+            _problem(id: 'b'),
+          ],
+        ),
+        act: (cubit) => cubit.setHidden(
+          problem: _problem(id: 'a'),
+          hidden: true,
+        ),
+        expect: () => [
+          isA<ProblemsState>().having(
+            (s) => s.problems.map((p) => p.id).toList(),
+            'problems ids',
+            ['b'],
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => repo.setHidden(problemId: 'a', hidden: true),
+          ).called(1);
+        },
+      );
+
+      blocTest<ProblemsCubit, ProblemsState>(
+        'setHidden(false) calls repo and applies local update without dropping',
+        build: () {
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenAnswer((_) async {});
+          return ProblemsCubit(repo);
+        },
+        seed: () => ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(id: 'a'),
+            _problem(id: 'b'),
+          ],
+        ),
+        act: (cubit) => cubit.setHidden(
+          problem: _problem(id: 'a'),
+          hidden: false,
+        ),
+        // The problem under id 'a' was already not-hidden in the local
+        // state, so applyLocalUpdate emits a state with the same shape.
+        expect: () => [
+          isA<ProblemsState>().having(
+            (s) => s.problems.map((p) => p.id).toList(),
+            'problems ids',
+            ['a', 'b'],
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => repo.setHidden(problemId: 'a', hidden: false),
+          ).called(1);
+        },
+      );
+
+      blocTest<ProblemsCubit, ProblemsState>(
+        'setHidden swallows repo errors',
+        build: () {
+          when(
+            () => repo.setHidden(
+              problemId: any(named: 'problemId'),
+              hidden: any(named: 'hidden'),
+            ),
+          ).thenThrow(Exception('boom'));
+          return ProblemsCubit(repo);
+        },
+        seed: () => ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [_problem(id: 'a')],
+        ),
+        act: (cubit) => cubit.setHidden(
+          problem: _problem(id: 'a'),
+          hidden: true,
+        ),
+        expect: () => <ProblemsState>[],
+      );
+    });
   });
 }

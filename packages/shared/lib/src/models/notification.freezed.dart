@@ -462,12 +462,12 @@ return forkAdopted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String problemId,  String actorUid)?  voteReceived,TResult Function( String originalProblemId,  String forkProblemId,  String actorUid)?  problemForked,TResult Function( String linkedProblemId,  String linkerProblemId,  String actorUid)?  problemLinked,TResult Function( String problemId,  int newVersion)?  problemRevised,TResult Function( String forkProblemId,  String originalProblemId,  int newVersion)?  forkAdopted,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String problemId,  String actorUid)?  voteReceived,TResult Function( String originalProblemId,  String forkProblemId,  String actorUid)?  problemForked,TResult Function( String linkedProblemId,  String linkerProblemId,  String actorUid,  ProblemLinkKind? kind)?  problemLinked,TResult Function( String problemId,  int newVersion)?  problemRevised,TResult Function( String forkProblemId,  String originalProblemId,  int newVersion)?  forkAdopted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case VoteReceivedPayload() when voteReceived != null:
 return voteReceived(_that.problemId,_that.actorUid);case ProblemForkedPayload() when problemForked != null:
 return problemForked(_that.originalProblemId,_that.forkProblemId,_that.actorUid);case ProblemLinkedPayload() when problemLinked != null:
-return problemLinked(_that.linkedProblemId,_that.linkerProblemId,_that.actorUid);case ProblemRevisedPayload() when problemRevised != null:
+return problemLinked(_that.linkedProblemId,_that.linkerProblemId,_that.actorUid,_that.kind);case ProblemRevisedPayload() when problemRevised != null:
 return problemRevised(_that.problemId,_that.newVersion);case ForkAdoptedPayload() when forkAdopted != null:
 return forkAdopted(_that.forkProblemId,_that.originalProblemId,_that.newVersion);case _:
   return orElse();
@@ -487,12 +487,12 @@ return forkAdopted(_that.forkProblemId,_that.originalProblemId,_that.newVersion)
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String problemId,  String actorUid)  voteReceived,required TResult Function( String originalProblemId,  String forkProblemId,  String actorUid)  problemForked,required TResult Function( String linkedProblemId,  String linkerProblemId,  String actorUid)  problemLinked,required TResult Function( String problemId,  int newVersion)  problemRevised,required TResult Function( String forkProblemId,  String originalProblemId,  int newVersion)  forkAdopted,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String problemId,  String actorUid)  voteReceived,required TResult Function( String originalProblemId,  String forkProblemId,  String actorUid)  problemForked,required TResult Function( String linkedProblemId,  String linkerProblemId,  String actorUid,  ProblemLinkKind? kind)  problemLinked,required TResult Function( String problemId,  int newVersion)  problemRevised,required TResult Function( String forkProblemId,  String originalProblemId,  int newVersion)  forkAdopted,}) {final _that = this;
 switch (_that) {
 case VoteReceivedPayload():
 return voteReceived(_that.problemId,_that.actorUid);case ProblemForkedPayload():
 return problemForked(_that.originalProblemId,_that.forkProblemId,_that.actorUid);case ProblemLinkedPayload():
-return problemLinked(_that.linkedProblemId,_that.linkerProblemId,_that.actorUid);case ProblemRevisedPayload():
+return problemLinked(_that.linkedProblemId,_that.linkerProblemId,_that.actorUid,_that.kind);case ProblemRevisedPayload():
 return problemRevised(_that.problemId,_that.newVersion);case ForkAdoptedPayload():
 return forkAdopted(_that.forkProblemId,_that.originalProblemId,_that.newVersion);}
 }
@@ -508,12 +508,12 @@ return forkAdopted(_that.forkProblemId,_that.originalProblemId,_that.newVersion)
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String problemId,  String actorUid)?  voteReceived,TResult? Function( String originalProblemId,  String forkProblemId,  String actorUid)?  problemForked,TResult? Function( String linkedProblemId,  String linkerProblemId,  String actorUid)?  problemLinked,TResult? Function( String problemId,  int newVersion)?  problemRevised,TResult? Function( String forkProblemId,  String originalProblemId,  int newVersion)?  forkAdopted,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String problemId,  String actorUid)?  voteReceived,TResult? Function( String originalProblemId,  String forkProblemId,  String actorUid)?  problemForked,TResult? Function( String linkedProblemId,  String linkerProblemId,  String actorUid,  ProblemLinkKind? kind)?  problemLinked,TResult? Function( String problemId,  int newVersion)?  problemRevised,TResult? Function( String forkProblemId,  String originalProblemId,  int newVersion)?  forkAdopted,}) {final _that = this;
 switch (_that) {
 case VoteReceivedPayload() when voteReceived != null:
 return voteReceived(_that.problemId,_that.actorUid);case ProblemForkedPayload() when problemForked != null:
 return problemForked(_that.originalProblemId,_that.forkProblemId,_that.actorUid);case ProblemLinkedPayload() when problemLinked != null:
-return problemLinked(_that.linkedProblemId,_that.linkerProblemId,_that.actorUid);case ProblemRevisedPayload() when problemRevised != null:
+return problemLinked(_that.linkedProblemId,_that.linkerProblemId,_that.actorUid,_that.kind);case ProblemRevisedPayload() when problemRevised != null:
 return problemRevised(_that.problemId,_that.newVersion);case ForkAdoptedPayload() when forkAdopted != null:
 return forkAdopted(_that.forkProblemId,_that.originalProblemId,_that.newVersion);case _:
   return null;
@@ -679,12 +679,13 @@ as String,
 @JsonSerializable()
 
 class ProblemLinkedPayload implements NotificationPayload {
-  const ProblemLinkedPayload({required this.linkedProblemId, required this.linkerProblemId, required this.actorUid, final  String? $type}): $type = $type ?? 'problemLinked';
+  const ProblemLinkedPayload({required this.linkedProblemId, required this.linkerProblemId, required this.actorUid, this.kind, final  String? $type}): $type = $type ?? 'problemLinked';
   factory ProblemLinkedPayload.fromJson(Map<String, dynamic> json) => _$ProblemLinkedPayloadFromJson(json);
 
  final  String linkedProblemId;
  final  String linkerProblemId;
  final  String actorUid;
+ final  ProblemLinkKind? kind;
 
 @JsonKey(name: 'type')
 final String $type;
@@ -703,16 +704,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProblemLinkedPayload&&(identical(other.linkedProblemId, linkedProblemId) || other.linkedProblemId == linkedProblemId)&&(identical(other.linkerProblemId, linkerProblemId) || other.linkerProblemId == linkerProblemId)&&(identical(other.actorUid, actorUid) || other.actorUid == actorUid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProblemLinkedPayload&&(identical(other.linkedProblemId, linkedProblemId) || other.linkedProblemId == linkedProblemId)&&(identical(other.linkerProblemId, linkerProblemId) || other.linkerProblemId == linkerProblemId)&&(identical(other.actorUid, actorUid) || other.actorUid == actorUid)&&(identical(other.kind, kind) || other.kind == kind));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,linkedProblemId,linkerProblemId,actorUid);
+int get hashCode => Object.hash(runtimeType,linkedProblemId,linkerProblemId,actorUid,kind);
 
 @override
 String toString() {
-  return 'NotificationPayload.problemLinked(linkedProblemId: $linkedProblemId, linkerProblemId: $linkerProblemId, actorUid: $actorUid)';
+  return 'NotificationPayload.problemLinked(linkedProblemId: $linkedProblemId, linkerProblemId: $linkerProblemId, actorUid: $actorUid, kind: $kind)';
 }
 
 
@@ -723,7 +724,7 @@ abstract mixin class $ProblemLinkedPayloadCopyWith<$Res> implements $Notificatio
   factory $ProblemLinkedPayloadCopyWith(ProblemLinkedPayload value, $Res Function(ProblemLinkedPayload) _then) = _$ProblemLinkedPayloadCopyWithImpl;
 @useResult
 $Res call({
- String linkedProblemId, String linkerProblemId, String actorUid
+ String linkedProblemId, String linkerProblemId, String actorUid, ProblemLinkKind? kind
 });
 
 
@@ -740,12 +741,13 @@ class _$ProblemLinkedPayloadCopyWithImpl<$Res>
 
 /// Create a copy of NotificationPayload
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? linkedProblemId = null,Object? linkerProblemId = null,Object? actorUid = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? linkedProblemId = null,Object? linkerProblemId = null,Object? actorUid = null,Object? kind = freezed,}) {
   return _then(ProblemLinkedPayload(
 linkedProblemId: null == linkedProblemId ? _self.linkedProblemId : linkedProblemId // ignore: cast_nullable_to_non_nullable
 as String,linkerProblemId: null == linkerProblemId ? _self.linkerProblemId : linkerProblemId // ignore: cast_nullable_to_non_nullable
 as String,actorUid: null == actorUid ? _self.actorUid : actorUid // ignore: cast_nullable_to_non_nullable
-as String,
+as String,kind: freezed == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as ProblemLinkKind?,
   ));
 }
 

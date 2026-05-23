@@ -6,7 +6,7 @@ Votasq is a Dart/Flutter monorepo with three main components:
 | Package           | Description                                                    |
 |-------------------|----------------------------------------------------------------|
 | `packages/shared` | Freezed data models shared between client and server           |
-| `apps/client`     | Flutter multi-platform client (macOS, GNU/Linux, Android, Web) |
+| `apps/client`     | Flutter multi-platform client (macOS, iOS, Android, Web)       |
 | `apps/server`     | Dart Frog REST API backed by Google Cloud Firestore            |
 
 ## Prerequisites
@@ -30,6 +30,27 @@ cd votasq
 # Bootstrap the workspace (resolves dependencies and links packages)
 melos setup
 ```
+
+### Tooling: prefer `melos` commands
+
+This monorepo uses [Melos](https://melos.invertase.dev/) to orchestrate
+multi-package operations. **Use `melos <script>` wherever one is defined**;
+the raw `dart`/`flutter` equivalents either work on a single package or have
+gotchas (e.g. `dart format apps packages` descends into vendored SwiftPM
+checkouts under `apps/client/build/`). The available scripts:
+
+| Command              | What it does                                                   |
+|----------------------|----------------------------------------------------------------|
+| `melos setup`        | Bootstrap workspace, enable SwiftPM, install git hooks         |
+| `melos gen`          | Run `build_runner` across packages + regenerate l10n           |
+| `melos format`       | `dart format --set-exit-if-changed` across packages            |
+| `melos build:client` | Build the Flutter client (Android, macOS, iOS, Web) — dev flavor |
+| `melos deploy:server`| Deploy the Dart Frog server to Cloud Run                       |
+| `melos run release`  | Tag-driven client release (see [Cutting a Client Release](#cutting-a-client-release)) |
+
+For things without a melos script (running the app, tests, the server in
+dev mode, e2e tests), the raw `flutter`/`dart`/`dart_frog` commands below
+are the canonical entry points.
 
 ### Code Generation
 
@@ -101,9 +122,13 @@ dart test apps/server/e2e/ -t e2e
 ### Linting and Formatting
 
 ```sh
-dart format --set-exit-if-changed apps packages
-flutter analyze apps packages
+melos format                       # Format Dart sources across all packages
+flutter analyze apps packages      # Run the analyzer (no melos wrapper)
 ```
+
+`melos format` is preferred over raw `dart format apps packages` because
+the raw command descends into vendored SwiftPM checkouts under
+`apps/client/build/` and reports noisy diffs that nothing should touch.
 
 ## REST API
 
@@ -122,8 +147,12 @@ flutter analyze apps packages
 ### Build Client Artifacts
 
 ```sh
-melos build:client     # Builds APK + macOS release
+melos build:client     # Builds Android (APK), macOS, iOS (--no-codesign), and Web — development flavor
 ```
+
+The script chains the platform builds with `&&`, so the first failure
+stops the rest. APK requires the Android SDK installed locally; the
+others build on a stock macOS dev box with Xcode.
 
 ### Deploy Server to Cloud Run
 
@@ -138,14 +167,32 @@ The production Docker build is a multi-stage process:
 and compiles it to a native executable.
 3. Produces a minimal `scratch` image containing only the binary and web assets.
 
+### Cutting a Client Release
+
+Releases are tag-driven — pushing a `v*` tag fires
+[release.yaml](.github/workflows/release.yaml), which builds Android, Web,
+and macOS artifacts and publishes them as a GitHub Release.
+
+```sh
+melos run release -- v0.5.1 "Short message for the annotated tag"
+```
+
+This wraps the manual ritual (format, analyze, bump
+`apps/client/pubspec.yaml`'s build number, commit, push, create annotated
+tag, push tag) in [tool/release.sh](tool/release.sh). Pre-flight checks
+require a clean working tree on `main` that's in sync with `origin/main`,
+and refuse to reuse an existing tag. The message argument becomes the
+annotated-tag message only — the GitHub Release body stays auto-generated
+from PR titles since the last tag.
+
 ## CI/CD
 
 GitHub Actions workflows in `.github/workflows/`:
 
 - **main.yaml** — Runs on every push/PR to `main`: semantic PR check, spell
   check, dependency resolution, formatting, analysis, and tests with coverage.
-- **release.yaml** — Triggered by `v*` tags: builds Android, Web, macOS, and
-  Linux artifacts and publishes them as a GitHub Release.
+- **release.yaml** — Triggered by `v*` tags: builds Android, Web, and macOS
+  artifacts and publishes them as a GitHub Release.
 - **license_check.yaml** — Validates that all dependencies use allowed licenses
   (MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0) when `pubspec.yaml` files change.
 

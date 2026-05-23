@@ -4,7 +4,7 @@ service cloud.firestore {
     match /problems/{problemId} {
       allow read: if true;
       allow create: if
-        request.resource.data.keys().hasAll(['description', 'votes', 'solved', 'version', 'geoscope'])
+        request.resource.data.keys().hasAll(['description', 'votes', 'solved', 'hidden', 'version', 'geoscope'])
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 80
@@ -15,6 +15,8 @@ service cloud.firestore {
         && request.resource.data.votes == 1
         && request.resource.data.solved is bool
         && request.resource.data.solved == false
+        && request.resource.data.hidden is bool
+        && request.resource.data.hidden == false
         && request.resource.data.version is int
         && request.resource.data.version == 1;
       allow update: if
@@ -36,12 +38,30 @@ service cloud.firestore {
           && request.auth.uid in request.resource.data.complaints
         )
         ||
-        // Problem linking / clustering update (auth required, only linkedProblemIds changes, size limited to prevent DoS)
+        // Problem linking / clustering update (auth required, only
+        // linkedProblemIds and/or typedLinks change, both size-limited to
+        // prevent DoS). `typedLinks` carries directional specialization /
+        // generalization tags; tagProblemLink and untagProblemLink in the
+        // client may write either field individually or both together
+        // (promoting a generic clique link into a typed pair severs the
+        // generic edge and writes the typed entries in one batched update).
         (
           request.auth != null
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedProblemIds'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedProblemIds', 'typedLinks'])
           && request.resource.data.get('linkedProblemIds', []) is list
           && request.resource.data.get('linkedProblemIds', []).size() <= 100
+          && request.resource.data.get('typedLinks', []) is list
+          && request.resource.data.get('typedLinks', []).size() <= 100
+        )
+        ||
+        // Hide / unhide. Only the owner may flip `hidden`, and only
+        // `hidden` may change in the write. A description/goal edit
+        // that also wants to change `hidden` must use two writes.
+        (
+          request.auth != null
+          && request.auth.uid == resource.data.ownerId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])
+          && request.resource.data.hidden is bool
         )
         ||
         // Full problem update
@@ -59,6 +79,7 @@ service cloud.firestore {
           && request.resource.data.solved is bool
           && request.resource.data.version is int
           && request.resource.data.version > resource.data.version
+          && request.resource.data.hidden == resource.data.get('hidden', false)
         );
 
       match /versions/{versionId} {

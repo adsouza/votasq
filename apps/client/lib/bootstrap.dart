@@ -34,16 +34,39 @@ Future<void> bootstrap(
   bool useEmulators = false,
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // print() (not log()) so this is reliably visible in `flutter run`'s
+  // terminal. The single most useful diagnostic at startup: which
+  // backend did this build connect to? Tells us in one line whether
+  // dart-defines / build flavor wiring did what we expect.
+  // ignore: avoid_print
+  print('Bootstrap: useEmulators=$useEmulators');
   usePathUrlStrategy();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  if (!useEmulators) {
-    // The Firestore emulator does not check App Check tokens, so activation
-    // is only useful (and only succeeds reliably) against real Firebase.
-    // In non-release builds, mobile providers emit a debug token to the log
-    // that must be registered in Firebase Console → App Check → Apps.
+  // Activate App Check in every non-(web+emulator) configuration.
+  //
+  // The naive guard `if (!useEmulators)` is wrong on Apple platforms:
+  // when the firebase_app_check plugin is loaded (which is always, it's
+  // in pubspec.yaml), the iOS/macOS Firestore SDK automatically attempts
+  // to fetch an App Check token for every request. Without an explicit
+  // provider, the SDK falls back to DeviceCheck, which can't issue a
+  // token in debug builds — the exchange to `firebaseappcheck.googleapis.com`
+  // fails ("Too many attempts"), the Firestore SDK then refuses to
+  // proceed, and every query surfaces as `[cloud_firestore/unavailable]`.
+  // Activating with the debug provider gives the SDK something to use;
+  // the emulator ignores tokens, so it doesn't matter that the debug
+  // token isn't registered in Firebase Console for emulator runs.
+  //
+  // Web emulator runs skip activation because reCAPTCHA's site-key
+  // verification against localhost is fiddly and the web Firestore SDK
+  // doesn't have the same auto-fallback problem.
+  //
+  // For non-release mobile providers, the debug token is emitted to the
+  // log on first use and must be registered in Firebase Console →
+  // App Check → Apps (for prod runs; emulator runs ignore the result).
+  if (!useEmulators || !kIsWeb) {
     await FirebaseAppCheck.instance.activate(
       providerWeb: ReCaptchaV3Provider(
         '6LehEfcsAAAAAKNdlzalCBUJXYvJngj1lFTKYpC6',
@@ -100,7 +123,12 @@ Future<void> _connectToEmulators() async {
   await FirebaseAuth.instance.useAuthEmulator(host, 9099);
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8081);
   FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
-  log(
+  // print() (not log()) so this is reliably visible in `flutter run`'s
+  // terminal — dart:developer.log() routes through the VM service and
+  // may not surface depending on Flutter / IDE configuration. This is
+  // a one-line bootstrap log; the noise is worth the diagnosability.
+  // ignore: avoid_print
+  print(
     'Bootstrap: connected to Firebase emulators at $host '
     '(auth:9099, firestore:8081, functions:5001)',
   );
@@ -109,5 +137,12 @@ Future<void> _connectToEmulators() async {
 String _emulatorHost() {
   if (kIsWeb) return 'localhost';
   if (Platform.isAndroid) return '10.0.2.2';
-  return 'localhost';
+  // macOS / iOS / desktop: use 127.0.0.1 literally rather than 'localhost'.
+  // macOS resolves 'localhost' to both ::1 (IPv6) and 127.0.0.1 (IPv4),
+  // and the Firebase Local Emulator Suite binds only to 127.0.0.1. The
+  // Firestore client uses gRPC, which on Apple platforms doesn't reliably
+  // happy-eyeballs from IPv6 to IPv4 — so a connection to ::1:8081 fails
+  // with "Connection refused" and surfaces as [cloud_firestore/unavailable].
+  // (Auth works because its REST/URLSession path does proper fallback.)
+  return '127.0.0.1';
 }

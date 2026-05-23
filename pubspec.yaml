@@ -54,8 +54,26 @@ melos:
 
     build:client:
       run: |
-        melos exec --scope="client" -- "flutter build apk --release && flutter build macos --release"
-      description: Build the Flutter client for Android and macOS.
+        melos exec --scope="client" -- "\
+          flutter build apk    --flavor development --target lib/main_development.dart --release && \
+          flutter build macos  --flavor development --target lib/main_development.dart --release && \
+          flutter build ios    --flavor development --target lib/main_development.dart --release --no-codesign && \
+          flutter build web                          --target lib/main_development.dart --release"
+      description: Build the Flutter client (Android, macOS, iOS, Web) using
+        the development flavor and entry point. Mirrors the
+        flavor/target/dart-define pattern that .github/workflows/release.yaml
+        uses for production. iOS builds with --no-codesign so this works on
+        a dev machine without signing certs; APK needs the Android SDK
+        installed locally. Web doesn't take a --flavor flag.
+
+    release:
+      run: ./tool/release.sh "$@"
+      description: |
+        Cut a new client release. Usage:
+          melos run release -- <vX.Y.Z[-suffix]> "<annotated tag message>"
+        Runs format + analyze, bumps the build number in
+        apps/client/pubspec.yaml, commits, pushes, and pushes an annotated tag
+        that triggers .github/workflows/release.yaml. See tool/release.sh.
 
     # Note: `flutter run` is launched via tool/run-client.sh, not as a melos
     # script, because melos doesn't forward stdin to script processes — so

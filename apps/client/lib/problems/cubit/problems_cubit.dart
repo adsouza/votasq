@@ -65,9 +65,12 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   /// Create a new problem with the given description.
   /// If [geoscope] is provided it overrides the current viewing geoscope.
   ///
-  /// Optimistically prepends the new problem to local state. The watch stream
-  /// will not emit when the new doc falls past the first page's `limit`, so
-  /// this keeps the UI in sync regardless.
+  /// Optimistically prepends the new problem to local state. The watch
+  /// stream may not emit when the new doc falls past the first page's
+  /// `limit`, so this keeps the UI in sync regardless. Dedupes by id
+  /// because on web the Firestore listener fires synchronously from
+  /// local cache before `await` returns, so a blind prepend would
+  /// duplicate the new problem at the top and at its sorted position.
   Future<void> addProblem({
     required String description,
     required String ownerId,
@@ -83,7 +86,8 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         geoscope: geoscope ?? state.geoscope,
         userLanguage: userLanguage,
       );
-      emit(state.copyWith(problems: [created, ...state.problems]));
+      final others = state.problems.where((p) => p.id != created.id).toList();
+      emit(state.copyWith(problems: [created, ...others]));
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {
@@ -125,6 +129,32 @@ class ProblemsCubit extends Cubit<ProblemsState> {
       );
     } on Exception catch (e, st) {
       log('flagProblem failed: $e', stackTrace: st);
+    }
+  }
+
+  /// Toggle a problem's `hidden` flag (owner-only at the rules layer).
+  /// On hide, optimistically drops the problem from the local list so a
+  /// back-navigation to the listing doesn't briefly show the stale entry
+  /// before the watch snapshot reconciles. On unhide, applies a local
+  /// update if the problem is still in the visible page (the watch
+  /// stream will refresh it independently).
+  Future<void> setHidden({
+    required Problem problem,
+    required bool hidden,
+  }) async {
+    try {
+      await _repo.setHidden(problemId: problem.id, hidden: hidden);
+      if (hidden) {
+        emit(
+          state.copyWith(
+            problems: state.problems.where((p) => p.id != problem.id).toList(),
+          ),
+        );
+      } else {
+        applyLocalUpdate(problem.copyWith(hidden: false));
+      }
+    } on Exception catch (e, st) {
+      log('setHidden failed: $e', stackTrace: st);
     }
   }
 

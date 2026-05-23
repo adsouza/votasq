@@ -50,11 +50,12 @@ class FirestoreRepository {
   CollectionReference<Map<String, dynamic>> get _problemsRef =>
       _firestore.collection(_collection);
 
-  /// Unsolved problems matching the given geoscope or any ancestor,
-  /// ordered by votes DESC then doc ID ASC.
+  /// Unsolved, non-hidden problems matching the given geoscope or any
+  /// ancestor, ordered by votes DESC then doc ID ASC.
   Query<Map<String, dynamic>> _geoscopedQuery(String geoscope) => _problemsRef
       .where('geoscope', whereIn: geoscopeAncestors(geoscope))
       .where('solved', isEqualTo: false)
+      .where('hidden', isEqualTo: false)
       .orderBy('votes', descending: true)
       .orderBy(FieldPath.documentId);
 
@@ -125,6 +126,10 @@ class FirestoreRepository {
       'lang': result.lang,
       'votes': 1,
       'solved': false,
+      // Required: the listing query filters `where('hidden', isEqualTo:
+      // false)`, which excludes docs where the field is missing. Always
+      // stamp it on create or the new problem won't appear in any list.
+      'hidden': false,
       'version': version,
       'createdAt': now,
       'lastUpdatedAt': now,
@@ -195,6 +200,9 @@ class FirestoreRepository {
       'lang': ?source.lang,
       'votes': 1,
       'solved': false,
+      // Same rationale as addProblem: the listing query excludes docs
+      // missing the `hidden` field.
+      'hidden': false,
       'version': version,
       'createdAt': now,
       'lastUpdatedAt': now,
@@ -385,6 +393,14 @@ class FirestoreRepository {
       'complaints': FieldValue.arrayUnion([userId]),
     });
   }
+
+  /// Owner-only single-field write that flips a problem's `hidden` flag.
+  /// Targets just the one field so the rules' hide-toggle branch
+  /// (`affectedKeys().hasOnly(['hidden'])`) matches the wire payload.
+  Future<void> setHidden({
+    required String problemId,
+    required bool hidden,
+  }) => _problemsRef.doc(problemId).update({'hidden': hidden});
 
   /// Ensure a user document exists in the `users` collection.
   /// Creates one from [user] if missing. Returns the stored [User].
@@ -590,8 +606,38 @@ class FirestoreRepository {
               ?.map((e) => e as String)
               .toList() ??
           [],
+      typedLinks: _decodeTypedLinks(data['typedLinks']),
     );
   }
+
+  static List<ProblemLink> _decodeTypedLinks(dynamic value) {
+    if (value is! List) return const [];
+    final out = <ProblemLink>[];
+    for (final entry in value) {
+      if (entry is! Map) continue;
+      final targetId = entry['targetId'];
+      final kindWire = entry['kind'];
+      if (targetId is! String || kindWire is! String) continue;
+      final kind = switch (kindWire) {
+        'specialization' => ProblemLinkKind.specialization,
+        'generalization' => ProblemLinkKind.generalization,
+        _ => null,
+      };
+      if (kind == null) continue;
+      out.add(ProblemLink(targetId: targetId, kind: kind));
+    }
+    return out;
+  }
+
+  static String _typedLinkKindToWire(ProblemLinkKind kind) => switch (kind) {
+    ProblemLinkKind.specialization => 'specialization',
+    ProblemLinkKind.generalization => 'generalization',
+  };
+
+  static Map<String, dynamic> _typedLinkToMap(ProblemLink link) => {
+    'targetId': link.targetId,
+    'kind': _typedLinkKindToWire(link.kind),
+  };
 
   // ---------------------------------------------------------------------------
   // Notifications
@@ -763,6 +809,77 @@ class FirestoreRepository {
     await batch.commit();
   }
 
+  /// Tag (or re-tag) a directional relationship between [sourceId] and
+  /// [targetId]. Removes the pair from either side's generic
+  /// `linkedProblemIds` to preserve the cross-list invariant; writes the
+  /// directional entry to [sourceId] and the mirrored inverse to [targetId].
+  Future<void> tagProblemLink({
+    required String sourceId,
+    required String targetId,
+    required ProblemLinkKind kind,
+  }) async {
+    if (sourceId == targetId) return;
+    final source = await getProblem(sourceId);
+    final target = await getProblem(targetId);
+    if (source == null || target == null) return;
+
+    final sourceLinked = source.linkedProblemIds
+        .where((id) => id != targetId)
+        .toList();
+    final sourceTyped = [
+      ...source.typedLinks.where((l) => l.targetId != targetId),
+      ProblemLink(targetId: targetId, kind: kind),
+    ];
+
+    final targetLinked = target.linkedProblemIds
+        .where((id) => id != sourceId)
+        .toList();
+    final targetTyped = [
+      ...target.typedLinks.where((l) => l.targetId != sourceId),
+      ProblemLink(targetId: sourceId, kind: kind.inverse),
+    ];
+
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(sourceId), {
+        'linkedProblemIds': sourceLinked,
+        'typedLinks': sourceTyped.map(_typedLinkToMap).toList(),
+      })
+      ..update(_problemsRef.doc(targetId), {
+        'linkedProblemIds': targetLinked,
+        'typedLinks': targetTyped.map(_typedLinkToMap).toList(),
+      });
+    await batch.commit();
+  }
+
+  /// Remove the directional relationship between [sourceId] and [targetId]
+  /// from both sides' `typedLinks`. Does NOT restore the generic clique
+  /// link — re-linking is an explicit user action.
+  Future<void> untagProblemLink({
+    required String sourceId,
+    required String targetId,
+  }) async {
+    if (sourceId == targetId) return;
+    final source = await getProblem(sourceId);
+    final target = await getProblem(targetId);
+    if (source == null || target == null) return;
+
+    final sourceTyped = source.typedLinks
+        .where((l) => l.targetId != targetId)
+        .toList();
+    final targetTyped = target.typedLinks
+        .where((l) => l.targetId != sourceId)
+        .toList();
+
+    final batch = _firestore.batch()
+      ..update(_problemsRef.doc(sourceId), {
+        'typedLinks': sourceTyped.map(_typedLinkToMap).toList(),
+      })
+      ..update(_problemsRef.doc(targetId), {
+        'typedLinks': targetTyped.map(_typedLinkToMap).toList(),
+      });
+    await batch.commit();
+  }
+
   /// Unlink a problem from its cluster symmetrically.
   Future<void> unlinkProblem(String problemId) async {
     final problem = await getProblem(problemId);
@@ -783,11 +900,12 @@ class FirestoreRepository {
     await batch.commit();
   }
 
-  /// Fetch up to 100 unsolved problems globally, sorted by votes DESC,
-  /// then doc ID ASC, for search.
+  /// Fetch up to 100 unsolved, non-hidden problems globally, sorted by
+  /// votes DESC, then doc ID ASC, for the link-to-another-problem search.
   Future<List<Problem>> getGlobalProblemsForSearch({int limit = 100}) async {
     final snapshot = await _problemsRef
         .where('solved', isEqualTo: false)
+        .where('hidden', isEqualTo: false)
         .orderBy('votes', descending: true)
         .orderBy(FieldPath.documentId)
         .limit(limit)

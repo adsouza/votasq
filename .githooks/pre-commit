@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Keep functions/l10n/ mirroring apps/client/lib/l10n/arb/. The sync also runs
+# at deploy time via the functions package's `prebuild` npm script, but doing
+# it here prevents drift from being committed.
+# Bypass (rarely): git commit --no-verify
+set -e
+
+echo "[pre-commit] sync functions/l10n..."
+node functions/tool/sync-arbs.mjs
+
+if ! git diff --quiet -- functions/l10n; then
+  echo "[pre-commit] functions/l10n was stale — staging the refresh:"
+  git diff --name-only -- functions/l10n | sed 's/^/  /'
+  git add functions/l10n
+fi
+
+echo "[pre-commit] ok"

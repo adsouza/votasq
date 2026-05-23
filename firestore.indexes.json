@@ -23,6 +23,10 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "hidden",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "votes",
           "order": "DESCENDING"
         },
@@ -42,6 +46,10 @@
         },
         {
           "fieldPath": "solved",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "hidden",
           "order": "ASCENDING"
         },
         {

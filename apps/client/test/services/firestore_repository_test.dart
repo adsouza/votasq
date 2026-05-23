@@ -115,6 +115,7 @@ void main() {
       String geoscope = '/',
       int votes = 1,
       bool solved = false,
+      bool hidden = false,
     }) async {
       final now = DateTime.now().toUtc();
       await firestore.collection('problems').doc(id).set({
@@ -124,6 +125,7 @@ void main() {
         'geoscope': geoscope,
         'votes': votes,
         'solved': solved,
+        'hidden': hidden,
         'version': 1,
         'createdAt': now,
         'lastUpdatedAt': now,
@@ -162,6 +164,10 @@ void main() {
         expect(doc.data()['ownerId'], 'user1');
         expect(doc.data()['votes'], 1);
         expect(doc.data()['solved'], false);
+        // Regression: the listing query filters `hidden == false`, and
+        // Firestore excludes docs where the field is missing. addProblem
+        // must always stamp this on the wire.
+        expect(doc.data()['hidden'], false);
 
         // Check voter doc was created.
         final voters = await firestore
@@ -197,6 +203,68 @@ void main() {
           'Achieve this outcome',
         );
       });
+
+      test(
+        'round-trip: a newly-created problem appears in getProblems '
+        '(regression for missing-hidden creates)',
+        () async {
+          // The listing query filters `where("hidden", isEqualTo: false)`,
+          // which excludes docs where the field is missing. addProblem
+          // must therefore stamp `hidden: false` on the wire. This test
+          // exercises the create → query round-trip end-to-end so that
+          // any future writer-path gap is caught — the layer-specific
+          // tests (rules e2e, query filter, cubit, widget) each test
+          // their own slice and do not catch wire-shape gaps.
+          //
+          // Predates the fix in 153a8fd: would fail with `actual: []`
+          // because the missing-hidden doc was silently filtered out.
+          await repo.addProblem(
+            description: 'A round-trippable problem',
+            ownerId: 'user1',
+            geoscope: '/',
+            userLanguage: 'en',
+          );
+
+          final result = await repo.getProblems(geoscope: '/');
+          expect(result.problems, hasLength(1));
+          expect(
+            result.problems.first.description,
+            'A round-trippable problem',
+          );
+        },
+      );
+
+      test(
+        'round-trip: a newly-forked problem appears in getProblems',
+        () async {
+          // Same rationale as the addProblem round-trip above: forkProblem
+          // also builds the doc map by hand and must stamp hidden:false.
+          // Seed a source problem first; forkProblem reads it before
+          // creating the fork.
+          final now = DateTime.now().toUtc();
+          await firestore.collection('problems').doc('src').set({
+            'description': 'Source problem',
+            'goal': '',
+            'ownerId': 'owner-of-src',
+            'geoscope': '/',
+            'votes': 5,
+            'solved': false,
+            'hidden': false,
+            'version': 1,
+            'createdAt': now,
+            'lastUpdatedAt': now,
+          });
+
+          final fork = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'forker',
+          );
+
+          final result = await repo.getProblems(geoscope: '/');
+          final ids = result.problems.map((p) => p.id).toSet();
+          expect(ids, contains(fork.id));
+        },
+      );
     });
 
     group('forkProblem', () {
@@ -251,6 +319,9 @@ void main() {
           expect(stored.data()!['votes'], 1);
           expect(stored.data()!['version'], 1);
           expect(stored.data()!['ownerId'], 'forker');
+          // Regression: forks must stamp `hidden: false` too, same
+          // rationale as addProblem.
+          expect(stored.data()!['hidden'], false);
 
           // Original problem should be untouched.
           final original = await firestore
@@ -495,6 +566,53 @@ void main() {
         final doc = await firestore.collection('problems').doc('p1').get();
         final complaints = (doc.data()!['complaints'] as List).cast<String>();
         expect(complaints, contains('complainer1'));
+      });
+    });
+
+    group('setHidden', () {
+      test('sets hidden=true on the doc', () async {
+        await seedProblem(id: 'h1');
+        await repo.setHidden(problemId: 'h1', hidden: true);
+        final doc = await firestore.collection('problems').doc('h1').get();
+        expect(doc.data()!['hidden'], isTrue);
+      });
+
+      test('sets hidden=false on the doc', () async {
+        await seedProblem(id: 'h2');
+        await repo.setHidden(problemId: 'h2', hidden: true);
+        await repo.setHidden(problemId: 'h2', hidden: false);
+        final doc = await firestore.collection('problems').doc('h2').get();
+        expect(doc.data()!['hidden'], isFalse);
+      });
+
+      test('does not touch other fields', () async {
+        await seedProblem(id: 'h3', description: 'untouched');
+        await repo.setHidden(problemId: 'h3', hidden: true);
+        final doc = await firestore.collection('problems').doc('h3').get();
+        expect(doc.data()!['description'], 'untouched');
+      });
+    });
+
+    group('watchProblems / getProblems hidden filter', () {
+      test('excludes problems with hidden=true', () async {
+        await seedProblem(id: 'visible');
+        await seedProblem(id: 'hidden');
+        await firestore.collection('problems').doc('hidden').update({
+          'hidden': true,
+        });
+
+        final result = await repo.getProblems(geoscope: '/');
+        expect(result.problems.map((p) => p.id), ['visible']);
+      });
+
+      test('includes problems with hidden=false', () async {
+        await seedProblem(id: 'v1');
+        await firestore.collection('problems').doc('v1').update({
+          'hidden': false,
+        });
+
+        final result = await repo.getProblems(geoscope: '/');
+        expect(result.problems.map((p) => p.id), ['v1']);
       });
     });
 
@@ -849,6 +967,133 @@ void main() {
         expect(updatedP3!.linkedProblemIds, isEmpty);
       });
 
+      test('tagProblemLink writes mirrored kinds on both sides', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p2',
+            kind: ProblemLinkKind.specialization,
+          ),
+        ]);
+        expect(p2!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p1',
+            kind: ProblemLinkKind.generalization,
+          ),
+        ]);
+      });
+
+      test('tagProblemLink severs pre-existing generic link', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await repo.linkProblems('p1', 'p2');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.linkedProblemIds, isEmpty);
+        expect(p2!.linkedProblemIds, isEmpty);
+        expect(p1.typedLinks, hasLength(1));
+        expect(p2.typedLinks, hasLength(1));
+      });
+
+      test('tagProblemLink replacing kind deduplicates', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.generalization,
+        );
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p2',
+            kind: ProblemLinkKind.generalization,
+          ),
+        ]);
+        expect(p2!.typedLinks, [
+          const ProblemLink(
+            targetId: 'p1',
+            kind: ProblemLinkKind.specialization,
+          ),
+        ]);
+      });
+
+      test('untagProblemLink removes both sides without restoring '
+          'generic link', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+        );
+
+        await repo.untagProblemLink(sourceId: 'p1', targetId: 'p2');
+
+        final p1 = await repo.getProblem('p1');
+        final p2 = await repo.getProblem('p2');
+        expect(p1!.typedLinks, isEmpty);
+        expect(p2!.typedLinks, isEmpty);
+        expect(p1.linkedProblemIds, isEmpty);
+        expect(p2.linkedProblemIds, isEmpty);
+      });
+
+      test('invariant: a pair never appears in both lists at once', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await seedProblem(id: 'p3');
+
+        await repo.linkProblems('p1', 'p2');
+        await repo.linkProblems('p2', 'p3');
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.generalization,
+        );
+
+        Future<void> assertInvariant(String id) async {
+          final p = await repo.getProblem(id);
+          final genericIds = p!.linkedProblemIds.toSet();
+          final typedIds = p.typedLinks.map((l) => l.targetId).toSet();
+          expect(
+            genericIds.intersection(typedIds),
+            isEmpty,
+            reason:
+                'problem $id has overlap between linkedProblemIds and '
+                'typedLinks',
+          );
+        }
+
+        await assertInvariant('p1');
+        await assertInvariant('p2');
+        await assertInvariant('p3');
+      });
+
       test('getGlobalProblemsForSearch returns active problems', () async {
         await seedProblem(id: 'p1', votes: 10);
         await seedProblem(id: 'p2', solved: true, votes: 50);
@@ -859,6 +1104,15 @@ void main() {
         // Sorted by votes DESC, then ID ASC
         expect(results[0].id, 'p3');
         expect(results[1].id, 'p1');
+      });
+
+      test('getGlobalProblemsForSearch excludes hidden problems', () async {
+        await seedProblem(id: 'p1', votes: 10);
+        await seedProblem(id: 'p2', votes: 20, hidden: true);
+        await seedProblem(id: 'p3', votes: 30);
+
+        final results = await repo.getGlobalProblemsForSearch();
+        expect(results.map((p) => p.id).toList(), ['p3', 'p1']);
       });
     });
   });
