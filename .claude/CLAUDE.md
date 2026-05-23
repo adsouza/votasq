@@ -82,6 +82,27 @@ When you change `firestore.rules`, add or update a case in `apps/server/e2e/fire
 
 The Firestore emulator caches rules at startup and does not reliably hot-reload on file edit. The e2e test pushes the current rules file into the emulator via the `:securityRules` PUT endpoint at setUpAll time, so the test is self-contained — but if you're testing rules manually against a long-running emulator, restart it or you'll be debugging stale rules.
 
+### Adding a new field to a Firestore doc with a query filter
+
+When a new field on a Firestore document type becomes part of a `where(...)` filter (or any index), **audit every doc-create site in `firestore_repository.dart` (and any server-side writer) to confirm each one stamps the field on the wire**. Freezed's `@Default(...)` annotations only fill in fields when *reading* (`fromJson`); they have no effect on doc maps built by hand and passed to `.set(...)`.
+
+We shipped the `hidden` flag with this exact gap in May 2026: `addProblem` and `forkProblem` built their `problemData` map without `hidden`, every new problem was missing the field, and Firestore's `where('hidden', isEqualTo: false)` filter excluded them — every newly-created problem silently vanished from the listing. The freezed model and the query-filter test both passed because the test helpers (`seedProblem` in `firestore_repository_test.dart`) wrote complete docs by hand, papering over the production wire shape.
+
+Mitigation pattern, in order of strength:
+
+1. **Add the field to every writer.** Grep for `_problemsRef.doc(...).set(` (and equivalent for other collections) and add the new field to every map literal.
+2. **Tighten the `firestore.rules` create branch** to require the field with a specific initial value (e.g. `&& request.resource.data.hidden == false`). The rule then enforces the invariant at the database, not just at the client.
+3. **Add a round-trip integration test** that calls the create method (e.g. `addProblem`) and then queries via the filtered method (e.g. `getProblems`), asserting the new doc appears. The existing layer-specific tests (rules e2e, repo unit, cubit, widget) each test their own slice — only a round-trip catches wire-shape gaps.
+
+### Test fixtures can paper over production widget-tree / wire-shape gaps
+
+Two debug sessions in May 2026 hit the same meta-bug: a test fixture provided something at the test root that wasn't actually there in production, masking the failure.
+
+- **Provider scope:** widget tests scaffolded `BlocProvider<ProblemsCubit>` at the test root, but in production the cubit is provided **inside `ProblemsPage`'s build method**. The detail page (`/problems/:id`) is a separate GoRouter route reached from outside that subtree — `context.read<ProblemsCubit>()` threw `ProviderNotFoundException` in prod but never in tests.
+- **Wire shape:** `seedProblem` in `firestore_repository_test.dart` defaults `hidden: false` when it writes seed docs, so query-filter tests passed even though `addProblem`'s real wire payload was missing the field.
+
+When adding a feature that touches multiple layers, write at least one **integration test** that exercises the production widget hierarchy / wire shape end-to-end — not just mocked unit tests for each layer. If you find yourself adding a convenience to a test fixture (a default value, a provider at the root), ask whether that convenience holds in production. If it doesn't, the test isn't testing what you think it is.
+
 ### Keep CI's `flutter-version` aligned with your local Flutter
 
 CI pins `flutter-version` in three workflow files (`.github/workflows/main.yaml`, `license_check.yaml`, `release.yaml`). The bundled `dart format` (and `dart analyze`) varies by SDK version, so a stale CI pin against a newer local Flutter produces formatter disagreements that pre-push checks can't catch — `melos format` uses your local SDK. When you bump local Flutter, bump those three files together.
