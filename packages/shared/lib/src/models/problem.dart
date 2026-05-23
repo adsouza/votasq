@@ -20,6 +20,7 @@ abstract class Problem with _$Problem {
     @Default(1) int votes,
     @Default([]) List<String> complaints,
     @Default(false) bool solved,
+    @Default(false) bool hidden,
     @Default(1) int version,
     // Source ProblemRevision that inspired this problem (set when forked).
     // The two `inspo*` fields together identify a revision and must be set

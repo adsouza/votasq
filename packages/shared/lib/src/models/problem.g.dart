@@ -22,6 +22,7 @@ _Problem _$ProblemFromJson(Map<String, dynamic> json) => _Problem(
           .toList() ??
       const [],
   solved: json['solved'] as bool? ?? false,
+  hidden: json['hidden'] as bool? ?? false,
   version: (json['version'] as num?)?.toInt() ?? 1,
   inspoProblemId: json['inspoProblemId'] as String?,
   inspoVersion: (json['inspoVersion'] as num?)?.toInt(),
@@ -49,6 +50,7 @@ Map<String, dynamic> _$ProblemToJson(_Problem instance) => <String, dynamic>{
   'votes': instance.votes,
   'complaints': instance.complaints,
   'solved': instance.solved,
+  'hidden': instance.hidden,
   'version': instance.version,
   'inspoProblemId': instance.inspoProblemId,
   'inspoVersion': instance.inspoVersion,
