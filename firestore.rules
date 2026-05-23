@@ -52,6 +52,16 @@ service cloud.firestore {
           && request.resource.data.get('typedLinks', []).size() <= 100
         )
         ||
+        // Hide / unhide. Only the owner may flip `hidden`, and only
+        // `hidden` may change in the write. A description/goal edit
+        // that also wants to change `hidden` must use two writes.
+        (
+          request.auth != null
+          && request.auth.uid == resource.data.ownerId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])
+          && request.resource.data.hidden is bool
+        )
+        ||
         // Full problem update
         (
           request.resource.data.description is string
@@ -67,6 +77,7 @@ service cloud.firestore {
           && request.resource.data.solved is bool
           && request.resource.data.version is int
           && request.resource.data.version > resource.data.version
+          && request.resource.data.hidden == resource.data.get('hidden', false)
         );
 
       match /versions/{versionId} {
