@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# Cut a new client release. Bumps the build number in
-# apps/client/pubspec.yaml, commits, pushes, creates an annotated tag, and
-# pushes the tag — which triggers .github/workflows/release.yaml to build
-# Android, Web, and macOS artifacts and publish a GitHub Release.
+# Cut a new client release. Updates apps/client/pubspec.yaml so its semver
+# matches the new tag (resetting the build number to +1), commits, pushes,
+# creates an annotated tag, and pushes the tag — which triggers
+# .github/workflows/release.yaml to build Android, Web, and macOS artifacts
+# and publish a GitHub Release.
+#
+# Pubspec's version only affects dev-build About-screens; CI overrides it
+# via --build-name=${GITHUB_REF_NAME#v} and --build-number=run_number per
+# release.yaml. Keeping pubspec in sync with the tag is for human readability.
 #
 # Usage:
 #   tool/release.sh <vX.Y.Z[-suffix]> "<annotated tag message>"
 #
 # Typically invoked via:
-#   melos run release -- v0.5.1 "Release notes for humans"
+#   melos run release -- v0.5.3 "Release notes for humans"
 #
 # Pre-flight checks run before any state is mutated. If anything fails after
 # the pubspec bump, the script bails loudly rather than attempting rollback;
@@ -79,21 +84,25 @@ flutter analyze apps packages
 
 PUBSPEC="apps/client/pubspec.yaml"
 CURRENT_VERSION=$(grep '^version: ' "$PUBSPEC" | sed -E 's/^version: //')
-if ! [[ "$CURRENT_VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)$ ]]; then
+if ! [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?\+[0-9]+$ ]]; then
   echo "Error: unexpected version format in $PUBSPEC: '$CURRENT_VERSION'" >&2
-  echo "Expected: X.Y.Z+N" >&2
+  echo "Expected: X.Y.Z[-suffix]+N" >&2
   exit 1
 fi
-SEMVER="${BASH_REMATCH[1]}"
-BUILD="${BASH_REMATCH[2]}"
-NEW_BUILD=$((BUILD + 1))
-NEW_VERSION="${SEMVER}+${NEW_BUILD}"
+# Derive new pubspec version from the tag (strip leading 'v'); reset build
+# number to 1 since the previous +N is meaningless against the new semver.
+NEW_VERSION="${TAG#v}+1"
+
+if [ "$CURRENT_VERSION" = "$NEW_VERSION" ]; then
+  echo "Error: $PUBSPEC is already at $NEW_VERSION. Did you bump it manually?" >&2
+  exit 1
+fi
 
 echo "==> Bumping $PUBSPEC: $CURRENT_VERSION -> $NEW_VERSION"
 sed -i '' "s/^version: ${CURRENT_VERSION}\$/version: ${NEW_VERSION}/" "$PUBSPEC"
 
-echo "==> Committing build number bump"
-git commit -am "chore(release): bump client build number for ${TAG}"
+echo "==> Committing pubspec bump"
+git commit -am "chore(release): bump client pubspec for ${TAG}"
 
 echo "==> Pushing main"
 git push origin main
