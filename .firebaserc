@@ -1,6 +1,7 @@
 {
   "projects": {
-    "prod": "votasq"
+    "prod": "votasq",
+    "default": "votasq"
   },
   "targets": {
     "votasq": {
