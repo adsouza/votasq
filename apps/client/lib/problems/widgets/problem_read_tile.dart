@@ -7,7 +7,6 @@ import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
 
 /// A read-only list tile for a single problem, showing its description, goal,
@@ -20,6 +19,7 @@ class ProblemReadTile extends StatelessWidget {
     required this.onEdit,
     required this.onCopyLink,
     required this.onComplaint,
+    required this.onViewDetails,
     super.key,
   });
 
@@ -29,6 +29,7 @@ class ProblemReadTile extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onCopyLink;
   final VoidCallback onComplaint;
+  final VoidCallback onViewDetails;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +52,7 @@ class ProblemReadTile extends StatelessWidget {
           spacing: 6,
           children: [
             GestureDetector(
-              onDoubleTap: () => context.push('/problems/${problem.id}'),
+              onDoubleTap: onViewDetails,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

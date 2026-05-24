@@ -596,6 +596,16 @@ class _ProblemsViewState extends State<ProblemsView> {
                             onEdit: () => _startEdit(problem),
                             onCopyLink: () => _copyProblemLink(problem),
                             onComplaint: () => _confirmComplaint(problem),
+                            onViewDetails: () {
+                              if (userId != null) {
+                                unawaited(
+                                  context
+                                      .read<FirestoreRepository>()
+                                      .incrementProblemDetailsViewCount(userId),
+                                );
+                              }
+                              context.push('/problems/${problem.id}');
+                            },
                           );
                         },
                       );
