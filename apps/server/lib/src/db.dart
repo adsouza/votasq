@@ -106,59 +106,12 @@ class Db {
       );
     }
 
-    final solvedFilter = fs.Filter(
-      fieldFilter: fs.FieldFilter(
-        field: fs.FieldReference(fieldPath: 'solved'),
-        op: 'EQUAL',
-        value: fs.Value(booleanValue: false),
-      ),
-    );
-
-    final fs.Filter whereFilter;
-    if (geoscope != null) {
-      final ancestors = geoscopeAncestors(geoscope);
-      final geoscopeFilter = fs.Filter(
-        compositeFilter: fs.CompositeFilter(
-          op: 'OR',
-          filters: [
-            for (final ancestor in ancestors)
-              fs.Filter(
-                fieldFilter: fs.FieldFilter(
-                  field: fs.FieldReference(fieldPath: 'geoscope'),
-                  op: 'EQUAL',
-                  value: fs.Value(stringValue: ancestor),
-                ),
-              ),
-          ],
-        ),
-      );
-      whereFilter = fs.Filter(
-        compositeFilter: fs.CompositeFilter(
-          op: 'AND',
-          filters: [solvedFilter, geoscopeFilter],
-        ),
-      );
-    } else {
-      whereFilter = solvedFilter;
-    }
-
     final results = await _firestore.projects.databases.documents.runQuery(
       fs.RunQueryRequest(
-        structuredQuery: fs.StructuredQuery(
-          from: [fs.CollectionSelector(collectionId: 'problems')],
-          where: whereFilter,
-          orderBy: [
-            fs.Order(
-              field: fs.FieldReference(fieldPath: 'votes'),
-              direction: 'DESCENDING',
-            ),
-            fs.Order(
-              field: fs.FieldReference(fieldPath: '__name__'),
-              direction: 'ASCENDING',
-            ),
-          ],
-          limit: pageSize,
+        structuredQuery: buildProblemsListingQuery(
+          pageSize: pageSize,
           startAt: startAt,
+          geoscope: geoscope,
         ),
       ),
       _basePath,
@@ -619,4 +572,81 @@ class Db {
         'generalization' => ProblemLinkKind.generalization,
         _ => throw StateError('Unknown ProblemLinkKind: $wire'),
       };
+}
+
+/// Build the Firestore `StructuredQuery` for the problems listing endpoint.
+///
+/// Extracted from [Db.getProblems] so the query shape can be inspected by
+/// tests and asserted against `firestore.indexes.json`. The Firestore
+/// emulator does not enforce composite indexes, so this is the only way
+/// to catch index drift locally.
+fs.StructuredQuery buildProblemsListingQuery({
+  required int pageSize,
+  fs.Cursor? startAt,
+  String? geoscope,
+}) {
+  final solvedFilter = fs.Filter(
+    fieldFilter: fs.FieldFilter(
+      field: fs.FieldReference(fieldPath: 'solved'),
+      op: 'EQUAL',
+      value: fs.Value(booleanValue: false),
+    ),
+  );
+  final hiddenFilter = fs.Filter(
+    fieldFilter: fs.FieldFilter(
+      field: fs.FieldReference(fieldPath: 'hidden'),
+      op: 'EQUAL',
+      value: fs.Value(booleanValue: false),
+    ),
+  );
+
+  final fs.Filter whereFilter;
+  if (geoscope != null) {
+    final ancestors = geoscopeAncestors(geoscope);
+    final geoscopeFilter = fs.Filter(
+      compositeFilter: fs.CompositeFilter(
+        op: 'OR',
+        filters: [
+          for (final ancestor in ancestors)
+            fs.Filter(
+              fieldFilter: fs.FieldFilter(
+                field: fs.FieldReference(fieldPath: 'geoscope'),
+                op: 'EQUAL',
+                value: fs.Value(stringValue: ancestor),
+              ),
+            ),
+        ],
+      ),
+    );
+    whereFilter = fs.Filter(
+      compositeFilter: fs.CompositeFilter(
+        op: 'AND',
+        filters: [solvedFilter, hiddenFilter, geoscopeFilter],
+      ),
+    );
+  } else {
+    whereFilter = fs.Filter(
+      compositeFilter: fs.CompositeFilter(
+        op: 'AND',
+        filters: [solvedFilter, hiddenFilter],
+      ),
+    );
+  }
+
+  return fs.StructuredQuery(
+    from: [fs.CollectionSelector(collectionId: 'problems')],
+    where: whereFilter,
+    orderBy: [
+      fs.Order(
+        field: fs.FieldReference(fieldPath: 'votes'),
+        direction: 'DESCENDING',
+      ),
+      fs.Order(
+        field: fs.FieldReference(fieldPath: '__name__'),
+        direction: 'ASCENDING',
+      ),
+    ],
+    limit: pageSize,
+    startAt: startAt,
+  );
 }
