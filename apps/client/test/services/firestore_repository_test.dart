@@ -703,6 +703,58 @@ void main() {
             .toDate();
         expect(actualLastActive.isAtSameMomentAs(oldTime), isTrue);
       });
+
+      test('ensureUserDoc writes problemDetailsViewCount: 0 on the wire', () async {
+        final fs = FakeFirebaseFirestore();
+        final repo = FirestoreRepository(firestore: fs);
+        final newUser = User(
+          uid: 'u1',
+          votes: 3,
+          lastActiveAt: DateTime.utc(2026, 5, 23),
+        );
+
+        await repo.ensureUserDoc(newUser);
+
+        final doc = await fs.collection('users').doc('u1').get();
+        expect(doc.data()!['problemDetailsViewCount'], 0);
+        expect(doc.data()!['votesCastCount'], 0);
+      });
+
+      test('_docToUser reads back seeded problemDetailsViewCount + votesCastCount', () async {
+        final fs = FakeFirebaseFirestore();
+        await fs.collection('users').doc('u2').set({
+          'uid': 'u2',
+          'votes': 3,
+          'lastActiveAt': Timestamp.fromDate(DateTime.utc(2026, 5, 23)),
+          'problemDetailsViewCount': 7,
+          'votesCastCount': 11,
+        });
+        final repo = FirestoreRepository(firestore: fs);
+
+        final user = await repo.fetchUserDoc('u2');
+
+        expect(user!.problemDetailsViewCount, 7);
+        expect(user.votesCastCount, 11);
+      });
+
+      test('incrementProblemDetailsViewCount advances the field and touches lastActiveAt',
+          () async {
+        final fs = FakeFirebaseFirestore();
+        final t0 = DateTime.utc(2026, 5, 23, 12);
+        await fs.collection('users').doc('u3').set({
+          'uid': 'u3',
+          'votes': 3,
+          'lastActiveAt': Timestamp.fromDate(t0),
+          'problemDetailsViewCount': 4,
+        });
+        final repo = FirestoreRepository(firestore: fs);
+
+        await repo.incrementProblemDetailsViewCount('u3');
+
+        final doc = await fs.collection('users').doc('u3').get();
+        expect(doc.data()!['problemDetailsViewCount'], 5);
+        expect((doc.data()!['lastActiveAt'] as Timestamp).toDate().isAfter(t0), isTrue);
+      });
     });
 
     group('vote', () {
