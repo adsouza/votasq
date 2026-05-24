@@ -13,3 +13,4 @@ export {onProblemLinkedWritten} from "./triggers/link";
 export {onRevisionCreated} from "./triggers/revision";
 export {onNotificationCreated} from "./triggers/push";
 export {markAllNotificationsRead} from "./callables/markAllNotificationsRead";
+export {onVoterWrittenForVotesCastCount} from "./triggers/votes_cast_count";
