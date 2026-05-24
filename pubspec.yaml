@@ -48,9 +48,13 @@ melos:
 
     deploy:server:
       run: >
-        gcloud run deploy votasq-server --source . --region us-central1
+        gcloud run deploy votasq --source . --region us-central1
         --allow-unauthenticated
-      description: Deploy the Dart server to Cloud Run.
+      description: Manual fallback deploy of the Dart server to the `votasq`
+        Cloud Run service. Normal pushes to main already auto-deploy via the
+        rmgpgab-votasq-us-central1-adsouza-votasq--mavwk Cloud Build trigger
+        (see cloudbuild.yaml); use this only when you need to ship without a
+        commit, or when the trigger is broken.
 
     build:client:
       run: |
