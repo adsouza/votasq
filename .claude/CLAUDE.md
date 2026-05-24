@@ -129,6 +129,37 @@ CI pins `flutter-version` in three workflow files (`.github/workflows/main.yaml`
 
 If you do hit a formatter disagreement, download just the matching Dart SDK from https://dart.dev/get-dart/archive (~200MB vs a full Flutter at ~6GB) and run `<sdk>/bin/dart format --output=show --set-exit-if-changed <file>` to see exactly what CI wants.
 
+### Single-field collection-group indexes go in `fieldOverrides`, not `indexes`
+
+`firestore.indexes.json` has two top-level arrays. `indexes` is for **composite** indexes (multi-field). `fieldOverrides` is for **single-field** index control, including opting a single field into **collection-group scope**.
+
+If you declare a single-field collection-group index in the `indexes` array, `firebase deploy --only firestore:indexes` rejects it at runtime with:
+
+```
+HTTP 400: this index is not necessary, configure using single field index controls
+```
+
+— and the emulator silently accepts the query anyway, so smoke tests don't catch it. Use `fieldOverrides` instead, e.g. for `collectionGroup('voters').where('uid', isEqualTo: X)`:
+
+```json
+"fieldOverrides": [
+  {
+    "collectionGroup": "voters",
+    "fieldPath": "uid",
+    "indexes": [
+      { "order": "ASCENDING", "queryScope": "COLLECTION" },
+      { "order": "DESCENDING", "queryScope": "COLLECTION" },
+      { "arrayConfig": "CONTAINS", "queryScope": "COLLECTION" },
+      { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+    ]
+  }
+]
+```
+
+The three COLLECTION-scope entries preserve Firestore's defaults for the field (which `fieldOverrides` would otherwise wipe out); the COLLECTION_GROUP entry is the one the query actually needs.
+
+Use the `indexes` array only when the query filters on **two or more** fields (`.where('a', ...).where('b', ...)`).
+
 ## Architecture
 
 Update the `ARCHITECTURE.md` file in the project root dir after making architectural changes.
