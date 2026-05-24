@@ -604,7 +604,9 @@ class _ProblemsViewState extends State<ProblemsView> {
                                       .incrementProblemDetailsViewCount(userId),
                                 );
                               }
-                              context.push('/problems/${problem.id}');
+                              unawaited(
+                                context.push('/problems/${problem.id}'),
+                              );
                             },
                           );
                         },

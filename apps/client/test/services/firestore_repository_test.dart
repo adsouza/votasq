@@ -744,7 +744,8 @@ void main() {
       );
 
       test(
-        'incrementProblemDetailsViewCount advances the field and touches lastActiveAt',
+        'incrementProblemDetailsViewCount advances the field and '
+        'touches lastActiveAt',
         () async {
           final fs = FakeFirebaseFirestore();
           final t0 = DateTime.utc(2026, 5, 23, 12);

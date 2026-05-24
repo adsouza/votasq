@@ -757,50 +757,49 @@ void main() {
       },
     );
 
-    test('problemDetailsViewCount increment without auth is rejected', () async {
-      // Fresh user with an existing doc; attempt the +1 without a token.
-      final user = await signUpFreshUser();
-      await seedUser(
-        forUid: user.uid,
-        withIdToken: user.idToken,
-      );
+    test(
+      'problemDetailsViewCount increment without auth is rejected',
+      () async {
+        // Fresh user with an existing doc; attempt the +1 without a token.
+        final user = await signUpFreshUser();
+        await seedUser(
+          forUid: user.uid,
+          withIdToken: user.idToken,
+        );
 
-      final now = DateTime.now().toUtc();
-      final qs = [
-        'updateMask.fieldPaths=problemDetailsViewCount',
-        'updateMask.fieldPaths=lastActiveAt',
-      ].join('&');
-      final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
-      // Deliberately omit Authorization header.
-      final resp = await client.patch(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'fields': {
-            'problemDetailsViewCount': iVal(1),
-            'lastActiveAt': tsVal(now),
-          },
-        }),
-      );
-      expect(
-        resp.statusCode,
-        403,
-        reason:
-            'Expected 403 for unauthenticated PDVC increment. '
-            'Got ${resp.statusCode}: ${resp.body}',
-      );
-    });
+        final now = DateTime.now().toUtc();
+        final qs = [
+          'updateMask.fieldPaths=problemDetailsViewCount',
+          'updateMask.fieldPaths=lastActiveAt',
+        ].join('&');
+        final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
+        // Deliberately omit Authorization header.
+        final resp = await client.patch(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'fields': {
+              'problemDetailsViewCount': iVal(1),
+              'lastActiveAt': tsVal(now),
+            },
+          }),
+        );
+        expect(
+          resp.statusCode,
+          403,
+          reason:
+              'Expected 403 for unauthenticated PDVC increment. '
+              'Got ${resp.statusCode}: ${resp.body}',
+        );
+      },
+    );
 
     test('client direct write to votesCastCount is rejected', () async {
       // Fresh user, seeded with votesCastCount: 0. No update branch permits
       // changing votesCastCount — the tightened lastActiveAt-touch branch now
       // requires affectedKeys().hasOnly(['lastActiveAt']).
       final user = await signUpFreshUser();
-      await seedUser(
-        forUid: user.uid,
-        withIdToken: user.idToken,
-        votesCastCount: 0,
-      );
+      await seedUser(forUid: user.uid, withIdToken: user.idToken);
 
       final now = DateTime.now().toUtc();
       final qs = [
