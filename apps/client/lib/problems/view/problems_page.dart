@@ -138,7 +138,7 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
         return;
       }
       _doubleTapToastItem = showToast(
-        context.l10n.doubleTapHintToast,
+        context.l10n.doubleTapHint,
         duration: const Duration(seconds: 5),
       );
     });
