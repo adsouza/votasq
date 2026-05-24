@@ -424,6 +424,8 @@ class FirestoreRepository {
       'uid': user.uid,
       'votes': user.votes,
       'lastActiveAt': user.lastActiveAt,
+      'problemDetailsViewCount': user.problemDetailsViewCount,
+      'votesCastCount': user.votesCastCount,
       if (user.displayName != null) 'displayName': user.displayName,
     };
     await _firestore.collection('users').doc(user.uid).set(data);
@@ -437,6 +439,9 @@ class FirestoreRepository {
       votes: (data['votes'] as num).toInt(),
       lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
       displayName: data['displayName'] as String?,
+      problemDetailsViewCount:
+          (data['problemDetailsViewCount'] as num?)?.toInt() ?? 0,
+      votesCastCount: (data['votesCastCount'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -493,6 +498,25 @@ class FirestoreRepository {
     });
   }
 
+  /// One-shot fetch of a user doc as a freezed [User]. Returns `null` if
+  /// the doc doesn't exist. Useful for the session-start snapshot in
+  /// the user cubit and for repository tests.
+  Future<User?> fetchUserDoc(String userId) async {
+    final doc = await _firestore.collection('users').doc(userId).get();
+    if (!doc.exists) return null;
+    return _docToUser(doc);
+  }
+
+  /// Increment the user's detail-view counter by exactly 1 and touch
+  /// `lastActiveAt` in the same write, matching the rule branch added
+  /// for this field. Fire-and-forget from the caller's perspective.
+  Future<void> incrementProblemDetailsViewCount(String userId) async {
+    await _firestore.collection('users').doc(userId).update({
+      'problemDetailsViewCount': FieldValue.increment(1),
+      'lastActiveAt': DateTime.now().toUtc(),
+    });
+  }
+
   /// Real-time stream of a user's remaining vote budget.
   Stream<int> watchUserVotes(String userId) {
     return _firestore
@@ -500,6 +524,18 @@ class FirestoreRepository {
         .doc(userId)
         .snapshots()
         .map((doc) => doc.exists ? (doc.data()!['votes'] as num).toInt() : 0);
+  }
+
+  /// Real-time stream of the entire user doc. The user cubit uses this in
+  /// preference to the older `watchUserVotes` so it can project
+  /// onboarding counters too. Once the cubit migration lands,
+  /// `watchUserVotes` can go away.
+  Stream<User?> watchUserDoc(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.exists ? _docToUser(doc) : null);
   }
 
   /// Atomically increment a user's vote on a problem.
