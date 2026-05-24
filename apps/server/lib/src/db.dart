@@ -431,6 +431,7 @@ class Db {
       ),
       complaints: _parseStringList(doc.fields?['complaints']),
       solved: doc.fields?['solved']?.booleanValue ?? false,
+      hidden: doc.fields?['hidden']?.booleanValue ?? false,
       version: _parseVersion(doc.fields),
       createdAt: _parseTimestamp(
         doc.fields?['createdAt'] ??
@@ -464,6 +465,7 @@ class Db {
           ),
         ),
         'solved': fs.Value(booleanValue: problem.solved),
+        'hidden': fs.Value(booleanValue: problem.hidden),
         'version': fs.Value(integerValue: '${problem.version}'),
         'createdAt': fs.Value(
           timestampValue: problem.createdAt.toIso8601String(),
