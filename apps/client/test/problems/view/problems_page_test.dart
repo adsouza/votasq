@@ -793,5 +793,142 @@ void main() {
       await tester.pumpWidget(buildSubject());
       expect(find.textContaining('3'), findsWidgets);
     });
+
+    testWidgets('banner shows sign-in tip when unauthenticated', (
+      tester,
+    ) async {
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.unauthenticated),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      expect(find.textContaining('Sign in via the'), findsOneWidget);
+      expect(find.textContaining('vote for it'), findsNothing);
+      expect(find.textContaining('Double-tap'), findsNothing);
+    });
+
+    testWidgets('banner shows vote tip when needsVoteHint is true', (
+      tester,
+    ) async {
+      when(() => userCubit.state).thenReturn(
+        UserState(
+          status: AuthStatus.authenticated,
+          userId: 'u1',
+          remainingVotes: 3,
+          votesCastCount: 0,
+          problemDetailsViewCount: 0,
+          sessionStartLastActiveAt: DateTime.now().toUtc(),
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      expect(find.textContaining('vote for it'), findsOneWidget);
+      expect(find.textContaining('Double-tap'), findsNothing);
+    });
+
+    testWidgets('banner shows double-tap tip when vote hint graduated', (
+      tester,
+    ) async {
+      // votesCastCount=5 > daysSince=0 → vote tip graduates;
+      // problemDetailsViewCount=0 <= daysSince=0 → double-tap tip wins.
+      when(() => userCubit.state).thenReturn(
+        UserState(
+          status: AuthStatus.authenticated,
+          userId: 'u1',
+          remainingVotes: 3,
+          votesCastCount: 5,
+          problemDetailsViewCount: 0,
+          sessionStartLastActiveAt: DateTime.now().toUtc(),
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      expect(find.textContaining('Double-tap'), findsOneWidget);
+      expect(find.textContaining('vote for it'), findsNothing);
+    });
+
+    testWidgets('banner shows nothing once both tips graduate', (
+      tester,
+    ) async {
+      when(() => userCubit.state).thenReturn(
+        UserState(
+          status: AuthStatus.authenticated,
+          userId: 'u1',
+          remainingVotes: 3,
+          votesCastCount: 99,
+          problemDetailsViewCount: 99,
+          sessionStartLastActiveAt: DateTime.now().toUtc(),
+        ),
+      );
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      expect(find.textContaining('Sign in'), findsNothing);
+      expect(find.textContaining('vote for it'), findsNothing);
+      expect(find.textContaining('Double-tap'), findsNothing);
+    });
+
+    testWidgets(
+      'double-tap fires incrementProblemDetailsViewCount',
+      (tester) async {
+        when(() => userCubit.state).thenReturn(
+          UserState(
+            status: AuthStatus.authenticated,
+            userId: 'u1',
+            remainingVotes: 3,
+            votesCastCount: 99,
+            problemDetailsViewCount: 99,
+            sessionStartLastActiveAt: DateTime.now().toUtc(),
+          ),
+        );
+        when(() => problemsCubit.state).thenReturn(
+          ProblemsState(
+            status: ProblemsStatus.success,
+            problems: [_problem(description: 'tap me')],
+          ),
+        );
+        when(
+          () => firestoreRepo.incrementProblemDetailsViewCount(any()),
+        ).thenAnswer((_) async {});
+        await tester.pumpWidget(buildSubject());
+        await tester.pump();
+
+        await tester.tap(find.text('tap me'));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tap(find.text('tap me'));
+        await tester.pump();
+
+        // The double-tap handler calls incrementProblemDetailsViewCount
+        // and then context.push(...). Because buildSubject() uses a plain
+        // MaterialApp (no GoRouter), context.push throws a "No GoRouter
+        // found" error. Swallow it — the side-effect we care about (the
+        // repo call) is issued synchronously before the navigation attempt.
+        tester.takeException();
+
+        verify(
+          () => firestoreRepo.incrementProblemDetailsViewCount('u1'),
+        ).called(1);
+
+        // Dismiss any pending toast timers so the test framework doesn't
+        // complain about a pending timer after the widget tree is disposed.
+        toastification.dismissAll(delayForAnimation: false);
+        await tester.pump(const Duration(seconds: 1));
+      },
+    );
   });
 }
