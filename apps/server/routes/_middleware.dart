@@ -9,7 +9,7 @@ Handler middleware(Handler handler) {
     final response = await handler(context);
 
     if (response.statusCode == 404 &&
-        !context.request.uri.path.startsWith('api')) {
+        !context.request.uri.path.startsWith('/api/')) {
       final indexFile = File('public/index.html');
       if (indexFile.existsSync()) {
         return Response(
