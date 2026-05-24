@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "backfill": "tsx scripts/backfill_votes_cast_count.ts"
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "firebase-functions-test": "^3.4.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.6.0",
     "vitest": "^3.0.0"
   }
