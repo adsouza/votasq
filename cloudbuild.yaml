@@ -28,8 +28,11 @@ steps:
       - --region=${_DEPLOY_REGION}
       - --quiet
 
-images:
-  - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+# No `images:` block: Kaniko pushes directly to Artifact Registry without
+# notifying Cloud Build's image-tracking agent, so the post-build verification
+# can't find images it didn't see pushed and marks the whole build FAILURE
+# (even though the push and deploy succeeded). Kaniko's --destination flag
+# above is the actual push; this attestation field is unnecessary alongside it.
 
 options:
   logging: CLOUD_LOGGING_ONLY
