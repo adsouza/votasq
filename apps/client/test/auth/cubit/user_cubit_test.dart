@@ -142,5 +142,153 @@ void main() {
         verify(() => authRepo.signOut()).called(1);
       },
     );
+
+    blocTest<UserCubit, UserState>(
+      'sessionStartLastActiveAt is captured from the existing doc',
+      build: () {
+        when(() => firestoreRepo.ensureUserDoc(any())).thenAnswer(
+          (_) async => User(
+            uid: 'test-uid-123',
+            votes: 3,
+            lastActiveAt: DateTime.utc(2026, 5, 20),
+            problemDetailsViewCount: 4,
+            votesCastCount: 2,
+          ),
+        );
+        when(
+          () => firestoreRepo.grantVotesAndTouch(any()),
+        ).thenAnswer((_) async {});
+        when(() => firestoreRepo.watchUserDoc(any())).thenAnswer(
+          (_) => const Stream<User?>.empty(),
+        );
+        when(() => authRepo.authStateChanges).thenAnswer(
+          (_) => Stream.value(_MockFirebaseUser()),
+        );
+        return UserCubit(authRepo, firestoreRepo);
+      },
+      wait: const Duration(milliseconds: 50),
+      verify: (cubit) {
+        expect(
+          cubit.state.sessionStartLastActiveAt,
+          DateTime.utc(2026, 5, 20),
+        );
+      },
+    );
+
+    blocTest<UserCubit, UserState>(
+      'subsequent stream lastActiveAt does NOT advance the snapshot',
+      build: () {
+        final ctrl = StreamController<User?>();
+        addTearDown(ctrl.close);
+        when(() => firestoreRepo.ensureUserDoc(any())).thenAnswer(
+          (_) async => User(
+            uid: 'test-uid-123',
+            votes: 3,
+            lastActiveAt: DateTime.utc(2026, 5, 20),
+          ),
+        );
+        when(
+          () => firestoreRepo.grantVotesAndTouch(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => firestoreRepo.watchUserDoc(any()),
+        ).thenAnswer((_) => ctrl.stream);
+        when(() => authRepo.authStateChanges).thenAnswer(
+          (_) => Stream.value(_MockFirebaseUser()),
+        );
+        final cubit = UserCubit(authRepo, firestoreRepo);
+        Future.delayed(const Duration(milliseconds: 20), () {
+          ctrl.add(
+            User(
+              uid: 'test-uid-123',
+              votes: 3,
+              lastActiveAt: DateTime.utc(2026, 5, 23), // moved forward
+            ),
+          );
+        });
+        return cubit;
+      },
+      wait: const Duration(milliseconds: 100),
+      verify: (cubit) {
+        // Frozen at the value from ensureUserDoc, not the stream emission.
+        expect(
+          cubit.state.sessionStartLastActiveAt,
+          DateTime.utc(2026, 5, 20),
+        );
+      },
+    );
+
+    blocTest<UserCubit, UserState>(
+      'projects problemDetailsViewCount and votesCastCount from the stream',
+      build: () {
+        when(() => firestoreRepo.ensureUserDoc(any())).thenAnswer(
+          (_) async => User(
+            uid: 'test-uid-123',
+            votes: 3,
+            lastActiveAt: DateTime.utc(2026, 5, 20),
+          ),
+        );
+        when(
+          () => firestoreRepo.grantVotesAndTouch(any()),
+        ).thenAnswer((_) async {});
+        when(() => firestoreRepo.watchUserDoc(any())).thenAnswer(
+          (_) => Stream.value(
+            User(
+              uid: 'test-uid-123',
+              votes: 2,
+              lastActiveAt: DateTime.utc(2026, 5, 23),
+              problemDetailsViewCount: 7,
+              votesCastCount: 5,
+            ),
+          ),
+        );
+        when(() => authRepo.authStateChanges).thenAnswer(
+          (_) => Stream.value(_MockFirebaseUser()),
+        );
+        return UserCubit(authRepo, firestoreRepo);
+      },
+      wait: const Duration(milliseconds: 100),
+      verify: (cubit) {
+        expect(cubit.state.problemDetailsViewCount, 7);
+        expect(cubit.state.votesCastCount, 5);
+        expect(cubit.state.remainingVotes, 2);
+      },
+    );
+
+    test('needsVoteHint matches the spec table', () {
+      final now = DateTime.now().toUtc();
+      expect(
+        const UserState().needsVoteHint,
+        isFalse,
+        reason: 'unknown auth status',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          votesCastCount: 0,
+          sessionStartLastActiveAt: now,
+        ).needsVoteHint,
+        isTrue,
+        reason: '0 <= 0',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          votesCastCount: 1,
+          sessionStartLastActiveAt: now,
+        ).needsVoteHint,
+        isFalse,
+        reason: '1 > 0',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          votesCastCount: 10,
+          sessionStartLastActiveAt: now.subtract(const Duration(days: 30)),
+        ).needsVoteHint,
+        isTrue,
+        reason: '10 <= 30 (returning user refresher)',
+      );
+    });
   });
 }
