@@ -2,6 +2,14 @@
   "projects": {
     "prod": "votasq"
   },
-  "targets": {},
+  "targets": {
+    "votasq": {
+      "hosting": {
+        "live": [
+          "votasqueue"
+        ]
+      }
+    }
+  },
   "etags": {}
 }
