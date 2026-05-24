@@ -3,6 +3,12 @@
 # Hand-patched to: (1) install Flutter SDK before `flutter build web`,
 # (2) add a paths: filter so server-only PRs don't trigger a preview
 # rebuild, (3) align action versions with the rest of .github/workflows/.
+#
+# Prerequisite (same as firebase-hosting-merge.yml): the GCP project
+# must have firebasehosting.googleapis.com enabled, otherwise the deploy
+# step's service-account auth returns 403 with a misleading
+# "API has not been used" message. Enable with:
+#   gcloud services enable firebasehosting.googleapis.com --project=votasq
 
 name: Deploy to Firebase Hosting on PR
 on:

@@ -3,6 +3,15 @@
 # Hand-patched to: (1) install Flutter SDK before `flutter build web`,
 # (2) add a paths: filter so server-only commits don't trigger a no-op
 # web rebuild, (3) align action versions with the rest of .github/workflows/.
+#
+# Prerequisite: firebasehosting.googleapis.com must be enabled in the GCP
+# project, otherwise the deploy step fails with a misleading 403:
+#   "Firebase Hosting API has not been used in project ... or it is disabled".
+# Interactive `firebase deploy` from the CLI works without the API enabled
+# (user OAuth routes through Firebase's consumer endpoints); service-account
+# auth (what this workflow uses) goes through the standard GCP API stack
+# and requires the API to be explicitly enabled.
+#   gcloud services enable firebasehosting.googleapis.com --project=votasq
 
 name: Deploy to Firebase Hosting on merge
 on:
