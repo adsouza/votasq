@@ -137,7 +137,21 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.votes is int
         && request.resource.data.votes == 3 // Must match initialVoteBudget
-        && request.resource.data.lastActiveAt is timestamp;
+        && request.resource.data.lastActiveAt is timestamp
+        && (
+          !('problemDetailsViewCount' in request.resource.data.keys())
+          || (
+            request.resource.data.problemDetailsViewCount is int
+            && request.resource.data.problemDetailsViewCount == 0
+          )
+        )
+        && (
+          !('votesCastCount' in request.resource.data.keys())
+          || (
+            request.resource.data.votesCastCount is int
+            && request.resource.data.votesCastCount == 0
+          )
+        );
       allow update: if
         request.auth != null
         && request.auth.uid == userId
@@ -169,6 +183,18 @@ service cloud.firestore {
             request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['notificationPreferences', 'locale', 'lastActiveAt'])
             && request.resource.data.votes == resource.data.votes
+          )
+          ||
+          // problemDetailsViewCount increment + lastActiveAt touch.
+          // Strict +1 enforcement keeps a malicious client from
+          // fast-forwarding themselves out of the banner.
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['problemDetailsViewCount', 'lastActiveAt'])
+            && request.resource.data.problemDetailsViewCount is int
+            && request.resource.data.problemDetailsViewCount ==
+               resource.data.get('problemDetailsViewCount', 0) + 1
+            && request.resource.data.lastActiveAt is timestamp
           )
         );
 
