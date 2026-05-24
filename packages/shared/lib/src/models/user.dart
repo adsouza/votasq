@@ -4,7 +4,7 @@ part 'user.freezed.dart';
 part 'user.g.dart';
 
 @freezed
-/// Represents a user with a vote budget.
+/// Represents a user with a vote budget and onboarding-tip counters.
 abstract class User with _$User {
   /// Creates a user.
   const factory User({
@@ -12,6 +12,8 @@ abstract class User with _$User {
     required DateTime lastActiveAt,
     required int votes,
     String? displayName,
+    @Default(0) int problemDetailsViewCount,
+    @Default(0) int votesCastCount,
   }) = _User;
 
   /// Deserializes a [User] from JSON.

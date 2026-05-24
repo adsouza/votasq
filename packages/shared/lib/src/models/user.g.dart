@@ -11,6 +11,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   lastActiveAt: DateTime.parse(json['lastActiveAt'] as String),
   votes: (json['votes'] as num).toInt(),
   displayName: json['displayName'] as String?,
+  problemDetailsViewCount:
+      (json['problemDetailsViewCount'] as num?)?.toInt() ?? 0,
+  votesCastCount: (json['votesCastCount'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
@@ -18,4 +21,6 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'lastActiveAt': instance.lastActiveAt.toIso8601String(),
   'votes': instance.votes,
   'displayName': instance.displayName,
+  'problemDetailsViewCount': instance.problemDetailsViewCount,
+  'votesCastCount': instance.votesCastCount,
 };
