@@ -18,7 +18,7 @@ import 'package:toastification/toastification.dart';
 
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
-class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
+class _MockUserCubit extends MockCubit<UserState> implements UserCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
@@ -59,7 +59,7 @@ Problem _problem({
 
 void main() {
   late FirestoreRepository repo;
-  late AuthCubit authCubit;
+  late UserCubit userCubit;
   late GeoscopeCubit geoscopeCubit;
   late ProblemsCubit problemsCubit;
   late LanguageDetectionService languageDetectionService;
@@ -72,13 +72,13 @@ void main() {
 
   setUp(() {
     repo = _MockFirestoreRepository();
-    authCubit = _MockAuthCubit();
+    userCubit = _MockUserCubit();
     geoscopeCubit = _MockGeoscopeCubit();
     problemsCubit = _MockProblemsCubit();
     languageDetectionService = _MockLanguageDetectionService();
     translationRepo = _MockTranslationRepository();
 
-    when(() => authCubit.state).thenReturn(const AuthState());
+    when(() => userCubit.state).thenReturn(const UserState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
     when(() => problemsCubit.state).thenReturn(const ProblemsState());
     when(() => problemsCubit.applyLocalUpdate(any())).thenReturn(null);
@@ -123,7 +123,7 @@ void main() {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthCubit>.value(value: authCubit),
+        BlocProvider<UserCubit>.value(value: userCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
         BlocProvider<ProblemsCubit>.value(value: problemsCubit),
       ],
@@ -164,8 +164,8 @@ void main() {
 
     testWidgets('shows read-only view for non-owner', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -187,8 +187,8 @@ void main() {
         // '/', which is the exact condition where buildGeoscopeDropdown
         // returns []. The whole label + dropdown row should disappear.
         when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -208,8 +208,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(geoscope: 'na/us'),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -223,8 +223,8 @@ void main() {
 
     testWidgets('shows editable view for owner', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'owner1',
         ),
@@ -242,8 +242,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        when(() => userCubit.state).thenReturn(
+          const UserState(status: AuthStatus.authenticated, userId: 'owner1'),
         );
         await tester.pumpWidget(buildSubject());
         await tester.pumpAndSettle();
@@ -260,8 +260,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(hidden: true),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        when(() => userCubit.state).thenReturn(
+          const UserState(status: AuthStatus.authenticated, userId: 'owner1'),
         );
         await tester.pumpWidget(buildSubject());
         await tester.pumpAndSettle();
@@ -282,8 +282,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(hidden: true),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'other-user',
           ),
@@ -307,8 +307,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'other-user',
           ),
@@ -324,8 +324,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        when(() => userCubit.state).thenReturn(
+          const UserState(status: AuthStatus.authenticated, userId: 'owner1'),
         );
         when(
           () => problemsCubit.setHidden(
@@ -352,8 +352,8 @@ void main() {
         when(() => repo.getProblem(any())).thenAnswer(
           (_) async => _problem(hidden: true),
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+        when(() => userCubit.state).thenReturn(
+          const UserState(status: AuthStatus.authenticated, userId: 'owner1'),
         );
         when(
           () => problemsCubit.setHidden(
@@ -388,8 +388,8 @@ void main() {
           when(() => repo.getProblem(any())).thenAnswer(
             (_) async => _problem(),
           );
-          when(() => authCubit.state).thenReturn(
-            const AuthState(
+          when(() => userCubit.state).thenReturn(
+            const UserState(
               status: AuthStatus.authenticated,
               userId: 'owner1',
             ),
@@ -423,7 +423,7 @@ void main() {
           await tester.pumpWidget(
             MultiBlocProvider(
               providers: [
-                BlocProvider<AuthCubit>.value(value: authCubit),
+                BlocProvider<UserCubit>.value(value: userCubit),
                 BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
                 // Intentionally no BlocProvider<ProblemsCubit>.
               ],
@@ -491,8 +491,8 @@ void main() {
             copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -545,8 +545,8 @@ void main() {
             copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -613,8 +613,8 @@ void main() {
           copiedFromProblemId: any(named: 'copiedFromProblemId'),
         ),
       ).thenThrow(Exception('boom'));
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'owner1',
         ),
@@ -659,8 +659,8 @@ void main() {
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async {});
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
           remainingVotes: initialVoteBudget,
@@ -690,7 +690,7 @@ void main() {
       when(() => repo.getProblem(any())).thenAnswer(
         (_) async => _problem(),
       );
-      when(() => authCubit.state).thenReturn(const AuthState());
+      when(() => userCubit.state).thenReturn(const UserState());
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
       expect(find.byType(ActionChip), findsNothing);
@@ -705,8 +705,8 @@ void main() {
       ).thenAnswer(
         (_) async => _problem(goal: 'reduce commute times'),
       );
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -718,8 +718,8 @@ void main() {
 
     testWidgets('hides goal in read-only view when empty', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -737,8 +737,8 @@ void main() {
         when(
           () => repo.getDisplayName('owner1'),
         ).thenAnswer((_) async => 'Alice');
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'other-user',
           ),
@@ -755,8 +755,8 @@ void main() {
       (tester) async {
         when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
         // Default stub returns null; assert no attribution line renders.
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'other-user',
           ),
@@ -770,8 +770,8 @@ void main() {
 
     testWidgets('excludes owner from voter list', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -806,8 +806,8 @@ void main() {
           (name: 'Charlie', votes: 1),
         ],
       );
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -826,8 +826,8 @@ void main() {
 
     testWidgets('hides voter list when empty', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -846,8 +846,8 @@ void main() {
           userId: any(named: 'userId'),
         ),
       ).thenAnswer((_) async {});
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
           remainingVotes: initialVoteBudget,
@@ -943,8 +943,8 @@ void main() {
         when(() => repo.getForksOfProblem(any())).thenAnswer(
           (_) async => [_problem(id: 'fork-a')],
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -965,8 +965,8 @@ void main() {
         (_) async => [_problem(id: 'fork-a', description: 'A different desc')],
       );
       // Authenticated but not the owner.
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'other-user',
         ),
@@ -998,8 +998,8 @@ void main() {
             copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1075,8 +1075,8 @@ void main() {
             copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1143,8 +1143,8 @@ void main() {
             copiedFromProblemId: any(named: 'copiedFromProblemId'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1219,8 +1219,8 @@ void main() {
       when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
       when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
       when(() => repo.unlinkProblem('p2')).thenAnswer((_) async {});
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'owner1',
         ),
@@ -1248,7 +1248,7 @@ void main() {
 
       when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
       when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
-      when(() => authCubit.state).thenReturn(const AuthState());
+      when(() => userCubit.state).thenReturn(const UserState());
 
       await tester.pumpWidget(buildSubject(problemId: 'p1'));
       await tester.pumpAndSettle();
@@ -1271,8 +1271,8 @@ void main() {
           () => repo.getGlobalProblemsForSearch(),
         ).thenAnswer((_) async => [searchResult]);
         when(() => repo.linkProblems('p1', 'p2')).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1316,8 +1316,8 @@ void main() {
         when(() => repo.getGlobalProblemsForSearch()).thenAnswer(
           (_) async => [result1, result2],
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1369,8 +1369,8 @@ void main() {
             kind: any(named: 'kind'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1459,8 +1459,8 @@ void main() {
             targetId: any(named: 'targetId'),
           ),
         ).thenAnswer((_) async {});
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),
@@ -1514,8 +1514,8 @@ void main() {
         when(() => repo.getGlobalProblemsForSearch()).thenAnswer(
           (_) async => [alreadyTaggedProblem, freshProblem],
         );
-        when(() => authCubit.state).thenReturn(
-          const AuthState(
+        when(() => userCubit.state).thenReturn(
+          const UserState(
             status: AuthStatus.authenticated,
             userId: 'owner1',
           ),

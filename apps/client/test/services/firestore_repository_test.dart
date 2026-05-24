@@ -704,57 +704,68 @@ void main() {
         expect(actualLastActive.isAtSameMomentAs(oldTime), isTrue);
       });
 
-      test('ensureUserDoc writes problemDetailsViewCount: 0 on the wire', () async {
-        final fs = FakeFirebaseFirestore();
-        final repo = FirestoreRepository(firestore: fs);
-        final newUser = User(
-          uid: 'u1',
-          votes: 3,
-          lastActiveAt: DateTime.utc(2026, 5, 23),
-        );
+      test(
+        'ensureUserDoc writes problemDetailsViewCount: 0 on the wire',
+        () async {
+          final fs = FakeFirebaseFirestore();
+          final repo = FirestoreRepository(firestore: fs);
+          final newUser = User(
+            uid: 'u1',
+            votes: 3,
+            lastActiveAt: DateTime.utc(2026, 5, 23),
+          );
 
-        await repo.ensureUserDoc(newUser);
+          await repo.ensureUserDoc(newUser);
 
-        final doc = await fs.collection('users').doc('u1').get();
-        expect(doc.data()!['problemDetailsViewCount'], 0);
-        expect(doc.data()!['votesCastCount'], 0);
-      });
+          final doc = await fs.collection('users').doc('u1').get();
+          expect(doc.data()!['problemDetailsViewCount'], 0);
+          expect(doc.data()!['votesCastCount'], 0);
+        },
+      );
 
-      test('_docToUser reads back seeded problemDetailsViewCount + votesCastCount', () async {
-        final fs = FakeFirebaseFirestore();
-        await fs.collection('users').doc('u2').set({
-          'uid': 'u2',
-          'votes': 3,
-          'lastActiveAt': Timestamp.fromDate(DateTime.utc(2026, 5, 23)),
-          'problemDetailsViewCount': 7,
-          'votesCastCount': 11,
-        });
-        final repo = FirestoreRepository(firestore: fs);
+      test(
+        '_docToUser reads back seeded problemDetailsViewCount + votesCastCount',
+        () async {
+          final fs = FakeFirebaseFirestore();
+          await fs.collection('users').doc('u2').set({
+            'uid': 'u2',
+            'votes': 3,
+            'lastActiveAt': Timestamp.fromDate(DateTime.utc(2026, 5, 23)),
+            'problemDetailsViewCount': 7,
+            'votesCastCount': 11,
+          });
+          final repo = FirestoreRepository(firestore: fs);
 
-        final user = await repo.fetchUserDoc('u2');
+          final user = await repo.fetchUserDoc('u2');
 
-        expect(user!.problemDetailsViewCount, 7);
-        expect(user.votesCastCount, 11);
-      });
+          expect(user!.problemDetailsViewCount, 7);
+          expect(user.votesCastCount, 11);
+        },
+      );
 
-      test('incrementProblemDetailsViewCount advances the field and touches lastActiveAt',
-          () async {
-        final fs = FakeFirebaseFirestore();
-        final t0 = DateTime.utc(2026, 5, 23, 12);
-        await fs.collection('users').doc('u3').set({
-          'uid': 'u3',
-          'votes': 3,
-          'lastActiveAt': Timestamp.fromDate(t0),
-          'problemDetailsViewCount': 4,
-        });
-        final repo = FirestoreRepository(firestore: fs);
+      test(
+        'incrementProblemDetailsViewCount advances the field and touches lastActiveAt',
+        () async {
+          final fs = FakeFirebaseFirestore();
+          final t0 = DateTime.utc(2026, 5, 23, 12);
+          await fs.collection('users').doc('u3').set({
+            'uid': 'u3',
+            'votes': 3,
+            'lastActiveAt': Timestamp.fromDate(t0),
+            'problemDetailsViewCount': 4,
+          });
+          final repo = FirestoreRepository(firestore: fs);
 
-        await repo.incrementProblemDetailsViewCount('u3');
+          await repo.incrementProblemDetailsViewCount('u3');
 
-        final doc = await fs.collection('users').doc('u3').get();
-        expect(doc.data()!['problemDetailsViewCount'], 5);
-        expect((doc.data()!['lastActiveAt'] as Timestamp).toDate().isAfter(t0), isTrue);
-      });
+          final doc = await fs.collection('users').doc('u3').get();
+          expect(doc.data()!['problemDetailsViewCount'], 5);
+          expect(
+            (doc.data()!['lastActiveAt'] as Timestamp).toDate().isAfter(t0),
+            isTrue,
+          );
+        },
+      );
     });
 
     group('vote', () {
@@ -814,24 +825,6 @@ void main() {
       test('returns empty set when user has no votes', () async {
         final ids = await repo.getVotedProblemIds('nobody');
         expect(ids, isEmpty);
-      });
-    });
-
-    group('watchUserVotes', () {
-      test('emits current vote budget', () async {
-        await firestore.collection('users').doc('u1').set({
-          'uid': 'u1',
-          'votes': 7,
-          'lastActiveAt': DateTime.now().toUtc(),
-        });
-
-        final votes = repo.watchUserVotes('u1');
-        expect(await votes.first, 7);
-      });
-
-      test('emits 0 for non-existent user', () async {
-        final votes = repo.watchUserVotes('ghost');
-        expect(await votes.first, 0);
       });
     });
 

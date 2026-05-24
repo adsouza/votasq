@@ -43,35 +43,55 @@ void main() {
       ),
     );
     when(
-      () => firestoreRepo.watchUserVotes(any()),
-    ).thenAnswer((_) => Stream.value(initialVoteBudget));
+      () => firestoreRepo.watchUserDoc(any()),
+    ).thenAnswer(
+      (_) => Stream.value(
+        User(
+          uid: 'test-uid-123',
+          votes: initialVoteBudget,
+          lastActiveAt: DateTime.utc(2024),
+        ),
+      ),
+    );
     when(
       () => firestoreRepo.grantVotesAndTouch(any()),
     ).thenAnswer((_) async {});
   });
 
-  group('AuthCubit', () {
+  group('UserCubit', () {
     test('initial state is unknown with null userId', () {
-      final cubit = AuthCubit(authRepo, firestoreRepo);
+      final cubit = UserCubit(authRepo, firestoreRepo);
       expect(cubit.state.status, AuthStatus.unknown);
       expect(cubit.state.userId, isNull);
       addTearDown(cubit.close);
     });
 
-    blocTest<AuthCubit, AuthState>(
+    blocTest<UserCubit, UserState>(
       'emits authenticated when auth stream fires user',
       build: () {
         final user = _MockFirebaseUser();
         when(
           () => authRepo.authStateChanges,
         ).thenAnswer((_) => Stream.value(user));
-        return AuthCubit(authRepo, firestoreRepo);
+        return UserCubit(authRepo, firestoreRepo);
       },
       expect: () => [
-        isA<AuthState>()
+        // 1) auth state fires: authenticated + userId
+        isA<UserState>()
             .having((s) => s.status, 'status', AuthStatus.authenticated)
-            .having((s) => s.userId, 'userId', 'test-uid-123'),
-        isA<AuthState>()
+            .having((s) => s.userId, 'userId', 'test-uid-123')
+            .having((s) => s.remainingVotes, 'remainingVotes', isNull),
+        // 2) ensureUserDoc returns: sessionStartLastActiveAt frozen
+        isA<UserState>()
+            .having((s) => s.status, 'status', AuthStatus.authenticated)
+            .having((s) => s.userId, 'userId', 'test-uid-123')
+            .having(
+              (s) => s.sessionStartLastActiveAt,
+              'sessionStartLastActiveAt',
+              DateTime.utc(2024),
+            ),
+        // 3) watchUserDoc emits: remainingVotes + counters
+        isA<UserState>()
             .having((s) => s.status, 'status', AuthStatus.authenticated)
             .having((s) => s.userId, 'userId', 'test-uid-123')
             .having(
@@ -82,28 +102,28 @@ void main() {
       ],
     );
 
-    blocTest<AuthCubit, AuthState>(
+    blocTest<UserCubit, UserState>(
       'emits unauthenticated when auth stream fires null',
       build: () {
         when(
           () => authRepo.authStateChanges,
         ).thenAnswer((_) => Stream<firebase.User?>.value(null));
-        return AuthCubit(authRepo, firestoreRepo);
+        return UserCubit(authRepo, firestoreRepo);
       },
       expect: () => [
-        isA<AuthState>()
+        isA<UserState>()
             .having((s) => s.status, 'status', AuthStatus.unauthenticated)
             .having((s) => s.userId, 'userId', isNull),
       ],
     );
 
-    blocTest<AuthCubit, AuthState>(
+    blocTest<UserCubit, UserState>(
       'signIn delegates to repository',
       build: () {
         when(
           () => authRepo.signInWithGoogle(),
         ).thenThrow(Exception('not implemented'));
-        return AuthCubit(authRepo, firestoreRepo);
+        return UserCubit(authRepo, firestoreRepo);
       },
       act: (cubit) => cubit.signIn(),
       verify: (_) {
@@ -111,11 +131,11 @@ void main() {
       },
     );
 
-    blocTest<AuthCubit, AuthState>(
+    blocTest<UserCubit, UserState>(
       'signOut delegates to repository',
       build: () {
         when(() => authRepo.signOut()).thenAnswer((_) async {});
-        return AuthCubit(authRepo, firestoreRepo);
+        return UserCubit(authRepo, firestoreRepo);
       },
       act: (cubit) => cubit.signOut(),
       verify: (_) {

@@ -109,7 +109,7 @@ class _AppState extends State<App> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => AuthCubit(
+            create: (context) => UserCubit(
               authRepo,
               context.read<FirestoreRepository>(),
             ),
@@ -163,11 +163,11 @@ class _AppState extends State<App> {
 }
 
 /// Drives [NotificationsCubit], [NotificationsCountCubit], and
-/// [NotificationRegistrationService] off [AuthCubit] state. On sign-in,
+/// [NotificationRegistrationService] off [UserCubit] state. On sign-in,
 /// the live subscription starts, the badge count refreshes, and FCM
 /// permission + token registration kicks off. On sign-out, the cubits
 /// reset and the device's FCM token doc is deleted. Captures the previous
-/// uid so the unregister can target it even after the AuthCubit has moved
+/// uid so the unregister can target it even after the UserCubit has moved
 /// past it.
 ///
 /// Also re-runs the unread-count aggregation whenever the live
@@ -191,7 +191,7 @@ class _NotificationAuthSyncState extends State<_NotificationAuthSync> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<AuthCubit, AuthState>(
+        BlocListener<UserCubit, UserState>(
           listenWhen: (previous, current) =>
               previous.status != current.status ||
               previous.userId != current.userId,
@@ -263,7 +263,7 @@ class _LastActiveTrackerState extends State<_LastActiveTracker> {
   }
 
   void _onResume() {
-    final userId = context.read<AuthCubit>().state.userId;
+    final userId = context.read<UserCubit>().state.userId;
     if (userId == null) return;
     unawaited(context.read<FirestoreRepository>().grantVotesAndTouch(userId));
     unawaited(context.read<NotificationsCountCubit>().refresh());

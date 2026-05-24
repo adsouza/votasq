@@ -236,7 +236,7 @@ class _ProblemsViewState extends State<ProblemsView> {
         await context.read<FeedbackRepository>().submit(
           text: feedback.text,
           screenshot: feedback.screenshot,
-          userId: context.read<AuthCubit>().state.userId!,
+          userId: context.read<UserCubit>().state.userId!,
         );
         if (mounted) {
           showToast(l10n.feedbackSuccess);
@@ -272,7 +272,7 @@ class _ProblemsViewState extends State<ProblemsView> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    final userId = context.read<AuthCubit>().state.userId!;
+    final userId = context.read<UserCubit>().state.userId!;
     unawaited(
       context.read<ProblemsCubit>().flagProblem(
         problem: problem,
@@ -315,7 +315,7 @@ class _ProblemsViewState extends State<ProblemsView> {
           builder: (context, state) {
             // watch (not read) so the filtered count reacts to sign-in /
             // sign-out — _applyFilters with _showOnlyOwned uses userId.
-            final userId = context.watch<AuthCubit>().state.userId;
+            final userId = context.watch<UserCubit>().state.userId;
             final filtered = _applyFilters(state.problems, userId);
             return Text(
               '${filtered.length} ${l10n.problemsAppBarTitle}',
@@ -347,12 +347,12 @@ class _ProblemsViewState extends State<ProblemsView> {
               } else if (value == 'send_feedback') {
                 _sendFeedback(l10n);
               } else if (value == 'sign_out') {
-                unawaited(context.read<AuthCubit>().signOut());
+                unawaited(context.read<UserCubit>().signOut());
               }
             },
             itemBuilder: (context) {
               final isAuthenticated =
-                  context.read<AuthCubit>().state.userId != null;
+                  context.read<UserCubit>().state.userId != null;
               return [
                 PopupMenuItem(
                   value: 'add_problem',
@@ -435,9 +435,9 @@ class _ProblemsViewState extends State<ProblemsView> {
                   PopupMenuItem(
                     enabled: false,
                     child: Text(
-                      (context.read<AuthCubit>().state.remainingVotes ?? 0) > 0
+                      (context.read<UserCubit>().state.remainingVotes ?? 0) > 0
                           ? l10n.menuVotesRemaining(
-                              context.read<AuthCubit>().state.remainingVotes!,
+                              context.read<UserCubit>().state.remainingVotes!,
                             )
                           : l10n.menuVotesReplenishHint,
                     ),
@@ -448,7 +448,7 @@ class _ProblemsViewState extends State<ProblemsView> {
           ),
         ),
         actions: [
-          BlocBuilder<AuthCubit, AuthState>(
+          BlocBuilder<UserCubit, UserState>(
             builder: (context, authState) {
               if (authState.status == AuthStatus.authenticated) {
                 return const NotificationsBadge();
@@ -456,7 +456,7 @@ class _ProblemsViewState extends State<ProblemsView> {
               return Tooltip(
                 message: l10n.signInButtonTooltip,
                 child: TextButton(
-                  onPressed: () => context.read<AuthCubit>().signIn(),
+                  onPressed: () => context.read<UserCubit>().signIn(),
                   child: SizedBox(
                     width: 64,
                     child: Text(
@@ -474,7 +474,7 @@ class _ProblemsViewState extends State<ProblemsView> {
       ),
       body: Column(
         children: [
-          BlocBuilder<AuthCubit, AuthState>(
+          BlocBuilder<UserCubit, UserState>(
             builder: (context, authState) {
               if (authState.status == AuthStatus.unauthenticated) {
                 return const _SignInHintBanner();
@@ -491,7 +491,7 @@ class _ProblemsViewState extends State<ProblemsView> {
                         required goal,
                         required geoscope,
                       }) async {
-                        final userId = context.read<AuthCubit>().state.userId!;
+                        final userId = context.read<UserCubit>().state.userId!;
                         final userLang = Localizations.localeOf(
                           context,
                         ).languageCode;
@@ -533,9 +533,9 @@ class _ProblemsViewState extends State<ProblemsView> {
                       // watch (not read) so showEditButton / showComplaintButton
                       // on each tile react to sign-in / sign-out without a
                       // separate rebuild trigger. The vote chip inside
-                      // ProblemReadTile already watches AuthCubit; this is the
+                      // ProblemReadTile already watches UserCubit; this is the
                       // matching subscription for the owner-driven props.
-                      final userId = context.watch<AuthCubit>().state.userId;
+                      final userId = context.watch<UserCubit>().state.userId;
                       final filtered = _applyFilters(state.problems, userId);
                       return ListView.builder(
                         controller: _scrollController,

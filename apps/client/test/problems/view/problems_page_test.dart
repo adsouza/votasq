@@ -26,7 +26,7 @@ import '../../helpers/helpers.dart';
 class _MockProblemsCubit extends MockCubit<ProblemsState>
     implements ProblemsCubit {}
 
-class _MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
+class _MockUserCubit extends MockCubit<UserState> implements UserCubit {}
 
 class _MockGeoscopeCubit extends MockCubit<GeoscopeState>
     implements GeoscopeCubit {}
@@ -73,7 +73,7 @@ Finder _menuItem(String value) => find.byWidgetPredicate(
 
 void main() {
   late ProblemsCubit problemsCubit;
-  late AuthCubit authCubit;
+  late UserCubit userCubit;
   late GeoscopeCubit geoscopeCubit;
   late NotificationsCountCubit notificationsCountCubit;
   late FirestoreRepository firestoreRepo;
@@ -89,7 +89,7 @@ void main() {
   setUp(() {
     mockPrefs = createMockSharedPreferences();
     problemsCubit = _MockProblemsCubit();
-    authCubit = _MockAuthCubit();
+    userCubit = _MockUserCubit();
     geoscopeCubit = _MockGeoscopeCubit();
     notificationsCountCubit = _MockNotificationsCountCubit();
     firestoreRepo = _MockFirestoreRepository();
@@ -99,7 +99,7 @@ void main() {
 
     // Default states.
     when(() => problemsCubit.state).thenReturn(const ProblemsState());
-    when(() => authCubit.state).thenReturn(const AuthState());
+    when(() => userCubit.state).thenReturn(const UserState());
     when(() => geoscopeCubit.state).thenReturn(const GeoscopeState());
     when(() => notificationsCountCubit.state).thenReturn(0);
     when(
@@ -115,7 +115,7 @@ void main() {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ProblemsCubit>.value(value: problemsCubit),
-        BlocProvider<AuthCubit>.value(value: authCubit),
+        BlocProvider<UserCubit>.value(value: userCubit),
         BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
         BlocProvider<AutoTranslateCubit>(
           create: (_) => AutoTranslateCubit(prefsForTesting: mockPrefs),
@@ -149,8 +149,8 @@ void main() {
 
   group('ProblemsView', () {
     testWidgets('shows add-problem row when authenticated', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'user1'),
       );
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
@@ -160,8 +160,8 @@ void main() {
     });
 
     testWidgets('hides add-problem row when not authenticated', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.unauthenticated),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.unauthenticated),
       );
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
@@ -186,8 +186,8 @@ void main() {
     });
 
     testWidgets('shows edit button for owned problems', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'owner1'),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'owner1'),
       );
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
@@ -205,20 +205,20 @@ void main() {
       'without any other rebuild trigger',
       (tester) async {
         // Regression test for the stale-userId bug: the ListView's outer
-        // Builder used context.read<AuthCubit>() rather than watch(), so
+        // Builder used context.read<UserCubit>() rather than watch(), so
         // showEditButton / showComplaintButton were computed once from the
         // unauthenticated userId and never updated when auth resolved.
         // The vote chip already worked because ProblemReadTile watches
-        // AuthCubit internally.
-        final authController = StreamController<AuthState>.broadcast();
+        // UserCubit internally.
+        final authController = StreamController<UserState>.broadcast();
         addTearDown(authController.close);
-        const initial = AuthState();
-        const signedIn = AuthState(
+        const initial = UserState();
+        const signedIn = UserState(
           status: AuthStatus.authenticated,
           userId: 'owner1',
         );
         whenListen(
-          authCubit,
+          userCubit,
           authController.stream,
           initialState: initial,
         );
@@ -254,8 +254,8 @@ void main() {
     );
 
     testWidgets('shows flag button for non-owned problems', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'other'),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'other'),
       );
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
@@ -269,8 +269,8 @@ void main() {
     });
 
     testWidgets('hides flagged problems', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'user1'),
       );
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
@@ -330,8 +330,8 @@ void main() {
     testWidgets('vote chip is ActionChip when authenticated with votes', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
           remainingVotes: initialVoteBudget,
@@ -351,8 +351,8 @@ void main() {
     testWidgets('vote chip is plain Chip when no remaining votes', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
           remainingVotes: 0,
@@ -372,8 +372,8 @@ void main() {
     testWidgets('vote chip is plain Chip when not authenticated', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.unauthenticated),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.unauthenticated),
       );
       when(() => problemsCubit.state).thenReturn(
         ProblemsState(
@@ -387,8 +387,8 @@ void main() {
     });
 
     testWidgets('tapping vote chip calls cubit.vote', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
           remainingVotes: initialVoteBudget,
@@ -439,8 +439,8 @@ void main() {
     testWidgets('hamburger menu shows owned filter when authenticated', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'user1'),
       );
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
@@ -456,8 +456,8 @@ void main() {
     testWidgets('goal field hidden until description has 3 words', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.authenticated, userId: 'user1'),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'user1'),
       );
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
@@ -534,8 +534,8 @@ void main() {
     testWidgets('toggling owned filter hides non-owned problems', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'owner1',
         ),
@@ -608,10 +608,10 @@ void main() {
     testWidgets('sign in button shown when unauthenticated', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(status: AuthStatus.unauthenticated),
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.unauthenticated),
       );
-      when(() => authCubit.signIn()).thenAnswer((_) async {});
+      when(() => userCubit.signIn()).thenAnswer((_) async {});
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
       );
@@ -622,19 +622,19 @@ void main() {
 
       await tester.tap(signIn);
       await tester.pump();
-      verify(() => authCubit.signIn()).called(1);
+      verify(() => userCubit.signIn()).called(1);
     });
 
     testWidgets('sign out menu item shown when authenticated', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
         ),
       );
-      when(() => authCubit.signOut()).thenAnswer((_) async {});
+      when(() => userCubit.signOut()).thenAnswer((_) async {});
       when(() => problemsCubit.state).thenReturn(
         const ProblemsState(status: ProblemsStatus.success),
       );
@@ -648,12 +648,12 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       await tester.tap(_menuItem('sign_out'));
       await tester.pump();
-      verify(() => authCubit.signOut()).called(1);
+      verify(() => userCubit.signOut()).called(1);
     });
 
     testWidgets('tapping edit shows ProblemEditTile', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'owner1',
         ),
@@ -675,8 +675,8 @@ void main() {
     });
 
     testWidgets('complaint dialog confirms and submits', (tester) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
         ),
@@ -724,8 +724,8 @@ void main() {
     testWidgets('complaint dialog cancel does not submit', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
         ),
@@ -757,8 +757,8 @@ void main() {
     testWidgets('menu shows votes remaining for authenticated user', (
       tester,
     ) async {
-      when(() => authCubit.state).thenReturn(
-        const AuthState(
+      when(() => userCubit.state).thenReturn(
+        const UserState(
           status: AuthStatus.authenticated,
           userId: 'user1',
           remainingVotes: 7,

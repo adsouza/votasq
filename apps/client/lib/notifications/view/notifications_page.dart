@@ -22,7 +22,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    final uid = context.read<AuthCubit>().state.userId;
+    final uid = context.read<UserCubit>().state.userId;
     if (uid != null) {
       context.read<NotificationsCubit>().subscribe(uid);
     }

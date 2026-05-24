@@ -89,7 +89,7 @@ class ProblemReadTile extends StatelessWidget {
               ),
             Builder(
               builder: (context) {
-                final authState = context.watch<AuthCubit>().state;
+                final authState = context.watch<UserCubit>().state;
                 final userId = authState.userId;
                 if (userId != null && (authState.remainingVotes ?? 0) > 0) {
                   return Tooltip(

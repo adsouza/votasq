@@ -303,7 +303,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final userId = context.read<AuthCubit>().state.userId;
+    final userId = context.read<UserCubit>().state.userId;
     final isOwner = userId != null && userId == problem.ownerId;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
@@ -385,7 +385,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final userId = context.read<AuthCubit>().state.userId;
+    final userId = context.read<UserCubit>().state.userId;
 
     final byId = {for (final p in linked) p.id: p};
 
@@ -682,7 +682,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                       ),
                     Builder(
                       builder: (context) {
-                        final authState = context.watch<AuthCubit>().state;
+                        final authState = context.watch<UserCubit>().state;
                         final userId = authState.userId;
                         if (userId != null &&
                             (authState.remainingVotes ?? 0) > 0) {
@@ -858,7 +858,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     }
 
     final problem = _problem!;
-    final userId = context.read<AuthCubit>().state.userId;
+    final userId = context.read<UserCubit>().state.userId;
     final isOwner = userId != null && userId == problem.ownerId;
     final canFork = userId != null && !isOwner;
 

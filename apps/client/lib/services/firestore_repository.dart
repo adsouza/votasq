@@ -517,19 +517,8 @@ class FirestoreRepository {
     });
   }
 
-  /// Real-time stream of a user's remaining vote budget.
-  Stream<int> watchUserVotes(String userId) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .snapshots()
-        .map((doc) => doc.exists ? (doc.data()!['votes'] as num).toInt() : 0);
-  }
-
-  /// Real-time stream of the entire user doc. The user cubit uses this in
-  /// preference to the older `watchUserVotes` so it can project
-  /// onboarding counters too. Once the cubit migration lands,
-  /// `watchUserVotes` can go away.
+  /// Real-time stream of the entire user doc. Emits `null` if the doc
+  /// does not exist.
   Stream<User?> watchUserDoc(String userId) {
     return _firestore
         .collection('users')

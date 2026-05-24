@@ -49,7 +49,7 @@ class _NewProblemPageState extends State<NewProblemPage> {
 
   void _maybeShowPicker() {
     if (_pickerTriggered) return;
-    final authState = context.read<AuthCubit>().state;
+    final authState = context.read<UserCubit>().state;
     if (authState.status != AuthStatus.authenticated) return;
     final geoCubit = context.read<GeoscopeCubit>();
     final geoState = geoCubit.state;
@@ -62,7 +62,7 @@ class _NewProblemPageState extends State<NewProblemPage> {
 
   Future<void> _save() async {
     if (_submitting || !hasEnoughWords(_controller.text)) return;
-    final userId = context.read<AuthCubit>().state.userId;
+    final userId = context.read<UserCubit>().state.userId;
     if (userId == null) return;
     final l10n = context.l10n;
     final repo = context.read<FirestoreRepository>();
@@ -108,7 +108,7 @@ class _NewProblemPageState extends State<NewProblemPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FilledButton(
-              onPressed: () => context.read<AuthCubit>().signIn(),
+              onPressed: () => context.read<UserCubit>().signIn(),
               child: Text(l10n.signInButton),
             ),
             const SizedBox(height: 8),
@@ -207,7 +207,7 @@ class _NewProblemPageState extends State<NewProblemPage> {
     final l10n = context.l10n;
     return MultiBlocListener(
       listeners: [
-        BlocListener<AuthCubit, AuthState>(
+        BlocListener<UserCubit, UserState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
           listener: (_, _) => _maybeShowPicker(),
         ),
@@ -233,7 +233,7 @@ class _NewProblemPageState extends State<NewProblemPage> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            body: BlocBuilder<AuthCubit, AuthState>(
+            body: BlocBuilder<UserCubit, UserState>(
               builder: (context, authState) => switch (authState.status) {
                 AuthStatus.unknown => const Center(
                   child: CircularProgressIndicator(),
