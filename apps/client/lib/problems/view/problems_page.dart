@@ -124,6 +124,7 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
     // Skip when a child route (e.g. /new) is on top so the hint lands
     // alongside the list it's describing.
     if (!_isHomeCurrent) return;
+    if (!context.read<UserCubit>().state.needsDoubleTapHint) return;
     final geoState = context.read<GeoscopeCubit>().state;
     if (geoState.status != GeoscopeStatus.success) return;
     if (geoState.needsSelection) return;
@@ -475,35 +476,52 @@ class _ProblemsViewState extends State<ProblemsView> {
       body: Column(
         children: [
           BlocBuilder<UserCubit, UserState>(
-            builder: (context, authState) {
-              if (authState.status == AuthStatus.unauthenticated) {
-                return const _SignInHintBanner();
+            builder: (context, userState) {
+              final authed = userState.status == AuthStatus.authenticated;
+
+              final Widget? hint;
+              if (userState.status == AuthStatus.unauthenticated) {
+                hint = const _SignInHintBanner();
+              } else if (authed && userState.needsVoteHint) {
+                hint = const _VoteHintBanner();
+              } else if (authed && userState.needsDoubleTapHint) {
+                hint = const _DoubleTapHintBanner();
+              } else {
+                hint = null;
               }
-              if (authState.status != AuthStatus.authenticated) {
-                return const SizedBox.shrink();
-              }
-              return BlocBuilder<GeoscopeCubit, GeoscopeState>(
-                builder: (context, geoState) => AddProblemRow(
-                  defaultGeoscope: geoState.selectedGeoscope,
-                  onSubmit:
-                      ({
-                        required description,
-                        required goal,
-                        required geoscope,
-                      }) async {
-                        final userId = context.read<UserCubit>().state.userId!;
-                        final userLang = Localizations.localeOf(
-                          context,
-                        ).languageCode;
-                        await context.read<ProblemsCubit>().addProblem(
-                          description: description,
-                          goal: goal,
-                          ownerId: userId,
-                          userLanguage: userLang,
-                          geoscope: geoscope,
-                        );
-                      },
-                ),
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ?hint,
+                  if (authed)
+                    BlocBuilder<GeoscopeCubit, GeoscopeState>(
+                      builder: (context, geoState) => AddProblemRow(
+                        defaultGeoscope: geoState.selectedGeoscope,
+                        onSubmit:
+                            ({
+                              required description,
+                              required goal,
+                              required geoscope,
+                            }) async {
+                              final userId = context
+                                  .read<UserCubit>()
+                                  .state
+                                  .userId!;
+                              final userLang = Localizations.localeOf(
+                                context,
+                              ).languageCode;
+                              await context.read<ProblemsCubit>().addProblem(
+                                description: description,
+                                goal: goal,
+                                ownerId: userId,
+                                userLanguage: userLang,
+                                geoscope: geoscope,
+                              );
+                            },
+                      ),
+                    ),
+                ],
               );
             },
           ),
@@ -593,11 +611,13 @@ class _ProblemsViewState extends State<ProblemsView> {
   }
 }
 
-/// Persistent banner shown to anonymous users below the app bar, replacing
-/// the transient sign-in toast that new users often missed. Colors echo the
-/// app's toast palette so the CTA reads as the same "system hint" surface.
-class _SignInHintBanner extends StatelessWidget {
-  const _SignInHintBanner();
+/// Common styling for an onboarding-tip banner: light-orange surface,
+/// indigo text, full-width, centered. Echoes the toast palette so the
+/// banner reads as part of the same "system hint" surface.
+class _HintBanner extends StatelessWidget {
+  const _HintBanner({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -606,7 +626,7 @@ class _SignInHintBanner extends StatelessWidget {
       color: Colors.orange.shade100,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Text(
-        context.l10n.signInHintBanner,
+        message,
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: Color(0xFF1A237E),
@@ -615,4 +635,28 @@ class _SignInHintBanner extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SignInHintBanner extends StatelessWidget {
+  const _SignInHintBanner();
+
+  @override
+  Widget build(BuildContext context) =>
+      _HintBanner(message: context.l10n.signInHintBanner);
+}
+
+class _VoteHintBanner extends StatelessWidget {
+  const _VoteHintBanner();
+
+  @override
+  Widget build(BuildContext context) =>
+      _HintBanner(message: context.l10n.voteHint);
+}
+
+class _DoubleTapHintBanner extends StatelessWidget {
+  const _DoubleTapHintBanner();
+
+  @override
+  Widget build(BuildContext context) =>
+      _HintBanner(message: context.l10n.doubleTapHint);
 }
