@@ -473,6 +473,364 @@ void main() {
     });
   });
 
+  group('firestore.rules — users onboarding counters', () {
+    // Signs up a fresh anonymous user against the Auth emulator and returns
+    // their uid + idToken. Used by create-rule tests that need a brand-new
+    // user doc (re-creating a doc for an existing uid would hit the update
+    // rule instead of the create rule).
+    Future<({String uid, String idToken})> signUpFreshUser() async {
+      final signUpUrl = Uri.parse(
+        'http://$authHost/identitytoolkit.googleapis.com/v1/accounts:signUp'
+        '?key=fake-api-key',
+      );
+      final resp = await client.post(
+        signUpUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'returnSecureToken': true}),
+      );
+      if (resp.statusCode != 200) {
+        fail('signUpFreshUser failed: ${resp.statusCode} ${resp.body}');
+      }
+      final body = jsonDecode(resp.body) as Map<String, dynamic>;
+      return (
+        uid: body['localId'] as String,
+        idToken: body['idToken'] as String,
+      );
+    }
+
+    // Seeds a users/{forUid} doc as the given user via raw PATCH (the create
+    // rule fires on first write). Mirrors the pattern used by seedProblem.
+    Future<void> seedUser({
+      required String forUid,
+      required String withIdToken,
+      int votes = 3,
+      int problemDetailsViewCount = 0,
+      int votesCastCount = 0,
+    }) async {
+      final now = DateTime.now().toUtc();
+      final fields = <String, dynamic>{
+        'uid': sVal(forUid),
+        'votes': iVal(votes),
+        'lastActiveAt': tsVal(now),
+        'problemDetailsViewCount': iVal(problemDetailsViewCount),
+        'votesCastCount': iVal(votesCastCount),
+      };
+      final resp = await client.patch(
+        docUri('users/$forUid'),
+        headers: {
+          'Authorization': 'Bearer $withIdToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'fields': fields}),
+      );
+      if (resp.statusCode >= 400) {
+        fail('seedUser($forUid) failed: ${resp.statusCode} ${resp.body}');
+      }
+    }
+
+    test('create with problemDetailsViewCount: 0 succeeds', () async {
+      final user = await signUpFreshUser();
+      final now = DateTime.now().toUtc();
+      final fields = <String, dynamic>{
+        'uid': sVal(user.uid),
+        'votes': iVal(3),
+        'lastActiveAt': tsVal(now),
+        'problemDetailsViewCount': iVal(0),
+      };
+      final resp = await client.patch(
+        docUri('users/${user.uid}'),
+        headers: {
+          'Authorization': 'Bearer ${user.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'fields': fields}),
+      );
+      expect(
+        resp.statusCode,
+        200,
+        reason:
+            'Expected 200 for create with problemDetailsViewCount: 0. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test('create with problemDetailsViewCount: 5 is rejected', () async {
+      final user = await signUpFreshUser();
+      final now = DateTime.now().toUtc();
+      final fields = <String, dynamic>{
+        'uid': sVal(user.uid),
+        'votes': iVal(3),
+        'lastActiveAt': tsVal(now),
+        'problemDetailsViewCount': iVal(5),
+      };
+      final resp = await client.patch(
+        docUri('users/${user.uid}'),
+        headers: {
+          'Authorization': 'Bearer ${user.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'fields': fields}),
+      );
+      expect(
+        resp.statusCode,
+        403,
+        reason:
+            'Expected 403 for create with problemDetailsViewCount: 5. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test('create with votesCastCount: 0 succeeds', () async {
+      final user = await signUpFreshUser();
+      final now = DateTime.now().toUtc();
+      final fields = <String, dynamic>{
+        'uid': sVal(user.uid),
+        'votes': iVal(3),
+        'lastActiveAt': tsVal(now),
+        'votesCastCount': iVal(0),
+      };
+      final resp = await client.patch(
+        docUri('users/${user.uid}'),
+        headers: {
+          'Authorization': 'Bearer ${user.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'fields': fields}),
+      );
+      expect(
+        resp.statusCode,
+        200,
+        reason:
+            'Expected 200 for create with votesCastCount: 0. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test('create with votesCastCount: 5 is rejected', () async {
+      final user = await signUpFreshUser();
+      final now = DateTime.now().toUtc();
+      final fields = <String, dynamic>{
+        'uid': sVal(user.uid),
+        'votes': iVal(3),
+        'lastActiveAt': tsVal(now),
+        'votesCastCount': iVal(5),
+      };
+      final resp = await client.patch(
+        docUri('users/${user.uid}'),
+        headers: {
+          'Authorization': 'Bearer ${user.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'fields': fields}),
+      );
+      expect(
+        resp.statusCode,
+        403,
+        reason:
+            'Expected 403 for create with votesCastCount: 5. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test(
+      'problemDetailsViewCount +1 with lastActiveAt touch succeeds',
+      () async {
+        // Use a fresh user so the first PATCH triggers the create rule
+        // (problemDetailsViewCount: 0 is valid at create time). Then do a
+        // +1 update from 0 → 1.
+        final user = await signUpFreshUser();
+        await seedUser(
+          forUid: user.uid,
+          withIdToken: user.idToken,
+        );
+
+        final now = DateTime.now().toUtc();
+        final qs = [
+          'updateMask.fieldPaths=problemDetailsViewCount',
+          'updateMask.fieldPaths=lastActiveAt',
+        ].join('&');
+        final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
+        final resp = await client.patch(
+          url,
+          headers: {
+            'Authorization': 'Bearer ${user.idToken}',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'fields': {
+              'problemDetailsViewCount': iVal(1), // 0 + 1
+              'lastActiveAt': tsVal(now),
+            },
+          }),
+        );
+        expect(
+          resp.statusCode,
+          200,
+          reason:
+              'Expected 200 for problemDetailsViewCount +1 with '
+              'lastActiveAt touch. Got ${resp.statusCode}: ${resp.body}',
+        );
+      },
+    );
+
+    test('problemDetailsViewCount +2 is rejected', () async {
+      // Fresh user, seeded at problemDetailsViewCount: 0. Attempt to jump
+      // from 0 → 2 (i.e. +2). The rule requires exactly +1.
+      final user = await signUpFreshUser();
+      await seedUser(
+        forUid: user.uid,
+        withIdToken: user.idToken,
+      );
+
+      final now = DateTime.now().toUtc();
+      final qs = [
+        'updateMask.fieldPaths=problemDetailsViewCount',
+        'updateMask.fieldPaths=lastActiveAt',
+      ].join('&');
+      final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
+      final resp = await client.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer ${user.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'fields': {
+            'problemDetailsViewCount': iVal(2), // 0 + 2, not +1
+            'lastActiveAt': tsVal(now),
+          },
+        }),
+      );
+      expect(
+        resp.statusCode,
+        403,
+        reason:
+            'Expected 403 for problemDetailsViewCount +2. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test(
+      'problemDetailsViewCount increment that also changes votes is rejected',
+      () async {
+        // Fresh user seeded at problemDetailsViewCount: 0 and votes: 3.
+        // Include votes in the update mask — the PDVC branch requires
+        // affectedKeys().hasOnly(['problemDetailsViewCount', 'lastActiveAt']),
+        // so any extra field must cause that branch to fail. The vote-decrement
+        // branch won't match a +1 PDVC change either.
+        final user = await signUpFreshUser();
+        await seedUser(
+          forUid: user.uid,
+          withIdToken: user.idToken,
+        );
+
+        final now = DateTime.now().toUtc();
+        final qs = [
+          'updateMask.fieldPaths=problemDetailsViewCount',
+          'updateMask.fieldPaths=votes',
+          'updateMask.fieldPaths=lastActiveAt',
+        ].join('&');
+        final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
+        final resp = await client.patch(
+          url,
+          headers: {
+            'Authorization': 'Bearer ${user.idToken}',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'fields': {
+              'problemDetailsViewCount': iVal(1), // +1
+              'votes': iVal(0), // 3 → 0 (not a valid -1 decrement)
+              'lastActiveAt': tsVal(now),
+            },
+          }),
+        );
+        expect(
+          resp.statusCode,
+          403,
+          reason:
+              'Expected 403 when PDVC +1 is combined with a multi-step votes '
+              'change (votes 3→0 matches no update branch; affectedKeys also '
+              'includes votes so the PDVC branch fails too). '
+              'Got ${resp.statusCode}: ${resp.body}',
+        );
+      },
+    );
+
+    test('problemDetailsViewCount increment without auth is rejected', () async {
+      // Fresh user with an existing doc; attempt the +1 without a token.
+      final user = await signUpFreshUser();
+      await seedUser(
+        forUid: user.uid,
+        withIdToken: user.idToken,
+      );
+
+      final now = DateTime.now().toUtc();
+      final qs = [
+        'updateMask.fieldPaths=problemDetailsViewCount',
+        'updateMask.fieldPaths=lastActiveAt',
+      ].join('&');
+      final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
+      // Deliberately omit Authorization header.
+      final resp = await client.patch(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'fields': {
+            'problemDetailsViewCount': iVal(1),
+            'lastActiveAt': tsVal(now),
+          },
+        }),
+      );
+      expect(
+        resp.statusCode,
+        403,
+        reason:
+            'Expected 403 for unauthenticated PDVC increment. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+
+    test('client direct write to votesCastCount is rejected', () async {
+      // Fresh user, seeded with votesCastCount: 0. No update branch permits
+      // changing votesCastCount — the tightened lastActiveAt-touch branch now
+      // requires affectedKeys().hasOnly(['lastActiveAt']).
+      final user = await signUpFreshUser();
+      await seedUser(
+        forUid: user.uid,
+        withIdToken: user.idToken,
+        votesCastCount: 0,
+      );
+
+      final now = DateTime.now().toUtc();
+      final qs = [
+        'updateMask.fieldPaths=votesCastCount',
+        'updateMask.fieldPaths=lastActiveAt',
+      ].join('&');
+      final url = Uri.parse('${docUri('users/${user.uid}')}?$qs');
+      final resp = await client.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer ${user.idToken}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'fields': {
+            'votesCastCount': iVal(5),
+            'lastActiveAt': tsVal(now),
+          },
+        }),
+      );
+      expect(
+        resp.statusCode,
+        403,
+        reason:
+            'Expected 403 for client direct write to votesCastCount. '
+            'Got ${resp.statusCode}: ${resp.body}',
+      );
+    });
+  });
+
   group('firestore.rules — problem create', () {
     // POSTs a problem doc creation to the emulator via the documents:create
     // endpoint. Unlike `seedProblem` above, which uses PATCH-as-upsert and

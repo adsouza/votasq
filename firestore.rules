@@ -172,9 +172,11 @@ service cloud.firestore {
             && request.resource.data.votes - resource.data.votes < 10
           )
           ||
-          // lastActiveAt touch (votes unchanged)
+          // lastActiveAt touch only (votes unchanged, no other fields changed)
           (
-            request.resource.data.votes == resource.data.votes
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['lastActiveAt'])
+            && request.resource.data.votes == resource.data.votes
             && request.resource.data.lastActiveAt is timestamp
           )
           ||
