@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -11,14 +11,14 @@ Future<Response> onRequest(RequestContext context, String id) async {
 }
 
 Future<Response> _get(RequestContext context, String id) async {
-  final db = await context.read<Future<Db>>();
   try {
+    final db = await context.read<Future<Db>>();
     final versions = await db.getVersions(id);
     return Response.json(
       body: {'data': versions.map((v) => v.toJson()).toList()},
     );
-  } on Exception catch (e) {
-    log('GET /api/problems/$id/versions failed: $e');
+  } catch (e, s) {
+    stderr.writeln('GET /api/problems/$id/versions failed: $e\n$s');
     return Response(statusCode: 500);
   }
 }

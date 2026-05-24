@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/translator.dart';
@@ -15,8 +15,8 @@ Future<Response> onRequest(RequestContext context) async {
 /// language and the English translation. This costs the same as pure detection
 /// but gives us a usable translation for free.
 Future<Response> _post(RequestContext context) async {
-  final translator = await context.read<Future<Translator>>();
   try {
+    final translator = await context.read<Future<Translator>>();
     final body =
         jsonDecode(await context.request.body()) as Map<String, dynamic>;
     final text = body['text'] as String?;
@@ -37,14 +37,14 @@ Future<Response> _post(RequestContext context) async {
         'translation': translatedText,
       },
     );
-  } on FormatException catch (e) {
-    log('POST /api/translate bad request: $e');
+  } on FormatException catch (e, s) {
+    stderr.writeln('POST /api/translate bad request: $e\n$s');
     return Response.json(
       statusCode: 400,
       body: {'error': 'Invalid request body'},
     );
-  } on Exception catch (e) {
-    log('POST /api/translate failed: $e');
+  } catch (e, s) {
+    stderr.writeln('POST /api/translate failed: $e\n$s');
     return Response(statusCode: 500);
   }
 }

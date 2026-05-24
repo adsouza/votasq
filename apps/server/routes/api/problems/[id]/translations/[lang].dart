@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -23,14 +23,14 @@ Future<Response> _get(
   String id,
   String lang,
 ) async {
-  final db = await context.read<Future<Db>>();
-  final cached = await db.getTranslation(id, lang);
-  if (cached != null) {
-    return Response.json(body: cached.toJson());
-  }
-
-  final translator = await context.read<Future<Translator>>();
   try {
+    final db = await context.read<Future<Db>>();
+    final cached = await db.getTranslation(id, lang);
+    if (cached != null) {
+      return Response.json(body: cached.toJson());
+    }
+
+    final translator = await context.read<Future<Translator>>();
     final problem = await db.getProblem(id);
     final translatedDesc = await translator.translate(
       text: problem.description,
@@ -48,8 +48,8 @@ Future<Response> _get(
     );
     await db.saveTranslation(id, lang, translatedProblem);
     return Response.json(body: translatedProblem.toJson());
-  } on Exception catch (e) {
-    log('GET /api/problems/$id/translations/$lang failed: $e');
+  } catch (e, s) {
+    stderr.writeln('GET /api/problems/$id/translations/$lang failed: $e\n$s');
     return Response(statusCode: 500);
   }
 }

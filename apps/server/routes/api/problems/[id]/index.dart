@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -14,23 +14,24 @@ Future<Response> onRequest(RequestContext context, String id) async {
 }
 
 Future<Response> _get(RequestContext context, String id) async {
-  final db = await context.read<Future<Db>>();
   try {
+    final db = await context.read<Future<Db>>();
     final problem = await db.getProblem(id);
     return Response.json(body: problem.toJson());
-  } on Exception catch (e) {
-    log('GET /api/problems/$id failed: $e');
+  } catch (e, s) {
+    stderr.writeln('GET /api/problems/$id failed: $e\n$s');
     return Response(statusCode: 404);
   }
 }
 
 Future<Response> _put(RequestContext context, String id) async {
-  final db = await context.read<Future<Db>>();
+  final Db db;
   final Problem existing;
   try {
+    db = await context.read<Future<Db>>();
     existing = await db.getProblem(id);
-  } on Exception catch (e) {
-    log('PUT /api/problems/$id lookup failed: $e');
+  } catch (e, s) {
+    stderr.writeln('PUT /api/problems/$id lookup failed: $e\n$s');
     return Response(statusCode: 404);
   }
   try {
@@ -55,14 +56,14 @@ Future<Response> _put(RequestContext context, String id) async {
     }
     await db.saveProblem(problem);
     return Response.json(body: problem.toJson());
-  } on FormatException catch (e) {
-    log('PUT /api/problems/$id bad request: $e');
+  } on FormatException catch (e, s) {
+    stderr.writeln('PUT /api/problems/$id bad request: $e\n$s');
     return Response.json(
       statusCode: 400,
       body: {'error': 'Invalid request body'},
     );
-  } on Exception catch (e) {
-    log('PUT /api/problems/$id update failed: $e');
+  } catch (e, s) {
+    stderr.writeln('PUT /api/problems/$id update failed: $e\n$s');
     return Response(statusCode: 500);
   }
 }

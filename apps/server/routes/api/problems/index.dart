@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:server/src/db.dart';
@@ -15,11 +15,11 @@ Future<Response> onRequest(RequestContext context) async {
 }
 
 Future<Response> _get(RequestContext context) async {
-  final db = await context.read<Future<Db>>();
-  final params = context.request.uri.queryParameters;
-  final pageSize = int.tryParse(params['pageSize'] ?? '') ?? 99;
-  final pageToken = params['pageToken'];
   try {
+    final db = await context.read<Future<Db>>();
+    final params = context.request.uri.queryParameters;
+    final pageSize = int.tryParse(params['pageSize'] ?? '') ?? 99;
+    final pageToken = params['pageToken'];
     final geoscope = params['geoscope'];
     final (:problems, :nextPageToken) = await db.getProblems(
       pageSize: pageSize,
@@ -32,15 +32,15 @@ Future<Response> _get(RequestContext context) async {
         if (nextPageToken != null) 'nextPageToken': nextPageToken,
       },
     );
-  } on Exception catch (e) {
-    log('GET /api/problems failed: $e');
+  } catch (e, s) {
+    stderr.writeln('GET /api/problems failed: $e\n$s');
     return Response(statusCode: 500);
   }
 }
 
 Future<Response> _post(RequestContext context) async {
-  final db = await context.read<Future<Db>>();
   try {
+    final db = await context.read<Future<Db>>();
     final body =
         jsonDecode(
               await context.request.body(),
@@ -75,14 +75,14 @@ Future<Response> _post(RequestContext context) async {
       votes: 1,
     );
     return Response.json(statusCode: 201, body: problem.toJson());
-  } on FormatException catch (e) {
-    log('POST /api/problems bad request: $e');
+  } on FormatException catch (e, s) {
+    stderr.writeln('POST /api/problems bad request: $e\n$s');
     return Response.json(
       statusCode: 400,
       body: {'error': 'Invalid request body'},
     );
-  } on Exception catch (e) {
-    log('POST /api/problems failed: $e');
+  } catch (e, s) {
+    stderr.writeln('POST /api/problems failed: $e\n$s');
     return Response(statusCode: 500);
   }
 }
