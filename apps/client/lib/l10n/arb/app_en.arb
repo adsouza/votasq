@@ -243,6 +243,10 @@
             }
         }
     },
+    "geoscopeSuggestionAccept": "Use",
+    "@geoscopeSuggestionAccept": {
+        "description": "Label on the button that confirms the suggested metro when its distance is outside the auto-select threshold"
+    },
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "@geoscopeLocationDenied": {
         "description": "Toast shown when the OS reports the user denied location permission"

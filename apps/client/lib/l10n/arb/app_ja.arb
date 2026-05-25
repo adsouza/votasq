@@ -65,6 +65,7 @@
     "geoscopePickerHeading": "以下の一覧から、利用可能な最も精度の高い位置を選択してください",
     "geoscopeUseMyLocation": "Use my location",
     "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "geoscopeSuggestionAccept": "Use",
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
     "adaptProblemTooltip": "この問題をアレンジする",

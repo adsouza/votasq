@@ -65,6 +65,7 @@
     "geoscopePickerHeading": "نیچے دی گئی فہرست سے دستیاب اعلیٰ ترین درستگی کے ساتھ اپنا مقام منتخب کریں",
     "geoscopeUseMyLocation": "Use my location",
     "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "geoscopeSuggestionAccept": "Use",
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
     "adaptProblemTooltip": "اس مسئلے کو ڈھالیں",

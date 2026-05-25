@@ -65,6 +65,7 @@
     "geoscopePickerHeading": "เลือกตำแหน่งที่ตั้งของคุณด้วยความแม่นยำสูงสุดที่มีจากรายการด้านล่าง",
     "geoscopeUseMyLocation": "Use my location",
     "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "geoscopeSuggestionAccept": "Use",
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
     "adaptProblemTooltip": "ปรับปัญหานี้",

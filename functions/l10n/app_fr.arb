@@ -65,6 +65,7 @@
     "geoscopePickerHeading": "Sélectionnez votre lieu avec la précision la plus élevée disponible dans la liste ci-dessous",
     "geoscopeUseMyLocation": "Use my location",
     "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "geoscopeSuggestionAccept": "Use",
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
     "adaptProblemTooltip": "Adapter ce problème",

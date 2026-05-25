@@ -65,6 +65,7 @@
     "geoscopePickerHeading": "கீழே உள்ள பட்டியலிலிருந்து கிடைக்கக்கூடிய அதிக துல்லியத்துடன் உங்கள் இருப்பிடத்தைத் தேர்ந்தெடுக்கவும்",
     "geoscopeUseMyLocation": "Use my location",
     "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "geoscopeSuggestionAccept": "Use",
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
     "adaptProblemTooltip": "இந்த சிக்கலை தழுவல் செய்க",

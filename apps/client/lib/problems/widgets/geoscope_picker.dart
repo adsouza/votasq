@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
+import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -148,12 +149,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
           GeoscopeToast.denied => l10n.geoscopeLocationDenied,
           GeoscopeToast.unavailable => l10n.geoscopeLocationUnavailable,
         };
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        showErrorToast(message);
         context.read<GeoscopeCubit>().clearPendingToast();
       },
       buildWhen: (prev, curr) =>
@@ -244,7 +240,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
                 await cubit.acceptLocationSuggestion();
                 if (context.mounted) Navigator.of(context).pop();
               },
-              child: const Text('Use'),
+              child: Text(l10n.geoscopeSuggestionAccept),
             ),
             IconButton(
               icon: const Icon(Icons.close),

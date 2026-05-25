@@ -65,6 +65,7 @@
     "geoscopePickerHeading": "اختر موقعك بأعلى دقة متاحة من القائمة أدناه",
     "geoscopeUseMyLocation": "Use my location",
     "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "geoscopeSuggestionAccept": "Use",
     "geoscopeLocationDenied": "Location access was denied — please pick manually.",
     "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
     "adaptProblemTooltip": "كيّف هذه المشكلة",
