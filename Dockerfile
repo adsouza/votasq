@@ -1,25 +1,15 @@
-# Stage 1: Build the Flutter web client
-FROM ghcr.io/cirruslabs/flutter:stable AS flutter-build
+# Build the native server binary for Cloud Run.
+#
+# Flutter web is no longer bundled here — it's served by Firebase Hosting at
+# votasqueue.web.app (and votasq.quikchange.net which CNAMEs to it), with a
+# /api/** rewrite proxying back to this Cloud Run service same-origin. See
+# .github/workflows/firebase-hosting-merge.yml for the web deploy pipeline.
 
-WORKDIR /app
-COPY pubspec.yaml pubspec.lock ./
-COPY apps/client/ apps/client/
-COPY packages/ packages/
-
-# Remove the server from the workspace so flutter pub get succeeds.
-# See ARCHITECTURE.md "Adding workspace members" before adding new apps/*.
-RUN sed -i '/apps\/server/d' pubspec.yaml
-
-WORKDIR /app/apps/client
-RUN flutter pub get
-RUN flutter build web --release --target lib/main_production.dart --dart-define=SERVER_URL=
-
-# Stage 2: Build the native server binary
 FROM dart:stable AS build
 
 WORKDIR /app
 
-# Copy server and all workspace packages (not the Flutter client)
+# Copy server and all workspace packages (not the Flutter client).
 COPY pubspec.yaml pubspec.lock ./
 COPY apps/server/ apps/server/
 COPY packages/ packages/
@@ -27,9 +17,6 @@ COPY packages/ packages/
 # Remove the Flutter client and its iOS-only MLKit deps from the workspace
 # so dart pub get succeeds without resolving Flutter SDK dependencies.
 RUN sed -i -e '/apps\/client/d' -e '/google_mlkit/d' pubspec.yaml
-
-# Copy the web build output into the server's public directory
-COPY --from=flutter-build /app/apps/client/build/web/ apps/server/public/
 
 # Generate the Dart Frog production server and compile it
 RUN dart pub global activate dart_frog_cli
@@ -41,11 +28,10 @@ WORKDIR /app/apps/server/build
 RUN dart pub get
 RUN dart compile exe bin/server.dart -o bin/server
 
-# Stage 3: Create the runtime image
+# Runtime image
 FROM scratch
 COPY --from=build /runtime/ /
 COPY --from=build /app/apps/server/build/bin/server /app/bin/server
-COPY --from=build /app/apps/server/build/public/ /app/public/
 
 WORKDIR /app
 EXPOSE 8080

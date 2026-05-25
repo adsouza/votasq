@@ -6,4 +6,5 @@ build/
 .dart_tool/
 .emulator-data/
 .firebase/
+apps/server/public/
 xcuserdata/
