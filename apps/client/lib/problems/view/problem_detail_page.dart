@@ -169,7 +169,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       unawaited(router.push('/problems/${fork.id}'));
     } on Exception catch (e) {
       log('Failed to fork problem: $e');
-      showToast(errorMessage);
+      showErrorToast(errorMessage);
     }
   }
 
@@ -222,12 +222,12 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       await repo.updateProblem(updated, userLanguage: userLang);
     } on LanguageMismatchException catch (e) {
       if (!mounted) return;
-      showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
+      showErrorToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
       return;
     } on Exception catch (e) {
       log('Failed to save problem: $e');
       if (!mounted) return;
-      showToast(l10n.saveProblemError);
+      showErrorToast(l10n.saveProblemError);
       return;
     }
     if (!mounted) return;
@@ -239,7 +239,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       _problem = updated;
     });
     problemsCubit?.applyLocalUpdate(updated);
-    showToast(l10n.problemSavedToast);
+    showSuccessToast(l10n.problemSavedToast);
   }
 
   /// The edit-view geoscope row. Returns an empty list when
@@ -354,12 +354,12 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       );
     } on LanguageMismatchException catch (e) {
       if (!mounted) return;
-      showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
+      showErrorToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
       return;
     } on Exception catch (e) {
       log('Failed to apply fork field: $e');
       if (!mounted) return;
-      showToast(l10n.saveProblemError);
+      showErrorToast(l10n.saveProblemError);
       return;
     }
     if (!mounted) return;
@@ -374,7 +374,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       _geoscope = saved.geoscope;
     });
     problemsCubit?.applyLocalUpdate(saved);
-    showToast(l10n.problemSavedToast);
+    showSuccessToast(l10n.problemSavedToast);
   }
 
   Widget _buildLinkedProblemsList() {
@@ -511,7 +511,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     } on Exception catch (e) {
       log('Failed to unlink problem: $e');
       if (mounted) {
-        showToast(context.l10n.unlinkProblemError);
+        showErrorToast(context.l10n.unlinkProblemError);
       }
     }
   }
@@ -583,7 +583,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     } on Exception catch (e) {
       log('Failed to untag problem link: $e');
       if (mounted) {
-        showToast(context.l10n.untagProblemLinkError);
+        showErrorToast(context.l10n.untagProblemLinkError);
       }
     }
   }
@@ -1291,7 +1291,7 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
       }
     } on Exception catch (e) {
       log('Failed to link problem: $e');
-      showToast(l10n.linkProblemError);
+      showErrorToast(l10n.linkProblemError);
     }
   }
 

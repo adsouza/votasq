@@ -86,13 +86,13 @@ class _NewProblemPageState extends State<NewProblemPage> {
     } on LanguageMismatchException catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      showToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
+      showErrorToast(l10n.languageMismatchError(e.descriptionLang, e.goalLang));
       return;
     } on Exception catch (e) {
       log('Failed to create problem: $e');
       if (!mounted) return;
       setState(() => _submitting = false);
-      showToast(l10n.saveProblemError);
+      showErrorToast(l10n.saveProblemError);
       return;
     }
     if (!mounted) return;

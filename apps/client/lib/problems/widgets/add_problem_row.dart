@@ -74,7 +74,7 @@ class _AddProblemRowState extends State<AddProblemRow> {
       });
     } on LanguageMismatchException catch (e) {
       if (mounted) {
-        showToast(
+        showErrorToast(
           context.l10n.languageMismatchError(e.descriptionLang, e.goalLang),
         );
       }

@@ -85,7 +85,7 @@ class _ProblemEditTileState extends State<ProblemEditTile> {
       } on LanguageMismatchException catch (e) {
         if (mounted) {
           setState(() => _submitting = false);
-          showToast(
+          showErrorToast(
             context.l10n.languageMismatchError(e.descriptionLang, e.goalLang),
           );
         }

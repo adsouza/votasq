@@ -118,7 +118,7 @@ class _ProblemsViewState extends State<ProblemsView> {
     final base = kIsWeb ? Uri.base : Uri.parse(webBase);
     final url = base.resolve('/problems/${problem.id}').toString();
     unawaited(Clipboard.setData(ClipboardData(text: url)));
-    showToast(context.l10n.problemLinkCopied);
+    showSuccessToast(context.l10n.problemLinkCopied);
   }
 
   void _startEdit(Problem problem) {
@@ -142,12 +142,12 @@ class _ProblemsViewState extends State<ProblemsView> {
           userId: context.read<UserCubit>().state.userId!,
         );
         if (mounted) {
-          showToast(l10n.feedbackSuccess);
+          showSuccessToast(l10n.feedbackSuccess);
         }
       } on Exception catch (e) {
         log('Feedback submission failed: $e');
         if (mounted) {
-          showToast(l10n.feedbackError);
+          showErrorToast(l10n.feedbackError);
         }
       }
     });
@@ -183,7 +183,7 @@ class _ProblemsViewState extends State<ProblemsView> {
       ),
     );
     if (mounted) {
-      showToast(context.l10n.complaintSubmitted);
+      showSuccessToast(context.l10n.complaintSubmitted);
     }
   }
 
@@ -526,10 +526,10 @@ class _ProblemsViewState extends State<ProblemsView> {
 }
 
 /// Common styling for an onboarding-tip banner: light-green surface,
-/// indigo text, full-width, centered. The green tint distinguishes the
-/// persistent banner from the transient orange toast (see
-/// [showToast]) — banner = ambient onboarding nudge, toast = ephemeral
-/// feedback.
+/// indigo text, full-width, centered. The banner is a persistent
+/// onboarding nudge; toasts are ephemeral, with [showSuccessToast]
+/// sharing the green hue and [showErrorToast] using light-orange to
+/// signal failure.
 class _HintBanner extends StatelessWidget {
   const _HintBanner({required this.message});
 
