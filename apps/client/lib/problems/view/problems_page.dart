@@ -525,9 +525,11 @@ class _ProblemsViewState extends State<ProblemsView> {
   }
 }
 
-/// Common styling for an onboarding-tip banner: light-orange surface,
-/// indigo text, full-width, centered. Echoes the toast palette so the
-/// banner reads as part of the same "system hint" surface.
+/// Common styling for an onboarding-tip banner: light-green surface,
+/// indigo text, full-width, centered. The green tint distinguishes the
+/// persistent banner from the transient orange toast (see
+/// [showToast]) — banner = ambient onboarding nudge, toast = ephemeral
+/// feedback.
 class _HintBanner extends StatelessWidget {
   const _HintBanner({required this.message});
 
@@ -537,7 +539,7 @@ class _HintBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.orange.shade100,
+      color: Colors.green.shade100,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Text(
         message,
