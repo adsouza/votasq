@@ -859,6 +859,34 @@ void main() {
       expect(find.textContaining('vote for it'), findsNothing);
     });
 
+    testWidgets(
+      'banner falls through to tap-for-details when remainingVotes is 0',
+      (tester) async {
+        // remainingVotes=0 suppresses the vote tip (chip is non-interactive),
+        // but problemDetailsViewCount=0 <= daysSince=0 means the
+        // tap-for-details tip is still applicable — the chain should fall
+        // through to it rather than hide the banner entirely.
+        when(() => userCubit.state).thenReturn(
+          UserState(
+            status: AuthStatus.authenticated,
+            userId: 'u1',
+            remainingVotes: 0,
+            votesCastCount: 0,
+            problemDetailsViewCount: 0,
+            sessionStartLastActiveAt: DateTime.now().toUtc(),
+          ),
+        );
+        when(() => problemsCubit.state).thenReturn(
+          const ProblemsState(status: ProblemsStatus.success),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pump();
+
+        expect(find.textContaining('Tap a problem'), findsOneWidget);
+        expect(find.textContaining('vote for it'), findsNothing);
+      },
+    );
+
     testWidgets('banner shows nothing once both tips graduate', (
       tester,
     ) async {
