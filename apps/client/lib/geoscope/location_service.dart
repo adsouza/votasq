@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 import 'package:meta/meta.dart';
 
@@ -84,9 +85,16 @@ class GeolocatorLocationService implements LocationService {
         permission == LocationPermission.deniedForever) {
       return const LocationDenied();
     }
+    // Web's `low` path uses the browser's Network Location Service (Wi-Fi
+    // triangulation + IP geo), which is unreliable on networks where the
+    // underlying Google endpoint is blocked or slow (privacy extensions,
+    // VPNs, corporate proxies). On the browser, the "low/high" knob is
+    // not gated by a precise-location toggle UI like it is on iOS, so
+    // there's no UX cost to using `high` on web — and it routes through
+    // CoreLocation / OS APIs instead, which actually returns.
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.low,
+        accuracy: kIsWeb ? LocationAccuracy.high : LocationAccuracy.low,
         timeLimit: Duration(seconds: 8),
       ),
     );
