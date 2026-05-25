@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Mirror CI's format + analyze checks before pushing, and guard against
-# AGENTS.md / CLAUDE.md drifting beyond their tool-identity lines. cspell
-# moved to pre-commit so unknown vocabulary surfaces at commit time when the
-# author still has context to update the wordlist.
+# Mirror CI's format + analyze checks before pushing. Cheap/locally-actionable
+# checks (cspell, AGENTS.md/CLAUDE.md sync) live in pre-commit so they surface
+# at authoring time. Pre-push handles the slow CI-mirroring checks plus the
+# web/index.html bootstrap-token guard.
 # Bypass (rarely): git push --no-verify
 set -e
 
@@ -17,16 +17,6 @@ if ! grep -qF '{{flutter_bootstrap_js}}' apps/client/web/index.html; then
   echo "[pre-push] apps/client/web/index.html is missing the literal token {{flutter_bootstrap_js}}."
   echo "[pre-push] An HTML formatter probably added whitespace inside the braces — Flutter's build system"
   echo "[pre-push] only substitutes the exact unspaced token, so the web app fails to bootstrap."
-  exit 1
-fi
-
-echo "[pre-push] AGENTS.md / CLAUDE.md sync..."
-if ! diff -q \
-  <(sed -e '1s|^# AGENTS\.md$|# CLAUDE.md|' \
-        -e '3s|Codex (Codex\.ai/code)|Claude Code (claude.ai/code)|' AGENTS.md) \
-  .claude/CLAUDE.md > /dev/null; then
-  echo "[pre-push] AGENTS.md and CLAUDE.md have drifted beyond their tool-identity lines:"
-  diff AGENTS.md .claude/CLAUDE.md || true
   exit 1
 fi
 

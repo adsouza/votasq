@@ -7,6 +7,10 @@
 #     the new word was introduced, so the author can add it to the wordlist
 #     immediately rather than discovering at push time after other people's
 #     drift has accumulated.
+#   * AGENTS.md / CLAUDE.md sync — flags when the two files diverge beyond
+#     their first/third-line tool-identity differences. Catches an
+#     edit-one-forget-the-other right when both files are still in the
+#     author's head.
 # Bypass (rarely): git commit --no-verify
 set -e
 
@@ -21,5 +25,15 @@ fi
 
 echo "[pre-commit] cspell..."
 npx --yes cspell --no-progress --no-summary --config .github/cspell.json "**/*.md"
+
+echo "[pre-commit] AGENTS.md / CLAUDE.md sync..."
+if ! diff -q \
+  <(sed -e '1s|^# AGENTS\.md$|# CLAUDE.md|' \
+        -e '3s|Codex (Codex\.ai/code)|Claude Code (claude.ai/code)|' AGENTS.md) \
+  .claude/CLAUDE.md > /dev/null; then
+  echo "[pre-commit] AGENTS.md and CLAUDE.md have drifted beyond their tool-identity lines:"
+  diff AGENTS.md .claude/CLAUDE.md || true
+  exit 1
+fi
 
 echo "[pre-commit] ok"
