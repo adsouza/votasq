@@ -856,6 +856,40 @@ void main() {
           expect(geoscopes[2].label, 'United Kingdom');
         },
       );
+
+      test(
+        'reads lat and lng from metro docs',
+        () async {
+          await firestore.collection('geoscopes').doc('sfbay').set({
+            'id': 'us/ca/sfbay',
+            'label': 'SF Bay Area',
+            'population': 7700000,
+            'lat': 37.7793,
+            'lng': -122.4193,
+          });
+
+          final geoscopes = await repo.getGeoscopes();
+          expect(geoscopes, hasLength(1));
+          expect(geoscopes[0].lat, closeTo(37.7793, 1e-6));
+          expect(geoscopes[0].lng, closeTo(-122.4193, 1e-6));
+        },
+      );
+
+      test(
+        'returns null lat and lng for docs without coords',
+        () async {
+          await firestore.collection('geoscopes').doc('eu').set({
+            'id': 'eu',
+            'label': 'European Union',
+            'population': 430000000,
+          });
+
+          final geoscopes = await repo.getGeoscopes();
+          expect(geoscopes, hasLength(1));
+          expect(geoscopes[0].lat, isNull);
+          expect(geoscopes[0].lng, isNull);
+        },
+      );
     });
 
     group('getVotersForProblem', () {
