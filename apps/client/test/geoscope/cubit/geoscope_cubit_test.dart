@@ -1,8 +1,3 @@
-// The optional `_outcome` constructor argument and `setOutcome` mutator are
-// used by tests added in the next commit (orchestration methods); the lints
-// fire prematurely on this snapshot.
-// ignore_for_file: unused_element_parameter, use_setters_to_change_properties
-
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/geoscope/cubit/geoscope_cubit.dart';
 import 'package:client/geoscope/cubit/geoscope_state.dart';
@@ -15,9 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
 class _FakeLocationService implements LocationService {
-  _FakeLocationService([this._outcome = const LocationUnavailable()]);
-  LocationOutcome _outcome;
-  void setOutcome(LocationOutcome outcome) => _outcome = outcome;
+  LocationOutcome _outcome = const LocationUnavailable();
+  // Test-only setter; no getter needed since the field is read internally.
+  // ignore: avoid_setters_without_getters
+  set outcome(LocationOutcome value) => _outcome = value;
 
   @override
   Future<LocationOutcome> getApproximateLocation() async => _outcome;
@@ -381,6 +377,186 @@ void main() {
             .having((s) => s.selectedGeoscope, 'selectedGeoscope', 'us/nyc')
             .having((s) => s.needsSelection, 'needsSelection', false),
       ],
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectNearestMetroFromLocation: coords within 100 km auto-selects',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer(
+          (_) async => [
+            (
+              id: 'us/ca/sfbay',
+              label: 'SF Bay Area',
+              population: 7700000,
+              lat: 37.7793,
+              lng: -122.4193,
+            ),
+          ],
+        );
+        // Query coords ~5 km from the SF Bay centroid: well inside 100.
+        locationService.outcome = const LocationCoords(37.83, -122.42);
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+      },
+      verify: (cubit) async {
+        expect(cubit.state.selectedGeoscope, 'us/ca/sfbay');
+        expect(cubit.state.locationStatus, GeoscopeLocationStatus.idle);
+        expect(cubit.state.locationSuggestion, isNull);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('selected_geoscope'), 'us/ca/sfbay');
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectNearestMetroFromLocation: coords outside 100 km emits suggestion',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer(
+          (_) async => [
+            (
+              id: 'us/ca/sfbay',
+              label: 'SF Bay Area',
+              population: 7700000,
+              lat: 37.7793,
+              lng: -122.4193,
+            ),
+          ],
+        );
+        // Reno-ish coords (~330 km from SF). Outside threshold.
+        locationService.outcome = const LocationCoords(39.53, -119.81);
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+      },
+      verify: (cubit) {
+        expect(cubit.state.selectedGeoscope, '/'); // unchanged from init
+        expect(cubit.state.locationStatus, GeoscopeLocationStatus.idle);
+        expect(cubit.state.locationSuggestion, isNotNull);
+        expect(cubit.state.locationSuggestion!.id, 'us/ca/sfbay');
+        expect(cubit.state.locationSuggestion!.distanceKm, greaterThan(100));
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectNearestMetroFromLocation: denial persists flag and emits toast',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+        locationService.outcome = const LocationDenied();
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+      },
+      verify: (cubit) async {
+        expect(cubit.state.locationDenied, true);
+        expect(cubit.state.pendingToast, GeoscopeToast.denied);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('geoscope_location_denied'), true);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectNearestMetroFromLocation: unavailable emits toast but no persist',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+        locationService.outcome = const LocationUnavailable();
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+      },
+      verify: (cubit) async {
+        expect(cubit.state.locationDenied, false);
+        expect(cubit.state.pendingToast, GeoscopeToast.unavailable);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('geoscope_location_denied'), isNull);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'acceptLocationSuggestion selects the suggested id and clears suggestion',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer(
+          (_) async => [
+            (
+              id: 'us/ca/sfbay',
+              label: 'SF Bay Area',
+              population: 7700000,
+              lat: 37.7793,
+              lng: -122.4193,
+            ),
+          ],
+        );
+        locationService.outcome = const LocationCoords(39.53, -119.81);
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+        await cubit.acceptLocationSuggestion();
+      },
+      verify: (cubit) {
+        expect(cubit.state.selectedGeoscope, 'us/ca/sfbay');
+        expect(cubit.state.locationSuggestion, isNull);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'dismissLocationSuggestion clears suggestion without selecting',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer(
+          (_) async => [
+            (
+              id: 'us/ca/sfbay',
+              label: 'SF Bay Area',
+              population: 7700000,
+              lat: 37.7793,
+              lng: -122.4193,
+            ),
+          ],
+        );
+        locationService.outcome = const LocationCoords(39.53, -119.81);
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+        cubit.dismissLocationSuggestion();
+      },
+      verify: (cubit) {
+        expect(cubit.state.selectedGeoscope, '/'); // unchanged
+        expect(cubit.state.locationSuggestion, isNull);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'clearPendingToast clears the toast field',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+        locationService.outcome = const LocationUnavailable();
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        await cubit.selectNearestMetroFromLocation();
+        cubit.clearPendingToast();
+      },
+      verify: (cubit) {
+        expect(cubit.state.pendingToast, isNull);
+      },
     );
   });
 

@@ -19,11 +19,13 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
   GeoscopeCubit(this._repo, this._location) : super(const GeoscopeState());
 
   final FirestoreRepository _repo;
-  // Used by selectNearestMetroFromLocation in the next commit.
-  // ignore: unused_field
   final LocationService _location;
   static const _prefsKey = 'selected_geoscope';
   static const _locationDeniedPrefsKey = 'geoscope_location_denied';
+
+  /// Within this distance, auto-select the nearest metro silently.
+  /// Beyond this, surface a confirmation row so the user can decide.
+  static const _autoSelectThresholdKm = 100.0;
 
   /// Load persisted geoscope and available geoscopes.
   /// If no persisted value, infer from device locale region and flag the state
@@ -67,6 +69,104 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
     emit(state.copyWith(selectedGeoscope: geoscope, needsSelection: false));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefsKey, geoscope);
+  }
+
+  /// Ask the OS for a coarse location, find the nearest metro, and either
+  /// auto-select (within threshold) or emit a
+  /// [GeoscopeState.locationSuggestion] for user confirmation.
+  ///
+  /// On [LocationDenied], persists the denial flag so the picker stops
+  /// offering the button. On [LocationUnavailable] (timeout, services off),
+  /// emits a one-shot toast but does not persist.
+  Future<void> selectNearestMetroFromLocation() async {
+    if (state.locationStatus == GeoscopeLocationStatus.fetching) return;
+    emit(state.copyWith(locationStatus: GeoscopeLocationStatus.fetching));
+    final outcome = await _location.getApproximateLocation();
+    switch (outcome) {
+      case LocationCoords(:final lat, :final lng):
+        final nearest = findNearestMetro(
+          lat: lat,
+          lng: lng,
+          available: state.availableGeoscopes,
+        );
+        if (nearest == null) {
+          emit(
+            state.copyWith(
+              locationStatus: GeoscopeLocationStatus.idle,
+              pendingToast: GeoscopeToast.unavailable,
+            ),
+          );
+          return;
+        }
+        if (nearest.distanceKm <= _autoSelectThresholdKm) {
+          await _persistGeoscope(nearest.id);
+          emit(
+            state.copyWith(
+              selectedGeoscope: nearest.id,
+              needsSelection: false,
+              locationStatus: GeoscopeLocationStatus.idle,
+              clearLocationSuggestion: true,
+            ),
+          );
+        } else {
+          emit(
+            state.copyWith(
+              locationStatus: GeoscopeLocationStatus.idle,
+              locationSuggestion: nearest,
+            ),
+          );
+        }
+      case LocationDenied():
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_locationDeniedPrefsKey, true);
+        emit(
+          state.copyWith(
+            locationStatus: GeoscopeLocationStatus.idle,
+            locationDenied: true,
+            pendingToast: GeoscopeToast.denied,
+          ),
+        );
+      case LocationUnavailable():
+        emit(
+          state.copyWith(
+            locationStatus: GeoscopeLocationStatus.idle,
+            pendingToast: GeoscopeToast.unavailable,
+          ),
+        );
+    }
+  }
+
+  /// Accepts a previously-emitted [GeoscopeState.locationSuggestion],
+  /// selecting the suggested geoscope and clearing the suggestion.
+  Future<void> acceptLocationSuggestion() async {
+    final s = state.locationSuggestion;
+    if (s == null) return;
+    await _persistGeoscope(s.id);
+    emit(
+      state.copyWith(
+        selectedGeoscope: s.id,
+        needsSelection: false,
+        clearLocationSuggestion: true,
+      ),
+    );
+  }
+
+  /// Dismisses a previously-emitted location suggestion without selecting.
+  void dismissLocationSuggestion() {
+    emit(state.copyWith(clearLocationSuggestion: true));
+  }
+
+  /// Called by the picker's BlocListener after firing a toast, so the
+  /// listener doesn't re-fire on subsequent state emissions.
+  void clearPendingToast() {
+    if (state.pendingToast != null) {
+      emit(state.copyWith(clearPendingToast: true));
+    }
+  }
+
+  Future<void> _persistGeoscope(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefsKey, id);
   }
 
   /// Mark the first-time selection prompt as shown without persisting a choice.
