@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
@@ -105,6 +106,61 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
     }
     return '/';
   }
+
+  /// Earth radius in km, used by [findNearestMetro].
+  static const _earthRadiusKm = 6371.0;
+
+  /// Returns the metro in [available] closest to ([lat], [lng]), or null
+  /// if no row carries both `lat` and `lng`. Threshold logic is the
+  /// caller's responsibility — this function always returns the absolute
+  /// nearest if any candidate exists.
+  @visibleForTesting
+  static ({String id, double distanceKm})? findNearestMetro({
+    required double lat,
+    required double lng,
+    required List<
+      ({
+        String id,
+        String label,
+        int population,
+        double? lat,
+        double? lng,
+      })
+    >
+    available,
+  }) {
+    ({String id, double distanceKm})? best;
+    for (final g in available) {
+      final gLat = g.lat;
+      final gLng = g.lng;
+      if (gLat == null || gLng == null) continue;
+      final d = _haversineKm(lat, lng, gLat, gLng);
+      if (best == null || d < best.distanceKm) {
+        best = (id: g.id, distanceKm: d);
+      }
+    }
+    return best;
+  }
+
+  static double _haversineKm(
+    double lat1,
+    double lng1,
+    double lat2,
+    double lng2,
+  ) {
+    final dLat = _toRadians(lat2 - lat1);
+    final dLng = _toRadians(lng2 - lng1);
+    final a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_toRadians(lat1)) *
+            math.cos(_toRadians(lat2)) *
+            math.sin(dLng / 2) *
+            math.sin(dLng / 2);
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return _earthRadiusKm * c;
+  }
+
+  static double _toRadians(double deg) => deg * math.pi / 180;
 
   /// Infer a country-level geoscope from the device locale's country code.
   /// Falls back to `'/'` (global) if unavailable.

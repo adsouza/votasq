@@ -313,4 +313,114 @@ void main() {
       ],
     );
   });
+
+  group('findNearestMetro', () {
+    // Known pairs sourced from public references; tolerances reflect the
+    // imprecision of "city centre" coords, not floating-point.
+    test('returns the only metro when one is given', () {
+      final result = GeoscopeCubit.findNearestMetro(
+        lat: 37.7793,
+        lng: -122.4193,
+        available: const [
+          (
+            id: 'us/ca/sfbay',
+            label: 'SF Bay Area',
+            population: 7700000,
+            lat: 37.7793,
+            lng: -122.4193,
+          ),
+        ],
+      );
+      expect(result, isNotNull);
+      expect(result!.id, 'us/ca/sfbay');
+      expect(result.distanceKm, closeTo(0, 0.01));
+    });
+
+    test('returns the closer of two metros', () {
+      // Querying from London — Paris (~344 km) should beat NYC (~5570 km).
+      final result = GeoscopeCubit.findNearestMetro(
+        lat: 51.5074,
+        lng: -0.1278,
+        available: const [
+          (
+            id: 'eu/fr/par',
+            label: 'Paris',
+            population: 14000000,
+            lat: 48.8566,
+            lng: 2.3522,
+          ),
+          (
+            id: 'us/ny/nyc',
+            label: 'NYC',
+            population: 19200000,
+            lat: 40.7128,
+            lng: -74.0060,
+          ),
+        ],
+      );
+      expect(result, isNotNull);
+      expect(result!.id, 'eu/fr/par');
+      expect(result.distanceKm, closeTo(344, 30));
+    });
+
+    test('computes SF→NYC distance to about 4130 km', () {
+      final result = GeoscopeCubit.findNearestMetro(
+        lat: 37.7793,
+        lng: -122.4193,
+        available: const [
+          (
+            id: 'us/ny/nyc',
+            label: 'NYC',
+            population: 19200000,
+            lat: 40.7128,
+            lng: -74.0060,
+          ),
+        ],
+      );
+      expect(result, isNotNull);
+      expect(result!.distanceKm, closeTo(4130, 50));
+    });
+
+    test('skips rows with null lat or lng', () {
+      final result = GeoscopeCubit.findNearestMetro(
+        lat: 37.7793,
+        lng: -122.4193,
+        available: const [
+          (
+            id: 'eu',
+            label: 'European Union',
+            population: 430000000,
+            lat: null,
+            lng: null,
+          ),
+          (
+            id: 'us/ca/sfbay',
+            label: 'SF Bay Area',
+            population: 7700000,
+            lat: 37.7793,
+            lng: -122.4193,
+          ),
+        ],
+      );
+      expect(result, isNotNull);
+      expect(result!.id, 'us/ca/sfbay');
+    });
+
+    test('returns null when no rows have coords', () {
+      final result = GeoscopeCubit.findNearestMetro(
+        lat: 0,
+        lng: 0,
+        available: const [
+          (
+            id: 'eu',
+            label: 'European Union',
+            population: 430000000,
+            lat: null,
+            lng: null,
+          ),
+        ],
+      );
+      expect(result, isNull);
+    });
+  });
 }
