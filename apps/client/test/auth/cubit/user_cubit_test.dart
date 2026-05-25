@@ -265,6 +265,7 @@ void main() {
       expect(
         UserState(
           status: AuthStatus.authenticated,
+          remainingVotes: 3,
           votesCastCount: 0,
           sessionStartLastActiveAt: now,
         ).needsVoteHint,
@@ -274,6 +275,7 @@ void main() {
       expect(
         UserState(
           status: AuthStatus.authenticated,
+          remainingVotes: 3,
           votesCastCount: 1,
           sessionStartLastActiveAt: now,
         ).needsVoteHint,
@@ -283,11 +285,31 @@ void main() {
       expect(
         UserState(
           status: AuthStatus.authenticated,
+          remainingVotes: 3,
           votesCastCount: 10,
           sessionStartLastActiveAt: now.subtract(const Duration(days: 30)),
         ).needsVoteHint,
         isTrue,
         reason: '10 <= 30 (returning user refresher)',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          remainingVotes: 0,
+          votesCastCount: 0,
+          sessionStartLastActiveAt: now,
+        ).needsVoteHint,
+        isFalse,
+        reason: 'no votes available — vote chip is non-interactive',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          votesCastCount: 0,
+          sessionStartLastActiveAt: now,
+        ).needsVoteHint,
+        isFalse,
+        reason: 'remainingVotes still loading',
       );
     });
   });

@@ -34,14 +34,20 @@ class UserState {
   }
 
   /// True iff the user is authenticated AND has cast few enough votes
-  /// (relative to the session-start gap) that we should still surface
-  /// the vote tip. Returns false while loading so the banner doesn't
-  /// flicker into and out of the vote state on cold start.
+  /// (relative to the session-start gap) AND currently has a vote to
+  /// spend, so the tip is actionable. Returns false while loading so
+  /// the banner doesn't flicker into and out of the vote state on cold
+  /// start. The actionable guard means the banner naturally disappears
+  /// when the user's budget is exhausted and reappears once
+  /// `grantVotesAndTouch` replenishes it — the nudge is only surfaced
+  /// when the vote chip is actually tappable.
   bool get needsVoteHint {
     if (status != AuthStatus.authenticated) return false;
     final count = votesCastCount;
     final days = _daysSinceLastSession;
-    if (count == null || days == null) return false;
+    final votes = remainingVotes;
+    if (count == null || days == null || votes == null) return false;
+    if (votes <= 0) return false;
     return count <= days;
   }
 
