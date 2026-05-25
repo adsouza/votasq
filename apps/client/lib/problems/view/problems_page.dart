@@ -256,6 +256,15 @@ class _ProblemsViewState extends State<ProblemsView> {
             itemBuilder: (context) {
               final isAuthenticated =
                   context.read<UserCubit>().state.userId != null;
+              final geoState = context.read<GeoscopeCubit>().state;
+              final currentGeoscopeId = geoState.selectedGeoscope;
+              final currentGeoscopeLabel = currentGeoscopeId == '/'
+                  ? '🌐 ${l10n.geoscopeGlobal}'
+                  : (geoState.availableGeoscopes
+                            .where((g) => g.id == currentGeoscopeId)
+                            .firstOrNull
+                            ?.label ??
+                        currentGeoscopeId);
               return [
                 PopupMenuItem(
                   value: 'add_problem',
@@ -308,6 +317,7 @@ class _ProblemsViewState extends State<ProblemsView> {
                   child: ListTile(
                     leading: const Icon(Icons.location_on),
                     title: Text(l10n.geoscopeChangeMenuItem),
+                    subtitle: Text(currentGeoscopeLabel),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),

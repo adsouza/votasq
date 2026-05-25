@@ -453,6 +453,47 @@ void main() {
       expect(find.byIcon(Icons.location_on), findsOneWidget);
     });
 
+    testWidgets(
+      'change-location menu item shows global subtitle when scope is /',
+      (tester) async {
+        when(() => problemsCubit.state).thenReturn(
+          const ProblemsState(status: ProblemsStatus.success),
+        );
+        // Default GeoscopeState selectedGeoscope is '/'.
+        await tester.pumpWidget(buildSubject());
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pump();
+        expect(find.textContaining('Global'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'change-location menu item shows the selected geoscope label as subtitle',
+      (tester) async {
+        when(() => problemsCubit.state).thenReturn(
+          const ProblemsState(status: ProblemsStatus.success),
+        );
+        when(() => geoscopeCubit.state).thenReturn(
+          const GeoscopeState(
+            selectedGeoscope: 'us/ca/sfbay',
+            availableGeoscopes: [
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: 37.7793,
+                lng: -122.4193,
+              ),
+            ],
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pump();
+        expect(find.text('SF Bay Area'), findsOneWidget);
+      },
+    );
+
     testWidgets('goal field hidden until description has 3 words', (
       tester,
     ) async {
