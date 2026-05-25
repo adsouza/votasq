@@ -230,6 +230,27 @@
     "@geoscopePickerHeading": {
         "description": "Heading shown at the top of the geoscope picker overlay, above the substring filter field"
     },
+    "geoscopeUseMyLocation": "Use my location",
+    "@geoscopeUseMyLocation": {
+        "description": "Label on the button in the geoscope picker that triggers a coarse-location lookup to suggest the nearest metro"
+    },
+    "geoscopeSuggestionDistance": "About {distanceKm} km away — use anyway?",
+    "@geoscopeSuggestionDistance": {
+        "description": "Subtitle shown under the suggested metro when the nearest match is outside the auto-select threshold",
+        "placeholders": {
+            "distanceKm": {
+                "type": "int"
+            }
+        }
+    },
+    "geoscopeLocationDenied": "Location access was denied — please pick manually.",
+    "@geoscopeLocationDenied": {
+        "description": "Toast shown when the OS reports the user denied location permission"
+    },
+    "geoscopeLocationUnavailable": "Location is unavailable — please pick manually.",
+    "@geoscopeLocationUnavailable": {
+        "description": "Toast shown when location services are off or the lookup timed out"
+    },
     "adaptProblemTooltip": "Adapt this problem",
     "@adaptProblemTooltip": {
         "description": "Tooltip for the adapt icon button on the problem detail page"
