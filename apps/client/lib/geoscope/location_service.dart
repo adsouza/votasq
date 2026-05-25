@@ -44,27 +44,15 @@ abstract class LocationService {
 class GeolocatorLocationService implements LocationService {
   const GeolocatorLocationService();
 
+  static const _overallTimeout = Duration(seconds: 10);
+
   @override
   Future<LocationOutcome> getApproximateLocation() async {
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
-        return const LocationUnavailable();
-      }
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return const LocationDenied();
-      }
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 8),
-        ),
+      return await _resolveOutcome().timeout(
+        _overallTimeout,
+        onTimeout: () => const LocationUnavailable(),
       );
-      return LocationCoords(position.latitude, position.longitude);
     } on TimeoutException {
       return const LocationUnavailable();
     } on LocationServiceDisabledException {
@@ -74,5 +62,26 @@ class GeolocatorLocationService implements LocationService {
     } on Exception {
       return const LocationUnavailable();
     }
+  }
+
+  Future<LocationOutcome> _resolveOutcome() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return const LocationUnavailable();
+    }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      return const LocationDenied();
+    }
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.low,
+        timeLimit: Duration(seconds: 8),
+      ),
+    );
+    return LocationCoords(position.latitude, position.longitude);
   }
 }
