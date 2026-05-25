@@ -62,7 +62,7 @@ class Db {
 
   /// Persist a [Problem] document and its revision snapshot atomically.
   Future<void> saveProblem(Problem problem) async {
-    final mainDoc = _problemToDocument(problem)
+    final mainDoc = problemToDocument(problem)
       ..name = '$_basePath/problems/${problem.id}';
     final revision = ProblemRevision(
       description: problem.description,
@@ -125,7 +125,7 @@ class Db {
       final doc = result.document;
       if (doc == null) continue;
       final id = doc.name!.split('/').last;
-      final problem = _documentToProblem(doc, id);
+      final problem = documentToProblem(doc, id);
       problems.add(problem);
       lastDocName = doc.name;
       lastVotes = problem.votes;
@@ -146,7 +146,7 @@ class Db {
     final doc = await _firestore.projects.databases.documents.get(
       '$_basePath/problems/$id',
     );
-    return _documentToProblem(doc, id);
+    return documentToProblem(doc, id);
   }
 
   /// Fetch all revisions of a [Problem], ordered by version ascending.
@@ -341,7 +341,7 @@ class Db {
     // Read problem to compute new total.
     final problem = await getProblem(problemId);
     final updatedProblem = problem.copyWith(votes: problem.votes + 1);
-    final problemDoc = _problemToDocument(updatedProblem)
+    final problemDoc = problemToDocument(updatedProblem)
       ..name = '$_basePath/problems/$problemId';
 
     // Read user doc to decrement vote budget.
@@ -413,7 +413,12 @@ class Db {
     }).toList();
   }
 
-  Problem _documentToProblem(fs.Document doc, String id) {
+  /// Decode a Firestore [fs.Document] into a [Problem]. Exposed (static) so
+  /// `apps/server/test/problem_document_round_trip_test.dart` can assert that
+  /// every model field round-trips through both serializers — a missed field
+  /// here silently drops the stored value to its `@Default`, as happened with
+  /// the May 2026 `hidden` regression.
+  static Problem documentToProblem(fs.Document doc, String id) {
     return Problem(
       id: id,
       description:
@@ -448,7 +453,9 @@ class Db {
     );
   }
 
-  fs.Document _problemToDocument(Problem problem) {
+  /// Encode a [Problem] as a Firestore [fs.Document]. Static partner of
+  /// [documentToProblem]; same testing rationale.
+  static fs.Document problemToDocument(Problem problem) {
     return fs.Document(
       fields: {
         'description': fs.Value(stringValue: problem.description),
