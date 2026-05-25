@@ -44,10 +44,10 @@ class GeoscopeState {
 
   /// Set when the nearest metro is outside the auto-select threshold.
   /// The UI shows a confirmation row; tapping "Use" calls
-  /// [GeoscopeCubit.acceptLocationSuggestion].
+  /// `GeoscopeCubit.acceptLocationSuggestion`.
   final ({String id, double distanceKm})? locationSuggestion;
 
-  /// One-shot toast signal, cleared by [GeoscopeCubit.clearPendingToast]
+  /// One-shot toast signal, cleared by `GeoscopeCubit.clearPendingToast`
   /// after the listener fires.
   final GeoscopeToast? pendingToast;
 
