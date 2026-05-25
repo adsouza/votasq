@@ -40,14 +40,12 @@ const _coords = <String, ({double lat, double lng})>{
   'dc': (lat: 38.9072, lng: -77.0369), // Washington DC, Capitol
   'gta': (lat: 43.6532, lng: -79.3832), // Greater Toronto, downtown
   'cdmx': (lat: 19.4326, lng: -99.1332), // Mexico City, Zócalo
-
   // South America metros
   'ba': (lat: -34.6037, lng: -58.3816), // Buenos Aires centre
   'sãopaulo': (lat: -23.5505, lng: -46.6333), // São Paulo centre
   'rio': (lat: -22.9068, lng: -43.1729), // Rio centre
   'bogota': (lat: 4.7110, lng: -74.0721), // Bogotá centre
   'lima': (lat: -12.0464, lng: -77.0428), // Lima centre
-
   // Europe metros
   'paris': (lat: 48.8566, lng: 2.3522), // Île-de-la-Cité
   'berlin': (lat: 52.5200, lng: 13.4050), // Brandenburg Gate
@@ -55,7 +53,6 @@ const _coords = <String, ({double lat, double lng})>{
   'madrid': (lat: 40.4168, lng: -3.7038), // Puerta del Sol
   'london': (lat: 51.5074, lng: -0.1278), // Charing Cross
   'athens': (lat: 37.9838, lng: 23.7275), // Acropolis
-
   // India metros
   'mumbai': (lat: 19.0760, lng: 72.8777),
   'delhi': (lat: 28.7041, lng: 77.1025),
