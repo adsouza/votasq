@@ -312,5 +312,64 @@ void main() {
         reason: 'remainingVotes still loading',
       );
     });
+
+    test('needsTapForDetailsHint matches the spec table', () {
+      final now = DateTime.now().toUtc();
+      expect(
+        const UserState().needsTapForDetailsHint,
+        isFalse,
+        reason: 'unknown auth status',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          problemDetailsViewCount: 0,
+          sessionStartLastActiveAt: now,
+        ).needsTapForDetailsHint,
+        isTrue,
+        reason: '0 <= 0',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          problemDetailsViewCount: 1,
+          sessionStartLastActiveAt: now,
+        ).needsTapForDetailsHint,
+        isFalse,
+        reason: '1 > 0',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          problemDetailsViewCount: 10,
+          sessionStartLastActiveAt: now.subtract(const Duration(days: 30)),
+        ).needsTapForDetailsHint,
+        isTrue,
+        reason: '10 <= 30 (returning user refresher)',
+      );
+      // problemDetailsViewCount only advances on tap, and the
+      // session-gap grows (or stays put) over time — so a user who
+      // never taps a problem keeps seeing the hint indefinitely,
+      // regardless of how long they stay away between sessions. This
+      // row pins that "no time-based escape" property against anyone
+      // who reads the formula and decides it looks like a bug.
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          problemDetailsViewCount: 0,
+          sessionStartLastActiveAt: now.subtract(const Duration(days: 30)),
+        ).needsTapForDetailsHint,
+        isTrue,
+        reason: '0 <= 30 (never-tapped user keeps seeing the hint)',
+      );
+      expect(
+        UserState(
+          status: AuthStatus.authenticated,
+          sessionStartLastActiveAt: now,
+        ).needsTapForDetailsHint,
+        isFalse,
+        reason: 'problemDetailsViewCount still loading',
+      );
+    });
   });
 }
