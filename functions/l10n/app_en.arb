@@ -52,9 +52,9 @@
     "@geoscopeGlobal": {
         "description": "Label for the global geoscope option in the picker"
     },
-    "geoscopeChangeMenuItem": "Change location",
+    "geoscopeChangeMenuItem": "Change location from",
     "@geoscopeChangeMenuItem": {
-        "description": "Menu item label to open the geoscope picker"
+        "description": "Menu item label to open the geoscope picker. Reads naturally as 'Change location from <current geoscope>' where the current geoscope is shown directly below as a subtitle (e.g. 'Change location from SF Bay Area')."
     },
     "showOnlyOwnedMenuItem": "Show only my problems",
     "@showOnlyOwnedMenuItem": {
