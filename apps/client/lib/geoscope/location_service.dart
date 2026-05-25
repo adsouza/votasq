@@ -1,3 +1,8 @@
+// The single-method `LocationService` abstract is intentional: it exists so
+// `GeoscopeCubit` can accept a fake in unit tests. A top-level function
+// (what `one_member_abstracts` suggests) wouldn't be substitutable.
+// ignore_for_file: one_member_abstracts
+
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
