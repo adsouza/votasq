@@ -57,7 +57,7 @@
     "votersHeading": "Votantes",
     "voterAnonymous": "Anônimo",
     "signInHintBanner": "Entre pelo link no canto superior direito para votar em problemas e propor os seus.",
-    "doubleTapHint": "Toque duas vezes em um problema para ver os detalhes.",
+    "doubleTapHint": "Toque em um problema para ver os detalhes.",
     "voteHint": "Toque no chip com a seta para cima ao lado de um problema para votar nele.",
     "complaintSubmitted": "Denúncia enviada",
     "failedToLoadProblems": "Não foi possível carregar os problemas",

@@ -57,7 +57,7 @@
     "votersHeading": "投票者",
     "voterAnonymous": "匿名",
     "signInHintBanner": "右上のリンクからサインインして、問題に投票し、自分の問題を提案しましょう。",
-    "doubleTapHint": "問題をダブルタップすると詳細が表示されます。",
+    "doubleTapHint": "問題をタップすると詳細が表示されます。",
     "voteHint": "上向き矢印のチップをタップして問題に投票してください。",
     "complaintSubmitted": "報告が送信されました",
     "failedToLoadProblems": "問題を読み込めませんでした",

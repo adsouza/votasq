@@ -24,7 +24,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
-import 'package:toastification/toastification.dart';
 
 class ProblemsPage extends StatelessWidget {
   const ProblemsPage({super.key});
@@ -42,12 +41,6 @@ class ProblemsPage extends StatelessWidget {
   }
 }
 
-/// Coordinates the double-tap-for-details hint toast with the geoscope picker
-/// so the toast isn't immediately obscured by the picker on first launch. The
-/// toast fires once per session, when (a) the geoscope cubit has settled and
-/// (b) no picker is currently shown. The sign-in CTA that used to live in
-/// this toast is now rendered as a persistent banner below the app bar via
-/// [_SignInHintBanner].
 class _ProblemsPageCoordinator extends StatefulWidget {
   const _ProblemsPageCoordinator();
 
@@ -57,92 +50,9 @@ class _ProblemsPageCoordinator extends StatefulWidget {
 }
 
 class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
-  bool _pickerActive = false;
-  bool _doubleTapToastShown = false;
-  ToastificationItem? _doubleTapToastItem;
-  late final GoRouter _router;
-
-  @override
-  void initState() {
-    super.initState();
-    // Re-attempt the toast when the user pops a child route (e.g. /new),
-    // since no geoscope transition fires on that navigation alone.
-    // Also dismiss any live toast when a child route is pushed on top —
-    // toastification's overlay persists across navigations, so the toast
-    // would otherwise linger on /new for the remainder of its duration.
-    _router = GoRouter.of(context)..routerDelegate.addListener(_onRouterChange);
-  }
-
-  @override
-  void dispose() {
-    _router.routerDelegate.removeListener(_onRouterChange);
-    super.dispose();
-  }
-
-  /// Whether the current top-of-stack location is this page. We read from
-  /// go_router's router delegate rather than `ModalRoute.of(context).isCurrent`
-  /// because the navigator widget hasn't rebuilt yet at the moment route
-  /// listeners fire — `currentConfiguration` reflects the intended state,
-  /// which is what we want to gate on.
-  bool get _isHomeCurrent =>
-      _router.routerDelegate.currentConfiguration.uri.path == '/';
-
-  void _onRouterChange() {
-    if (!mounted) return;
-    if (!_isHomeCurrent) {
-      final item = _doubleTapToastItem;
-      if (item != null) {
-        toastification.dismiss(item);
-        _doubleTapToastItem = null;
-      }
-      return;
-    }
-    _maybeShowDoubleTapToast();
-  }
-
   Future<void> _openPicker() async {
     context.read<GeoscopeCubit>().acknowledgeSelectionPrompt();
-    setState(() => _pickerActive = true);
-    try {
-      await showGeoscopePicker(context);
-    } finally {
-      if (mounted) {
-        setState(() => _pickerActive = false);
-        _maybeShowDoubleTapToast();
-      }
-    }
-  }
-
-  /// Try to show the double-tap-for-details toast. Returns silently when not
-  /// yet appropriate (picker active, geoscope still loading, child route on
-  /// top) so the next state transition can re-attempt.
-  void _maybeShowDoubleTapToast() {
-    if (!mounted) return;
-    if (_doubleTapToastShown) return;
-    if (_pickerActive) return;
-    // The toast text refers to "problems" — the list shown on this page.
-    // Skip when a child route (e.g. /new) is on top so the hint lands
-    // alongside the list it's describing.
-    if (!_isHomeCurrent) return;
-    if (!context.read<UserCubit>().state.needsDoubleTapHint) return;
-    final geoState = context.read<GeoscopeCubit>().state;
-    if (geoState.status != GeoscopeStatus.success) return;
-    if (geoState.needsSelection) return;
-
-    _doubleTapToastShown = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Re-check: the user may have navigated away in the frame between
-      // scheduling and now. Reset the flag so a return can re-attempt.
-      if (!_isHomeCurrent) {
-        _doubleTapToastShown = false;
-        return;
-      }
-      _doubleTapToastItem = showToast(
-        context.l10n.doubleTapHint,
-        duration: const Duration(seconds: 5),
-      );
-    });
+    await showGeoscopePicker(context);
   }
 
   @override
@@ -162,14 +72,6 @@ class _ProblemsPageCoordinatorState extends State<_ProblemsPageCoordinator> {
           listenWhen: (prev, curr) =>
               !prev.needsSelection && curr.needsSelection,
           listener: (_, _) => unawaited(_openPicker()),
-        ),
-        // Show the toast once the geoscope cubit settles (problems are then
-        // visible and the hint applies to them).
-        BlocListener<GeoscopeCubit, GeoscopeState>(
-          listenWhen: (prev, curr) =>
-              prev.status != GeoscopeStatus.success &&
-              curr.status == GeoscopeStatus.success,
-          listener: (_, _) => _maybeShowDoubleTapToast(),
         ),
       ],
       child: const ProblemsView(),

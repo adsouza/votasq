@@ -57,7 +57,7 @@
     "votersHeading": "투표자",
     "voterAnonymous": "익명",
     "signInHintBanner": "오른쪽 상단의 링크를 통해 로그인하여 문제에 투표하고 자신의 문제를 제안하세요.",
-    "doubleTapHint": "문제를 두 번 탭하여 세부 정보를 확인하세요.",
+    "doubleTapHint": "문제를 탭하여 세부 정보를 확인하세요.",
     "voteHint": "문제 옆의 위쪽 화살표 칩을 탭하여 투표하세요.",
     "complaintSubmitted": "신고가 접수되었습니다",
     "failedToLoadProblems": "문제를 불러올 수 없습니다",

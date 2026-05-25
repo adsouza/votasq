@@ -42,6 +42,7 @@ class ProblemReadTile extends StatelessWidget {
       minimumSize: Size.zero,
     );
     return ListTile(
+      onTap: onViewDetails,
       title: ProblemTranslation(
         problemId: problem.id,
         lang: problem.lang,
@@ -51,27 +52,24 @@ class ProblemReadTile extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 6,
           children: [
-            GestureDetector(
-              onDoubleTap: onViewDetails,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TranslatedField(
+                  problem.description,
+                  fieldSelector: (tp) => tp.description,
+                ),
+                if (problem.goal.isNotEmpty)
                   TranslatedField(
-                    problem.description,
-                    fieldSelector: (tp) => tp.description,
-                  ),
-                  if (problem.goal.isNotEmpty)
-                    TranslatedField(
-                      problem.goal,
-                      fieldSelector: (tp) => tp.goal,
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 13,
-                      ),
+                    problem.goal,
+                    fieldSelector: (tp) => tp.goal,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 13,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
             if (problem.geoscope != '/')
               Tooltip(
