@@ -7,6 +7,19 @@ import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// Top-tier geoscope IDs — entities of global political/economic
+/// significance whose constituents are worth listing as a separate picker
+/// tier. Surfaced to users under the heading "Global regions"
+/// (l10n key `geoscopeSuperstatesHeading`); `superstate` is the internal
+/// codename, kept for backward-compatibility with existing code.
+///
+/// Mixed bag: 3 large countries (`us`, `in`, `cn`) and 4 regional
+/// organizations (`eu` = European Union, `scm` = Mercosur / Mercado Común
+/// del Sur, `sea` = ASEAN, `las` = League of Arab States). That's why the
+/// level-2 "States" tier under each is heterogeneous: subnational
+/// divisions under the countries, sovereign member states under the
+/// regional orgs. See the @description on `geoscopeStatesHeading` in the
+/// English ARB for the translator-facing version of this note.
 const _superstateIds = {'us', 'in', 'eu', 'scm', 'sea', 'las', 'cn'};
 
 /// Top-level metros only show megacities; drilling in lifts the threshold.
@@ -398,7 +411,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Superstates',
+                  l10n.geoscopeSuperstatesHeading,
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
                 Icon(
@@ -447,7 +460,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
             child: Text(
-              'States',
+              l10n.geoscopeStatesHeading,
               style: Theme.of(context).textTheme.labelSmall,
             ),
           ),
@@ -493,7 +506,7 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
             child: Text(
-              'Metro areas',
+              l10n.geoscopeMetroAreasHeading,
               style: Theme.of(context).textTheme.labelSmall,
             ),
           ),

@@ -68,7 +68,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Global option should be visible.
-      expect(find.textContaining('Global'), findsOneWidget);
+      expect(find.textContaining('🌐'), findsOneWidget);
     });
 
     testWidgets(
@@ -117,7 +117,7 @@ void main() {
         await tester.tap(find.text('Open Picker'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.textContaining('Global'));
+        await tester.tap(find.textContaining('🌐'));
         await tester.pumpAndSettle();
 
         verify(() => geoscopeCubit.selectGeoscope('/')).called(1);
@@ -403,7 +403,7 @@ void main() {
         expect(find.text('United States'), findsNothing);
         expect(find.text('New York City'), findsNothing);
         // Section headers don't render while filtering.
-        expect(find.text('Superstates'), findsNothing);
+        expect(find.text('Global regions'), findsNothing);
         expect(find.text('Metro areas'), findsNothing);
       },
     );
@@ -685,7 +685,7 @@ void main() {
         expect(find.text('SF Bay Area'), findsOneWidget);
 
         // Superstates heading is visible, but list items are hidden/collapsed.
-        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('Global regions'), findsOneWidget);
         expect(find.text('United States'), findsNothing);
       },
     );
@@ -719,7 +719,7 @@ void main() {
 
         // No state is selected (only superstate is selected).
         // Superstates heading and items are visible.
-        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('Global regions'), findsOneWidget);
         expect(find.text('United States'), findsOneWidget);
       },
     );
@@ -760,7 +760,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Superstates heading is visible but list items are collapsed.
-        expect(find.text('Superstates'), findsOneWidget);
+        expect(find.text('Global regions'), findsOneWidget);
         expect(find.text('United States'), findsNothing);
 
         // Deselect the state by tapping on California again.
@@ -810,14 +810,14 @@ void main() {
         expect(find.text('United States'), findsNothing);
 
         // Tap the heading to manually expand it.
-        await tester.tap(find.text('Superstates'));
+        await tester.tap(find.text('Global regions'));
         await tester.pumpAndSettle();
 
         // Now expanded.
         expect(find.text('United States'), findsOneWidget);
 
         // Tap the heading again to manually collapse it.
-        await tester.tap(find.text('Superstates'));
+        await tester.tap(find.text('Global regions'));
         await tester.pumpAndSettle();
 
         // Collapsed again.

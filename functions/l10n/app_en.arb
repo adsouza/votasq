@@ -238,6 +238,10 @@
     "@failedToLoadProblems": {
         "description": "Error message shown when problems cannot be loaded"
     },
+    "retryButton": "Retry",
+    "@retryButton": {
+        "description": "Button label that re-attempts the failed load on the problems list failure state"
+    },
     "geoscopeFilterHint": "Type partial name of current location here to narrow down the list.",
     "@geoscopeFilterHint": {
         "description": "Placeholder text for the substring filter field at the top of the geoscope picker"
@@ -245,6 +249,18 @@
     "geoscopePickerHeading": "Select your location from the list below with the highest available precision:",
     "@geoscopePickerHeading": {
         "description": "Heading shown at the top of the geoscope picker overlay, above the substring filter field"
+    },
+    "geoscopeSuperstatesHeading": "Global regions",
+    "@geoscopeSuperstatesHeading": {
+        "description": "Section heading in the geoscope picker above the top-tier geographic groupings. The set is 3 large countries (US, India, China) plus 4 regional organizations (EU, Mercosur, ASEAN, Arab League) — i.e. entities of global political/economic significance whose constituents are worth listing. Translate as 'global regions' / 'world regions' (whichever reads more naturally in the target language) — the term should convey both 'planetary scale' and 'mixed-sovereignty groupings,' covering both single large countries and regional organizations without committing to either category."
+    },
+    "geoscopeStatesHeading": "States",
+    "@geoscopeStatesHeading": {
+        "description": "Section heading in the geoscope picker above the level-2 entries under a selected Global region. The constituents are SOVEREIGN COUNTRIES when the parent is a regional organization (EU → France, Germany; ASEAN → Vietnam, Thailand; Mercosur → Brazil, Argentina; Arab League → Saudi Arabia, Egypt) AND SUBNATIONAL DIVISIONS when the parent is a large country (US → California, Texas; India → Tamil Nadu, Maharashtra; China → Sichuan, Guangdong). English 'States' covers both via polysemy. PREFER the bare calque in languages that share that polysemy (fr 'États', es 'Estados', pt 'Estados', de 'Staaten', it 'Stati', tr 'Devletler') and avoid an 'and provinces' hedge that narrows to subnational. USE an explicit dual ('countries / [subnational-division]' or equivalent — e.g. ja '国・地域', ar 'الدول والولايات', zh '国家/省') in languages where the calque is sovereign-only or subnational-only. The dual works because the parent 'Global regions' tier already conveys the heterogeneous parent context. Pick whichever subnational-division noun is most natural per language (states / provinces / regions / oblasts / etc.) — do not force 'provinces' as a literal calque."
+    },
+    "geoscopeMetroAreasHeading": "Metro areas",
+    "@geoscopeMetroAreasHeading": {
+        "description": "Section heading in the geoscope picker above the metropolitan area (large city) entries"
     },
     "geoscopeUseMyLocation": "Use my location",
     "@geoscopeUseMyLocation": {
@@ -340,6 +356,10 @@
     "linkProblemDialogTitle": "Link a Problem",
     "@linkProblemDialogTitle": {
         "description": "Title of the dialog for linking a similar problem"
+    },
+    "linkProblemNoResults": "No problems found",
+    "@linkProblemNoResults": {
+        "description": "Empty-state message shown in the link-problem search dialog when the user's query returns no matches"
     },
     "linkProblemSearchHint": "Search by text, paste problem ID, or full URL...",
     "@linkProblemSearchHint": {

@@ -446,7 +446,7 @@ class _ProblemsViewState extends State<ProblemsView> {
                         ElevatedButton(
                           onPressed: () =>
                               context.read<ProblemsCubit>().subscribe(),
-                          child: const Text('Retry'),
+                          child: Text(context.l10n.retryButton),
                         ),
                       ],
                     ),

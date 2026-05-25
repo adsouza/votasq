@@ -1422,7 +1422,7 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
                   : _searchResults.isEmpty
                   ? Center(
                       child: Text(
-                        'No problems found',
+                        l10n.linkProblemNoResults,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
