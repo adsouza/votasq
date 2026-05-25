@@ -1,12 +1,19 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/geoscope/cubit/geoscope_cubit.dart';
 import 'package:client/geoscope/cubit/geoscope_state.dart';
+import 'package:client/geoscope/location_service.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
+
+class _FakeLocationService implements LocationService {
+  @override
+  Future<LocationOutcome> getApproximateLocation() async =>
+      LocationUnavailable();
+}
 
 void main() {
   late FirestoreRepository repo;
@@ -18,10 +25,14 @@ void main() {
 
   group('GeoscopeCubit', () {
     test('initial state is correct', () {
-      final cubit = GeoscopeCubit(repo);
+      final cubit = GeoscopeCubit(repo, _FakeLocationService());
       expect(cubit.state.status, GeoscopeStatus.initial);
       expect(cubit.state.selectedGeoscope, '/');
       expect(cubit.state.availableGeoscopes, isEmpty);
+      expect(cubit.state.locationStatus, GeoscopeLocationStatus.idle);
+      expect(cubit.state.locationSuggestion, isNull);
+      expect(cubit.state.pendingToast, isNull);
+      expect(cubit.state.locationDenied, isFalse);
       addTearDown(cubit.close);
     });
 
