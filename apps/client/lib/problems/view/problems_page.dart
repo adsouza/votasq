@@ -9,6 +9,7 @@ import 'package:client/notifications/notifications.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/cubit/problems_state.dart';
 import 'package:client/problems/widgets/add_problem_row.dart';
+import 'package:client/problems/widgets/flag_complaint_dialog.dart';
 import 'package:client/problems/widgets/geoscope_picker.dart';
 import 'package:client/problems/widgets/problem_edit_tile.dart';
 import 'package:client/problems/widgets/problem_read_tile.dart';
@@ -154,26 +155,7 @@ class _ProblemsViewState extends State<ProblemsView> {
   }
 
   Future<void> _confirmComplaint(Problem problem) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Flag as abusive?'),
-        content: const Text(
-          'Are you sure you want to report this problem as abusive? '
-          'It will be hidden from your list.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Report'),
-          ),
-        ],
-      ),
-    );
+    final confirmed = await showFlagComplaintConfirmDialog(context);
     if (confirmed != true || !mounted) return;
     final userId = context.read<UserCubit>().state.userId!;
     unawaited(

@@ -36,6 +36,22 @@
     "@flagProblemButton": {
         "description": "Tooltip for the flag/complaint button on a problem list item"
     },
+    "flagComplaintDialogTitle": "Flag as abusive?",
+    "@flagComplaintDialogTitle": {
+        "description": "Title of the confirm dialog shown before submitting an abuse complaint"
+    },
+    "flagComplaintDialogBody": "Are you sure you want to report this problem as abusive? It will be hidden from your list.",
+    "@flagComplaintDialogBody": {
+        "description": "Body of the confirm dialog shown before submitting an abuse complaint"
+    },
+    "flagComplaintDialogCancel": "Cancel",
+    "@flagComplaintDialogCancel": {
+        "description": "Cancel action on the abuse-complaint confirm dialog"
+    },
+    "flagComplaintDialogConfirm": "Report",
+    "@flagComplaintDialogConfirm": {
+        "description": "Confirm action on the abuse-complaint confirm dialog"
+    },
     "feedbackButton": "Send feedback",
     "@feedbackButton": {
         "description": "Tooltip for the feedback button in the app bar"

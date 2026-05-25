@@ -5,6 +5,7 @@ import 'package:client/auth/auth.dart';
 import 'package:client/geoscope/geoscope.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
+import 'package:client/problems/widgets/flag_complaint_dialog.dart';
 import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
@@ -154,6 +155,41 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     setState(() {
       _problem = problem.copyWith(hidden: hidden);
     });
+  }
+
+  /// Submit an abuse complaint on behalf of the current user, then return
+  /// to the listing. Mirrors the listing page's flag flow so the UX is
+  /// identical regardless of where the user starts. Uses the same
+  /// cubit-or-repo fallback pattern as [_setHidden] because the detail
+  /// page can be reached by direct URL (notifications, shared links)
+  /// outside the listing route, where `ProblemsCubit` isn't in scope.
+  Future<void> _confirmComplaint(Problem problem) async {
+    final confirmed = await showFlagComplaintConfirmDialog(context);
+    if (confirmed != true || !mounted) return;
+    final userId = context.read<UserCubit>().state.userId;
+    if (userId == null) return;
+    final l10n = context.l10n;
+    final router = GoRouter.of(context);
+    ProblemsCubit? problemsCubit;
+    try {
+      problemsCubit = context.read<ProblemsCubit>();
+    } on Object {
+      problemsCubit = null;
+    }
+    final repo = context.read<FirestoreRepository>();
+    try {
+      if (problemsCubit != null) {
+        await problemsCubit.flagProblem(problem: problem, userId: userId);
+      } else if (!problem.complaints.contains(userId)) {
+        await repo.addComplaint(problemId: problem.id, userId: userId);
+      }
+    } on Object catch (e, st) {
+      log('flagProblem failed: $e', stackTrace: st);
+      return;
+    }
+    if (!mounted) return;
+    showSuccessToast(l10n.complaintSubmitted);
+    router.go('/');
   }
 
   Future<void> _fork(Problem problem, String ownerId) async {
@@ -642,6 +678,57 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     );
   }
 
+  /// The vote affordance shown in the AppBar action row. Renders as a
+  /// tappable [ActionChip] when the viewer is signed in with remaining
+  /// votes, or a plain [Chip] otherwise — same two-state pattern the
+  /// listing tile uses, so the count is always visible regardless of auth
+  /// state. The [Builder] keeps the [UserCubit] watch scoped to this
+  /// subtree so the rest of the AppBar doesn't rebuild on auth changes.
+  Widget _buildVoteChip(Problem problem) {
+    return Builder(
+      builder: (context) {
+        final l10n = context.l10n;
+        final theme = Theme.of(context);
+        final authState = context.watch<UserCubit>().state;
+        final userId = authState.userId;
+        if (userId != null && (authState.remainingVotes ?? 0) > 0) {
+          return Tooltip(
+            message: l10n.voteButtonTooltip,
+            child: ActionChip(
+              avatar: const Icon(Icons.arrow_circle_up_rounded, size: 16),
+              label: Text('${problem.votes}'),
+              backgroundColor: theme.colorScheme.secondaryContainer,
+              onPressed: () async {
+                final repo = context.read<FirestoreRepository>();
+                final anonName = context.l10n.voterAnonymous;
+                await repo.vote(problemId: problem.id, userId: userId);
+                if (!mounted) return;
+                final voters = await repo.getVotersForProblem(
+                  problem.id,
+                  excludeUid: problem.ownerId,
+                  anonymous: anonName,
+                );
+                if (mounted) {
+                  setState(() {
+                    _problem = problem.copyWith(votes: problem.votes + 1);
+                    _voters = voters;
+                  });
+                }
+              },
+            ),
+          );
+        }
+        return Tooltip(
+          message: l10n.votesChipTooltip,
+          child: Chip(
+            label: Text('${problem.votes}'),
+            backgroundColor: theme.colorScheme.secondaryContainer,
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildReadOnlyBody(Problem problem) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
@@ -692,58 +779,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                           backgroundColor: theme.colorScheme.tertiaryContainer,
                         ),
                       ),
-                    Builder(
-                      builder: (context) {
-                        final authState = context.watch<UserCubit>().state;
-                        final userId = authState.userId;
-                        if (userId != null &&
-                            (authState.remainingVotes ?? 0) > 0) {
-                          return Tooltip(
-                            message: l10n.voteButtonTooltip,
-                            child: ActionChip(
-                              avatar: const Icon(
-                                Icons.arrow_circle_up_rounded,
-                                size: 16,
-                              ),
-                              label: Text('${problem.votes}'),
-                              backgroundColor:
-                                  theme.colorScheme.secondaryContainer,
-                              onPressed: () async {
-                                final repo = context
-                                    .read<FirestoreRepository>();
-                                final anonName = context.l10n.voterAnonymous;
-                                await repo.vote(
-                                  problemId: problem.id,
-                                  userId: userId,
-                                );
-                                if (!mounted) return;
-                                final voters = await repo.getVotersForProblem(
-                                  problem.id,
-                                  excludeUid: problem.ownerId,
-                                  anonymous: anonName,
-                                );
-                                if (mounted) {
-                                  setState(() {
-                                    _problem = problem.copyWith(
-                                      votes: problem.votes + 1,
-                                    );
-                                    _voters = voters;
-                                  });
-                                }
-                              },
-                            ),
-                          );
-                        }
-                        return Tooltip(
-                          message: l10n.votesChipTooltip,
-                          child: Chip(
-                            label: Text('${problem.votes}'),
-                            backgroundColor:
-                                theme.colorScheme.secondaryContainer,
-                          ),
-                        );
-                      },
-                    ),
                     const ProblemTranslateButton(),
                   ],
                 ),
@@ -889,15 +924,35 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(l10n.problemDetailPageTitle),
-            actions: [
-              if (canFork)
-                IconButton(
-                  tooltip: l10n.adaptProblemTooltip,
-                  icon: const Icon(Icons.call_split),
-                  onPressed: () => _fork(problem, userId),
-                ),
-              if (userId != null) ..._buildLinkButton(context, l10n),
-            ],
+            // Material auto-injects the back chevron in the leading slot
+            // (via ModalRoute.canPop). The action icons sit on a sub-row
+            // below the title so the title line stays uncluttered.
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(48),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 8),
+                    child: _buildVoteChip(problem),
+                  ),
+                  const Spacer(),
+                  if (canFork)
+                    IconButton(
+                      tooltip: l10n.adaptProblemTooltip,
+                      icon: const Icon(Icons.call_split),
+                      onPressed: () => _fork(problem, userId),
+                    ),
+                  if (userId != null) ..._buildLinkButton(context, l10n),
+                  if (userId != null && !isOwner)
+                    IconButton(
+                      key: const Key('flagProblemButton'),
+                      tooltip: l10n.flagProblemButton,
+                      icon: const Text('🙈', style: TextStyle(fontSize: 20)),
+                      onPressed: () => _confirmComplaint(problem),
+                    ),
+                ],
+              ),
+            ),
           ),
           body: SingleChildScrollView(
             child: Column(

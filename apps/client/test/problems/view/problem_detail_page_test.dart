@@ -470,6 +470,202 @@ void main() {
       );
     });
 
+    group('flag complaint', () {
+      testWidgets('non-owner sees the flag icon', (tester) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => userCubit.state).thenReturn(
+          const UserState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('flagProblemButton')), findsOneWidget);
+      });
+
+      testWidgets('owner does not see the flag icon', (tester) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => userCubit.state).thenReturn(
+          const UserState(status: AuthStatus.authenticated, userId: 'owner1'),
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('flagProblemButton')), findsNothing);
+      });
+
+      testWidgets('unauthenticated viewer does not see the flag icon', (
+        tester,
+      ) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => userCubit.state).thenReturn(const UserState());
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('flagProblemButton')), findsNothing);
+      });
+
+      testWidgets(
+        'tapping flag → Report calls cubit.flagProblem, shows toast, '
+        'and returns to listing',
+        (tester) async {
+          final problem = _problem();
+          when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
+          when(() => userCubit.state).thenReturn(
+            const UserState(
+              status: AuthStatus.authenticated,
+              userId: 'other-user',
+            ),
+          );
+          when(
+            () => problemsCubit.flagProblem(
+              problem: any(named: 'problem'),
+              userId: any(named: 'userId'),
+            ),
+          ).thenAnswer((_) async {});
+
+          await tester.pumpWidget(buildSubject());
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('flagProblemButton')));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Flag as abusive?'), findsOneWidget);
+          expect(find.text('Report'), findsOneWidget);
+          expect(find.text('Cancel'), findsOneWidget);
+
+          await tester.tap(find.text('Report'));
+          await tester.pumpAndSettle();
+
+          verify(
+            () => problemsCubit.flagProblem(
+              problem: problem,
+              userId: 'other-user',
+            ),
+          ).called(1);
+          // After flagging the user is sent back to listing so the
+          // now-filtered problem disappears from view — same outcome as
+          // tapping the flag icon on the listing itself.
+          expect(find.text('home'), findsOneWidget);
+          toastification.dismissAll(delayForAnimation: false);
+          await tester.pump(const Duration(seconds: 1));
+        },
+      );
+
+      testWidgets('tapping flag → Cancel does not submit', (tester) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => userCubit.state).thenReturn(
+          const UserState(
+            status: AuthStatus.authenticated,
+            userId: 'other-user',
+          ),
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('flagProblemButton')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        verifyNever(
+          () => problemsCubit.flagProblem(
+            problem: any(named: 'problem'),
+            userId: any(named: 'userId'),
+          ),
+        );
+      });
+
+      testWidgets(
+        'falls back to repo.addComplaint when ProblemsCubit is NOT in scope '
+        '(direct-URL navigation regression test)',
+        (tester) async {
+          // Mirrors the _setHidden direct-URL fallback test above: a user
+          // landing on the detail page from a notification or shared link
+          // sits outside the listing's BlocProvider subtree, so
+          // context.read<ProblemsCubit>() throws. The fix is to write the
+          // complaint via the repo instead.
+          final problem = _problem();
+          when(() => repo.getProblem(any())).thenAnswer((_) async => problem);
+          when(() => userCubit.state).thenReturn(
+            const UserState(
+              status: AuthStatus.authenticated,
+              userId: 'other-user',
+            ),
+          );
+          when(
+            () => repo.addComplaint(
+              problemId: any(named: 'problemId'),
+              userId: any(named: 'userId'),
+            ),
+          ).thenAnswer((_) async {});
+
+          final router = GoRouter(
+            initialLocation: '/problems/test-id',
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const Scaffold(body: Text('home')),
+                routes: [
+                  GoRoute(
+                    path: 'problems/:id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return ProblemDetailPage(problemId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          );
+          await tester.pumpWidget(
+            MultiBlocProvider(
+              providers: [
+                BlocProvider<UserCubit>.value(value: userCubit),
+                BlocProvider<GeoscopeCubit>.value(value: geoscopeCubit),
+                // Intentionally no BlocProvider<ProblemsCubit>.
+              ],
+              child: MultiRepositoryProvider(
+                providers: [
+                  RepositoryProvider<FirestoreRepository>.value(value: repo),
+                  RepositoryProvider<LanguageDetectionService>.value(
+                    value: languageDetectionService,
+                  ),
+                  RepositoryProvider<TranslationRepository>.value(
+                    value: translationRepo,
+                  ),
+                ],
+                child: ToastificationWrapper(
+                  child: MaterialApp.router(
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    routerConfig: router,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('flagProblemButton')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Report'));
+          await tester.pumpAndSettle();
+
+          verify(
+            () => repo.addComplaint(
+              problemId: 'test-id',
+              userId: 'other-user',
+            ),
+          ).called(1);
+          expect(find.text('home'), findsOneWidget);
+          toastification.dismissAll(delayForAnimation: false);
+          await tester.pump(const Duration(seconds: 1));
+        },
+      );
+    });
+
     testWidgets('back button navigates to home', (tester) async {
       when(() => repo.getProblem(any())).thenAnswer((_) async => null);
       await tester.pumpWidget(buildSubject());
