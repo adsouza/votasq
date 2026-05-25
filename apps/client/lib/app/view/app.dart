@@ -4,6 +4,7 @@ import 'package:client/app/router.dart';
 import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
 import 'package:client/geoscope/geoscope.dart';
+import 'package:client/geoscope/location_service.dart';
 import 'package:client/l10n/l10n.dart';
 import 'package:client/notifications/notifications.dart';
 import 'package:client/services/feedback_repository.dart';
@@ -119,6 +120,7 @@ class _AppState extends State<App> {
             create: (context) {
               final cubit = GeoscopeCubit(
                 context.read<FirestoreRepository>(),
+                const GeolocatorLocationService(),
               );
               unawaited(cubit.initialize());
               return cubit;

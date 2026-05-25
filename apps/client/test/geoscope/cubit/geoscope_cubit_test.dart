@@ -1,3 +1,8 @@
+// The optional `_outcome` constructor argument and `setOutcome` mutator are
+// used by tests added in the next commit (orchestration methods); the lints
+// fire prematurely on this snapshot.
+// ignore_for_file: unused_element_parameter, use_setters_to_change_properties
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/geoscope/cubit/geoscope_cubit.dart';
 import 'package:client/geoscope/cubit/geoscope_state.dart';
@@ -10,22 +15,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
 class _FakeLocationService implements LocationService {
+  _FakeLocationService([this._outcome = const LocationUnavailable()]);
+  LocationOutcome _outcome;
+  void setOutcome(LocationOutcome outcome) => _outcome = outcome;
+
   @override
-  Future<LocationOutcome> getApproximateLocation() async =>
-      LocationUnavailable();
+  Future<LocationOutcome> getApproximateLocation() async => _outcome;
 }
 
 void main() {
   late FirestoreRepository repo;
+  late _FakeLocationService locationService;
 
   setUp(() {
     repo = _MockFirestoreRepository();
+    locationService = _FakeLocationService();
     SharedPreferences.setMockInitialValues({});
   });
 
   group('GeoscopeCubit', () {
     test('initial state is correct', () {
-      final cubit = GeoscopeCubit(repo, _FakeLocationService());
+      final cubit = GeoscopeCubit(repo, locationService);
       expect(cubit.state.status, GeoscopeStatus.initial);
       expect(cubit.state.selectedGeoscope, '/');
       expect(cubit.state.availableGeoscopes, isEmpty);
@@ -43,7 +53,7 @@ void main() {
         SharedPreferences.setMockInitialValues({});
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
       expect: () => [
         isA<GeoscopeState>().having(
@@ -73,12 +83,24 @@ void main() {
         );
         when(() => repo.getGeoscopes()).thenAnswer(
           (_) async => [
-            (id: 'us', label: 'United States', population: 330000000),
-            (id: 'us/nyc', label: 'New York City', population: 8500000),
+            (
+              id: 'us',
+              label: 'United States',
+              population: 330000000,
+              lat: null,
+              lng: null,
+            ),
+            (
+              id: 'us/nyc',
+              label: 'New York City',
+              population: 8500000,
+              lat: null,
+              lng: null,
+            ),
           ],
         );
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
       expect: () => [
         isA<GeoscopeState>().having(
@@ -112,11 +134,17 @@ void main() {
         );
         when(() => repo.getGeoscopes()).thenAnswer(
           (_) async => [
-            (id: 'na/us', label: 'United States', population: 330000000),
+            (
+              id: 'na/us',
+              label: 'United States',
+              population: 330000000,
+              lat: null,
+              lng: null,
+            ),
           ],
         );
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
       expect: () => [
         isA<GeoscopeState>().having(
@@ -140,12 +168,54 @@ void main() {
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
+      'initialize loads persisted geoscope_location_denied=true',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({
+          'geoscope_location_denied': true,
+        });
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) => cubit.initialize(),
+      expect: () => [
+        isA<GeoscopeState>().having(
+          (s) => s.status,
+          'status',
+          GeoscopeStatus.loading,
+        ),
+        isA<GeoscopeState>()
+            .having((s) => s.status, 'status', GeoscopeStatus.success)
+            .having((s) => s.locationDenied, 'locationDenied', true),
+      ],
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'initialize defaults locationDenied to false when key absent',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) => cubit.initialize(),
+      expect: () => [
+        isA<GeoscopeState>().having(
+          (s) => s.status,
+          'status',
+          GeoscopeStatus.loading,
+        ),
+        isA<GeoscopeState>()
+            .having((s) => s.status, 'status', GeoscopeStatus.success)
+            .having((s) => s.locationDenied, 'locationDenied', false),
+      ],
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
       'acknowledgeSelectionPrompt clears needsSelection without persisting',
       setUp: () {
         SharedPreferences.setMockInitialValues({});
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) async {
         await cubit.initialize();
         cubit.acknowledgeSelectionPrompt();
@@ -164,7 +234,7 @@ void main() {
 
     blocTest<GeoscopeCubit, GeoscopeState>(
       'acknowledgeSelectionPrompt is a no-op when needsSelection is false',
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.acknowledgeSelectionPrompt(),
       expect: () => <GeoscopeState>[],
     );
@@ -256,7 +326,7 @@ void main() {
         SharedPreferences.setMockInitialValues({});
         when(() => repo.getGeoscopes()).thenThrow(Exception('network error'));
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
       expect: () => [
         isA<GeoscopeState>().having(
@@ -277,7 +347,7 @@ void main() {
       setUp: () {
         SharedPreferences.setMockInitialValues({});
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.selectGeoscope('us/nyc'),
       expect: () => [
         isA<GeoscopeState>()
@@ -300,7 +370,7 @@ void main() {
         SharedPreferences.setMockInitialValues({});
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
       },
-      build: () => GeoscopeCubit(repo),
+      build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) async {
         await cubit.initialize();
         await cubit.selectGeoscope('us/nyc');

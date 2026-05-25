@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:client/geoscope/cubit/geoscope_state.dart';
+import 'package:client/geoscope/location_service.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,10 +16,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _countryContainingSuperstateIds = {'eu', 'scm', 'sea', 'las'};
 
 class GeoscopeCubit extends Cubit<GeoscopeState> {
-  GeoscopeCubit(this._repo) : super(const GeoscopeState());
+  GeoscopeCubit(this._repo, this._location) : super(const GeoscopeState());
 
   final FirestoreRepository _repo;
+  // Used by selectNearestMetroFromLocation in the next commit.
+  // ignore: unused_field
+  final LocationService _location;
   static const _prefsKey = 'selected_geoscope';
+  static const _locationDeniedPrefsKey = 'geoscope_location_denied';
 
   /// Load persisted geoscope and available geoscopes.
   /// If no persisted value, infer from device locale region and flag the state
@@ -28,6 +33,7 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final persisted = prefs.getString(_prefsKey);
+      final locationDenied = prefs.getBool(_locationDeniedPrefsKey) ?? false;
       final available = await _repo.getGeoscopes();
       final availableIds = {'/'}..addAll(available.map((g) => g.id));
       final geoscope = resolveGeoscope(
@@ -47,6 +53,7 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
           selectedGeoscope: geoscope,
           availableGeoscopes: available,
           needsSelection: persisted == null,
+          locationDenied: locationDenied,
         ),
       );
     } on Exception catch (e, st) {
