@@ -124,8 +124,8 @@ class _NotificationCardState extends State<NotificationCard> {
         problemId,
       ),
       ProblemForkedPayload(:final originalProblemId) => (
-        l10n.notificationProblemForkedTitle,
-        l10n.notificationProblemForkedBody(actorName),
+        l10n.notificationProblemAdaptedTitle,
+        l10n.notificationProblemAdaptedBody(actorName),
         originalProblemId,
       ),
       ProblemLinkedPayload(
@@ -155,8 +155,8 @@ class _NotificationCardState extends State<NotificationCard> {
         problemId,
       ),
       ForkAdoptedPayload(:final forkProblemId) => (
-        l10n.notificationForkAdoptedTitle,
-        l10n.notificationForkAdoptedBody,
+        l10n.notificationAdaptationIncorporatedTitle,
+        l10n.notificationAdaptationIncorporatedBody,
         forkProblemId,
       ),
     };

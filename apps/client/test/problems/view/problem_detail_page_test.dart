@@ -911,7 +911,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Heading shows the count.
-      expect(find.text('Forks (2)'), findsOneWidget);
+      expect(find.text('Adaptations (2)'), findsOneWidget);
       // Initially expanded — both fork titles visible.
       expect(find.text('Forked problem A'), findsOneWidget);
       expect(find.text('Forked problem B'), findsOneWidget);
@@ -926,11 +926,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Forked problem A'), findsOneWidget);
-      await tester.tap(find.text('Forks (1)'));
+      await tester.tap(find.text('Adaptations (1)'));
       await tester.pumpAndSettle();
       expect(find.text('Forked problem A'), findsNothing);
       // Heading (with count) remains visible.
-      expect(find.text('Forks (1)'), findsOneWidget);
+      expect(find.text('Adaptations (1)'), findsOneWidget);
     });
 
     testWidgets(

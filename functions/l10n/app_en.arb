@@ -230,50 +230,50 @@
     "@geoscopePickerHeading": {
         "description": "Heading shown at the top of the geoscope picker overlay, above the substring filter field"
     },
-    "forkProblemTooltip": "Fork this problem into your own copy",
-    "@forkProblemTooltip": {
-        "description": "Tooltip for the fork icon button on the problem detail page"
+    "adaptProblemTooltip": "Adapt this problem",
+    "@adaptProblemTooltip": {
+        "description": "Tooltip for the adapt icon button on the problem detail page"
     },
-    "forkProblemError": "Could not fork this problem. Please try again.",
-    "@forkProblemError": {
-        "description": "SnackBar message shown when forking a problem fails"
+    "adaptProblemError": "Could not adapt this problem. Please try again.",
+    "@adaptProblemError": {
+        "description": "SnackBar message shown when adapting a problem fails"
     },
-    "forkedFromOriginalLink": "Forked from original",
-    "@forkedFromOriginalLink": {
-        "description": "Label on the backlink shown above the description of a forked problem; tapping navigates to the source problem"
+    "adaptedFromOriginalLink": "Adapted from original",
+    "@adaptedFromOriginalLink": {
+        "description": "Label on the backlink shown above the description of an adapted problem; tapping navigates to the source problem"
     },
-    "forksHeading": "Forks ({count})",
-    "@forksHeading": {
-        "description": "Title of the collapsible section listing every fork of the current problem; the count is shown whether expanded or collapsed",
+    "adaptationsHeading": "Adaptations ({count})",
+    "@adaptationsHeading": {
+        "description": "Title of the collapsible section listing every adaptation of the current problem; the count is shown whether expanded or collapsed",
         "placeholders": {
             "count": {
                 "type": "int"
             }
         }
     },
-    "compareForkTooltip": "Compare with your problem",
-    "@compareForkTooltip": {
-        "description": "Tooltip for the icon that reveals the per-field comparison panel for a fork"
+    "compareAdaptationTooltip": "Compare with your problem",
+    "@compareAdaptationTooltip": {
+        "description": "Tooltip for the icon that reveals the per-field comparison panel for an adaptation"
     },
-    "hideForkCompareTooltip": "Hide comparison",
-    "@hideForkCompareTooltip": {
-        "description": "Tooltip for the icon that hides the per-field comparison panel for a fork once it is open"
+    "hideAdaptationCompareTooltip": "Hide comparison",
+    "@hideAdaptationCompareTooltip": {
+        "description": "Tooltip for the icon that hides the per-field comparison panel for an adaptation once it is open"
     },
-    "useForkFieldButton": "Use this here",
-    "@useForkFieldButton": {
-        "description": "Button next to a forked problem's field value; tapping copies that value into the current problem as a new revision"
+    "useAdaptationFieldButton": "Use this here",
+    "@useAdaptationFieldButton": {
+        "description": "Button next to an adaptation's field value; tapping copies that value into the current problem as a new revision"
     },
     "problemDescriptionFieldLabel": "Description",
     "@problemDescriptionFieldLabel": {
-        "description": "Field label used in the per-field fork comparison panel above the description value"
+        "description": "Field label used in the per-field adaptation comparison panel above the description value"
     },
     "problemGoalFieldLabel": "Goal",
     "@problemGoalFieldLabel": {
-        "description": "Field label used in the per-field fork comparison panel above the goal value"
+        "description": "Field label used in the per-field adaptation comparison panel above the goal value"
     },
     "problemGeoscopeFieldLabel": "Location",
     "@problemGeoscopeFieldLabel": {
-        "description": "Field label used in the per-field fork comparison panel above the geoscope value"
+        "description": "Field label used in the per-field adaptation comparison panel above the geoscope value"
     },
     "problemSavedToast": "Your changes have been saved",
     "@problemSavedToast": {
@@ -395,13 +395,13 @@
             }
         }
     },
-    "notificationProblemForkedTitle": "Your problem was forked",
-    "@notificationProblemForkedTitle": {
-        "description": "Title of a notification when someone forks the user's problem"
+    "notificationProblemAdaptedTitle": "Your problem was adapted",
+    "@notificationProblemAdaptedTitle": {
+        "description": "Title of a notification when someone adapts the user's problem"
     },
-    "notificationProblemForkedBody": "{actorName} created a fork of your problem",
-    "@notificationProblemForkedBody": {
-        "description": "Body of a notification when someone forks the user's problem",
+    "notificationProblemAdaptedBody": "{actorName} adapted your problem",
+    "@notificationProblemAdaptedBody": {
+        "description": "Body of a notification when someone adapts the user's problem",
         "placeholders": {
             "actorName": {
                 "type": "String"
@@ -455,12 +455,12 @@
     "@notificationProblemRevisedBody": {
         "description": "Body of a notification sent to voters when a problem they voted on has a new revision"
     },
-    "notificationForkAdoptedTitle": "Your fork was adopted",
-    "@notificationForkAdoptedTitle": {
-        "description": "Title of a notification sent to a fork owner when the original problem's owner incorporates their contribution"
+    "notificationAdaptationIncorporatedTitle": "Your adaptation was incorporated",
+    "@notificationAdaptationIncorporatedTitle": {
+        "description": "Title of a notification sent to an adaptation's owner when the original problem's owner incorporates their contribution"
     },
-    "notificationForkAdoptedBody": "Your contribution was incorporated into the original problem",
-    "@notificationForkAdoptedBody": {
-        "description": "Body of a notification sent to a fork owner when the original problem's owner incorporates their contribution"
+    "notificationAdaptationIncorporatedBody": "Your contribution was incorporated into the original problem",
+    "@notificationAdaptationIncorporatedBody": {
+        "description": "Body of a notification sent to an adaptation's owner when the original problem's owner incorporates their contribution"
     }
 }

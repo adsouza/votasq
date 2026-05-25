@@ -159,7 +159,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   Future<void> _fork(Problem problem, String ownerId) async {
     final repo = context.read<FirestoreRepository>();
     final router = GoRouter.of(context);
-    final errorMessage = context.l10n.forkProblemError;
+    final errorMessage = context.l10n.adaptProblemError;
     try {
       final fork = await repo.forkProblem(
         sourceProblemId: problem.id,
@@ -290,7 +290,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       child: TextButton.icon(
         onPressed: () => context.push('/problems/$sourceId'),
         icon: const Icon(Icons.call_merge, size: 16),
-        label: Text(context.l10n.forkedFromOriginalLink),
+        label: Text(context.l10n.adaptedFromOriginalLink),
       ),
     );
   }
@@ -309,7 +309,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       padding: const EdgeInsets.only(top: 16),
       child: ExpansionTile(
         title: Text(
-          l10n.forksHeading(forks.length),
+          l10n.adaptationsHeading(forks.length),
           style: theme.textTheme.titleMedium,
         ),
         initiallyExpanded: true,
@@ -880,7 +880,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
             actions: [
               if (canFork)
                 IconButton(
-                  tooltip: l10n.forkProblemTooltip,
+                  tooltip: l10n.adaptProblemTooltip,
                   icon: const Icon(Icons.call_split),
                   onPressed: () => _fork(problem, userId),
                 ),
@@ -1038,8 +1038,8 @@ class _ForkRowState extends State<_ForkRow> {
           trailing: showCompareIcon
               ? IconButton(
                   tooltip: panelOpen
-                      ? l10n.hideForkCompareTooltip
-                      : l10n.compareForkTooltip,
+                      ? l10n.hideAdaptationCompareTooltip
+                      : l10n.compareAdaptationTooltip,
                   icon: Icon(
                     panelOpen ? Icons.expand_less : Icons.compare_arrows,
                   ),
@@ -1121,7 +1121,7 @@ class _ForkFieldDiffRow extends StatelessWidget {
           const SizedBox(width: 8),
           TextButton(
             onPressed: () => onUse(diff.apply(), forkId),
-            child: Text(l10n.useForkFieldButton),
+            child: Text(l10n.useAdaptationFieldButton),
           ),
         ],
       ),
