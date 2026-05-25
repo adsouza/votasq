@@ -96,7 +96,9 @@ after model changes (`melos gen`).
 ## Server
 
 The server is a [Dart Frog](https://dartfrog.vgv.dev) application that exposes a
-REST API and serves the Flutter web client as static files.
+REST API at `/api/**`. The Flutter web client is served separately by Firebase
+Hosting; the Hosting site rewrites `/api/**` back to this server so the client
+sees a single same-origin endpoint. See *Build & Deployment* below.
 
 ### Request lifecycle
 
@@ -125,7 +127,6 @@ Dart Frog maps the filesystem to routes automatically:
 
 | File                                            | Endpoint                                                    |
 |-------------------------------------------------|-------------------------------------------------------------|
-| `routes/index.dart`                             | GET / — serves public/index.html (Flutter web build)        |
 | `routes/problems/index.dart`                    | GET /problems — paginated list; POST /problems — create     |
 | `routes/problems/[id]/index.dart`               | GET /problems/:id — read; PUT /problems/:id — update        |
 | `routes/problems/[id]/versions/index.dart`      | GET /problems/:id/versions — version history                |
@@ -136,9 +137,10 @@ Each file exports an `onRequest` function that switches on HTTP method.
 
 ### Middleware & dependency injection
 
-`routes/_middleware.dart` provides a lazily-initialized `Future<Db>` to all
-route handlers via Dart Frog's `provider<T>()`. The `Db` instance is created
-once on first request and reused for the lifetime of the server process.
+`routes/api/_middleware.dart` provides lazily-initialized `Future<Db>` and
+`Future<Translator>` to all `/api/**` route handlers via Dart Frog's
+`provider<T>()`. The `Db` and `Translator` instances are created once on
+first request and reused for the lifetime of the server process.
 
 ### Database layer (`lib/src/db.dart`)
 
@@ -369,7 +371,9 @@ Three entry points configure the app for different environments:
 
 All call `bootstrap()` which sets up BLoC observer and error logging.
 `ApiService` picks its base URL at runtime: `localhost:8080` in debug mode,
-the Cloud Run URL in release builds.
+the Cloud Run URL in native release builds (iOS / Android / macOS), and an
+empty string (i.e., relative URLs) in web release builds — which resolve to
+`<hosting-origin>/api/**` and get rewritten to Cloud Run by Firebase Hosting.
 
 ### Internationalization
 
@@ -404,51 +408,99 @@ _middleware.dart` against Firebase's JWKS.
 
 ### Docker build (production)
 
-The Dockerfile produces a minimal container that serves both the API and the
-Flutter web client from a single binary.
+The Dockerfile produces a minimal API-only container. Flutter web is built
+and deployed independently by a separate GitHub Actions pipeline (see
+*Deploy pipelines* below).
 
 ```mermaid
 graph LR
-    subgraph "Stage 1: flutter-build"
-        A1[Flutter SDK] --> A2["flutter build web --release"]
-    end
-
-    subgraph "Stage 2: build"
+    subgraph "Stage 1: build"
         B1[Dart SDK] --> B2["dart_frog build"]
         B2 --> B3["dart compile exe"]
-        A2 -.->|"COPY web output to<br/>server/public/"| B2
     end
 
-    subgraph "Stage 3: scratch"
-        C1["Native binary + web assets"]
+    subgraph "Stage 2: scratch"
+        C1["Native binary + runtime libs only"]
     end
 
     B3 --> C1
 ```
 
-1. **Stage 1** builds the Flutter web client (production flavor)
-2. **Stage 2** copies the web output into `apps/server/public/`, generates the
-   Dart Frog production code, and compiles it to a native executable
-3. **Stage 3** copies only the binary, web assets, and runtime libs into a
-   `scratch` image — the final image contains no SDK
-
-The server's `GET /` route serves `public/index.html`, so the web client is
-bundled directly into the server container.
+1. **Stage 1** copies `apps/server/`, `packages/`, and root pubspec files;
+   `sed`s the Flutter client and MLKit packages out of the workspace
+   (so `dart pub get` doesn't try to resolve Flutter SDK deps); runs
+   `dart_frog build`; compiles to a native executable
+2. **Stage 2** copies the binary + runtime libs into a `scratch` image —
+   the final image contains no SDK and no `public/` directory
 
 **Adding workspace members.** The build context copies the entire `packages/`
-tree, so a new `packages/<name>/` entry needs no Dockerfile change. A new
-`apps/<name>/` entry does: each stage explicitly `COPY`s only the `apps/*`
-it needs and `sed`s the others out of the root `pubspec.yaml`'s `workspace:`
-list, since the workspace constraint solver requires every listed member to
-exist on disk. Additionally, any new package that depends on the Flutter SDK
-(like the vendored MLKit plugins) must be `sed`-removed from the workspace
-in Stage 2, which runs in a Dart-only image.
+tree, so a new `packages/<name>/` entry needs no Dockerfile change *unless*
+the new package depends on the Flutter SDK, in which case it must be
+`sed`-removed from the workspace alongside the existing `apps/client/` /
+`google_mlkit_*` exclusions (the build stage runs in a Dart-only image).
+A new `apps/<name>/` entry needs an explicit `COPY` if it should be in the
+build context; otherwise it can be left out and `sed` will skip it.
 
-### Cloud Run deployment
+### Deploy pipelines
 
-`melos deploy:server` runs `gcloud run deploy` from the repo root,
-which triggers Cloud Build to execute the Dockerfile and
-deploy the resulting container to Cloud Run in `us-central1`.
+Two independent pipelines, one per architectural concern. Both fire from
+pushes to `main` and use **path filters** so each only runs when its inputs
+change.
+
+```mermaid
+graph TD
+    subgraph "API: Cloud Build trigger → Cloud Run"
+        A1["push to main"]
+        A1 -->|"paths: apps/server/**, packages/**,<br/>Dockerfile, cloudbuild.yaml,<br/>pubspec.yaml, pubspec.lock"| A2["Cloud Build (Kaniko)"]
+        A2 --> A3["Push image to<br/>Artifact Registry"]
+        A3 --> A4["gcloud run services update votasq"]
+    end
+
+    subgraph "Web: GitHub Actions → Firebase Hosting"
+        W1["push to main"]
+        W1 -->|"paths: apps/client/**, packages/**,<br/>firebase.json, .firebaserc,<br/>workflow file itself"| W2["actions/checkout +<br/>subosito/flutter-action"]
+        W2 --> W3["flutter build web --release"]
+        W3 --> W4["FirebaseExtended/<br/>action-hosting-deploy"]
+    end
+```
+
+**API pipeline.** The Cloud Build trigger
+`rmgpgab-votasq-us-central1-adsouza-votasq--mavwk` (in `gcloud builds
+triggers describe`) reads `cloudbuild.yaml` from the repo, builds the
+Dockerfile via Kaniko with per-layer registry cache
+(`--cache=true --cache-ttl=24h`), pushes to
+`us-central1-docker.pkg.dev/votasq/cloud-run-source-deploy/votasq/votasq:<sha>`,
+and deploys the new revision to the `votasq` Cloud Run service in
+`us-central1`. `melos deploy:server` is a manual fallback for the same
+endpoint, useful when the trigger is down or for testing uncommitted code.
+
+**Web pipeline.** `.github/workflows/firebase-hosting-merge.yml` runs
+`flutter build web --release --target lib/main_production.dart
+--dart-define=SERVER_URL=` (empty `SERVER_URL` → relative API URLs → same-
+origin via the Hosting rewrite) and deploys the build to the `votasqueue`
+Firebase Hosting site via a least-privileged
+`Firebase Hosting Admin` service account (key stored in the GitHub repo
+secret `FIREBASE_SERVICE_ACCOUNT_VOTASQ`). PRs trigger a sibling workflow
+that deploys to an auto-expiring preview channel.
+
+### Domains & traffic routing
+
+The web app is served from two URLs:
+
+- **`votasqueue.web.app`** — the project's Firebase Hosting site URL.
+  Always available. Auto-provisioned cert. HSTS-preloaded by the `.web.app`
+  zone, so browsers never accept HTTP traffic here.
+- **`votasq.quikchange.net`** — custom domain. DNS is a CNAME to
+  `votasqueue.web.app`; Firebase Hosting issued a Google Trust Services
+  managed cert after the domain was added in Console.
+
+Both URLs serve identical content from Firebase Hosting's global CDN.
+Requests under `/api/**` are rewritten (per the `hosting.rewrites` block in
+root `firebase.json`) to the `votasq` Cloud Run service, so client code can
+make plain relative `/api/...` calls without any cross-origin concerns.
+
+Hitting Cloud Run directly (`https://votasq-269624680910.us-central1.run.app/`)
+returns 404 for non-`/api/` paths — Cloud Run is exclusively an API server.
 
 ### CI/CD
 
@@ -460,6 +512,14 @@ graph TD
         CI3 --> CI4[Format check]
         CI4 --> CI5[Analyze]
         CI5 --> CI6[Test with coverage]
+    end
+
+    subgraph "Web deploy (firebase-hosting-merge.yml)"
+        WD1["paths-filtered: apps/client/**,<br/>packages/**, firebase config"] --> WD2[flutter-action] --> WD3[flutter build web] --> WD4[firebase deploy --only hosting:live]
+    end
+
+    subgraph "Web PR previews (firebase-hosting-pull-request.yml)"
+        PR1[same paths filter] --> PR2[same build] --> PR3[deploy to auto-channel]
     end
 
     subgraph "Release (release.yaml) — v* tags"
@@ -474,3 +534,8 @@ graph TD
 A separate `license_check.yaml` workflow validates that all dependencies use
 allowed licenses (MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0) whenever
 `pubspec.yaml` files change.
+
+The release workflow (`release.yaml`) is **independent** of the routine
+deploy pipelines above — it builds and publishes mobile + desktop artifacts
+on `v*` tag pushes, not on every commit. The web tarball it produces is for
+ad-hoc distribution; routine web deploys go through the Hosting workflow.
