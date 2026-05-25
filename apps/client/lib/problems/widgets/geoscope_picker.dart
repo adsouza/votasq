@@ -139,57 +139,142 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    // The filter is only meaningful at the top of the hierarchy. Drilling into
-    // a superstate or state disables the field; backing out re-enables it.
-    final filterEnabled =
-        _selectedSuperstate == null && _selectedCountry == null;
-    return Padding(
-      // Keep the sheet's content above the on-screen keyboard while typing.
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SafeArea(
-        child: Column(
+    return BlocConsumer<GeoscopeCubit, GeoscopeState>(
+      listenWhen: (prev, curr) => prev.pendingToast != curr.pendingToast,
+      listener: (context, state) {
+        final toast = state.pendingToast;
+        if (toast == null) return;
+        final message = switch (toast) {
+          GeoscopeToast.denied => l10n.geoscopeLocationDenied,
+          GeoscopeToast.unavailable => l10n.geoscopeLocationUnavailable,
+        };
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        context.read<GeoscopeCubit>().clearPendingToast();
+      },
+      buildWhen: (prev, curr) =>
+          prev.locationStatus != curr.locationStatus ||
+          prev.locationSuggestion != curr.locationSuggestion ||
+          prev.locationDenied != curr.locationDenied ||
+          prev.selectedGeoscope != curr.selectedGeoscope,
+      builder: (context, state) {
+        // The filter is only meaningful at the top of the hierarchy.
+        // Drilling into a superstate or state disables the field; backing
+        // out re-enables it.
+        final filterEnabled =
+            _selectedSuperstate == null && _selectedCountry == null;
+        return Padding(
+          // Keep the sheet's content above the on-screen keyboard while
+          // typing.
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Text(
+                    l10n.geoscopePickerHeading,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _filterController,
+                    enabled: filterEnabled,
+                    autocorrect: false,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: l10n.geoscopeFilterHint,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _query.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: _filterController.clear,
+                            ),
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                if (!state.locationDenied) _buildLocationRow(context, state),
+                Flexible(
+                  child: _query.isEmpty
+                      ? _buildHierarchical(context)
+                      : _buildFiltered(context, _query.toLowerCase()),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLocationRow(BuildContext context, GeoscopeState state) {
+    final l10n = context.l10n;
+    final cubit = context.read<GeoscopeCubit>();
+
+    if (state.locationSuggestion != null) {
+      final suggestion = state.locationSuggestion!;
+      final allGeo = state.availableGeoscopes;
+      final match = allGeo.where((g) => g.id == suggestion.id).firstOrNull;
+      final label = match?.label ?? suggestion.id;
+      return ListTile(
+        leading: const Icon(Icons.my_location),
+        title: Text(label),
+        subtitle: Text(
+          l10n.geoscopeSuggestionDistance(suggestion.distanceKm.round()),
+        ),
+        trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Text(
-                l10n.geoscopePickerHeading,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
+            TextButton(
+              onPressed: () async {
+                await cubit.acceptLocationSuggestion();
+                if (context.mounted) Navigator.of(context).pop();
+              },
+              child: const Text('Use'),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                controller: _filterController,
-                enabled: filterEnabled,
-                autocorrect: false,
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  hintText: l10n.geoscopeFilterHint,
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _query.isEmpty
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: _filterController.clear,
-                        ),
-                  border: const OutlineInputBorder(),
-                  isDense: true,
-                ),
-              ),
-            ),
-            Flexible(
-              child: _query.isEmpty
-                  ? _buildHierarchical(context)
-                  : _buildFiltered(context, _query.toLowerCase()),
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: cubit.dismissLocationSuggestion,
             ),
           ],
         ),
-      ),
+      );
+    }
+
+    final isFetching = state.locationStatus == GeoscopeLocationStatus.fetching;
+    return ListTile(
+      leading: isFetching
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.my_location),
+      title: Text(l10n.geoscopeUseMyLocation),
+      onTap: isFetching
+          ? null
+          : () async {
+              final before = cubit.state.selectedGeoscope;
+              await cubit.selectNearestMetroFromLocation();
+              final after = cubit.state.selectedGeoscope;
+              if (before != after && context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
     );
   }
 
@@ -240,7 +325,8 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
         .toList();
 
     // Build States section.
-    List<({String id, String label, int population})> stateItems;
+    List<({String id, String label, int population, double? lat, double? lng})>
+    stateItems;
     if (_selectedSuperstate != null) {
       final prefix = '$_selectedSuperstate/';
       stateItems = allGeo
@@ -262,6 +348,8 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
             id: firstSeg,
             label: labelMap[firstSeg] ?? firstSeg,
             population: g.population,
+            lat: null,
+            lng: null,
           ));
         }
       }
@@ -270,7 +358,8 @@ class _GeoscopePickerSheetState extends State<_GeoscopePickerSheet> {
     // Build Metro areas section. When no superstate or state is selected,
     // the unfiltered list is enormous, so restrict to megacities. Drilling
     // into a region removes the threshold.
-    List<({String id, String label, int population})> metroItems;
+    List<({String id, String label, int population, double? lat, double? lng})>
+    metroItems;
     if (_selectedCountry != null) {
       final prefix = '$_selectedCountry/';
       metroItems = allGeo.where((g) => g.id.startsWith(prefix)).toList();

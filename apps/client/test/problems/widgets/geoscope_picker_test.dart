@@ -19,13 +19,29 @@ void main() {
   });
 
   Widget buildSubject({
-    List<({String id, String label, int population})> geoscopes = const [],
+    List<
+          ({
+            String id,
+            String label,
+            int population,
+            double? lat,
+            double? lng,
+          })
+        >
+        geoscopes =
+        const [],
     String selectedGeoscope = '/',
+    GeoscopeLocationStatus locationStatus = GeoscopeLocationStatus.idle,
+    ({String id, double distanceKm})? locationSuggestion,
+    bool locationDenied = false,
   }) {
     when(() => geoscopeCubit.state).thenReturn(
       GeoscopeState(
         availableGeoscopes: geoscopes,
         selectedGeoscope: selectedGeoscope,
+        locationStatus: locationStatus,
+        locationSuggestion: locationSuggestion,
+        locationDenied: locationDenied,
       ),
     );
     return BlocProvider<GeoscopeCubit>.value(
@@ -61,9 +77,27 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'in', label: 'India', population: 1400000000),
-              (id: 'eu', label: 'European Union', population: 450000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'in',
+                label: 'India',
+                population: 1400000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'eu',
+                label: 'European Union',
+                population: 450000000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -96,8 +130,20 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -119,7 +165,13 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us',
           ),
@@ -138,9 +190,27 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
-              (id: 'us/ny', label: 'New York', population: 19000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ny',
+                label: 'New York',
+                population: 19000000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us',
           ),
@@ -159,11 +229,29 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
               // Megacity — should appear at top level.
-              (id: 'us/ny/nyc', label: 'New York City', population: 19000000),
+              (
+                id: 'us/ny/nyc',
+                label: 'New York City',
+                population: 19000000,
+                lat: null,
+                lng: null,
+              ),
               // Below threshold — should be hidden at top level.
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -182,10 +270,28 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'ca', label: 'Canada', population: 38000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'ca',
+                label: 'Canada',
+                population: 38000000,
+                lat: null,
+                lng: null,
+              ),
               // Sub-megacity that would be hidden without a drill-in.
-              (id: 'ca/toronto', label: 'Toronto', population: 6700000),
+              (
+                id: 'ca/toronto',
+                label: 'Toronto',
+                population: 6700000,
+                lat: null,
+                lng: null,
+              ),
             ],
             // Mimics the cubit's locale resolution for en-CA: an exact-match
             // 1-part id that isn't a superstate.
@@ -209,9 +315,21 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
               // Below 10M — hidden at top level, but visible under "us".
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us',
           ),
@@ -247,11 +365,29 @@ void main() {
           buildSubject(
             geoscopes: [
               // Superstate.
-              (id: 'us', label: 'United States', population: 330000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
               // Sub-megacity metro that would normally be hidden at top level.
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
               // A metro that doesn't match the query.
-              (id: 'us/ny/nyc', label: 'New York City', population: 19000000),
+              (
+                id: 'us/ny/nyc',
+                label: 'New York City',
+                population: 19000000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -278,8 +414,20 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'in', label: 'India', population: 1400000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'in',
+                label: 'India',
+                population: 1400000000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -304,8 +452,20 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
             ],
             // Opens the picker already drilled into the "us" superstate.
             selectedGeoscope: 'us',
@@ -339,6 +499,8 @@ void main() {
                 id: 'mx/mexico-city',
                 label: 'Mexico City',
                 population: 22000000,
+                lat: null,
+                lng: null,
               ),
             ],
             selectedGeoscope: 'mx/mexico-city',
@@ -365,8 +527,20 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -390,8 +564,20 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -418,10 +604,28 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
               // Sub-megacity metro that wouldn't show without drill-in.
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
           ),
         );
@@ -448,9 +652,27 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us/ca',
           ),
@@ -474,8 +696,20 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us',
           ),
@@ -497,9 +731,27 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us/ca',
           ),
@@ -526,9 +778,27 @@ void main() {
         await tester.pumpWidget(
           buildSubject(
             geoscopes: [
-              (id: 'us', label: 'United States', population: 330000000),
-              (id: 'us/ca', label: 'California', population: 39000000),
-              (id: 'us/ca/sfbay', label: 'SF Bay Area', population: 7700000),
+              (
+                id: 'us',
+                label: 'United States',
+                population: 330000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca',
+                label: 'California',
+                population: 39000000,
+                lat: null,
+                lng: null,
+              ),
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: null,
+                lng: null,
+              ),
             ],
             selectedGeoscope: 'us/ca',
           ),
@@ -552,6 +822,109 @@ void main() {
 
         // Collapsed again.
         expect(find.text('United States'), findsNothing);
+      },
+    );
+  });
+
+  group('Use my location row', () {
+    testWidgets('shows "Use my location" row by default', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.tap(find.text('Open Picker'));
+      await tester.pumpAndSettle();
+      expect(find.text('Use my location'), findsOneWidget);
+    });
+
+    testWidgets('hides the row when locationDenied is true', (tester) async {
+      await tester.pumpWidget(buildSubject(locationDenied: true));
+      await tester.tap(find.text('Open Picker'));
+      await tester.pumpAndSettle();
+      expect(find.text('Use my location'), findsNothing);
+    });
+
+    testWidgets(
+      'shows spinner when locationStatus is fetching',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(locationStatus: GeoscopeLocationStatus.fetching),
+        );
+        await tester.tap(find.text('Open Picker'));
+        // The spinner animates indefinitely, so pumpAndSettle would time
+        // out — pump a single frame past the sheet's open transition.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'shows suggestion row with metro label and distance',
+      (tester) async {
+        when(() => geoscopeCubit.acceptLocationSuggestion()).thenAnswer(
+          (_) async {},
+        );
+        when(() => geoscopeCubit.dismissLocationSuggestion()).thenReturn(null);
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: 37.7793,
+                lng: -122.4193,
+              ),
+            ],
+            locationSuggestion: (id: 'us/ca/sfbay', distanceKm: 183.4),
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+        expect(find.text('SF Bay Area'), findsAtLeastNWidgets(1));
+        expect(find.textContaining('183 km'), findsOneWidget);
+        expect(find.text('Use'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping "Use my location" calls selectNearestMetroFromLocation',
+      (tester) async {
+        when(() => geoscopeCubit.selectNearestMetroFromLocation()).thenAnswer(
+          (_) async {},
+        );
+        await tester.pumpWidget(buildSubject());
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Use my location'));
+        await tester.pumpAndSettle();
+        verify(() => geoscopeCubit.selectNearestMetroFromLocation()).called(1);
+      },
+    );
+
+    testWidgets(
+      'tapping Use on the suggestion calls acceptLocationSuggestion',
+      (tester) async {
+        when(() => geoscopeCubit.acceptLocationSuggestion()).thenAnswer(
+          (_) async {},
+        );
+        await tester.pumpWidget(
+          buildSubject(
+            geoscopes: [
+              (
+                id: 'us/ca/sfbay',
+                label: 'SF Bay Area',
+                population: 7700000,
+                lat: 37.7793,
+                lng: -122.4193,
+              ),
+            ],
+            locationSuggestion: (id: 'us/ca/sfbay', distanceKm: 183.4),
+          ),
+        );
+        await tester.tap(find.text('Open Picker'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Use'));
+        await tester.pumpAndSettle();
+        verify(() => geoscopeCubit.acceptLocationSuggestion()).called(1);
       },
     );
   });
