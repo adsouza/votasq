@@ -64,9 +64,8 @@ class ProblemReadTile extends StatelessWidget {
                   TranslatedField(
                     problem.goal,
                     fieldSelector: (tp) => tp.goal,
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 13,
                     ),
                   ),
               ],
@@ -79,7 +78,7 @@ class ProblemReadTile extends StatelessWidget {
                 child: Chip(
                   label: Text(
                     problem.geoscope.split('/').last,
-                    style: const TextStyle(fontSize: 12),
+                    style: theme.textTheme.bodySmall,
                   ),
                   backgroundColor: theme.colorScheme.tertiaryContainer,
                   visualDensity: VisualDensity.compact,
@@ -100,7 +99,7 @@ class ProblemReadTile extends StatelessWidget {
                       ),
                       label: Text(
                         '${problem.votes}',
-                        style: const TextStyle(fontSize: 12),
+                        style: theme.textTheme.bodySmall,
                       ),
                       backgroundColor: theme.colorScheme.secondaryContainer,
                       visualDensity: VisualDensity.compact,
@@ -121,7 +120,7 @@ class ProblemReadTile extends StatelessWidget {
                   child: Chip(
                     label: Text(
                       '${problem.votes}',
-                      style: const TextStyle(fontSize: 12),
+                      style: theme.textTheme.bodySmall,
                     ),
                     backgroundColor: theme.colorScheme.secondaryContainer,
                     visualDensity: VisualDensity.compact,
