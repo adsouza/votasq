@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "مسئلہ اپ ڈیٹ ہو گیا",
     "notificationProblemRevisedBody": "جس مسئلے پر آپ نے ووٹ دیا تھا اس کا نیا ورژن ہے",
     "notificationAdaptationIncorporatedTitle": "آپ کی تطبیق شامل کر لی گئی",
-    "notificationAdaptationIncorporatedBody": "آپ کا تعاون اصل مسئلے میں شامل کیا گیا"
+    "notificationAdaptationIncorporatedBody": "آپ کا تعاون اصل مسئلے میں شامل کیا گیا",
+    "textSizeMenuItem": "متن کا سائز",
+    "textSizeDialogTitle": "متن کا سائز",
+    "textSizeOptionSmall": "چھوٹا",
+    "textSizeOptionDefault": "ڈیفالٹ",
+    "textSizeOptionLarge": "بڑا",
+    "textSizeOptionLarger": "زیادہ بڑا",
+    "textSizeOptionLargest": "سب سے بڑا"
 }

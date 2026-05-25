@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "問題が更新されました",
     "notificationProblemRevisedBody": "あなたが投票した問題に新しいバージョンがあります",
     "notificationAdaptationIncorporatedTitle": "あなたのアレンジが取り入れられました",
-    "notificationAdaptationIncorporatedBody": "あなたの貢献が元の問題に組み込まれました"
+    "notificationAdaptationIncorporatedBody": "あなたの貢献が元の問題に組み込まれました",
+    "textSizeMenuItem": "文字サイズ",
+    "textSizeDialogTitle": "文字サイズ",
+    "textSizeOptionSmall": "小",
+    "textSizeOptionDefault": "標準",
+    "textSizeOptionLarge": "大",
+    "textSizeOptionLarger": "特大",
+    "textSizeOptionLargest": "最大"
 }

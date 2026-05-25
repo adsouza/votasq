@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "ਸਮੱਸਿਆ ਅੱਪਡੇਟ ਹੋਈ",
     "notificationProblemRevisedBody": "ਜਿਸ ਸਮੱਸਿਆ 'ਤੇ ਤੁਸੀਂ ਵੋਟ ਪਾਈ ਸੀ ਉਸਦਾ ਨਵਾਂ ਸੰਸਕਰਣ ਹੈ",
     "notificationAdaptationIncorporatedTitle": "ਤੁਹਾਡੇ ਅਨੁਕੂਲਨ ਨੂੰ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ",
-    "notificationAdaptationIncorporatedBody": "ਤੁਹਾਡਾ ਯੋਗਦਾਨ ਮੂਲ ਸਮੱਸਿਆ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"
+    "notificationAdaptationIncorporatedBody": "ਤੁਹਾਡਾ ਯੋਗਦਾਨ ਮੂਲ ਸਮੱਸਿਆ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ",
+    "textSizeMenuItem": "ਟੈਕਸਟ ਦਾ ਆਕਾਰ",
+    "textSizeDialogTitle": "ਟੈਕਸਟ ਦਾ ਆਕਾਰ",
+    "textSizeOptionSmall": "ਛੋਟਾ",
+    "textSizeOptionDefault": "ਡਿਫਾਲਟ",
+    "textSizeOptionLarge": "ਵੱਡਾ",
+    "textSizeOptionLarger": "ਜ਼ਿਆਦਾ ਵੱਡਾ",
+    "textSizeOptionLargest": "ਸਭ ਤੋਂ ਵੱਡਾ"
 }

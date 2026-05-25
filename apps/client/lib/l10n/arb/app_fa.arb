@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "مشکل به‌روزرسانی شد",
     "notificationProblemRevisedBody": "مشکلی که به آن رأی دادید نسخه جدیدی دارد",
     "notificationAdaptationIncorporatedTitle": "تطبیق شما در نسخه‌ی اصلی گنجانده شد",
-    "notificationAdaptationIncorporatedBody": "مشارکت شما در مشکل اصلی گنجانده شد"
+    "notificationAdaptationIncorporatedBody": "مشارکت شما در مشکل اصلی گنجانده شد",
+    "textSizeMenuItem": "اندازه متن",
+    "textSizeDialogTitle": "اندازه متن",
+    "textSizeOptionSmall": "کوچک",
+    "textSizeOptionDefault": "پیش‌فرض",
+    "textSizeOptionLarge": "بزرگ",
+    "textSizeOptionLarger": "بزرگ‌تر",
+    "textSizeOptionLargest": "بزرگ‌ترین"
 }

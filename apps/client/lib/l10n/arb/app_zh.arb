@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "问题已更新",
     "notificationProblemRevisedBody": "您投票的问题有了新版本",
     "notificationAdaptationIncorporatedTitle": "您的改编已被采纳",
-    "notificationAdaptationIncorporatedBody": "您的贡献已被纳入原始问题"
+    "notificationAdaptationIncorporatedBody": "您的贡献已被纳入原始问题",
+    "textSizeMenuItem": "字号",
+    "textSizeDialogTitle": "字号",
+    "textSizeOptionSmall": "小",
+    "textSizeOptionDefault": "默认",
+    "textSizeOptionLarge": "大",
+    "textSizeOptionLarger": "更大",
+    "textSizeOptionLargest": "最大"
 }

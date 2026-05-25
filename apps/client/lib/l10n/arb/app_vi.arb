@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Vấn đề đã được cập nhật",
     "notificationProblemRevisedBody": "Một vấn đề bạn đã bình chọn có phiên bản mới",
     "notificationAdaptationIncorporatedTitle": "Phiên bản của bạn đã được tích hợp",
-    "notificationAdaptationIncorporatedBody": "Đóng góp của bạn đã được tích hợp vào vấn đề gốc"
+    "notificationAdaptationIncorporatedBody": "Đóng góp của bạn đã được tích hợp vào vấn đề gốc",
+    "textSizeMenuItem": "Cỡ chữ",
+    "textSizeDialogTitle": "Cỡ chữ",
+    "textSizeOptionSmall": "Nhỏ",
+    "textSizeOptionDefault": "Mặc định",
+    "textSizeOptionLarge": "Lớn",
+    "textSizeOptionLarger": "Lớn hơn",
+    "textSizeOptionLargest": "Lớn nhất"
 }

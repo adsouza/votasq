@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Problema actualizado",
     "notificationProblemRevisedBody": "Un problema por el que votaste tiene una nueva versión",
     "notificationAdaptationIncorporatedTitle": "Tu adaptación fue incorporada",
-    "notificationAdaptationIncorporatedBody": "Tu contribución se incorporó al problema original"
+    "notificationAdaptationIncorporatedBody": "Tu contribución se incorporó al problema original",
+    "textSizeMenuItem": "Tamaño del texto",
+    "textSizeDialogTitle": "Tamaño del texto",
+    "textSizeOptionSmall": "Pequeño",
+    "textSizeOptionDefault": "Predeterminado",
+    "textSizeOptionLarge": "Grande",
+    "textSizeOptionLarger": "Más grande",
+    "textSizeOptionLargest": "El más grande"
 }

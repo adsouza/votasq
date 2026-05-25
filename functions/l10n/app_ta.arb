@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "பிரச்சினை புதுப்பிக்கப்பட்டது",
     "notificationProblemRevisedBody": "நீங்கள் வாக்களித்த பிரச்சினையில் புதிய பதிப்பு உள்ளது",
     "notificationAdaptationIncorporatedTitle": "உங்கள் தழுவல் சேர்க்கப்பட்டது",
-    "notificationAdaptationIncorporatedBody": "உங்கள் பங்களிப்பு அசல் பிரச்சினையில் சேர்க்கப்பட்டது"
+    "notificationAdaptationIncorporatedBody": "உங்கள் பங்களிப்பு அசல் பிரச்சினையில் சேர்க்கப்பட்டது",
+    "textSizeMenuItem": "உரை அளவு",
+    "textSizeDialogTitle": "உரை அளவு",
+    "textSizeOptionSmall": "சிறிய",
+    "textSizeOptionDefault": "இயல்புநிலை",
+    "textSizeOptionLarge": "பெரிய",
+    "textSizeOptionLarger": "அதிக பெரிய",
+    "textSizeOptionLargest": "மிகப் பெரிய"
 }

@@ -13,6 +13,7 @@ import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/notification_registration_service.dart';
 import 'package:client/services/translation_repository.dart';
 import 'package:client/services/visibility_listener.dart';
+import 'package:client/settings/settings.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -116,6 +117,7 @@ class _AppState extends State<App> {
             ),
           ),
           BlocProvider(create: (_) => AutoTranslateCubit()),
+          BlocProvider(create: (_) => TextScaleCubit()),
           BlocProvider(
             create: (context) {
               final cubit = GeoscopeCubit(
@@ -154,6 +156,22 @@ class _AppState extends State<App> {
                       AppLocalizations.localizationsDelegates,
                   supportedLocales: AppLocalizations.supportedLocales,
                   routerConfig: _router,
+                  // Apply the user's preferred text-scale by overriding the
+                  // MediaQuery `MaterialApp` installs for its descendants.
+                  // Wrapping *above* `MaterialApp` would not work — it
+                  // builds its own MediaQuery from the View.
+                  builder: (context, child) {
+                    return BlocBuilder<TextScaleCubit, double>(
+                      builder: (context, scale) {
+                        return MediaQuery(
+                          data: MediaQuery.of(context).copyWith(
+                            textScaler: TextScaler.linear(scale),
+                          ),
+                          child: child ?? const SizedBox.shrink(),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),

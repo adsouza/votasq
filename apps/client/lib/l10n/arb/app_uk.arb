@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Проблему оновлено",
     "notificationProblemRevisedBody": "Проблема, за яку ви голосували, має нову версію",
     "notificationAdaptationIncorporatedTitle": "Вашу адаптацію включено",
-    "notificationAdaptationIncorporatedBody": "Ваш внесок було включено до початкової проблеми"
+    "notificationAdaptationIncorporatedBody": "Ваш внесок було включено до початкової проблеми",
+    "textSizeMenuItem": "Розмір тексту",
+    "textSizeDialogTitle": "Розмір тексту",
+    "textSizeOptionSmall": "Малий",
+    "textSizeOptionDefault": "За замовчуванням",
+    "textSizeOptionLarge": "Великий",
+    "textSizeOptionLarger": "Більший",
+    "textSizeOptionLargest": "Найбільший"
 }

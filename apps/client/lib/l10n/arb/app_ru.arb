@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Проблема обновлена",
     "notificationProblemRevisedBody": "У проблемы, за которую вы проголосовали, новая версия",
     "notificationAdaptationIncorporatedTitle": "Ваша адаптация была включена",
-    "notificationAdaptationIncorporatedBody": "Ваш вклад был включён в исходную проблему"
+    "notificationAdaptationIncorporatedBody": "Ваш вклад был включён в исходную проблему",
+    "textSizeMenuItem": "Размер текста",
+    "textSizeDialogTitle": "Размер текста",
+    "textSizeOptionSmall": "Маленький",
+    "textSizeOptionDefault": "По умолчанию",
+    "textSizeOptionLarge": "Большой",
+    "textSizeOptionLarger": "Больше",
+    "textSizeOptionLargest": "Самый большой"
 }

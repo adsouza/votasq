@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "समस्या अद्यतनित",
     "notificationProblemRevisedBody": "तुम्ही मत दिलेल्या समस्येला नवीन आवृत्ती आहे",
     "notificationAdaptationIncorporatedTitle": "तुमचे अनुकूलन समाविष्ट केले गेले",
-    "notificationAdaptationIncorporatedBody": "तुमचे योगदान मूळ समस्येत समाविष्ट केले"
+    "notificationAdaptationIncorporatedBody": "तुमचे योगदान मूळ समस्येत समाविष्ट केले",
+    "textSizeMenuItem": "मजकूराचा आकार",
+    "textSizeDialogTitle": "मजकूराचा आकार",
+    "textSizeOptionSmall": "लहान",
+    "textSizeOptionDefault": "डीफॉल्ट",
+    "textSizeOptionLarge": "मोठा",
+    "textSizeOptionLarger": "अधिक मोठा",
+    "textSizeOptionLargest": "सर्वात मोठा"
 }

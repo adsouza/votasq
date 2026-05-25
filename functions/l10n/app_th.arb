@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "อัปเดตปัญหาแล้ว",
     "notificationProblemRevisedBody": "ปัญหาที่คุณโหวตมีเวอร์ชันใหม่",
     "notificationAdaptationIncorporatedTitle": "การปรับของคุณถูกนำมาใช้",
-    "notificationAdaptationIncorporatedBody": "การมีส่วนร่วมของคุณถูกรวมเข้ากับปัญหาต้นฉบับ"
+    "notificationAdaptationIncorporatedBody": "การมีส่วนร่วมของคุณถูกรวมเข้ากับปัญหาต้นฉบับ",
+    "textSizeMenuItem": "ขนาดข้อความ",
+    "textSizeDialogTitle": "ขนาดข้อความ",
+    "textSizeOptionSmall": "เล็ก",
+    "textSizeOptionDefault": "ค่าเริ่มต้น",
+    "textSizeOptionLarge": "ใหญ่",
+    "textSizeOptionLarger": "ใหญ่กว่า",
+    "textSizeOptionLargest": "ใหญ่ที่สุด"
 }

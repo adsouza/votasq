@@ -17,6 +17,7 @@ import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository;
 import 'package:client/services/translation_repository.dart';
+import 'package:client/settings/settings.dart';
 import 'package:client/widgets/toast.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -227,6 +228,8 @@ class _ProblemsViewState extends State<ProblemsView> {
                 });
               } else if (value == 'toggle_auto_translate') {
                 unawaited(context.read<AutoTranslateCubit>().toggle());
+              } else if (value == 'text_size') {
+                unawaited(showTextSizeDialog(context));
               } else if (value == 'add_problem') {
                 context.go('/new');
               } else if (value == 'send_feedback') {
@@ -300,6 +303,14 @@ class _ProblemsViewState extends State<ProblemsView> {
                     leading: const Icon(Icons.location_on),
                     title: Text(l10n.geoscopeChangeMenuItem),
                     subtitle: Text(currentGeoscopeLabel),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'text_size',
+                  child: ListTile(
+                    leading: const Icon(Icons.format_size),
+                    title: Text(l10n.textSizeMenuItem),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),

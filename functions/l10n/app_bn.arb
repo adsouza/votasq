@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "সমস্যা আপডেট হয়েছে",
     "notificationProblemRevisedBody": "আপনি যে সমস্যায় ভোট দিয়েছিলেন তার একটি নতুন সংস্করণ আছে",
     "notificationAdaptationIncorporatedTitle": "আপনার অভিযোজন গৃহীত হয়েছে",
-    "notificationAdaptationIncorporatedBody": "আপনার অবদান মূল সমস্যায় অন্তর্ভুক্ত করা হয়েছে"
+    "notificationAdaptationIncorporatedBody": "আপনার অবদান মূল সমস্যায় অন্তর্ভুক্ত করা হয়েছে",
+    "textSizeMenuItem": "লেখার আকার",
+    "textSizeDialogTitle": "লেখার আকার",
+    "textSizeOptionSmall": "ছোট",
+    "textSizeOptionDefault": "ডিফল্ট",
+    "textSizeOptionLarge": "বড়",
+    "textSizeOptionLarger": "আরও বড়",
+    "textSizeOptionLargest": "সবচেয়ে বড়"
 }

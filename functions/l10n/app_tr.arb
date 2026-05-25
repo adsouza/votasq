@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Sorun güncellendi",
     "notificationProblemRevisedBody": "Oy verdiğiniz sorunun yeni bir sürümü var",
     "notificationAdaptationIncorporatedTitle": "Uyarlamanız dahil edildi",
-    "notificationAdaptationIncorporatedBody": "Katkınız orijinal soruna dahil edildi"
+    "notificationAdaptationIncorporatedBody": "Katkınız orijinal soruna dahil edildi",
+    "textSizeMenuItem": "Metin boyutu",
+    "textSizeDialogTitle": "Metin boyutu",
+    "textSizeOptionSmall": "Küçük",
+    "textSizeOptionDefault": "Varsayılan",
+    "textSizeOptionLarge": "Büyük",
+    "textSizeOptionLarger": "Daha büyük",
+    "textSizeOptionLargest": "En büyük"
 }

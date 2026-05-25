@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Problem aktualisiert",
     "notificationProblemRevisedBody": "Ein Problem, für das du abgestimmt hast, hat eine neue Version",
     "notificationAdaptationIncorporatedTitle": "Deine Anpassung wurde übernommen",
-    "notificationAdaptationIncorporatedBody": "Dein Beitrag wurde in das ursprüngliche Problem übernommen"
+    "notificationAdaptationIncorporatedBody": "Dein Beitrag wurde in das ursprüngliche Problem übernommen",
+    "textSizeMenuItem": "Textgröße",
+    "textSizeDialogTitle": "Textgröße",
+    "textSizeOptionSmall": "Klein",
+    "textSizeOptionDefault": "Standard",
+    "textSizeOptionLarge": "Groß",
+    "textSizeOptionLarger": "Größer",
+    "textSizeOptionLargest": "Am größten"
 }

@@ -503,5 +503,33 @@
     "notificationAdaptationIncorporatedBody": "Your contribution was incorporated into the original problem",
     "@notificationAdaptationIncorporatedBody": {
         "description": "Body of a notification sent to an adaptation's owner when the original problem's owner incorporates their contribution"
+    },
+    "textSizeMenuItem": "Text size",
+    "@textSizeMenuItem": {
+        "description": "Label for the 'Text size' entry in the AppBar popup menu."
+    },
+    "textSizeDialogTitle": "Text size",
+    "@textSizeDialogTitle": {
+        "description": "Title of the dialog where the user picks their preferred text size."
+    },
+    "textSizeOptionSmall": "Small",
+    "@textSizeOptionSmall": {
+        "description": "Smallest of the five text-size options in the dialog (0.85x)."
+    },
+    "textSizeOptionDefault": "Default",
+    "@textSizeOptionDefault": {
+        "description": "Default text-size option in the dialog (1.0x)."
+    },
+    "textSizeOptionLarge": "Large",
+    "@textSizeOptionLarge": {
+        "description": "Large text-size option in the dialog (1.15x)."
+    },
+    "textSizeOptionLarger": "Larger",
+    "@textSizeOptionLarger": {
+        "description": "Larger text-size option in the dialog (1.30x)."
+    },
+    "textSizeOptionLargest": "Largest",
+    "@textSizeOptionLargest": {
+        "description": "Largest of the five text-size options in the dialog (1.50x)."
     }
 }

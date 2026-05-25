@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "تم تحديث المشكلة",
     "notificationProblemRevisedBody": "هناك إصدار جديد لمشكلة صوّتت عليها",
     "notificationAdaptationIncorporatedTitle": "تم دمج تكييفك",
-    "notificationAdaptationIncorporatedBody": "تم دمج مساهمتك في المشكلة الأصلية"
+    "notificationAdaptationIncorporatedBody": "تم دمج مساهمتك في المشكلة الأصلية",
+    "textSizeMenuItem": "حجم الخط",
+    "textSizeDialogTitle": "حجم الخط",
+    "textSizeOptionSmall": "صغير",
+    "textSizeOptionDefault": "افتراضي",
+    "textSizeOptionLarge": "كبير",
+    "textSizeOptionLarger": "أكبر",
+    "textSizeOptionLargest": "الأكبر"
 }

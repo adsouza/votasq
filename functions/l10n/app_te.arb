@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "సమస్య నవీకరించబడింది",
     "notificationProblemRevisedBody": "మీరు ఓటు వేసిన సమస్యకు కొత్త వెర్షన్ ఉంది",
     "notificationAdaptationIncorporatedTitle": "మీ అనుసరణ చేర్చబడింది",
-    "notificationAdaptationIncorporatedBody": "మీ సహకారం అసలు సమస్యలో చేర్చబడింది"
+    "notificationAdaptationIncorporatedBody": "మీ సహకారం అసలు సమస్యలో చేర్చబడింది",
+    "textSizeMenuItem": "టెక్స్ట్ పరిమాణం",
+    "textSizeDialogTitle": "టెక్స్ట్ పరిమాణం",
+    "textSizeOptionSmall": "చిన్నది",
+    "textSizeOptionDefault": "డిఫాల్ట్",
+    "textSizeOptionLarge": "పెద్దది",
+    "textSizeOptionLarger": "మరింత పెద్దది",
+    "textSizeOptionLargest": "అతిపెద్దది"
 }

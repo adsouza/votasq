@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "문제 업데이트됨",
     "notificationProblemRevisedBody": "투표하신 문제에 새 버전이 있습니다",
     "notificationAdaptationIncorporatedTitle": "내 변형이 반영되었습니다",
-    "notificationAdaptationIncorporatedBody": "회원님의 기여가 원본 문제에 통합되었습니다"
+    "notificationAdaptationIncorporatedBody": "회원님의 기여가 원본 문제에 통합되었습니다",
+    "textSizeMenuItem": "글자 크기",
+    "textSizeDialogTitle": "글자 크기",
+    "textSizeOptionSmall": "작게",
+    "textSizeOptionDefault": "기본",
+    "textSizeOptionLarge": "크게",
+    "textSizeOptionLarger": "더 크게",
+    "textSizeOptionLargest": "가장 크게"
 }

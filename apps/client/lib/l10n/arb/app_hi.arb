@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "समस्या अपडेट हुई",
     "notificationProblemRevisedBody": "जिस समस्या पर आपने वोट किया था, उसका नया संस्करण है",
     "notificationAdaptationIncorporatedTitle": "आपका अनुकूलन शामिल किया गया",
-    "notificationAdaptationIncorporatedBody": "आपका योगदान मूल समस्या में शामिल किया गया"
+    "notificationAdaptationIncorporatedBody": "आपका योगदान मूल समस्या में शामिल किया गया",
+    "textSizeMenuItem": "टेक्स्ट का आकार",
+    "textSizeDialogTitle": "टेक्स्ट का आकार",
+    "textSizeOptionSmall": "छोटा",
+    "textSizeOptionDefault": "डिफ़ॉल्ट",
+    "textSizeOptionLarge": "बड़ा",
+    "textSizeOptionLarger": "अधिक बड़ा",
+    "textSizeOptionLargest": "सबसे बड़ा"
 }

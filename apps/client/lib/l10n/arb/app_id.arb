@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Masalah diperbarui",
     "notificationProblemRevisedBody": "Masalah yang Anda pilih memiliki versi baru",
     "notificationAdaptationIncorporatedTitle": "Adaptasi Anda telah dimasukkan",
-    "notificationAdaptationIncorporatedBody": "Kontribusi Anda dimasukkan ke dalam masalah asli"
+    "notificationAdaptationIncorporatedBody": "Kontribusi Anda dimasukkan ke dalam masalah asli",
+    "textSizeMenuItem": "Ukuran teks",
+    "textSizeDialogTitle": "Ukuran teks",
+    "textSizeOptionSmall": "Kecil",
+    "textSizeOptionDefault": "Default",
+    "textSizeOptionLarge": "Besar",
+    "textSizeOptionLarger": "Lebih besar",
+    "textSizeOptionLargest": "Terbesar"
 }

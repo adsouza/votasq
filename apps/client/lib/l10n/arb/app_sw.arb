@@ -118,5 +118,12 @@
     "notificationProblemRevisedTitle": "Tatizo limesasishwa",
     "notificationProblemRevisedBody": "Tatizo ulilopiga kura lina toleo jipya",
     "notificationAdaptationIncorporatedTitle": "Marekebisho yako yamejumuishwa",
-    "notificationAdaptationIncorporatedBody": "Mchango wako uliingizwa katika tatizo asili"
+    "notificationAdaptationIncorporatedBody": "Mchango wako uliingizwa katika tatizo asili",
+    "textSizeMenuItem": "Ukubwa wa maandishi",
+    "textSizeDialogTitle": "Ukubwa wa maandishi",
+    "textSizeOptionSmall": "Ndogo",
+    "textSizeOptionDefault": "Chaguo-msingi",
+    "textSizeOptionLarge": "Kubwa",
+    "textSizeOptionLarger": "Kubwa zaidi",
+    "textSizeOptionLargest": "Kubwa zaidi sana"
 }
