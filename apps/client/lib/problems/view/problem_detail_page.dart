@@ -301,6 +301,18 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     if (problem == null || forks == null || forks.isEmpty) {
       return const SizedBox.shrink();
     }
+    // A fork whose description, goal, and geoscope all match the parent
+    // contributes nothing the viewer can compare or adopt — same three
+    // fields _ForkRow._computeDiffs uses. Hide those so the list only
+    // surfaces meaningful adaptations.
+    final visibleForks = [
+      for (final f in forks)
+        if (f.description != problem.description ||
+            f.goal != problem.goal ||
+            f.geoscope != problem.geoscope)
+          f,
+    ];
+    if (visibleForks.isEmpty) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final userId = context.read<UserCubit>().state.userId;
@@ -309,7 +321,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
       padding: const EdgeInsets.only(top: 16),
       child: ExpansionTile(
         title: Text(
-          l10n.adaptationsHeading(forks.length),
+          l10n.adaptationsHeading(visibleForks.length),
           style: theme.textTheme.titleMedium,
         ),
         initiallyExpanded: true,
@@ -318,7 +330,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
         shape: const RoundedRectangleBorder(),
         collapsedShape: const RoundedRectangleBorder(),
         children: [
-          for (final fork in forks)
+          for (final fork in visibleForks)
             _ForkRow(
               current: problem,
               fork: fork,

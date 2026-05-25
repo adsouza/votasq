@@ -934,26 +934,43 @@ void main() {
     });
 
     testWidgets(
-      'compare icon hidden when fork matches current problem in all fields',
+      'hides forks section entirely when every fork is identical to parent',
       (tester) async {
-        // Owner viewing their own problem. The fork is identical in
-        // description/goal/geoscope, so there is nothing to compare and the
-        // compare icon must not render.
+        // Two forks, both with identical description/goal/geoscope to the
+        // parent. They contribute nothing the viewer can compare or adopt,
+        // so the whole section is suppressed.
         when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
         when(() => repo.getForksOfProblem(any())).thenAnswer(
-          (_) async => [_problem(id: 'fork-a')],
-        );
-        when(() => userCubit.state).thenReturn(
-          const UserState(
-            status: AuthStatus.authenticated,
-            userId: 'owner1',
-          ),
+          (_) async => [_problem(id: 'fork-a'), _problem(id: 'fork-b')],
         );
 
         await tester.pumpWidget(buildSubject());
         await tester.pumpAndSettle();
 
-        expect(find.byIcon(Icons.compare_arrows), findsNothing);
+        expect(find.byType(ExpansionTile), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'omits identical forks but keeps the section for differing ones',
+      (tester) async {
+        when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+        when(() => repo.getForksOfProblem(any())).thenAnswer(
+          (_) async => [
+            // Identical to parent — should not render.
+            _problem(id: 'fork-identical'),
+            // Differs by description — should render and be counted.
+            _problem(id: 'fork-diff', description: 'A different description'),
+          ],
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Count reflects only the visible fork; if the identical fork
+        // weren't filtered out the heading would read "Adaptations (2)".
+        expect(find.text('Adaptations (1)'), findsOneWidget);
+        expect(find.text('A different description'), findsOneWidget);
       },
     );
 
