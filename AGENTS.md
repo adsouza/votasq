@@ -123,6 +123,16 @@ Two macOS-specific footguns the web flavor doesn't have. Both surface the same w
 
 See `apps/client/macos/README.md` for the debug-token registration walkthrough.
 
+### macOS Debug builds use ad-hoc signing — Profile/Release still need a real Mac profile
+
+The three `Debug-*` configs in `apps/client/macos/Runner.xcodeproj` (development, staging, production) are intentionally set to ad-hoc signing: `CODE_SIGN_IDENTITY[sdk=macosx*] = "-"`, `CODE_SIGN_STYLE = Manual`, no `DEVELOPMENT_TEAM`, with a stripped-down entitlements file at `Runner/DebugProfileDev.entitlements` (only `cs.allow-jit`, no sandbox, no `keychain-access-groups`). That's why `flutter run --flavor <any>` and `flutter build macos --debug` work locally without an Apple Developer team membership or a downloaded Mac App Development provisioning profile.
+
+The `Profile-*` and `Release-*` configs still go through automatic signing with team `X6Q4W6ZWSV` and the sandboxed `DebugProfile.entitlements` / `Release.entitlements`. To run `flutter run --profile` or build for distribution from a local machine, open `Runner.xcworkspace` in Xcode once and let auto-provisioning download a Mac App Development profile for `net.quikchange.votasq` — `flutter`'s CLI doesn't pass `-allowProvisioningUpdates` to `xcodebuild`, so it can't generate the profile itself.
+
+Don't switch the Debug configs back to `DebugProfile.entitlements` without also restoring real signing. Apple's signing system rejects ad-hoc for any entitlement that needs a Team ID prefix — notably `keychain-access-groups` — so the build fails with `"Runner" requires a provisioning profile` even when `CODE_SIGN_IDENTITY = "-"`. The error message is misleading: it isn't the signing identity, it's the entitlements file.
+
+Side effect of unsandboxed Debug builds: Firebase Auth uses the login keychain instead of a per-app keychain group. Sessions still persist locally, but each Debug flavor lands in its own login-keychain bucket and credentials don't carry over from signed (Profile/Release) builds.
+
 ### Keep CI's `flutter-version` aligned with your local Flutter
 
 CI pins `flutter-version` in three workflow files (`.github/workflows/main.yaml`, `license_check.yaml`, `release.yaml`). The bundled `dart format` (and `dart analyze`) varies by SDK version, so a stale CI pin against a newer local Flutter produces formatter disagreements that pre-push checks can't catch — `melos format` uses your local SDK. When you bump local Flutter, bump those three files together.
