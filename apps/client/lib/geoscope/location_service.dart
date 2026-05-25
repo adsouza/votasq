@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:meta/meta.dart';
 
 /// Outcome of an attempt to read the user's approximate location.
 sealed class LocationOutcome {
@@ -44,13 +45,20 @@ abstract class LocationService {
 class GeolocatorLocationService implements LocationService {
   const GeolocatorLocationService();
 
-  static const _overallTimeout = Duration(seconds: 10);
+  /// Hard ceiling on the entire location lookup. Defensive against
+  /// platform-impl timeout bugs (e.g. geolocator_web 4.1.3 ignored
+  /// our inner timeLimit due to a microseconds/milliseconds unit
+  /// confusion, causing the picker's spinner to hang indefinitely).
+  /// Loud-named so a future cleanup is more likely to notice it's
+  /// load-bearing.
+  @visibleForTesting
+  static const overallTimeout = Duration(seconds: 10);
 
   @override
   Future<LocationOutcome> getApproximateLocation() async {
     try {
       return await _resolveOutcome().timeout(
-        _overallTimeout,
+        overallTimeout,
         onTimeout: () => const LocationUnavailable(),
       );
     } on TimeoutException {
