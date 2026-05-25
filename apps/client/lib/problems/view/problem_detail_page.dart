@@ -858,13 +858,6 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                     onPressed: () => context.go('/'),
                     child: Text(l10n.problemDetailBackButton),
                   ),
-                  if (!problem.hidden)
-                    OutlinedButton.icon(
-                      key: const Key('hideProblemButton'),
-                      icon: const Icon(Icons.visibility_off_outlined),
-                      label: Text(l10n.hideProblemButton),
-                      onPressed: () => _setHidden(problem, true),
-                    ),
                 ],
               );
             },
@@ -949,6 +942,13 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                       tooltip: l10n.flagProblemButton,
                       icon: const Text('🙈', style: TextStyle(fontSize: 20)),
                       onPressed: () => _confirmComplaint(problem),
+                    ),
+                  if (isOwner && !problem.hidden)
+                    IconButton(
+                      key: const Key('hideProblemButton'),
+                      tooltip: l10n.hideProblemButton,
+                      icon: const Icon(Icons.visibility_off_outlined),
+                      onPressed: () => _setHidden(problem, true),
                     ),
                 ],
               ),
