@@ -20,9 +20,18 @@ class _FakeLocationService implements LocationService {
   /// If non-zero, delay before completing with [_outcome].
   Duration _delay = Duration.zero;
 
+  /// What [hasPermission] returns. Independent of [_outcome] because the
+  /// reconciliation logic in initialize() checks this without triggering
+  /// a full lookup.
+  bool _hasPermission = false;
+
   // Test-only setter; no getter needed since the field is read internally.
   // ignore: avoid_setters_without_getters
   set outcome(LocationOutcome value) => _outcome = value;
+
+  // Test-only setter; the field is read internally by `hasPermission`.
+  // ignore: avoid_setters_without_getters
+  set hasPermissionResult(bool value) => _hasPermission = value;
 
   /// Make the next call to [getApproximateLocation] hang forever.
   void hangNext() => _hang = Completer<LocationOutcome>();
@@ -37,6 +46,9 @@ class _FakeLocationService implements LocationService {
     if (_delay > Duration.zero) await Future<void>.delayed(_delay);
     return _outcome;
   }
+
+  @override
+  Future<bool> hasPermission() async => _hasPermission;
 }
 
 void main() {
@@ -184,25 +196,43 @@ void main() {
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
-      'initialize loads persisted geoscope_location_denied=true',
+      'initialize keeps locationDenied=true when OS also reports no permission',
       setUp: () {
         SharedPreferences.setMockInitialValues({
           'geoscope_location_denied': true,
         });
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+        locationService.hasPermissionResult = false;
       },
       build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
-      expect: () => [
-        isA<GeoscopeState>().having(
-          (s) => s.status,
-          'status',
-          GeoscopeStatus.loading,
-        ),
-        isA<GeoscopeState>()
-            .having((s) => s.status, 'status', GeoscopeStatus.success)
-            .having((s) => s.locationDenied, 'locationDenied', true),
-      ],
+      verify: (cubit) async {
+        expect(cubit.state.locationDenied, true);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('geoscope_location_denied'), true);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'initialize clears stale locationDenied=true when OS now grants '
+      '(reconcile false-denial / user-granted-via-settings)',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({
+          'geoscope_location_denied': true,
+        });
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+        // OS reports permission as granted despite the persisted flag.
+        // This is the macOS race-condition scenario AND the case where
+        // the user later granted access via system settings.
+        locationService.hasPermissionResult = true;
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) => cubit.initialize(),
+      verify: (cubit) async {
+        expect(cubit.state.locationDenied, false);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('geoscope_location_denied'), false);
+      },
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(

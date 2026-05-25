@@ -35,7 +35,17 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final persisted = prefs.getString(_prefsKey);
-      final locationDenied = prefs.getBool(_locationDeniedPrefsKey) ?? false;
+      var locationDenied = prefs.getBool(_locationDeniedPrefsKey) ?? false;
+      // If we previously persisted a denial but the OS now reports
+      // permission as granted, the persisted state is stale: either the
+      // user granted access via system settings later, or our earlier
+      // persist was a race-condition false alarm (macOS returns the
+      // pre-dialog authorization status before the user's choice
+      // propagates). Reconcile to the live OS state.
+      if (locationDenied && await _location.hasPermission()) {
+        locationDenied = false;
+        await prefs.setBool(_locationDeniedPrefsKey, false);
+      }
       final available = await _repo.getGeoscopes();
       final availableIds = {'/'}..addAll(available.map((g) => g.id));
       final geoscope = resolveGeoscope(

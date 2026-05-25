@@ -1,8 +1,3 @@
-// The single-method `LocationService` abstract is intentional: it exists so
-// `GeoscopeCubit` can accept a fake in unit tests. A top-level function
-// (what `one_member_abstracts` suggests) wouldn't be substitutable.
-// ignore_for_file: one_member_abstracts
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -36,6 +31,13 @@ class LocationUnavailable extends LocationOutcome {
 /// inexpensive to call once per picker open.
 abstract class LocationService {
   Future<LocationOutcome> getApproximateLocation();
+
+  /// Read-only check of the OS's current authorization status. Does NOT
+  /// prompt the user — safe to call on startup. Returns true iff the
+  /// app currently holds permission (whileInUse or always). Used to
+  /// reconcile a previously-persisted `locationDenied` flag against the
+  /// live OS state on initialize.
+  Future<bool> hasPermission();
 }
 
 /// Default impl, backed by the `geolocator` package. Requests coarse
@@ -67,10 +69,23 @@ class GeolocatorLocationService implements LocationService {
     } on LocationServiceDisabledException {
       return const LocationUnavailable();
     } on PermissionDeniedException {
-      return const LocationDenied();
+      // Only treat as a sticky denial if the OS still reports denial
+      // after the exception. macOS has a race window where the dialog's
+      // response hasn't propagated yet — we don't want to persist a
+      // false denial.
+      final p = await Geolocator.checkPermission();
+      return p == LocationPermission.deniedForever
+          ? const LocationDenied()
+          : const LocationUnavailable();
     } on Exception {
       return const LocationUnavailable();
     }
+  }
+
+  @override
+  Future<bool> hasPermission() async {
+    final p = await Geolocator.checkPermission();
+    return p == LocationPermission.whileInUse || p == LocationPermission.always;
   }
 
   Future<LocationOutcome> _resolveOutcome() async {
@@ -81,9 +96,16 @@ class GeolocatorLocationService implements LocationService {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
+    // Only sticky-persist on `deniedForever`. A bare `denied` here may
+    // be a transient race (macOS in particular returns the pre-dialog
+    // status before the delegate callback fires) — treat as unavailable
+    // so the next attempt re-asks rather than silently hiding the row
+    // forever.
+    if (permission == LocationPermission.deniedForever) {
       return const LocationDenied();
+    }
+    if (permission == LocationPermission.denied) {
+      return const LocationUnavailable();
     }
     // Web's `low` path uses the browser's Network Location Service (Wi-Fi
     // triangulation + IP geo), which is unreliable on networks where the
