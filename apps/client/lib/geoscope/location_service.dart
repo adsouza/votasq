@@ -32,12 +32,15 @@ class LocationUnavailable extends LocationOutcome {
 abstract class LocationService {
   Future<LocationOutcome> getApproximateLocation();
 
-  /// Read-only check of the OS's current authorization status. Does NOT
-  /// prompt the user — safe to call on startup. Returns true iff the
-  /// app currently holds permission (whileInUse or always). Used to
-  /// reconcile a previously-persisted `locationDenied` flag against the
-  /// live OS state on initialize.
-  Future<bool> hasPermission();
+  /// Read-only check: does the OS report permission as *permanently*
+  /// denied (system-settings-off, or "don't ask again")? Does NOT
+  /// prompt the user — safe to call on startup. Returning `false`
+  /// does NOT mean permission is granted — it just means we shouldn't
+  /// sticky-hide. Could be denied-once, notDetermined, granted, or any
+  /// other in-flight state. Used by `GeoscopeCubit.initialize` to
+  /// decide whether to keep a previously-persisted `locationDenied`
+  /// flag against the live OS state.
+  Future<bool> isPermanentlyDenied();
 }
 
 /// Default impl, backed by the `geolocator` package. Requests coarse
@@ -83,9 +86,9 @@ class GeolocatorLocationService implements LocationService {
   }
 
   @override
-  Future<bool> hasPermission() async {
+  Future<bool> isPermanentlyDenied() async {
     final p = await Geolocator.checkPermission();
-    return p == LocationPermission.whileInUse || p == LocationPermission.always;
+    return p == LocationPermission.deniedForever;
   }
 
   Future<LocationOutcome> _resolveOutcome() async {

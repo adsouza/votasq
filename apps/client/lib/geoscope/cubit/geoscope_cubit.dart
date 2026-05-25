@@ -36,13 +36,15 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
       final prefs = await SharedPreferences.getInstance();
       final persisted = prefs.getString(_prefsKey);
       var locationDenied = prefs.getBool(_locationDeniedPrefsKey) ?? false;
-      // If we previously persisted a denial but the OS now reports
-      // permission as granted, the persisted state is stale: either the
-      // user granted access via system settings later, or our earlier
-      // persist was a race-condition false alarm (macOS returns the
-      // pre-dialog authorization status before the user's choice
-      // propagates). Reconcile to the live OS state.
-      if (locationDenied && await _location.hasPermission()) {
+      // Reconcile a previously-persisted denial against the live OS
+      // state. Only KEEP the sticky-hide if the OS still reports a
+      // hard permanent denial; anything else (denied-once, granted,
+      // notDetermined, etc.) clears the flag so the user can re-trigger
+      // the lookup. This self-heals both (a) macOS race-condition false
+      // alarms (the OS returns the pre-dialog status before the user's
+      // click propagates) and (b) the case where the user later granted
+      // access via system settings.
+      if (locationDenied && !await _location.isPermanentlyDenied()) {
         locationDenied = false;
         await prefs.setBool(_locationDeniedPrefsKey, false);
       }

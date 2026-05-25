@@ -20,18 +20,18 @@ class _FakeLocationService implements LocationService {
   /// If non-zero, delay before completing with [_outcome].
   Duration _delay = Duration.zero;
 
-  /// What [hasPermission] returns. Independent of [_outcome] because the
-  /// reconciliation logic in initialize() checks this without triggering
-  /// a full lookup.
-  bool _hasPermission = false;
+  /// What [isPermanentlyDenied] returns. Independent of [_outcome]
+  /// because the reconciliation logic in initialize() checks this
+  /// without triggering a full lookup.
+  bool _isPermanentlyDenied = false;
 
   // Test-only setter; no getter needed since the field is read internally.
   // ignore: avoid_setters_without_getters
   set outcome(LocationOutcome value) => _outcome = value;
 
-  // Test-only setter; the field is read internally by `hasPermission`.
+  // Test-only setter; the field is read internally by `isPermanentlyDenied`.
   // ignore: avoid_setters_without_getters
-  set hasPermissionResult(bool value) => _hasPermission = value;
+  set isPermanentlyDeniedResult(bool value) => _isPermanentlyDenied = value;
 
   /// Make the next call to [getApproximateLocation] hang forever.
   void hangNext() => _hang = Completer<LocationOutcome>();
@@ -48,7 +48,7 @@ class _FakeLocationService implements LocationService {
   }
 
   @override
-  Future<bool> hasPermission() async => _hasPermission;
+  Future<bool> isPermanentlyDenied() async => _isPermanentlyDenied;
 }
 
 void main() {
@@ -196,13 +196,15 @@ void main() {
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
-      'initialize keeps locationDenied=true when OS also reports no permission',
+      'initialize keeps locationDenied=true when OS reports deniedForever',
       setUp: () {
         SharedPreferences.setMockInitialValues({
           'geoscope_location_denied': true,
         });
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
-        locationService.hasPermissionResult = false;
+        // OS still reports a hard, permanent denial: System Settings →
+        // Privacy & Security has the app's location switched off.
+        locationService.isPermanentlyDeniedResult = true;
       },
       build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
@@ -214,17 +216,19 @@ void main() {
     );
 
     blocTest<GeoscopeCubit, GeoscopeState>(
-      'initialize clears stale locationDenied=true when OS now grants '
-      '(reconcile false-denial / user-granted-via-settings)',
+      'initialize clears stale locationDenied=true unless OS still reports '
+      'deniedForever (handles macOS race + user-granted-via-settings + '
+      'denied-once recovery)',
       setUp: () {
         SharedPreferences.setMockInitialValues({
           'geoscope_location_denied': true,
         });
         when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
-        // OS reports permission as granted despite the persisted flag.
-        // This is the macOS race-condition scenario AND the case where
-        // the user later granted access via system settings.
-        locationService.hasPermissionResult = true;
+        // OS does NOT report a permanent denial. Could be: granted,
+        // notDetermined, denied-once, or anything other than the hard
+        // "system-settings-off" state. All of these should let the user
+        // re-trigger the lookup rather than silently sticky-hiding.
+        locationService.isPermanentlyDeniedResult = false;
       },
       build: () => GeoscopeCubit(repo, locationService),
       act: (cubit) => cubit.initialize(),
