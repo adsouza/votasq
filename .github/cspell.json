@@ -55,6 +55,8 @@
     "Podfile",
     "podspec",
     "Prefs",
+    "quikchange",
+    "sandboxed",
     "sfbay",
     "shared",
     "subcollection",
@@ -65,10 +67,12 @@
     "toastification",
     "Unhide",
     "unhide",
+    "unsandboxed",
     "unvote",
     "Texto",
     "Votasq",
     "votasq",
-    "xcworkspacedata"
+    "xcworkspacedata",
+    "ZWSV"
   ]
 }
