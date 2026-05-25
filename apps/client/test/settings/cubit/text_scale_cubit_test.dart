@@ -64,5 +64,20 @@ void main() {
       expect(cubit.state, 1.50);
       await cubit.close();
     });
+
+    test('survives missing shared_preferences platform', () async {
+      // Construct without prefsForTesting — forces the real
+      // SharedPreferencesWithCache.create path, which throws in this test
+      // environment because no platform plugin is bound. The try/catch in
+      // _initialize must swallow that and leave the cubit at its default.
+      // Regression guard: this is the bug that crashed app_test.dart when
+      // BlocBuilder<TextScaleCubit> eagerly read the cubit in
+      // MaterialApp.builder.
+      final cubit = TextScaleCubit();
+      // Let _initialize() complete (and its catch fire).
+      await Future<void>.delayed(Duration.zero);
+      expect(cubit.state, 1.0);
+      await cubit.close();
+    });
   });
 }

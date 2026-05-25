@@ -21,11 +21,18 @@ class AutoTranslateCubit extends Cubit<bool> {
     if (_prefsForTesting != null) {
       _prefs = _prefsForTesting;
     } else {
-      _prefs = await SharedPreferencesWithCache.create(
-        cacheOptions: const SharedPreferencesWithCacheOptions(
-          allowList: {_prefsKey},
-        ),
-      );
+      try {
+        _prefs = await SharedPreferencesWithCache.create(
+          cacheOptions: const SharedPreferencesWithCacheOptions(
+            allowList: {_prefsKey},
+          ),
+        );
+      } on Object {
+        // No platform plugin (e.g. unit tests that don't bind one), corrupted
+        // profile, or sandboxing edge case — fall back to the in-memory
+        // default. Toggle still works this session; it just doesn't persist.
+        _prefs = null;
+      }
     }
     final persisted = _prefs?.getBool(_prefsKey);
     if (persisted != null) emit(persisted);

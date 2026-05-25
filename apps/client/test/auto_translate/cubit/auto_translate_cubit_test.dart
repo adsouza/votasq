@@ -56,5 +56,17 @@ void main() {
       expect(cubit.state, isTrue);
       await cubit.close();
     });
+
+    test('survives missing shared_preferences platform', () async {
+      // Construct without prefsForTesting — forces the real
+      // SharedPreferencesWithCache.create path, which throws in this test
+      // environment because no platform plugin is bound. The try/catch in
+      // _initialize must swallow that and leave the cubit at its default.
+      final cubit = AutoTranslateCubit();
+      // Let _initialize() complete (and its catch fire).
+      await Future<void>.delayed(Duration.zero);
+      expect(cubit.state, isFalse);
+      await cubit.close();
+    });
   });
 }
