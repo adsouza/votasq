@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Mirror CI's format + analyze checks before pushing, and guard against
-# AGENTS.md / CLAUDE.md drifting beyond their tool-identity lines.
+# AGENTS.md / CLAUDE.md drifting beyond their tool-identity lines. cspell
+# moved to pre-commit so unknown vocabulary surfaces at commit time when the
+# author still has context to update the wordlist.
 # Bypass (rarely): git push --no-verify
 set -e
 
@@ -9,9 +11,6 @@ melos format
 
 echo "[pre-push] flutter analyze..."
 flutter analyze apps packages
-
-echo "[pre-push] cspell..."
-npx --yes cspell --no-progress --no-summary --config .github/cspell.json "**/*.md"
 
 echo "[pre-push] web/index.html flutter_bootstrap_js token..."
 if ! grep -qF '{{flutter_bootstrap_js}}' apps/client/web/index.html; then

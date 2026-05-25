@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# Keep functions/l10n/ mirroring apps/client/lib/l10n/arb/. The sync also runs
-# at deploy time via the functions package's `prebuild` npm script, but doing
-# it here prevents drift from being committed.
+# Pre-commit checks that catch issues at authoring time, where the dev still
+# has context to fix them:
+#   * Sync functions/l10n/ from apps/client/lib/l10n/arb/ (also runs at deploy
+#     time via the functions package's `prebuild` npm script).
+#   * cspell on **/*.md — catches unknown vocabulary in the same commit where
+#     the new word was introduced, so the author can add it to the wordlist
+#     immediately rather than discovering at push time after other people's
+#     drift has accumulated.
 # Bypass (rarely): git commit --no-verify
 set -e
 
@@ -13,5 +18,8 @@ if ! git diff --quiet -- functions/l10n; then
   git diff --name-only -- functions/l10n | sed 's/^/  /'
   git add functions/l10n
 fi
+
+echo "[pre-commit] cspell..."
+npx --yes cspell --no-progress --no-summary --config .github/cspell.json "**/*.md"
 
 echo "[pre-commit] ok"
