@@ -57,7 +57,7 @@
     "votersHeading": "Wapiga kura",
     "voterAnonymous": "Asiyejulikana",
     "signInHintBanner": "Ingia kupitia kiungo katika kona ya juu kulia ili kupigia kura matatizo na kupendekeza matatizo yako.",
-    "doubleTapHint": "Gusa tatizo ili kuona maelezo.",
+    "tapForDetailsHint": "Gusa tatizo ili kuona maelezo.",
     "voteHint": "Bofya kichipu chenye mshale wa juu kando ya tatizo ili kupiga kura.",
     "complaintSubmitted": "Malalamiko yametumwa",
     "failedToLoadProblems": "Imeshindwa kupakia matatizo",

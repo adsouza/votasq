@@ -53,7 +53,7 @@
     "voteButtonTooltip": "Votar por este problema",
     "signInButtonTooltip": "Inicia sesión para votar por problemas o agregar tus propios problemas a la lista",
     "signInHintBanner": "Inicia sesión mediante el enlace en la esquina superior derecha para votar problemas y proponer los tuyos.",
-    "doubleTapHint": "Toca un problema para ver los detalles.",
+    "tapForDetailsHint": "Toca un problema para ver los detalles.",
     "voteHint": "Toca el chip con la flecha hacia arriba junto a un problema para votar por él.",
     "menuVotesRemaining": "{count, plural, one{1 voto restante} other{{count} votos restantes}}",
     "menuVotesReplenishHint": "Los votos se reponen tras 3 horas de ausencia",

@@ -45,8 +45,8 @@ class UserState {
     return count <= days;
   }
 
-  /// Same shape as [needsVoteHint] but for the double-tap hint.
-  bool get needsDoubleTapHint {
+  /// Same shape as [needsVoteHint] but for the tap-for-details hint.
+  bool get needsTapForDetailsHint {
     if (status != AuthStatus.authenticated) return false;
     final count = problemDetailsViewCount;
     final days = _daysSinceLastSession;

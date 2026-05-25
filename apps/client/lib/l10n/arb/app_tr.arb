@@ -57,7 +57,7 @@
     "votersHeading": "Oy verenler",
     "voterAnonymous": "Anonim",
     "signInHintBanner": "Sorunlara oy vermek ve kendi sorunlarınızı önermek için sağ üst köşedeki bağlantıdan oturum açın.",
-    "doubleTapHint": "Ayrıntılar için bir soruna dokunun.",
+    "tapForDetailsHint": "Ayrıntılar için bir soruna dokunun.",
     "voteHint": "Bir soruna oy vermek için yanındaki yukarı oklu çipe dokunun.",
     "complaintSubmitted": "Şikayet gönderildi",
     "failedToLoadProblems": "Sorunlar yüklenemedi",

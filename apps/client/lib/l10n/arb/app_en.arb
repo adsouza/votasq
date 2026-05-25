@@ -185,8 +185,8 @@
     "@signInHintBanner": {
         "description": "Persistent banner shown below the app bar to anonymous users prompting sign-in"
     },
-    "doubleTapHint": "Tap a problem for details.",
-    "@doubleTapHint": {
+    "tapForDetailsHint": "Tap a problem for details.",
+    "@tapForDetailsHint": {
         "description": "Hint message (banner) telling the user that tapping a problem opens its detail page"
     },
     "voteHint": "Tap the up-arrow chip beside a problem to vote for it.",

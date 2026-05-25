@@ -386,8 +386,8 @@ class _ProblemsViewState extends State<ProblemsView> {
                 hint = const _SignInHintBanner();
               } else if (authed && userState.needsVoteHint) {
                 hint = const _VoteHintBanner();
-              } else if (authed && userState.needsDoubleTapHint) {
-                hint = const _DoubleTapHintBanner();
+              } else if (authed && userState.needsTapForDetailsHint) {
+                hint = const _TapForDetailsHintBanner();
               } else {
                 hint = null;
               }
@@ -567,10 +567,10 @@ class _VoteHintBanner extends StatelessWidget {
       _HintBanner(message: context.l10n.voteHint);
 }
 
-class _DoubleTapHintBanner extends StatelessWidget {
-  const _DoubleTapHintBanner();
+class _TapForDetailsHintBanner extends StatelessWidget {
+  const _TapForDetailsHintBanner();
 
   @override
   Widget build(BuildContext context) =>
-      _HintBanner(message: context.l10n.doubleTapHint);
+      _HintBanner(message: context.l10n.tapForDetailsHint);
 }

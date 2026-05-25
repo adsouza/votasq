@@ -57,7 +57,7 @@
     "votersHeading": "Pemilih",
     "voterAnonymous": "Anonim",
     "signInHintBanner": "Masuk melalui tautan di sudut kanan atas untuk memberikan suara pada masalah dan mengusulkan masalah Anda sendiri.",
-    "doubleTapHint": "Ketuk masalah untuk melihat detail.",
+    "tapForDetailsHint": "Ketuk masalah untuk melihat detail.",
     "voteHint": "Ketuk chip panah ke atas di sebelah masalah untuk memilihnya.",
     "complaintSubmitted": "Laporan terkirim",
     "failedToLoadProblems": "Gagal memuat masalah",
