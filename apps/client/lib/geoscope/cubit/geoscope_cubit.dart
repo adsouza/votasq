@@ -67,8 +67,7 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
   /// Select a geoscope and persist the choice.
   Future<void> selectGeoscope(String geoscope) async {
     emit(state.copyWith(selectedGeoscope: geoscope, needsSelection: false));
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefsKey, geoscope);
+    await _persistGeoscope(geoscope);
   }
 
   /// Ask the OS for a coarse location, find the nearest metro, and either
@@ -80,8 +79,15 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
   /// emits a one-shot toast but does not persist.
   Future<void> selectNearestMetroFromLocation() async {
     if (state.locationStatus == GeoscopeLocationStatus.fetching) return;
+    final priorSelection = state.selectedGeoscope;
     emit(state.copyWith(locationStatus: GeoscopeLocationStatus.fetching));
     final outcome = await _location.getApproximateLocation();
+    // If the user manually picked a geoscope during the await, their
+    // choice wins; we just clear our fetching state and bail.
+    if (state.selectedGeoscope != priorSelection) {
+      emit(state.copyWith(locationStatus: GeoscopeLocationStatus.idle));
+      return;
+    }
     switch (outcome) {
       case LocationCoords(:final lat, :final lng):
         final nearest = findNearestMetro(
@@ -106,6 +112,7 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
               needsSelection: false,
               locationStatus: GeoscopeLocationStatus.idle,
               clearLocationSuggestion: true,
+              clearPendingToast: true,
             ),
           );
         } else {
@@ -113,6 +120,7 @@ class GeoscopeCubit extends Cubit<GeoscopeState> {
             state.copyWith(
               locationStatus: GeoscopeLocationStatus.idle,
               locationSuggestion: nearest,
+              clearPendingToast: true,
             ),
           );
         }

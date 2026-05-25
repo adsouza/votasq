@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:client/geoscope/cubit/geoscope_cubit.dart';
 import 'package:client/geoscope/cubit/geoscope_state.dart';
@@ -11,12 +13,30 @@ class _MockFirestoreRepository extends Mock implements FirestoreRepository {}
 
 class _FakeLocationService implements LocationService {
   LocationOutcome _outcome = const LocationUnavailable();
+
+  /// If non-null, future returned by [getApproximateLocation] never completes.
+  Completer<LocationOutcome>? _hang;
+
+  /// If non-zero, delay before completing with [_outcome].
+  Duration _delay = Duration.zero;
+
   // Test-only setter; no getter needed since the field is read internally.
   // ignore: avoid_setters_without_getters
   set outcome(LocationOutcome value) => _outcome = value;
 
+  /// Make the next call to [getApproximateLocation] hang forever.
+  void hangNext() => _hang = Completer<LocationOutcome>();
+
+  /// Delay the next outcome by [d] before completing.
+  // ignore: use_setters_to_change_properties
+  void delayBy(Duration d) => _delay = d;
+
   @override
-  Future<LocationOutcome> getApproximateLocation() async => _outcome;
+  Future<LocationOutcome> getApproximateLocation() async {
+    if (_hang != null) return _hang!.future;
+    if (_delay > Duration.zero) await Future<void>.delayed(_delay);
+    return _outcome;
+  }
 }
 
 void main() {
@@ -556,6 +576,75 @@ void main() {
       },
       verify: (cubit) {
         expect(cubit.state.pendingToast, isNull);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectNearestMetroFromLocation: re-entry while fetching is a no-op',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer((_) async => []);
+        locationService.hangNext();
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        // Fire twice in rapid succession; the second call should bail
+        // immediately at the fetching guard.
+        unawaited(cubit.selectNearestMetroFromLocation());
+        await cubit.selectNearestMetroFromLocation();
+      },
+      verify: (cubit) {
+        // Still fetching — neither call resolved (the first is hung on
+        // the never-outcome, the second bailed at the guard).
+        expect(cubit.state.locationStatus, GeoscopeLocationStatus.fetching);
+      },
+    );
+
+    blocTest<GeoscopeCubit, GeoscopeState>(
+      'selectNearestMetroFromLocation: manual selection during await wins',
+      setUp: () {
+        SharedPreferences.setMockInitialValues({});
+        when(() => repo.getGeoscopes()).thenAnswer(
+          (_) async => [
+            (
+              id: 'us/ca/sfbay',
+              label: 'SF Bay Area',
+              population: 7700000,
+              lat: 37.7793,
+              lng: -122.4193,
+            ),
+            (
+              id: 'us/ny/nyc',
+              label: 'New York City',
+              population: 19200000,
+              lat: 40.7128,
+              lng: -74.0060,
+            ),
+          ],
+        );
+        // Coords would normally auto-select sfbay — but the test
+        // manually selects something else during the await.
+        locationService
+          ..outcome = const LocationCoords(37.83, -122.42)
+          ..delayBy(const Duration(milliseconds: 50));
+      },
+      build: () => GeoscopeCubit(repo, locationService),
+      act: (cubit) async {
+        await cubit.initialize();
+        final lookup = cubit.selectNearestMetroFromLocation();
+        // While the lookup is pending, user manually picks something
+        // distinct from both the initial value ('/') and the
+        // auto-select target ('us/ca/sfbay').
+        await cubit.selectGeoscope('us/ny/nyc');
+        await lookup;
+      },
+      verify: (cubit) async {
+        // Manual choice wins; auto-select didn't clobber it.
+        expect(cubit.state.selectedGeoscope, 'us/ny/nyc');
+        expect(cubit.state.locationStatus, GeoscopeLocationStatus.idle);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('selected_geoscope'), 'us/ny/nyc');
       },
     );
   });
