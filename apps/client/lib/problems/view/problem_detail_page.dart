@@ -909,6 +909,36 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     // HardwareKeyboard state can desync, throwing a "key already pressed"
     // assertion and breaking subsequent typing in TextFields. Escape still
     // works once the user has interacted with anything on the page.
+    // On narrow viewports the action icons live in a sub-row below the
+    // title so they don't crowd it; on wide viewports there's room to
+    // collapse everything onto one line via AppBar.actions. 600dp is
+    // Material 3's compact/medium boundary — phones in portrait fall
+    // below it, tablets and landscape phones above.
+    final wide = MediaQuery.sizeOf(context).width >= 600;
+    final iconActions = <Widget>[
+      if (canFork)
+        IconButton(
+          tooltip: l10n.adaptProblemTooltip,
+          icon: const Icon(Icons.call_split),
+          onPressed: () => _fork(problem, userId),
+        ),
+      if (userId != null) ..._buildLinkButton(context, l10n),
+      if (userId != null && !isOwner)
+        IconButton(
+          key: const Key('flagProblemButton'),
+          tooltip: l10n.flagProblemButton,
+          icon: const Text('🙈', style: TextStyle(fontSize: 20)),
+          onPressed: () => _confirmComplaint(problem),
+        ),
+      if (isOwner && !problem.hidden)
+        IconButton(
+          key: const Key('hideProblemButton'),
+          tooltip: l10n.hideProblemButton,
+          icon: const Icon(Icons.visibility_off_outlined),
+          onPressed: () => _setHidden(problem, true),
+        ),
+    ];
+
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.escape): () => context.pop(),
@@ -918,41 +948,23 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
           appBar: AppBar(
             title: Text(l10n.problemDetailPageTitle),
             // Material auto-injects the back chevron in the leading slot
-            // (via ModalRoute.canPop). The action icons sit on a sub-row
-            // below the title so the title line stays uncluttered.
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8),
-                    child: _buildVoteChip(problem),
+            // (via ModalRoute.canPop).
+            actions: wide ? [_buildVoteChip(problem), ...iconActions] : null,
+            bottom: wide
+                ? null
+                : PreferredSize(
+                    preferredSize: const Size.fromHeight(48),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 8),
+                          child: _buildVoteChip(problem),
+                        ),
+                        const Spacer(),
+                        ...iconActions,
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                  if (canFork)
-                    IconButton(
-                      tooltip: l10n.adaptProblemTooltip,
-                      icon: const Icon(Icons.call_split),
-                      onPressed: () => _fork(problem, userId),
-                    ),
-                  if (userId != null) ..._buildLinkButton(context, l10n),
-                  if (userId != null && !isOwner)
-                    IconButton(
-                      key: const Key('flagProblemButton'),
-                      tooltip: l10n.flagProblemButton,
-                      icon: const Text('🙈', style: TextStyle(fontSize: 20)),
-                      onPressed: () => _confirmComplaint(problem),
-                    ),
-                  if (isOwner && !problem.hidden)
-                    IconButton(
-                      key: const Key('hideProblemButton'),
-                      tooltip: l10n.hideProblemButton,
-                      icon: const Icon(Icons.visibility_off_outlined),
-                      onPressed: () => _setHidden(problem, true),
-                    ),
-                ],
-              ),
-            ),
           ),
           body: SingleChildScrollView(
             child: Column(
