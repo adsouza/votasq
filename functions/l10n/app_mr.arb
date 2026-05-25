@@ -13,7 +13,7 @@
     "feedbackSuccess": "तुमच्या अभिप्रायाबद्दल धन्यवाद!",
     "feedbackError": "अभिप्राय पाठवता आला नाही. कृपया पुन्हा प्रयत्न करा.",
     "geoscopeGlobal": "जागतिक",
-    "geoscopeChangeMenuItem": "स्थान बदला",
+    "geoscopeChangeMenuItem": "स्थान बदला:",
     "showOnlyOwnedMenuItem": "फक्त माझ्या समस्या दाखवा",
     "showOnlyWithGoalsMenuItem": "फक्त ध्येय असलेल्या समस्या दाखवा",
     "problemDetailPageTitle": "समस्या तपशील",

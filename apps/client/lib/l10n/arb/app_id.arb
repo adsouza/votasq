@@ -13,7 +13,7 @@
     "feedbackSuccess": "Terima kasih atas umpan balik Anda!",
     "feedbackError": "Tidak dapat mengirim umpan balik. Silakan coba lagi.",
     "geoscopeGlobal": "Global",
-    "geoscopeChangeMenuItem": "Ubah lokasi",
+    "geoscopeChangeMenuItem": "Ubah lokasi dari",
     "showOnlyOwnedMenuItem": "Tampilkan hanya masalah saya",
     "showOnlyWithGoalsMenuItem": "Tampilkan hanya masalah dengan tujuan",
     "problemDetailPageTitle": "Detail Masalah",

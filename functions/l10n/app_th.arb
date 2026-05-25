@@ -13,7 +13,7 @@
     "feedbackSuccess": "ขอบคุณสำหรับความคิดเห็นของคุณ!",
     "feedbackError": "ไม่สามารถส่งความคิดเห็นได้ กรุณาลองอีกครั้ง",
     "geoscopeGlobal": "ทั่วโลก",
-    "geoscopeChangeMenuItem": "เปลี่ยนสถานที่",
+    "geoscopeChangeMenuItem": "เปลี่ยนสถานที่จาก",
     "showOnlyOwnedMenuItem": "แสดงเฉพาะปัญหาของฉัน",
     "showOnlyWithGoalsMenuItem": "แสดงเฉพาะปัญหาที่มีเป้าหมาย",
     "problemDetailPageTitle": "รายละเอียดปัญหา",

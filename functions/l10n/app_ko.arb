@@ -13,7 +13,7 @@
     "feedbackSuccess": "피드백을 보내주셔서 감사합니다!",
     "feedbackError": "피드백을 보낼 수 없습니다. 다시 시도해 주세요.",
     "geoscopeGlobal": "전세계",
-    "geoscopeChangeMenuItem": "위치 변경",
+    "geoscopeChangeMenuItem": "위치 변경:",
     "showOnlyOwnedMenuItem": "내 문제만 보기",
     "showOnlyWithGoalsMenuItem": "목표가 있는 문제만 보기",
     "problemDetailPageTitle": "문제 상세",

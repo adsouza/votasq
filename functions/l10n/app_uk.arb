@@ -13,7 +13,7 @@
     "feedbackSuccess": "Дякуємо за ваш відгук!",
     "feedbackError": "Не вдалося надіслати відгук. Спробуйте ще раз.",
     "geoscopeGlobal": "Глобально",
-    "geoscopeChangeMenuItem": "Змінити місце",
+    "geoscopeChangeMenuItem": "Змінити місце з",
     "showOnlyOwnedMenuItem": "Показати лише мої проблеми",
     "showOnlyWithGoalsMenuItem": "Показати лише проблеми з цілями",
     "problemDetailPageTitle": "Деталі проблеми",

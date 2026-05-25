@@ -13,7 +13,7 @@
     "feedbackSuccess": "Geri bildiriminiz için teşekkürler!",
     "feedbackError": "Geri bildirim gönderilemedi. Lütfen tekrar deneyin.",
     "geoscopeGlobal": "Küresel",
-    "geoscopeChangeMenuItem": "Konumu değiştir",
+    "geoscopeChangeMenuItem": "Konumu değiştir:",
     "showOnlyOwnedMenuItem": "Yalnızca benim sorunlarımı göster",
     "showOnlyWithGoalsMenuItem": "Yalnızca hedefi olan sorunları göster",
     "problemDetailPageTitle": "Sorun Detayları",

@@ -13,7 +13,7 @@
     "feedbackSuccess": "Спасибо за ваш отзыв!",
     "feedbackError": "Не удалось отправить отзыв. Пожалуйста, попробуйте снова.",
     "geoscopeGlobal": "Глобально",
-    "geoscopeChangeMenuItem": "Изменить местоположение",
+    "geoscopeChangeMenuItem": "Изменить местоположение из",
     "showOnlyOwnedMenuItem": "Показать только мои проблемы",
     "showOnlyWithGoalsMenuItem": "Показать только проблемы с целями",
     "problemDetailPageTitle": "Детали проблемы",

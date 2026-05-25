@@ -13,7 +13,7 @@
     "feedbackSuccess": "از بازخورد شما متشکریم!",
     "feedbackError": "بازخورد ارسال نشد. لطفاً دوباره تلاش کنید.",
     "geoscopeGlobal": "جهانی",
-    "geoscopeChangeMenuItem": "تغییر مکان",
+    "geoscopeChangeMenuItem": "تغییر مکان از",
     "showOnlyOwnedMenuItem": "فقط مشکلات من نمایش داده شود",
     "showOnlyWithGoalsMenuItem": "فقط مشکلات دارای هدف نمایش داده شود",
     "problemDetailPageTitle": "جزئیات مشکل",

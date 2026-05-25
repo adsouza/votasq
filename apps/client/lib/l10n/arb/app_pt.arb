@@ -13,7 +13,7 @@
     "feedbackSuccess": "Obrigado pelo seu feedback!",
     "feedbackError": "Não foi possível enviar o feedback. Por favor, tente novamente.",
     "geoscopeGlobal": "Global",
-    "geoscopeChangeMenuItem": "Alterar localização",
+    "geoscopeChangeMenuItem": "Alterar localização de",
     "showOnlyOwnedMenuItem": "Mostrar apenas meus problemas",
     "showOnlyWithGoalsMenuItem": "Mostrar apenas problemas com objetivos",
     "problemDetailPageTitle": "Detalhes do Problema",

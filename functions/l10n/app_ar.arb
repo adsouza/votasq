@@ -13,7 +13,7 @@
     "feedbackSuccess": "شكرًا على ملاحظاتك!",
     "feedbackError": "تعذّر إرسال الملاحظات. يرجى المحاولة مرة أخرى.",
     "geoscopeGlobal": "عالمي",
-    "geoscopeChangeMenuItem": "تغيير الموقع",
+    "geoscopeChangeMenuItem": "تغيير الموقع من",
     "showOnlyOwnedMenuItem": "إظهار مشاكلي فقط",
     "showOnlyWithGoalsMenuItem": "إظهار المشاكل ذات الأهداف فقط",
     "problemDetailPageTitle": "تفاصيل المشكلة",

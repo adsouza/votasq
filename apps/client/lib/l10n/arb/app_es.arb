@@ -13,7 +13,7 @@
     "feedbackSuccess": "¡Gracias por tus comentarios!",
     "feedbackError": "No se pudieron enviar los comentarios. Inténtalo de nuevo.",
     "geoscopeGlobal": "Global",
-    "geoscopeChangeMenuItem": "Cambiar ubicación",
+    "geoscopeChangeMenuItem": "Cambiar ubicación desde",
     "showOnlyOwnedMenuItem": "Mostrar solo mis problemas",
     "showOnlyWithGoalsMenuItem": "Mostrar solo problemas con metas",
     "problemDetailPageTitle": "Detalles del problema",

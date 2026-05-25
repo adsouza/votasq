@@ -13,7 +13,7 @@
     "feedbackSuccess": "感谢你的反馈！",
     "feedbackError": "无法发送反馈，请重试。",
     "geoscopeGlobal": "全球",
-    "geoscopeChangeMenuItem": "更改位置",
+    "geoscopeChangeMenuItem": "更改位置：",
     "showOnlyOwnedMenuItem": "只显示我的问题",
     "showOnlyWithGoalsMenuItem": "只显示有目标的问题",
     "problemDetailPageTitle": "问题详情",

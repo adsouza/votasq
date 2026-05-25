@@ -13,7 +13,7 @@
     "feedbackSuccess": "আপনার মতামতের জন্য ধন্যবাদ!",
     "feedbackError": "মতামত পাঠানো যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "geoscopeGlobal": "বিশ্বব্যাপী",
-    "geoscopeChangeMenuItem": "অবস্থান পরিবর্তন করুন",
+    "geoscopeChangeMenuItem": "অবস্থান পরিবর্তন করুন:",
     "showOnlyOwnedMenuItem": "শুধুমাত্র আমার সমস্যাগুলো দেখান",
     "showOnlyWithGoalsMenuItem": "শুধুমাত্র লক্ষ্যযুক্ত সমস্যাগুলো দেখান",
     "problemDetailPageTitle": "সমস্যার বিবরণ",
