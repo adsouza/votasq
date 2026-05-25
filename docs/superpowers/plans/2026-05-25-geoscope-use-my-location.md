@@ -38,6 +38,34 @@
 
 ---
 
+## Execution Order
+
+**This supersedes the in-document task numbering below.** Tasks remain documented in their original order to keep cross-references stable, but the executor must follow this sequence:
+
+| # | Task ref in doc | What |
+|---|---|---|
+| 1 | Task 10 | Build the backfill tool (`seed_geoscope_coords.dart`), curated coords, `--dry-run` sanity. |
+| 2 | Task 12 (steps 1–4 only) | Start emulator, seed geoscopes from prod, run backfill against emulator, verify a sample doc has `lat`/`lng`. |
+| 3 | Task 13 | **User-gated.** Run backfill against production. Spot-check 2–3 docs via the Firebase MCP. |
+| 4 | Task 1 | Extend `getGeoscopes` to read lat/lng (read-side trap test). |
+| 5 | Task 2 | Extend `GeoscopeState` with new fields. |
+| 6 | Task 3 | Add `geolocator` dependency. |
+| 7 | Task 4 | Create `LocationService` abstraction. |
+| 8 | Task 5 | Implement `findNearestMetro` (pure static helper). |
+| 9 | Task 6 | Wire `LocationService` into `GeoscopeCubit` + extend `initialize`. |
+| 10 | Task 7 | Cubit orchestration methods. |
+| 11 | Task 8 | Add ARB strings in all 24 locales. |
+| 12 | Task 9 | Platform manifest updates (iOS / Android / macOS). |
+| 13 | Task 11 | Picker UI changes. |
+| 14 | Task 12 (steps 5–7 only) | UI smoke-test: launch the app against the emulator, verify the new row, the suggestion flow, and the denial-hide flow. |
+| 15 | Task 14 | Final verification (`melos format`, `flutter analyze`, full test suite). |
+
+**Rationale for this order:**
+
+- Backfill data lands first. Once metro docs in prod have `lat`/`lng`, old clients ignore the new fields (no breakage), and the client work can be developed and tested against real data without further redeployments.
+- If the curated coords need fixing after the client UI is built and exercised, that's a one-line tool change and a re-run of Task 13 — cheaper than rolling client code.
+- The two halves of Task 12 (data verify before client code, UI smoke-test after) are explicit gates: each runs at the right point in the sequence.
+
 ## Conventions
 
 - **TDD:** write a failing test, see it fail, write the smallest impl that makes it pass, see it pass, commit. Never combine those into one commit.
@@ -1521,7 +1549,7 @@ EOF
 
 ## Task 10: Backfill tool — `seed_geoscope_coords.dart`
 
-Pre-curated coords for ~50 metros, writes via `googleapis/firestore`.
+Pre-curated coords for ~50 metro docs (no countries, states, or supranationals — see comment in the file), writes via `googleapis/firestore`.
 
 **Files:**
 - Create: `apps/server/tool/seed_geoscope_coords.dart`
@@ -1556,13 +1584,13 @@ const _scopes = <String>[FirestoreApi.datastoreScope];
 const _projectId = 'votasq';
 
 /// Document id (the doc name in the `geoscopes` collection) → lat/lng.
+/// Per spec, only METRO docs get coords — supranationals (eu/sea/cn/...),
+/// countries, and states do NOT, because a single point can't meaningfully
+/// represent them and `findNearestMetro` is intentionally metros-only.
 /// Coords are city-centre / metro centroid in WGS84 decimal degrees.
 /// References noted in comments so a reviewer can sanity-check.
 const _coords = <String, ({double lat, double lng})>{
-  // North America
-  'usa': (lat: 39.8283, lng: -98.5795), // continental US geographic centre
-  'canada': (lat: 56.1304, lng: -106.3468), // Canada geographic centre
-  'mexico': (lat: 23.6345, lng: -102.5528), // Mexico geographic centre
+  // North America metros
   'sfbay': (lat: 37.7793, lng: -122.4193), // SF City Hall
   'socal': (lat: 34.0522, lng: -118.2437), // Downtown LA
   'nyc': (lat: 40.7128, lng: -74.0060), // Manhattan
@@ -1570,27 +1598,18 @@ const _coords = <String, ({double lat, double lng})>{
   'atlanta': (lat: 33.7490, lng: -84.3880), // Downtown Atlanta
   'miami': (lat: 25.7617, lng: -80.1918), // Downtown Miami
   'philly': (lat: 39.9526, lng: -75.1652), // Center City
-  'dc': (lat: 38.9072, lng: -77.0369), // Capitol
-  'gta': (lat: 43.6532, lng: -79.3832), // Downtown Toronto
-  'cdmx': (lat: 19.4326, lng: -99.1332), // Zócalo
+  'dc': (lat: 38.9072, lng: -77.0369), // Washington DC, Capitol
+  'gta': (lat: 43.6532, lng: -79.3832), // Greater Toronto, downtown
+  'cdmx': (lat: 19.4326, lng: -99.1332), // Mexico City, Zócalo
 
-  // South America
-  'brazil': (lat: -14.2350, lng: -51.9253), // geographic centre
-  'argentina': (lat: -38.4161, lng: -63.6167), // geographic centre
-  'colombia': (lat: 4.5709, lng: -74.2973), // geographic centre
+  // South America metros
   'ba': (lat: -34.6037, lng: -58.3816), // Buenos Aires centre
   'sãopaulo': (lat: -23.5505, lng: -46.6333), // São Paulo centre
   'rio': (lat: -22.9068, lng: -43.1729), // Rio centre
   'bogota': (lat: 4.7110, lng: -74.0721), // Bogotá centre
   'lima': (lat: -12.0464, lng: -77.0428), // Lima centre
 
-  // Europe
-  'france': (lat: 46.6034, lng: 1.8883), // geographic centre
-  'germany': (lat: 51.1657, lng: 10.4515), // geographic centre
-  'italy': (lat: 41.8719, lng: 12.5674), // geographic centre
-  'spain': (lat: 40.4637, lng: -3.7492), // geographic centre
-  'uk': (lat: 54.7023, lng: -3.2765), // geographic centre
-  'ukraine': (lat: 48.3794, lng: 31.1656),
+  // Europe metros
   'paris': (lat: 48.8566, lng: 2.3522), // Île-de-la-Cité
   'berlin': (lat: 52.5200, lng: 13.4050), // Brandenburg Gate
   'rome': (lat: 41.9028, lng: 12.4964), // Colosseum
@@ -1598,8 +1617,7 @@ const _coords = <String, ({double lat, double lng})>{
   'london': (lat: 51.5074, lng: -0.1278), // Charing Cross
   'athens': (lat: 37.9838, lng: 23.7275), // Acropolis
 
-  // India
-  'india': (lat: 20.5937, lng: 78.9629),
+  // India metros
   'mumbai': (lat: 19.0760, lng: 72.8777),
   'delhi': (lat: 28.7041, lng: 77.1025),
   'bengaluru': (lat: 12.9716, lng: 77.5946),
@@ -1613,49 +1631,31 @@ const _coords = <String, ({double lat, double lng})>{
   'kanpur': (lat: 26.4499, lng: 80.3319),
   'lucknow': (lat: 26.8467, lng: 80.9462),
 
-  // China
-  'china': (lat: 35.8617, lng: 104.1954),
+  // China metros (Guangdong omitted — it's a province, ~127M people,
+  // a single point can't represent it)
   'beijing': (lat: 39.9042, lng: 116.4074),
   'shanghai': (lat: 31.2304, lng: 121.4737),
-  'guangdong': (lat: 23.3790, lng: 113.7633), // Guangdong centre
   'hongkong': (lat: 22.3193, lng: 114.1694),
 
-  // Japan / Korea
-  'japan': (lat: 36.2048, lng: 138.2529),
+  // Japan metro
   'tokyo': (lat: 35.6762, lng: 139.6503),
-  'korea': (lat: 37.5665, lng: 126.9780), // Seoul (Korea geographic centre ambiguous)
 
-  // SE Asia
-  'indonesia': (lat: -0.7893, lng: 113.9213),
-  'philippines': (lat: 12.8797, lng: 121.7740),
-  'vietnam': (lat: 14.0583, lng: 108.2772),
-  'thailand': (lat: 15.8700, lng: 100.9925),
-  'singapore': (lat: 1.3521, lng: 103.8198),
+  // SE Asia metros
+  'singapore': (lat: 1.3521, lng: 103.8198), // city-state, doubles as metro
   'jakarta': (lat: -6.2088, lng: 106.8456),
-  'krungthep': (lat: 13.7563, lng: 100.5018),
+  'krungthep': (lat: 13.7563, lng: 100.5018), // Bangkok
   'manila': (lat: 14.5995, lng: 120.9842),
   'hanoi': (lat: 21.0285, lng: 105.8542),
   'hochiminh': (lat: 10.8231, lng: 106.6297),
 
-  // West Asia / Iran / Pakistan / Bangladesh
-  'iran': (lat: 32.4279, lng: 53.6880),
-  'pakistan': (lat: 30.3753, lng: 69.3451),
-  'bangladesh': (lat: 23.6850, lng: 90.3563),
+  // West / South Asia metros
   'karachi': (lat: 24.8607, lng: 67.0011),
   'dhaka': (lat: 23.8103, lng: 90.4125),
   'istanbul': (lat: 41.0082, lng: 28.9784),
-  'iraq': (lat: 33.2232, lng: 43.6793),
-  'saudiarabia': (lat: 23.8859, lng: 45.0792),
   'jeddah': (lat: 21.4858, lng: 39.1925),
   'riyadh': (lat: 24.7136, lng: 46.6753),
 
-  // Africa
-  'algeria': (lat: 28.0339, lng: 1.6596),
-  'egypt': (lat: 26.8206, lng: 30.8025),
-  'morocco': (lat: 31.7917, lng: -7.0926),
-  'ethiopia': (lat: 9.1450, lng: 40.4897),
-  'southafrica': (lat: -30.5595, lng: 22.9375),
-  'nigeria': (lat: 9.0820, lng: 8.6753),
+  // Africa metros
   'cairo': (lat: 30.0444, lng: 31.2357),
   'alexandria': (lat: 31.2001, lng: 29.9187),
   'lagos': (lat: 6.5244, lng: 3.3792),
@@ -1763,7 +1763,7 @@ Expected: no errors.
 - [ ] **Step 3: Run dry-run against emulator (no emulator required for `--dry-run`)**
 
 Run: `cd apps/server && FIRESTORE_EMULATOR_HOST=127.0.0.1:8081 dart run tool/seed_geoscope_coords.dart --emulator --dry-run`
-Expected: prints ~50 `doc=X lat=Y lng=Z dryRun=true` lines and a final `updated=0 dryRun=true target=emulator` summary. No network calls.
+Expected: prints one `doc=X lat=Y lng=Z dryRun=true` line per entry in the `_coords` map (~50 lines) and a final `updated=0 dryRun=true target=emulator` summary. No network calls.
 
 - [ ] **Step 4: Commit**
 
@@ -1772,10 +1772,12 @@ git add apps/server/tool/seed_geoscope_coords.dart
 git commit -m "$(cat <<'EOF'
 feat(server): add seed_geoscope_coords backfill tool
 
-One-shot writer that stamps lat/lng on ~50 metro docs in the
-`geoscopes` collection. --emulator and --prod flags select the target.
-update_mask keeps existing id/label/population fields untouched.
-Coords curated by hand; reviewer notes in source comments.
+One-shot writer that stamps lat/lng on the ~50 metro docs in the
+`geoscopes` collection (countries/states/supranationals deliberately
+excluded — a single point can't represent them). --emulator and
+--prod flags select the target; update_mask keeps existing
+id/label/population fields untouched. Coords curated by hand;
+reviewer notes in source comments.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
