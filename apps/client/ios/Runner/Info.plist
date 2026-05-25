@@ -66,6 +66,8 @@
 	<string>269624680910-4ou35akn93js1rg2f8km3hiegrpft30u.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used to suggest the metro area nearest you when picking a geoscope.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
