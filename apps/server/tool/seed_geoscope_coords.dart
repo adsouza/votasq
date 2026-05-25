@@ -163,6 +163,7 @@ Future<void> main(List<String> args) async {
         ),
         docName,
         updateMask_fieldPaths: ['lat', 'lng'],
+        currentDocument_exists: true,
       );
       updated++;
     }
