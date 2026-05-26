@@ -193,6 +193,11 @@ class _ProblemsViewState extends State<ProblemsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // At >=600dp (Material's compact/medium boundary) there's room to
+    // surface the "Add problem" affordance directly in the AppBar for
+    // authenticated users. Below that, it stays tucked in the hamburger
+    // menu so the long title isn't crowded.
+    final wide = MediaQuery.sizeOf(context).width >= 600;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
@@ -250,15 +255,21 @@ class _ProblemsViewState extends State<ProblemsView> {
                             .firstOrNull
                             ?.label ??
                         currentGeoscopeId);
+              // When authenticated AND we have horizontal room, the
+              // add-problem affordance lives in the AppBar instead — see
+              // `actions:` below. The menu entry is suppressed in that
+              // case so the action isn't presented twice.
+              final showAddInMenu = !(isAuthenticated && wide);
               return [
-                PopupMenuItem(
-                  value: 'add_problem',
-                  child: ListTile(
-                    leading: const Icon(Icons.add),
-                    title: Text(l10n.addProblemTooltip),
-                    contentPadding: EdgeInsets.zero,
+                if (showAddInMenu)
+                  PopupMenuItem(
+                    value: 'add_problem',
+                    child: ListTile(
+                      leading: const Icon(Icons.add_circle),
+                      title: Text(l10n.addProblemTooltip),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
                 if (isAuthenticated)
                   PopupMenuItem(
                     value: 'toggle_owned',
@@ -357,7 +368,18 @@ class _ProblemsViewState extends State<ProblemsView> {
           BlocBuilder<UserCubit, UserState>(
             builder: (context, authState) {
               if (authState.status == AuthStatus.authenticated) {
-                return const NotificationsBadge();
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (wide)
+                      IconButton(
+                        tooltip: l10n.addProblemTooltip,
+                        icon: const Icon(Icons.add_circle),
+                        onPressed: () => context.go('/new'),
+                      ),
+                    const NotificationsBadge(),
+                  ],
+                );
               }
               return IconButton(
                 tooltip: l10n.signInButtonTooltip,
