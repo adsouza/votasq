@@ -60,7 +60,7 @@
     "menuVotesReplenishHint": "3時間離れると投票が補充されます",
     "votersHeading": "投票者",
     "voterAnonymous": "匿名",
-    "signInHintBanner": "右上のリンクからサインインして、問題に投票し、自分の問題を提案しましょう。",
+    "signInHintBanner": "右上のアイコンからサインインして、問題に投票し、自分の問題を提案しましょう。",
     "tapForDetailsHint": "問題をタップすると詳細が表示されます。",
     "voteHint": "上向き矢印のチップをタップして問題に投票してください。",
     "complaintSubmitted": "報告が送信されました",

@@ -658,7 +658,7 @@ void main() {
       );
       await tester.pumpWidget(buildSubject());
 
-      final signIn = find.byType(TextButton).last;
+      final signIn = find.widgetWithIcon(IconButton, Icons.login);
       expect(signIn, findsOneWidget);
 
       await tester.tap(signIn);

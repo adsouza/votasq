@@ -359,20 +359,10 @@ class _ProblemsViewState extends State<ProblemsView> {
               if (authState.status == AuthStatus.authenticated) {
                 return const NotificationsBadge();
               }
-              return Tooltip(
-                message: l10n.signInButtonTooltip,
-                child: TextButton(
-                  onPressed: () => context.read<UserCubit>().signIn(),
-                  child: SizedBox(
-                    width: 64,
-                    child: Text(
-                      l10n.signInButton,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
+              return IconButton(
+                tooltip: l10n.signInButtonTooltip,
+                icon: const Icon(Icons.login),
+                onPressed: () => context.read<UserCubit>().signIn(),
               );
             },
           ),
