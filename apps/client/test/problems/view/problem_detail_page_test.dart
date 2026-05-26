@@ -1431,7 +1431,9 @@ void main() {
 
       when(() => repo.getProblem('p1')).thenAnswer((_) async => mainProblem);
       when(() => repo.getProblem('p2')).thenAnswer((_) async => linkedProblem);
-      when(() => repo.unlinkProblem('p2')).thenAnswer((_) async {});
+      when(
+        () => repo.unlinkProblem('p2', actorUid: any(named: 'actorUid')),
+      ).thenAnswer((_) async {});
       when(() => userCubit.state).thenReturn(
         const UserState(
           status: AuthStatus.authenticated,
@@ -1449,7 +1451,9 @@ void main() {
       await tester.tap(unlinkBtn);
       await tester.pumpAndSettle();
 
-      verify(() => repo.unlinkProblem('p2')).called(1);
+      verify(
+        () => repo.unlinkProblem('p2', actorUid: 'owner1'),
+      ).called(1);
     });
 
     testWidgets('hides unlink button when unauthenticated', (tester) async {
@@ -1483,7 +1487,13 @@ void main() {
         when(
           () => repo.getGlobalProblemsForSearch(),
         ).thenAnswer((_) async => [searchResult]);
-        when(() => repo.linkProblems('p1', 'p2')).thenAnswer((_) async {});
+        when(
+          () => repo.linkProblems(
+            'p1',
+            'p2',
+            actorUid: any(named: 'actorUid'),
+          ),
+        ).thenAnswer((_) async {});
         when(() => userCubit.state).thenReturn(
           const UserState(
             status: AuthStatus.authenticated,
@@ -1513,7 +1523,9 @@ void main() {
         await tester.tap(confirmLinkBtn);
         await tester.pumpAndSettle();
 
-        verify(() => repo.linkProblems('p1', 'p2')).called(1);
+        verify(
+          () => repo.linkProblems('p1', 'p2', actorUid: 'owner1'),
+        ).called(1);
         expect(find.text('Link a Problem'), findsNothing);
       },
     );
@@ -1580,6 +1592,7 @@ void main() {
             sourceId: any(named: 'sourceId'),
             targetId: any(named: 'targetId'),
             kind: any(named: 'kind'),
+            actorUid: any(named: 'actorUid'),
           ),
         ).thenAnswer((_) async {});
         when(() => userCubit.state).thenReturn(
@@ -1630,6 +1643,7 @@ void main() {
             sourceId: 'p1',
             targetId: 'p2',
             kind: ProblemLinkKind.specialization,
+            actorUid: 'owner1',
           ),
         ).called(1);
       },
@@ -1670,6 +1684,7 @@ void main() {
           () => repo.untagProblemLink(
             sourceId: any(named: 'sourceId'),
             targetId: any(named: 'targetId'),
+            actorUid: any(named: 'actorUid'),
           ),
         ).thenAnswer((_) async {});
         when(() => userCubit.state).thenReturn(
@@ -1698,7 +1713,11 @@ void main() {
         await tester.pumpAndSettle();
 
         verify(
-          () => repo.untagProblemLink(sourceId: 'p1', targetId: 'gen'),
+          () => repo.untagProblemLink(
+            sourceId: 'p1',
+            targetId: 'gen',
+            actorUid: 'owner1',
+          ),
         ).called(1);
       },
     );

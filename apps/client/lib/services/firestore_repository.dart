@@ -851,7 +851,16 @@ class FirestoreRepository {
   }
 
   /// Symmetrically link two problems together into a merged cluster (clique).
-  Future<void> linkProblems(String problemIdA, String problemIdB) async {
+  /// Generic-clique link. [actorUid] must be the authenticated caller's uid;
+  /// it is stamped onto every modified problem doc as `lastLinkActor` so the
+  /// `onProblemLinkedWritten` Cloud Function can attribute the notification
+  /// to the real actor rather than to `ownerId` of the modified doc (which
+  /// is only correct on one side of the paired write — see the trigger).
+  Future<void> linkProblems(
+    String problemIdA,
+    String problemIdB, {
+    required String actorUid,
+  }) async {
     final problemA = await getProblem(problemIdA);
     final problemB = await getProblem(problemIdB);
     if (problemA == null || problemB == null) return;
@@ -868,6 +877,7 @@ class FirestoreRepository {
       final otherIds = allIds.difference({id}).toList();
       batch.update(_problemsRef.doc(id), {
         'linkedProblemIds': otherIds,
+        'lastLinkActor': actorUid,
       });
     }
     await batch.commit();
@@ -877,10 +887,14 @@ class FirestoreRepository {
   /// [targetId]. Removes the pair from either side's generic
   /// `linkedProblemIds` to preserve the cross-list invariant; writes the
   /// directional entry to [sourceId] and the mirrored inverse to [targetId].
+  ///
+  /// [actorUid] is the authenticated caller's uid; see [linkProblems] for
+  /// why we stamp it on every modified doc.
   Future<void> tagProblemLink({
     required String sourceId,
     required String targetId,
     required ProblemLinkKind kind,
+    required String actorUid,
   }) async {
     if (sourceId == targetId) return;
     final source = await getProblem(sourceId);
@@ -907,10 +921,12 @@ class FirestoreRepository {
       ..update(_problemsRef.doc(sourceId), {
         'linkedProblemIds': sourceLinked,
         'typedLinks': sourceTyped.map(_typedLinkToMap).toList(),
+        'lastLinkActor': actorUid,
       })
       ..update(_problemsRef.doc(targetId), {
         'linkedProblemIds': targetLinked,
         'typedLinks': targetTyped.map(_typedLinkToMap).toList(),
+        'lastLinkActor': actorUid,
       });
     await batch.commit();
   }
@@ -918,9 +934,14 @@ class FirestoreRepository {
   /// Remove the directional relationship between [sourceId] and [targetId]
   /// from both sides' `typedLinks`. Does NOT restore the generic clique
   /// link — re-linking is an explicit user action.
+  ///
+  /// Stamps [actorUid] on both docs for symmetry with [tagProblemLink] and
+  /// so any future trigger logic that wants to react to untagging can use
+  /// the same field.
   Future<void> untagProblemLink({
     required String sourceId,
     required String targetId,
+    required String actorUid,
   }) async {
     if (sourceId == targetId) return;
     final source = await getProblem(sourceId);
@@ -937,15 +958,25 @@ class FirestoreRepository {
     final batch = _firestore.batch()
       ..update(_problemsRef.doc(sourceId), {
         'typedLinks': sourceTyped.map(_typedLinkToMap).toList(),
+        'lastLinkActor': actorUid,
       })
       ..update(_problemsRef.doc(targetId), {
         'typedLinks': targetTyped.map(_typedLinkToMap).toList(),
+        'lastLinkActor': actorUid,
       });
     await batch.commit();
   }
 
   /// Unlink a problem from its cluster symmetrically.
-  Future<void> unlinkProblem(String problemId) async {
+  ///
+  /// Stamps [actorUid] on every modified doc; the field is required by the
+  /// linking-clause in `firestore.rules` even though removals from
+  /// `linkedProblemIds` won't trigger a notification (the trigger fires
+  /// only on additions).
+  Future<void> unlinkProblem(
+    String problemId, {
+    required String actorUid,
+  }) async {
     final problem = await getProblem(problemId);
     if (problem == null || problem.linkedProblemIds.isEmpty) return;
 
@@ -953,12 +984,14 @@ class FirestoreRepository {
     final batch = _firestore.batch()
       ..update(_problemsRef.doc(problemId), {
         'linkedProblemIds': <String>[],
+        'lastLinkActor': actorUid,
       });
 
     // Remove this problem ID from all other problems in the cluster
     for (final otherId in clusterIds) {
       batch.update(_problemsRef.doc(otherId), {
         'linkedProblemIds': FieldValue.arrayRemove([problemId]),
+        'lastLinkActor': actorUid,
       });
     }
     await batch.commit();

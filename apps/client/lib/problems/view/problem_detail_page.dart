@@ -551,9 +551,11 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   }
 
   Future<void> _unlink(String targetId) async {
+    final userId = context.read<UserCubit>().state.userId;
+    if (userId == null) return;
     final repo = context.read<FirestoreRepository>();
     try {
-      await repo.unlinkProblem(targetId);
+      await repo.unlinkProblem(targetId, actorUid: userId);
       if (!mounted) return;
       await _load();
     } on Exception catch (e) {
@@ -623,9 +625,15 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
   Future<void> _untagLink(String targetId) async {
     final problem = _problem;
     if (problem == null) return;
+    final userId = context.read<UserCubit>().state.userId;
+    if (userId == null) return;
     final repo = context.read<FirestoreRepository>();
     try {
-      await repo.untagProblemLink(sourceId: problem.id, targetId: targetId);
+      await repo.untagProblemLink(
+        sourceId: problem.id,
+        targetId: targetId,
+        actorUid: userId,
+      );
       if (!mounted) return;
       await _load();
     } on Exception catch (e) {
@@ -1352,17 +1360,24 @@ class _LinkProblemDialogState extends State<_LinkProblemDialog> {
   }
 
   Future<void> _link(Problem target) async {
+    final userId = context.read<UserCubit>().state.userId;
+    if (userId == null) return;
     final repo = context.read<FirestoreRepository>();
     final l10n = context.l10n;
     try {
       final mode = widget.mode;
       if (mode == null) {
-        await repo.linkProblems(widget.currentProblem.id, target.id);
+        await repo.linkProblems(
+          widget.currentProblem.id,
+          target.id,
+          actorUid: userId,
+        );
       } else {
         await repo.tagProblemLink(
           sourceId: widget.currentProblem.id,
           targetId: target.id,
           kind: mode,
+          actorUid: userId,
         );
       }
       if (mounted) {

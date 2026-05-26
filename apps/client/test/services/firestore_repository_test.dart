@@ -1022,13 +1022,22 @@ void main() {
     });
 
     group('linking and search', () {
+      // Helper: read the raw lastLinkActor field for a problem doc. The
+      // field is intentionally NOT modeled on Problem (it's a transient
+      // marker for the Cloud Function trigger), so we read it directly
+      // from the underlying Firestore document instead of via getProblem.
+      Future<String?> readLastLinkActor(String id) async {
+        final snap = await firestore.collection('problems').doc(id).get();
+        return snap.data()?['lastLinkActor'] as String?;
+      }
+
       test('linkProblems merges cliques symmetrically', () async {
         await seedProblem(id: 'p1');
         await seedProblem(id: 'p2');
         await seedProblem(id: 'p3');
 
         // Link p1 and p2 first
-        await repo.linkProblems('p1', 'p2');
+        await repo.linkProblems('p1', 'p2', actorUid: 'tester');
 
         var updatedP1 = await repo.getProblem('p1');
         var updatedP2 = await repo.getProblem('p2');
@@ -1036,7 +1045,7 @@ void main() {
         expect(updatedP2!.linkedProblemIds, ['p1']);
 
         // Merge p3 into the cluster
-        await repo.linkProblems('p2', 'p3');
+        await repo.linkProblems('p2', 'p3', actorUid: 'tester');
 
         updatedP1 = await repo.getProblem('p1');
         updatedP2 = await repo.getProblem('p2');
@@ -1048,17 +1057,39 @@ void main() {
         expect(updatedP3!.linkedProblemIds.toSet(), {'p1', 'p2'});
       });
 
+      test('linkProblems stamps lastLinkActor on every doc in the '
+          'clique merge', () async {
+        // Regression for the wrong-actor-half-the-time bug. The Cloud
+        // Function trigger uses lastLinkActor as the actor identity for
+        // notifications; if ANY doc in the merged clique is missing it,
+        // that firing falls back to ownerId and re-introduces the bug
+        // on the affected side.
+        await seedProblem(id: 'p1', ownerId: 'owner-1');
+        await seedProblem(id: 'p2', ownerId: 'owner-2');
+        await seedProblem(id: 'p3', ownerId: 'owner-3');
+
+        await repo.linkProblems('p1', 'p2', actorUid: 'real-actor');
+        await repo.linkProblems('p2', 'p3', actorUid: 'real-actor');
+
+        // Every doc in the resulting clique should have been stamped on
+        // the most recent write — which means all three for the second
+        // call (it touches the whole transitive clique).
+        expect(await readLastLinkActor('p1'), equals('real-actor'));
+        expect(await readLastLinkActor('p2'), equals('real-actor'));
+        expect(await readLastLinkActor('p3'), equals('real-actor'));
+      });
+
       test('unlinkProblem removes a problem symmetrically', () async {
         await seedProblem(id: 'p1');
         await seedProblem(id: 'p2');
         await seedProblem(id: 'p3');
 
         // Link p1, p2, p3
-        await repo.linkProblems('p1', 'p2');
-        await repo.linkProblems('p2', 'p3');
+        await repo.linkProblems('p1', 'p2', actorUid: 'tester');
+        await repo.linkProblems('p2', 'p3', actorUid: 'tester');
 
         // Unlink p3
-        await repo.unlinkProblem('p3');
+        await repo.unlinkProblem('p3', actorUid: 'tester');
 
         final updatedP1 = await repo.getProblem('p1');
         final updatedP2 = await repo.getProblem('p2');
@@ -1079,6 +1110,7 @@ void main() {
           sourceId: 'p1',
           targetId: 'p2',
           kind: ProblemLinkKind.specialization,
+          actorUid: 'tester',
         );
 
         final p1 = await repo.getProblem('p1');
@@ -1097,15 +1129,35 @@ void main() {
         ]);
       });
 
-      test('tagProblemLink severs pre-existing generic link', () async {
-        await seedProblem(id: 'p1');
-        await seedProblem(id: 'p2');
-        await repo.linkProblems('p1', 'p2');
+      test('tagProblemLink stamps lastLinkActor on both sides', () async {
+        // Regression: the typed-link path is where the user reported the
+        // wrong-name notification. The trigger now relies on
+        // lastLinkActor being present on BOTH sides so the mirrored-side
+        // firing's recipient (== the actor) is filtered out.
+        await seedProblem(id: 'p1', ownerId: 'owner-1');
+        await seedProblem(id: 'p2', ownerId: 'owner-2');
 
         await repo.tagProblemLink(
           sourceId: 'p1',
           targetId: 'p2',
           kind: ProblemLinkKind.specialization,
+          actorUid: 'real-actor',
+        );
+
+        expect(await readLastLinkActor('p1'), equals('real-actor'));
+        expect(await readLastLinkActor('p2'), equals('real-actor'));
+      });
+
+      test('tagProblemLink severs pre-existing generic link', () async {
+        await seedProblem(id: 'p1');
+        await seedProblem(id: 'p2');
+        await repo.linkProblems('p1', 'p2', actorUid: 'tester');
+
+        await repo.tagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          kind: ProblemLinkKind.specialization,
+          actorUid: 'tester',
         );
 
         final p1 = await repo.getProblem('p1');
@@ -1124,11 +1176,13 @@ void main() {
           sourceId: 'p1',
           targetId: 'p2',
           kind: ProblemLinkKind.specialization,
+          actorUid: 'tester',
         );
         await repo.tagProblemLink(
           sourceId: 'p1',
           targetId: 'p2',
           kind: ProblemLinkKind.generalization,
+          actorUid: 'tester',
         );
 
         final p1 = await repo.getProblem('p1');
@@ -1155,9 +1209,14 @@ void main() {
           sourceId: 'p1',
           targetId: 'p2',
           kind: ProblemLinkKind.specialization,
+          actorUid: 'tester',
         );
 
-        await repo.untagProblemLink(sourceId: 'p1', targetId: 'p2');
+        await repo.untagProblemLink(
+          sourceId: 'p1',
+          targetId: 'p2',
+          actorUid: 'tester',
+        );
 
         final p1 = await repo.getProblem('p1');
         final p2 = await repo.getProblem('p2');
@@ -1172,12 +1231,13 @@ void main() {
         await seedProblem(id: 'p2');
         await seedProblem(id: 'p3');
 
-        await repo.linkProblems('p1', 'p2');
-        await repo.linkProblems('p2', 'p3');
+        await repo.linkProblems('p1', 'p2', actorUid: 'tester');
+        await repo.linkProblems('p2', 'p3', actorUid: 'tester');
         await repo.tagProblemLink(
           sourceId: 'p1',
           targetId: 'p2',
           kind: ProblemLinkKind.generalization,
+          actorUid: 'tester',
         );
 
         Future<void> assertInvariant(String id) async {

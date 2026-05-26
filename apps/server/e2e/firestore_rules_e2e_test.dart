@@ -199,8 +199,9 @@ void main() {
           {
             'linkedProblemIds': arrVal([]),
             'typedLinks': arrVal([typedLinkVal('p2', 'specialization')]),
+            'lastLinkActor': sVal(uid),
           },
-          updateMask: ['linkedProblemIds', 'typedLinks'],
+          updateMask: ['linkedProblemIds', 'typedLinks', 'lastLinkActor'],
         );
 
         expect(
@@ -220,8 +221,9 @@ void main() {
         'p3',
         {
           'typedLinks': arrVal([typedLinkVal('p4', 'generalization')]),
+          'lastLinkActor': sVal(uid),
         },
-        updateMask: ['typedLinks'],
+        updateMask: ['typedLinks', 'lastLinkActor'],
       );
 
       expect(resp.statusCode, 200, reason: resp.body);
@@ -237,11 +239,65 @@ void main() {
           'p5',
           {
             'linkedProblemIds': arrVal([sVal('p6')]),
+            'lastLinkActor': sVal(uid),
+          },
+          updateMask: ['linkedProblemIds', 'lastLinkActor'],
+        );
+
+        expect(resp.statusCode, 200, reason: resp.body);
+      },
+    );
+
+    test(
+      'authed: legacy write without lastLinkActor is permitted '
+      '(staged-rollout compat for older clients)',
+      () async {
+        // Older client builds (pre-fix) call linkProblems / tagProblemLink
+        // without setting lastLinkActor. Those writes must still pass —
+        // the trigger falls back to ownerId for them, which is the same
+        // pre-fix (half-wrong) behavior. We don't want to break older
+        // clients during rollout.
+        await seedProblem('p5b');
+
+        final resp = await patchProblem(
+          'p5b',
+          {
+            'linkedProblemIds': arrVal([sVal('p5c')]),
           },
           updateMask: ['linkedProblemIds'],
         );
 
         expect(resp.statusCode, 200, reason: resp.body);
+      },
+    );
+
+    test(
+      'authed: lastLinkActor set to a different uid is rejected '
+      '(anti-impersonation guard)',
+      () async {
+        // Even though the linking clause is permissive about WHICH
+        // fields you can write, lastLinkActor must equal request.auth.uid
+        // when it appears. Otherwise a malicious client could stamp
+        // someone else's uid and have the trigger attribute a
+        // notification falsely.
+        await seedProblem('p5d');
+
+        final resp = await patchProblem(
+          'p5d',
+          {
+            'linkedProblemIds': arrVal([sVal('p5e')]),
+            'lastLinkActor': sVal('someone-else'),
+          },
+          updateMask: ['linkedProblemIds', 'lastLinkActor'],
+        );
+
+        expect(
+          resp.statusCode,
+          403,
+          reason:
+              'Expected 403 PERMISSION_DENIED for impersonated '
+              'lastLinkActor. Got ${resp.statusCode}: ${resp.body}',
+        );
       },
     );
 

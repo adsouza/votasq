@@ -39,19 +39,40 @@ service cloud.firestore {
         )
         ||
         // Problem linking / clustering update (auth required, only
-        // linkedProblemIds and/or typedLinks change, both size-limited to
-        // prevent DoS). `typedLinks` carries directional specialization /
-        // generalization tags; tagProblemLink and untagProblemLink in the
-        // client may write either field individually or both together
-        // (promoting a generic clique link into a typed pair severs the
-        // generic edge and writes the typed entries in one batched update).
+        // linkedProblemIds, typedLinks, and/or lastLinkActor change, all
+        // size-limited to prevent DoS). `typedLinks` carries directional
+        // specialization / generalization tags; tagProblemLink and
+        // untagProblemLink in the client may write either field
+        // individually or both together (promoting a generic clique link
+        // into a typed pair severs the generic edge and writes the typed
+        // entries in one batched update). `lastLinkActor` is the
+        // authenticated caller's uid; the onProblemLinkedWritten Cloud
+        // Function reads it instead of `ownerId` to attribute the
+        // notification to the actual writer (linking is a paired write
+        // and `ownerId` is only correct on one side — see
+        // functions/src/triggers/link.ts).
+        //
+        // The lastLinkActor constraint is "if this write touches the
+        // field, the new value must equal request.auth.uid" rather than
+        // "must be present". This shape supports a staged rollout:
+        // legacy clients that don't set the field still pass (the
+        // trigger falls back to ownerId for those writes, preserving
+        // the old behavior), while any client that DOES set it is
+        // prevented from impersonating another user. We key off the
+        // diff (not the final value) so a legacy client can still write
+        // linkedProblemIds-only updates to docs that already carry a
+        // lastLinkActor from a newer client.
         (
           request.auth != null
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedProblemIds', 'typedLinks'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['linkedProblemIds', 'typedLinks', 'lastLinkActor'])
           && request.resource.data.get('linkedProblemIds', []) is list
           && request.resource.data.get('linkedProblemIds', []).size() <= 100
           && request.resource.data.get('typedLinks', []) is list
           && request.resource.data.get('typedLinks', []).size() <= 100
+          && (
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastLinkActor'])
+            || request.resource.data.lastLinkActor == request.auth.uid
+          )
         )
         ||
         // Hide / unhide. Only the owner may flip `hidden`, and only
