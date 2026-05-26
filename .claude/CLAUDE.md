@@ -75,10 +75,13 @@ melos deploy:server        # Deploy server to Cloud Run
 ### Release
 
 ```sh
-melos run release -- vX.Y.Z "Annotated tag message"
+RELEASE_MESSAGE='Annotated tag message; can include semicolons.' \
+  melos run release -- vX.Y.Z
 ```
 
 Updates `apps/client/pubspec.yaml` to `X.Y.Z+1` (matching the tag), commits, pushes main, creates a signed annotated tag, and pushes the tag — which triggers `.github/workflows/release.yaml` to build Android, Web, and macOS artifacts and publish a GitHub Release. Pre-flight checks: clean tree, on `main`, up-to-date with origin, tag doesn't exist, `melos format` + `flutter analyze` pass. See `tool/release.sh` for the full sequence.
+
+The tag message must be passed via the `RELEASE_MESSAGE` env var, not as a positional arg. Melos's script runner concatenates positional args into the final shell command without quoting and runs the result under `sh -c eval`, so any shell metacharacter (`;`, `&&`, `|`, backticks, `$()`, `>`) in a positional message is reparsed as live shell syntax and silently truncates the tag annotation at the first metachar (and runs the rest as bogus commands, exiting non-zero after the release otherwise succeeded). The env var sidesteps melos's arg pipeline. Direct script invocation (`tool/release.sh vX.Y.Z 'msg; with; semis'`) is also safe because the user's outer shell handles quoting before melos is involved.
 
 ## Gotchas
 

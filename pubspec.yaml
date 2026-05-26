@@ -74,10 +74,16 @@ melos:
       run: ./tool/release.sh "$@"
       description: |
         Cut a new client release. Usage:
-          melos run release -- <vX.Y.Z[-suffix]> "<annotated tag message>"
-        Runs format + analyze, bumps the build number in
-        apps/client/pubspec.yaml, commits, pushes, and pushes an annotated tag
-        that triggers .github/workflows/release.yaml. See tool/release.sh.
+          RELEASE_MESSAGE='annotated tag message' \
+            melos run release -- <vX.Y.Z[-suffix]>
+        Pass the message via the RELEASE_MESSAGE env var, not as a positional
+        arg — melos's script runner concatenates extraArgs into the command
+        line without shell-quoting, so semicolons (or any shell metacharacter)
+        in a positional message get reparsed by eval and truncate the tag
+        annotation silently. The env var bypasses that pipeline. Runs format +
+        analyze, bumps the build number in apps/client/pubspec.yaml, commits,
+        pushes, and pushes an annotated tag that triggers
+        .github/workflows/release.yaml. See tool/release.sh.
 
     # Note: `flutter run` is launched via tool/run-client.sh, not as a melos
     # script, because melos doesn't forward stdin to script processes — so

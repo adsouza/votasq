@@ -9,20 +9,29 @@
 # via --build-name=${GITHUB_REF_NAME#v} and --build-number=run_number per
 # release.yaml. Keeping pubspec in sync with the tag is for human readability.
 #
-# Usage:
-#   tool/release.sh <vX.Y.Z[-suffix]> <annotated tag message...>
+# Usage (preferred — robust against shell metacharacters in the message):
+#   RELEASE_MESSAGE='Annotated tag message; can contain semicolons.' \
+#     melos run release -- v0.5.3
 #
-# Typically invoked via:
-#   melos run release -- v0.5.3 "Release notes for humans"
+# Direct invocation also works (user's shell quotes correctly):
+#   tool/release.sh v0.5.3 'Annotated tag message; can contain semicolons.'
+#   RELEASE_MESSAGE='...' tool/release.sh v0.5.3
 #
-# All positional args after the tag are joined with a single space to form
-# the message. This is defensive against melos's `"$@"` arg-forwarding,
-# which re-tokenizes quoted strings on whitespace before they reach the
-# script — so `melos run release -- v0.5.3 "two words"` arrives here as
-# three argv entries (v0.5.3, two, words) rather than two. Joining via
-# `"$*"` reassembles them into "two words" regardless. Direct invocation
-# `tool/release.sh v0.5.3 "two words"` still works (one quoted argv
-# entry collapses to itself via $*).
+# Why the env-var contract: melos's script runner joins extraArgs into the
+# command line by raw string concatenation (no shell-quoting), then runs the
+# joined string under `sh -c eval "$MELOS_SCRIPT"` — so any shell metacharacter
+# (;, &&, |, backticks, $(), >) inside `melos run release -- ... "msg; with;
+# semis"` is reparsed by eval as live syntax, truncating the message at the
+# first metachar and running the rest as bogus commands. Passing the message
+# via $RELEASE_MESSAGE bypasses melos's arg pipeline entirely: env vars set in
+# the user's outer shell propagate byte-for-byte into the script's process.
+#
+# Positional-arg fallback: if $RELEASE_MESSAGE is unset, all positional args
+# after the tag are joined via `"$*"`. This is defensive against melos's
+# whitespace re-tokenization of quoted strings — so direct invocation like
+# `tool/release.sh v0.5.3 "two words"` still works, but a melos invocation
+# with metacharacters in the message will silently truncate (use the env-var
+# form instead).
 #
 # Pre-flight checks run before any state is mutated. If anything fails after
 # the pubspec bump, the script bails loudly rather than attempting rollback;
@@ -31,14 +40,19 @@
 
 set -eo pipefail
 
-if [ $# -lt 2 ]; then
-  echo "Usage: melos run release -- <vX.Y.Z[-suffix]> <annotated tag message...>" >&2
+if [ $# -lt 1 ]; then
+  echo "Usage: RELEASE_MESSAGE='...' melos run release -- <vX.Y.Z[-suffix]>" >&2
+  echo "   or: tool/release.sh <vX.Y.Z[-suffix]> <annotated tag message...>" >&2
   exit 1
 fi
 
 TAG="$1"
 shift
-MESSAGE="$*"
+if [ -n "${RELEASE_MESSAGE:-}" ]; then
+  MESSAGE="$RELEASE_MESSAGE"
+else
+  MESSAGE="$*"
+fi
 
 if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$ ]]; then
   echo "Error: tag must match vX.Y.Z or vX.Y.Z-suffix (got: $TAG)" >&2
