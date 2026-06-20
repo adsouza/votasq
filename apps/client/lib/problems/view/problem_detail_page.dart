@@ -11,6 +11,7 @@ import 'package:client/problems/widgets/problem_text_utils.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
 import 'package:client/services/firestore_repository.dart'
     show FirestoreRepository, LanguageMismatchException;
+import 'package:client/widgets/relative_timestamp.dart';
 import 'package:client/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -303,17 +304,37 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
     ];
   }
 
-  Widget _buildOwnerLine() {
-    final name = _ownerName;
-    if (name == null) return const SizedBox.shrink();
+  /// "Posted by Alice" followed by a relative creation time ("3 days ago"),
+  /// plus an "Edited X ago" line once the problem has been revised.
+  ///
+  /// The owner line is omitted until the async name lookup resolves; the
+  /// created timestamp always shows since `createdAt` is on the loaded
+  /// problem. The edited line appears only when `version > 1` — the signal a
+  /// revision occurred. `lastUpdatedAt` tracks creation and revisions but not
+  /// votes, so it's the right field for "edited", and at v1 it equals
+  /// `createdAt`, which is why the line is gated rather than always shown.
+  Widget _buildProblemMeta(Problem problem) {
     final theme = Theme.of(context);
+    final name = _ownerName;
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Text(
-        context.l10n.problemPostedBy(name),
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (name != null)
+            Text(
+              context.l10n.problemPostedBy(name),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          RelativeTimestamp(timestamp: problem.createdAt),
+          if (problem.version > 1)
+            RelativeTimestamp(
+              timestamp: problem.lastUpdatedAt,
+              label: context.l10n.problemEditedLabel,
+            ),
+        ],
       ),
     );
   }
@@ -770,7 +791,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
                     ),
                   ),
                 ],
-                _buildOwnerLine(),
+                _buildProblemMeta(problem),
                 const SizedBox(height: 16),
                 Wrap(
                   spacing: 8,
@@ -841,7 +862,7 @@ class _ProblemDetailPageState extends State<ProblemDetailPage> {
               );
             },
           ),
-          _buildOwnerLine(),
+          _buildProblemMeta(problem),
           ..._buildGeoscopeRow(problem),
           _buildForksList(),
           _buildLinkedProblemsList(),

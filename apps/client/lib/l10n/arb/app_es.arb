@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "Mostrar solo problemas con metas",
     "problemDetailPageTitle": "Detalles del problema",
     "problemPostedBy": "Publicado por {name}",
+    "problemEditedLabel": "Editado",
     "hideProblemButton": "Ocultar de la lista",
     "unhideProblemButton": "Mostrar en la lista",
     "problemHiddenOwnerBannerTitle": "Este problema está oculto de la lista principal.",

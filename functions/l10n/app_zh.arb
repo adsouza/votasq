@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "只显示有目标的问题",
     "problemDetailPageTitle": "问题详情",
     "problemPostedBy": "{name} 发布",
+    "problemEditedLabel": "已编辑",
     "hideProblemButton": "从列表中隐藏",
     "unhideProblemButton": "在列表中显示",
     "problemHiddenOwnerBannerTitle": "此问题已从主列表中隐藏。",

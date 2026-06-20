@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "إظهار المشاكل ذات الأهداف فقط",
     "problemDetailPageTitle": "تفاصيل المشكلة",
     "problemPostedBy": "نشره {name}",
+    "problemEditedLabel": "تم التعديل",
     "hideProblemButton": "إخفاء من القائمة",
     "unhideProblemButton": "إظهار في القائمة",
     "problemHiddenOwnerBannerTitle": "هذه المشكلة مخفية من القائمة الرئيسية.",

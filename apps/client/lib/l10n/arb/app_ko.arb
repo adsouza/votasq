@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "목표가 있는 문제만 보기",
     "problemDetailPageTitle": "문제 상세",
     "problemPostedBy": "{name}님이 게시함",
+    "problemEditedLabel": "수정됨",
     "hideProblemButton": "목록에서 숨기기",
     "unhideProblemButton": "목록에 표시",
     "problemHiddenOwnerBannerTitle": "이 문제는 메인 목록에서 숨겨져 있습니다.",
