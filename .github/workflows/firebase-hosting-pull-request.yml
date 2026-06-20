@@ -25,7 +25,7 @@ permissions:
   pull-requests: write
 jobs:
   build_and_preview:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.FIREBASE_SERVICE_ACCOUNT_VOTASQ != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -39,3 +39,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VOTASQ }}
           projectId: votasq
+
+name: Skip Firebase deploy (no service account) 
+  if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VOTASQ == '' }} 
+    run: echo "FIREBASE_SERVICE_ACCOUNT_VOTASQ secret missing — skipping Firebase preview deploy."

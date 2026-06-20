@@ -8,3 +8,4 @@ build/
 .firebase/
 apps/server/public/
 xcuserdata/
+/key.json
