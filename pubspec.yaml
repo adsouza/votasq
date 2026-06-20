@@ -13,7 +13,7 @@ workspace:
   - packages/google_mlkit_translation
 
 dev_dependencies:
-  melos: ^7.5.0
+  melos: ^7.8.1
 
 melos:
   command:
