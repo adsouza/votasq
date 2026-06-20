@@ -5,6 +5,7 @@ import 'package:client/l10n/l10n.dart';
 import 'package:client/problems/cubit/problems_cubit.dart';
 import 'package:client/problems/widgets/geoscope_widgets.dart';
 import 'package:client/problems/widgets/problem_translation.dart';
+import 'package:client/widgets/relative_timestamp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/shared.dart';
@@ -68,6 +69,7 @@ class ProblemReadTile extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                RelativeTimestamp(timestamp: problem.createdAt),
               ],
             ),
             if (problem.geoscope != '/')

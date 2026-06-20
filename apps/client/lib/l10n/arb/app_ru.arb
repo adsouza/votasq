@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "Показать только проблемы с целями",
     "problemDetailPageTitle": "Детали проблемы",
     "problemPostedBy": "Опубликовал(а) {name}",
+    "problemEditedLabel": "Изменено",
     "hideProblemButton": "Скрыть из списка",
     "unhideProblemButton": "Показать в списке",
     "problemHiddenOwnerBannerTitle": "Эта проблема скрыта из основного списка.",

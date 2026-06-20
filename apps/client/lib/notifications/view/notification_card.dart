@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:client/l10n/l10n.dart';
 import 'package:client/services/firestore_repository.dart';
+import 'package:client/widgets/relative_timestamp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -89,6 +90,10 @@ class _NotificationCardState extends State<NotificationCard> {
                       Text(
                         body,
                         style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      RelativeTimestamp(
+                        timestamp: widget.notification.updatedAt,
                       ),
                     ],
                   ),
