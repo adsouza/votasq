@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "केवल लक्ष्य वाली समस्याएँ दिखाएँ",
     "problemDetailPageTitle": "समस्या विवरण",
     "problemPostedBy": "{name} द्वारा पोस्ट किया गया",
+    "problemEditedLabel": "संपादित",
     "hideProblemButton": "सूची से छिपाएँ",
     "unhideProblemButton": "सूची में दिखाएँ",
     "problemHiddenOwnerBannerTitle": "यह समस्या मुख्य सूची से छिपी हुई है।",

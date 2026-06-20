@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "Yalnızca hedefi olan sorunları göster",
     "problemDetailPageTitle": "Sorun Detayları",
     "problemPostedBy": "{name} tarafından gönderildi",
+    "problemEditedLabel": "Düzenlendi",
     "hideProblemButton": "Listeden gizle",
     "unhideProblemButton": "Listede göster",
     "problemHiddenOwnerBannerTitle": "Bu sorun ana listeden gizlenmiştir.",

@@ -381,6 +381,15 @@ ARB files in `lib/l10n/arb/` define localized strings for 23 languages.
 Flutter generates `AppLocalizations` at build time. Access in widgets via the
 `context.l10n` extension.
 
+Relative timestamps ("9 hours ago") are rendered by the `RelativeTimestamp`
+widget (`lib/widgets/relative_timestamp.dart`) using the `timeago` package.
+`bootstrap()` calls `registerTimeagoLocales()` once at startup to register
+messages for every supported locale, keyed by `languageCode`. `timeago` bundles
+most of them; Marathi, Punjabi, Swahili, and Telugu have hand-written
+`LookupMessages` in `lib/l10n/timeago_locales.dart`. **Adding a new app locale
+means adding it there too** — an unregistered locale silently falls back to
+English.
+
 ### App Check
 
 The client talks to Firestore both directly (via `cloud_firestore` —
