@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "目標のある問題のみ表示",
     "problemDetailPageTitle": "問題の詳細",
     "problemPostedBy": "{name}さんが投稿",
+    "problemEditedLabel": "編集済み",
     "hideProblemButton": "一覧から非表示にする",
     "unhideProblemButton": "一覧に表示する",
     "problemHiddenOwnerBannerTitle": "この問題はメイン一覧から非表示になっています。",

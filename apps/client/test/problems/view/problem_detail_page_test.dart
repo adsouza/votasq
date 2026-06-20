@@ -41,6 +41,8 @@ Problem _problem({
   int votes = 7,
   String? lang,
   bool hidden = false,
+  int version = 1,
+  DateTime? lastUpdatedAt,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -52,8 +54,9 @@ Problem _problem({
     votes: votes,
     lang: lang,
     hidden: hidden,
+    version: version,
     createdAt: now,
-    lastUpdatedAt: now,
+    lastUpdatedAt: lastUpdatedAt ?? now,
   );
 }
 
@@ -176,6 +179,37 @@ void main() {
       expect(find.text('7'), findsOneWidget);
       // No text field in read-only view.
       expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('omits the "Edited" line for an unrevised problem', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer((_) async => _problem());
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'other'),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Edited'), findsNothing);
+    });
+
+    testWidgets('shows an "Edited" line once a problem has been revised', (
+      tester,
+    ) async {
+      when(() => repo.getProblem(any())).thenAnswer(
+        (_) async => _problem(
+          version: 2,
+          lastUpdatedAt: DateTime.now().subtract(const Duration(hours: 2)),
+        ),
+      );
+      when(() => userCubit.state).thenReturn(
+        const UserState(status: AuthStatus.authenticated, userId: 'other'),
+      );
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      // The label phrasing comes from timeago; assert on the prefix so the
+      // test isn't brittle to exact relative wording.
+      expect(find.textContaining('Edited'), findsOneWidget);
     });
 
     testWidgets(

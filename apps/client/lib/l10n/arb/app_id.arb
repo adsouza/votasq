@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "Tampilkan hanya masalah dengan tujuan",
     "problemDetailPageTitle": "Detail Masalah",
     "problemPostedBy": "Diposting oleh {name}",
+    "problemEditedLabel": "Diedit",
     "hideProblemButton": "Sembunyikan dari daftar",
     "unhideProblemButton": "Tampilkan di daftar",
     "problemHiddenOwnerBannerTitle": "Masalah ini disembunyikan dari daftar utama.",

@@ -22,6 +22,7 @@
     "showOnlyWithGoalsMenuItem": "లక్ష్యాలు ఉన్న సమస్యలను మాత్రమే చూపించు",
     "problemDetailPageTitle": "సమస్య వివరాలు",
     "problemPostedBy": "{name} పోస్ట్ చేశారు",
+    "problemEditedLabel": "సవరించబడింది",
     "hideProblemButton": "జాబితా నుండి దాచండి",
     "unhideProblemButton": "జాబితాలో చూపించు",
     "problemHiddenOwnerBannerTitle": "ఈ సమస్య ప్రధాన జాబితా నుండి దాచబడింది.",

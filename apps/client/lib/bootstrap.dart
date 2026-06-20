@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 
 import 'package:bloc/bloc.dart';
 import 'package:client/firebase_options.dart';
+import 'package:client/l10n/timeago_locales.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -41,6 +42,12 @@ Future<void> bootstrap(
   // ignore: avoid_print
   print('Bootstrap: useEmulators=$useEmulators');
   usePathUrlStrategy();
+
+  // Load relative-time ("9 hours ago") messages for every supported locale
+  // before any UI builds. timeago stores these in global state, so once is
+  // enough and it must precede the first NotificationCard render.
+  registerTimeagoLocales();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

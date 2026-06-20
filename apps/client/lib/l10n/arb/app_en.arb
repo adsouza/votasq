@@ -85,6 +85,10 @@
         "description": "Title in the AppBar of the problem detail page"
     },
     "problemPostedBy": "Posted by {name}",
+    "problemEditedLabel": "Edited",
+    "@problemEditedLabel": {
+        "description": "Label prefixed to the relative time a problem was last revised, shown on the problem detail page only when it has been edited at least once. Reads e.g. \"Edited 3 days ago\"."
+    },
     "@problemPostedBy": {
         "description": "Attribution line on the problem detail page showing the display name of the user who owns the problem. Omitted when the owner has no displayName set.",
         "placeholders": {
