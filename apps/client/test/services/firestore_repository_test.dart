@@ -474,34 +474,39 @@ void main() {
         },
       );
 
-      test('getForksOfProblem sorts by votes desc, then id asc', () async {
-        await seedProblemWithVersion(id: 'src', version: 1);
-        final a = await repo.forkProblem(
-          sourceProblemId: 'src',
-          ownerId: 'alice',
-        );
-        final b = await repo.forkProblem(
-          sourceProblemId: 'src',
-          ownerId: 'bob',
-        );
-        final c = await repo.forkProblem(
-          sourceProblemId: 'src',
-          ownerId: 'carol',
-        );
-        // Manually adjust votes (all forks start at 1).
-        await firestore.collection('problems').doc(a.id).update({'votes': 5});
-        await firestore.collection('problems').doc(b.id).update({'votes': 9});
-        await firestore.collection('problems').doc(c.id).update({'votes': 9});
+      test(
+        'getForksOfProblem sorts by votes desc, then lastUpdatedAt desc',
+        () async {
+          await seedProblemWithVersion(id: 'src', version: 1);
+          final a = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'alice',
+          );
+          final b = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'bob',
+          );
+          final c = await repo.forkProblem(
+            sourceProblemId: 'src',
+            ownerId: 'carol',
+          );
+          // a has the fewest votes; b and c tie on votes and are broken by
+          // lastUpdatedAt DESC (c is newer than b).
+          await firestore.collection('problems').doc(a.id).update({'votes': 5});
+          await firestore.collection('problems').doc(b.id).update({
+            'votes': 9,
+            'lastUpdatedAt': Timestamp.fromDate(DateTime.utc(2024)),
+          });
+          await firestore.collection('problems').doc(c.id).update({
+            'votes': 9,
+            'lastUpdatedAt': Timestamp.fromDate(DateTime.utc(2024, 6)),
+          });
 
-        final forks = await repo.getForksOfProblem('src');
-        // c may sort before or after b purely by id comparison; both have
-        // votes=9, then a with votes=5.
-        expect(forks[2].id, a.id);
-        expect({forks[0].id, forks[1].id}, {b.id, c.id});
-        // Stable tiebreak by id ascending.
-        final tied = [forks[0].id, forks[1].id]..sort();
-        expect([forks[0].id, forks[1].id], tied);
-      });
+          final forks = await repo.getForksOfProblem('src');
+          // c (9 votes, newest) → b (9 votes, older) → a (5 votes).
+          expect(forks.map((p) => p.id).toList(), [c.id, b.id, a.id]);
+        },
+      );
 
       test(
         'getForksOfProblem returns empty list when there are no forks',
@@ -1265,7 +1270,7 @@ void main() {
 
         final results = await repo.getGlobalProblemsForSearch();
         expect(results, hasLength(2));
-        // Sorted by votes DESC, then ID ASC
+        // Sorted by votes DESC (ties broken by lastUpdatedAt DESC, then ID ASC)
         expect(results[0].id, 'p3');
         expect(results[1].id, 'p1');
       });
@@ -1278,6 +1283,23 @@ void main() {
         final results = await repo.getGlobalProblemsForSearch();
         expect(results.map((p) => p.id).toList(), ['p3', 'p1']);
       });
+
+      test(
+        'getGlobalProblemsForSearch breaks vote ties by lastUpdatedAt DESC',
+        () async {
+          await seedProblem(id: 'old', votes: 5);
+          await seedProblem(id: 'new', votes: 5);
+          await firestore.collection('problems').doc('old').update({
+            'lastUpdatedAt': Timestamp.fromDate(DateTime.utc(2024)),
+          });
+          await firestore.collection('problems').doc('new').update({
+            'lastUpdatedAt': Timestamp.fromDate(DateTime.utc(2024, 6)),
+          });
+
+          final results = await repo.getGlobalProblemsForSearch();
+          expect(results.map((p) => p.id).toList(), ['new', 'old']);
+        },
+      );
     });
   });
 }

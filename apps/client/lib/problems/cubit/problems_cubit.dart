@@ -7,29 +7,130 @@ import 'package:client/services/firestore_repository.dart';
 import 'package:shared/shared.dart';
 
 class ProblemsCubit extends Cubit<ProblemsState> {
-  ProblemsCubit(this._repo) : super(const ProblemsState());
+  ProblemsCubit(this._repo, {int eagerLoadCap = 99, int pageSize = 9})
+    : _eagerLoadCap = eagerLoadCap,
+      _pageSize = pageSize,
+      super(const ProblemsState());
 
   final FirestoreRepository _repo;
   StreamSubscription<dynamic>? _subscription;
-  static const _pageSize = 20;
+  final int _pageSize;
+
+  /// Upper bound on how many problems the post-subscribe background loader
+  /// will eagerly fetch so the 1-vote tier (where freshly created problems
+  /// land) is already in memory and can be scrolled to instantly. Beyond this
+  /// the user can still page further by scrolling. See [_eagerLoad].
+  ///
+  /// Note: because the live window already loads [_pageSize] problems, a cap
+  /// at or below that makes the background loader a no-op — the loaded list is
+  /// then just the realtime window.
+  final int _eagerLoadCap;
+
   bool _isLoadingMore = false;
+
+  /// Once pagination has advanced past the live window, the paginated cursor
+  /// (`lastDocument`) and `hasMore` are owned by [loadMore]; the watch stream
+  /// must not reset them back to the first page's tail on every emit.
+  bool _hasPaginated = false;
+
+  /// Guards [_eagerLoad] so it's only kicked off once per subscription.
+  bool _eagerKickedOff = false;
+  bool _eagerLoading = false;
+
+  /// Monotonic sequence backing [ProblemScrollRequest] so repeated requests
+  /// for the same problem still register as a state change for the view.
+  int _scrollSeq = 0;
+
+  /// Listing sort: votes DESC, then lastUpdatedAt DESC (most recently touched
+  /// first within a vote tier), then document id ASC as a stable tiebreak —
+  /// identical to the server-side `orderBy` in [FirestoreRepository] so locally
+  /// reconciled state matches what a fresh query would return.
+  static int _byRank(Problem a, Problem b) {
+    final byVotes = b.votes.compareTo(a.votes);
+    if (byVotes != 0) return byVotes;
+    final byUpdated = b.lastUpdatedAt.compareTo(a.lastUpdatedAt);
+    if (byUpdated != 0) return byUpdated;
+    return a.id.compareTo(b.id);
+  }
+
+  /// Union of [a] and [b] keyed by id (entries from [a] win on conflict so
+  /// optimistic local mutations survive), sorted by [_byRank].
+  static List<Problem> _merged(Iterable<Problem> a, Iterable<Problem> b) {
+    final byId = <String, Problem>{};
+    for (final p in a) {
+      byId[p.id] = p;
+    }
+    for (final p in b) {
+      byId.putIfAbsent(p.id, () => p);
+    }
+    return byId.values.toList()..sort(_byRank);
+  }
+
+  /// Merge a fresh live-window snapshot into the existing (possibly paginated)
+  /// list instead of replacing it wholesale.
+  ///
+  /// The watch query covers only the top [_pageSize] problems, so [window] is
+  /// authoritative for that prefix but says nothing about items below it. We
+  /// therefore:
+  ///   * take the window's copies for ids it contains (they're freshest),
+  ///   * keep existing items that sort strictly *after* the window's last item
+  ///     (the paginated tail and freshly created 1-vote problems), and
+  ///   * drop existing items that fall within the window's range but are
+  ///     absent from it — they left the listing (solved/hidden/deleted).
+  ///
+  /// Problem votes only ever increment, so an in-flight snapshot that predates
+  /// a local optimistic upvote must not clobber it; we floor each window item's
+  /// votes at any higher local value.
+  List<Problem> _reconcileWithWindow(
+    List<Problem> existing,
+    List<Problem> window,
+  ) {
+    if (window.isEmpty) {
+      // A spurious empty window shouldn't wipe a loaded tail; only an
+      // unpaginated empty window means the listing is genuinely empty.
+      return _hasPaginated ? existing : const <Problem>[];
+    }
+    final existingById = {for (final p in existing) p.id: p};
+    final reconciledWindow = window.map((w) {
+      final local = existingById[w.id];
+      if (local != null && local.votes > w.votes) {
+        return w.copyWith(votes: local.votes);
+      }
+      return w;
+    }).toList();
+    final windowIds = window.map((p) => p.id).toSet();
+    final threshold = window.last;
+    final tail = existing.where(
+      (p) => !windowIds.contains(p.id) && _byRank(p, threshold) > 0,
+    );
+    return [...reconciledWindow, ...tail]..sort(_byRank);
+  }
 
   /// Subscribe to real-time updates for the first page of problems.
   void subscribe() {
     emit(state.copyWith(status: ProblemsStatus.loading));
+    _hasPaginated = false;
+    _eagerKickedOff = false;
     unawaited(_subscription?.cancel());
     _subscription = _repo
-        .watchProblems(geoscope: state.geoscope)
+        .watchProblems(geoscope: state.geoscope, limit: _pageSize)
         .listen(
           (result) {
             emit(
               state.copyWith(
                 status: ProblemsStatus.success,
-                problems: result.problems,
-                lastDocument: () => result.lastDoc,
-                hasMore: result.problems.length >= _pageSize,
+                problems: _reconcileWithWindow(state.problems, result.problems),
+                // Once paginated, loadMore owns the cursor/hasMore.
+                lastDocument: _hasPaginated ? null : () => result.lastDoc,
+                hasMore: _hasPaginated
+                    ? null
+                    : result.problems.length >= _pageSize,
               ),
             );
+            if (!_eagerKickedOff) {
+              _eagerKickedOff = true;
+              unawaited(_eagerLoad());
+            }
           },
           onError: (Object e, StackTrace st) {
             log('subscribe failed: $e', stackTrace: st);
@@ -38,18 +139,41 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         );
   }
 
-  /// Load the next page of problems (appends to existing list).
+  /// After the first snapshot, page through the listing in the background until
+  /// the 1-vote tier is loaded (so newly created problems can be scrolled to),
+  /// the [_eagerLoadCap] is hit, or the server runs out. Yields between pages
+  /// so it doesn't compete with user scrolling.
+  Future<void> _eagerLoad() async {
+    if (_eagerLoading) return;
+    _eagerLoading = true;
+    try {
+      while (state.hasMore &&
+          state.problems.length < _eagerLoadCap &&
+          !state.problems.any((p) => p.votes <= 1)) {
+        final before = state.problems.length;
+        await loadMore();
+        if (state.problems.length <= before) break; // no progress; bail
+        await Future<void>.delayed(Duration.zero);
+      }
+    } finally {
+      _eagerLoading = false;
+    }
+  }
+
+  /// Load the next page of problems (merges into the existing list).
   Future<void> loadMore() async {
     if (_isLoadingMore || !state.hasMore || state.lastDocument == null) return;
     _isLoadingMore = true;
+    _hasPaginated = true;
     try {
       final result = await _repo.getProblems(
         geoscope: state.geoscope,
         startAfter: state.lastDocument,
+        pageSize: _pageSize,
       );
       emit(
         state.copyWith(
-          problems: [...state.problems, ...result.problems],
+          problems: _merged(state.problems, result.problems),
           lastDocument: () => result.lastDoc,
           hasMore: result.problems.length >= _pageSize,
         ),
@@ -65,12 +189,13 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   /// Create a new problem with the given description.
   /// If [geoscope] is provided it overrides the current viewing geoscope.
   ///
-  /// Optimistically prepends the new problem to local state. The watch
-  /// stream may not emit when the new doc falls past the first page's
-  /// `limit`, so this keeps the UI in sync regardless. Dedupes by id
-  /// because on web the Firestore listener fires synchronously from
-  /// local cache before `await` returns, so a blind prepend would
-  /// duplicate the new problem at the top and at its sorted position.
+  /// Inserts the new problem at its honest sorted position (the top of the
+  /// 1-vote tier) rather than artificially at the top of the list, and asks
+  /// the view to scroll it into view. Starting low means the owner's first
+  /// upvote moves it *up* (intuitive) instead of the old behaviour where the
+  /// artificial top placement made voting look like a demotion. Dedupes by id
+  /// because on web the Firestore listener fires synchronously from local
+  /// cache before `await` returns.
   Future<void> addProblem({
     required String description,
     required String ownerId,
@@ -86,8 +211,18 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         geoscope: geoscope ?? state.geoscope,
         userLanguage: userLanguage,
       );
-      final others = state.problems.where((p) => p.id != created.id).toList();
-      emit(state.copyWith(problems: [created, ...others]));
+      emit(
+        state.copyWith(
+          problems: _merged(
+            state.problems.where((p) => p.id != created.id),
+            [created],
+          ),
+          scrollRequest: ProblemScrollRequest(
+            problemId: created.id,
+            seq: ++_scrollSeq,
+          ),
+        ),
+      );
     } on LanguageMismatchException {
       rethrow;
     } on Exception catch (e, st) {
@@ -102,14 +237,44 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }
 
   /// Vote on a problem.
+  ///
+  /// Optimistically increments the vote locally and re-sorts so the problem
+  /// climbs immediately, then asks the view to keep it in view (the view only
+  /// scrolls if it would otherwise leave the viewport). Reverts on failure.
+  /// Safe because problem votes only ever increment.
   Future<void> vote({
     required String problemId,
     required String userId,
   }) async {
+    final index = state.problems.indexWhere((p) => p.id == problemId);
+    final original = index == -1 ? null : state.problems[index];
+    if (original != null) {
+      final bumped = [...state.problems];
+      bumped[index] = original.copyWith(votes: original.votes + 1);
+      bumped.sort(_byRank);
+      emit(
+        state.copyWith(
+          problems: bumped,
+          scrollRequest: ProblemScrollRequest(
+            problemId: problemId,
+            seq: ++_scrollSeq,
+          ),
+        ),
+      );
+    }
     try {
       await _repo.vote(problemId: problemId, userId: userId);
     } on Exception catch (e, st) {
       log('vote failed: $e', stackTrace: st);
+      if (original != null) {
+        final idx = state.problems.indexWhere((p) => p.id == problemId);
+        if (idx != -1) {
+          final reverted = [...state.problems]
+            ..[idx] = original
+            ..sort(_byRank);
+          emit(state.copyWith(problems: reverted));
+        }
+      }
     }
   }
 

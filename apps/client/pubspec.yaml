@@ -40,6 +40,7 @@ dependencies:
   http: ^1.2.1
   intl: ^0.20.2
   meta: ^1.16.0
+  scrollable_positioned_list: ^0.3.8 # Index-based scroll-to for the problem list
   shared: any # Use the same shared logic as the server
   shared_preferences: ^2.5.5
   timeago: ^3.7.1
