@@ -253,6 +253,108 @@ void main() {
     );
 
     test(
+      'switching geoscope mid-load discards the stale page and runs the new '
+      'eager loader',
+      () async {
+        // A fresh watch stream per subscription (a controller can only be
+        // listened once).
+        final watchA =
+            StreamController<
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
+            >();
+        final watchB =
+            StreamController<
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
+            >();
+        addTearDown(watchA.close);
+        addTearDown(watchB.close);
+        var watchCalls = 0;
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) {
+          watchCalls++;
+          return watchCalls == 1 ? watchA.stream : watchB.stream;
+        });
+
+        // First eager fetch (geoscope A) is held open; later fetches are empty.
+        final held =
+            Completer<({List<Problem> problems, DocumentSnapshot? lastDoc})>();
+        var getCalls = 0;
+        when(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).thenAnswer((_) {
+          getCalls++;
+          return getCalls == 1
+              ? held.future
+              : Future.value((problems: <Problem>[], lastDoc: null));
+        });
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+
+        // Full window for geoscope A => hasMore => eager kicks => loadMore
+        // (held in flight).
+        watchA.add((
+          problems: [for (var i = 0; i < 9; i++) _problem(id: 'A$i', votes: 5)],
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        expect(getCalls, 1, reason: 'eager started a page for geoscope A');
+
+        // Switch geoscope while A's page is still in flight.
+        cubit.changeGeoscope('us');
+        watchB.add((
+          problems: [for (var i = 0; i < 9; i++) _problem(id: 'B$i', votes: 5)],
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        // The new subscription's eager loader ran (not blocked by A's stale
+        // in-flight loadMore guard).
+        expect(getCalls, greaterThanOrEqualTo(2));
+
+        // Now resolve the stale A page — it must be discarded.
+        held.complete((
+          problems: [
+            for (var i = 0; i < 9; i++) _problem(id: 'Astale$i', votes: 5),
+          ],
+          lastDoc: _FakeDocumentSnapshot(),
+        ));
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        expect(cubit.state.geoscope, 'us');
+        expect(
+          cubit.state.problems.any((p) => p.id.startsWith('A')),
+          isFalse,
+          reason: 'no geoscope-A data leaked into the new subscription',
+        );
+      },
+    );
+
+    test(
       'eager-load and pagination wait for a server snapshot, ignoring cache',
       () async {
         // Regression: against prod (web persistence ON) the first watch

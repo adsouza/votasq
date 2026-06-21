@@ -35,7 +35,14 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Guards [_eagerLoad] so it's only kicked off once per subscription.
   bool _eagerKickedOff = false;
-  bool _eagerLoading = false;
+
+  /// Incremented on every [subscribe]. The watch listener, the eager loader,
+  /// and in-flight [loadMore] calls capture the generation active when they
+  /// started and bail (or discard their result) if it no longer matches —
+  /// otherwise an async page from a superseded subscription (e.g. the user
+  /// switched geoscope mid-load) would merge old-geoscope data into the new
+  /// state, and the stale eager loop would keep running against it.
+  int _generation = 0;
 
   /// Monotonic sequence backing [ProblemScrollRequest] so repeated requests
   /// for the same problem still register as a state change for the view.
@@ -123,11 +130,15 @@ class ProblemsCubit extends Cubit<ProblemsState> {
     );
     _hasPaginated = false;
     _eagerKickedOff = false;
+    // Drop any in-flight loadMore guard left by a prior subscription.
+    _isLoadingMore = false;
+    final generation = ++_generation;
     unawaited(_subscription?.cancel());
     _subscription = _repo
         .watchProblems(geoscope: state.geoscope, limit: _pageSize)
         .listen(
           (result) {
+            if (generation != _generation) return; // superseded subscription
             // An offline-cache snapshot may be stale: seeding the paginated
             // cursor from it produces a `startAfterDocument` that resumes at
             // the wrong place and stalls pagination, and the one-shot eager
@@ -148,10 +159,11 @@ class ProblemsCubit extends Cubit<ProblemsState> {
             );
             if (!_eagerKickedOff && authoritative) {
               _eagerKickedOff = true;
-              unawaited(_eagerLoad());
+              unawaited(_eagerLoad(generation));
             }
           },
           onError: (Object e, StackTrace st) {
+            if (generation != _generation) return; // superseded subscription
             log('subscribe failed: $e', stackTrace: st);
             emit(state.copyWith(status: ProblemsStatus.failure));
           },
@@ -168,26 +180,26 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   /// safe because problem votes only ever increment, so a cache-seeded entry is
   /// never a *stale* 1-vote that could trip this early (a doc that was >1 vote
   /// can't have dropped to 1).
-  Future<void> _eagerLoad() async {
-    if (_eagerLoading) return;
-    _eagerLoading = true;
-    try {
-      while (state.hasMore &&
-          state.problems.length < _eagerLoadCap &&
-          !state.problems.any((p) => p.votes <= 1)) {
-        final before = state.problems.length;
-        await loadMore();
-        if (state.problems.length <= before) break; // no progress; bail
-        await Future<void>.delayed(Duration.zero);
-      }
-    } finally {
-      _eagerLoading = false;
+  ///
+  /// [generation] is the subscription generation active when this was kicked
+  /// off; the loop abandons itself if a newer [subscribe] supersedes it.
+  Future<void> _eagerLoad(int generation) async {
+    while (generation == _generation &&
+        state.hasMore &&
+        state.problems.length < _eagerLoadCap &&
+        !state.problems.any((p) => p.votes <= 1)) {
+      final before = state.problems.length;
+      await loadMore();
+      if (generation != _generation) return; // superseded mid-load
+      if (state.problems.length <= before) break; // no progress; bail
+      await Future<void>.delayed(Duration.zero);
     }
   }
 
   /// Load the next page of problems (merges into the existing list).
   Future<void> loadMore() async {
     if (_isLoadingMore || !state.hasMore || state.lastDocument == null) return;
+    final generation = _generation;
     _isLoadingMore = true;
     _hasPaginated = true;
     try {
@@ -196,6 +208,10 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         startAfter: state.lastDocument,
         pageSize: _pageSize,
       );
+      // A newer subscribe() (e.g. geoscope switch) ran while this page was in
+      // flight — discard it so old-geoscope problems don't pollute the new
+      // state.
+      if (generation != _generation) return;
       emit(
         state.copyWith(
           problems: _merged(state.problems, result.problems),
@@ -205,9 +221,13 @@ class ProblemsCubit extends Cubit<ProblemsState> {
       );
     } on Exception catch (e, st) {
       log('loadMore failed: $e', stackTrace: st);
-      emit(state.copyWith(status: ProblemsStatus.failure));
+      if (generation == _generation) {
+        emit(state.copyWith(status: ProblemsStatus.failure));
+      }
     } finally {
-      _isLoadingMore = false;
+      // Only release the guard if still current; a superseded call must not
+      // clear a flag a newer in-flight loadMore is holding.
+      if (generation == _generation) _isLoadingMore = false;
     }
   }
 
