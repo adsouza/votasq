@@ -17,9 +17,10 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   final int _pageSize;
 
   /// Upper bound on how many problems the post-subscribe background loader
-  /// will eagerly fetch so the 1-vote tier (where freshly created problems
-  /// land) is already in memory and can be scrolled to instantly. Beyond this
-  /// the user can still page further by scrolling. See [_eagerLoad].
+  /// eagerly fetches so the list is populated without the user scrolling (and
+  /// so a freshly created problem near the bottom is in memory and can be
+  /// scrolled to). Beyond this the user can still page further by scrolling.
+  /// See [_eagerLoad].
   ///
   /// Note: because the live window already loads [_pageSize] problems, a cap
   /// at or below that makes the background loader a no-op — the loaded list is
@@ -116,18 +117,25 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         .watchProblems(geoscope: state.geoscope, limit: _pageSize)
         .listen(
           (result) {
+            // An offline-cache snapshot may be stale: seeding the paginated
+            // cursor from it produces a `startAfterDocument` that resumes at
+            // the wrong place and stalls pagination, and the one-shot eager
+            // loader would latch onto it permanently. So show the cache's
+            // problems for a fast paint, but only seed the cursor/hasMore and
+            // kick off the eager loader from a server-confirmed snapshot.
+            // (The Firestore emulator runs with persistence disabled, so this
+            // cache path never appeared in testing — only against prod.)
+            final authoritative = !result.isFromCache;
+            final ownCursor = _hasPaginated || !authoritative;
             emit(
               state.copyWith(
                 status: ProblemsStatus.success,
                 problems: _reconcileWithWindow(state.problems, result.problems),
-                // Once paginated, loadMore owns the cursor/hasMore.
-                lastDocument: _hasPaginated ? null : () => result.lastDoc,
-                hasMore: _hasPaginated
-                    ? null
-                    : result.problems.length >= _pageSize,
+                lastDocument: ownCursor ? null : () => result.lastDoc,
+                hasMore: ownCursor ? null : result.problems.length >= _pageSize,
               ),
             );
-            if (!_eagerKickedOff) {
+            if (!_eagerKickedOff && authoritative) {
               _eagerKickedOff = true;
               unawaited(_eagerLoad());
             }
@@ -139,17 +147,15 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         );
   }
 
-  /// After the first snapshot, page through the listing in the background until
-  /// the 1-vote tier is loaded (so newly created problems can be scrolled to),
-  /// the [_eagerLoadCap] is hit, or the server runs out. Yields between pages
-  /// so it doesn't compete with user scrolling.
+  /// After the first (server) snapshot, page through the listing in the
+  /// background up to [_eagerLoadCap] problems, or until the server runs out,
+  /// so the list is populated without the user having to scroll. Yields
+  /// between pages so it doesn't compete with user scrolling.
   Future<void> _eagerLoad() async {
     if (_eagerLoading) return;
     _eagerLoading = true;
     try {
-      while (state.hasMore &&
-          state.problems.length < _eagerLoadCap &&
-          !state.problems.any((p) => p.votes <= 1)) {
+      while (state.hasMore && state.problems.length < _eagerLoadCap) {
         final before = state.problems.length;
         await loadMore();
         if (state.problems.length <= before) break; // no progress; bail

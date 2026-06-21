@@ -68,9 +68,11 @@ void main() {
             limit: any(named: 'limit'),
           ),
         ).thenAnswer(
-          (_) => Stream.value(
-            (problems: [_problem()], lastDoc: _FakeDocumentSnapshot()),
-          ),
+          (_) => Stream.value((
+            problems: [_problem()],
+            lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
+          )),
         );
         return ProblemsCubit(repo);
       },
@@ -138,6 +140,7 @@ void main() {
               ),
             ],
             lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
           )),
         );
         return ProblemsCubit(repo);
@@ -158,20 +161,21 @@ void main() {
     );
 
     test(
-      'after subscribe, eagerly pages in the background until the 1-vote '
-      'tier is loaded, then stops',
+      'eager-load keeps paging past the 1-vote tier up to the cap / end',
       () async {
-        // Live window: a full page (20) of multi-vote problems => hasMore.
+        // A full live window (9) of multi-vote problems => hasMore.
         final window = [
-          for (var i = 0; i < 20; i++)
-            _problem(id: 'w${i.toString().padLeft(2, '0')}', votes: 5),
+          for (var i = 0; i < 9; i++) _problem(id: 'w$i', votes: 5),
         ];
-        // The first background page already reaches the 1-vote tier, so the
-        // loader should stop after a single fetch.
-        final page = [
-          _problem(id: 'p0', votes: 4),
-          _problem(id: 'fresh'), // 1 vote (the helper default) => 1-vote tier
+        // First background page is FULL (9) and already contains a 1-vote
+        // problem — the loader must NOT stop there. It keeps going until a
+        // short page (the server running out) ends it.
+        final page1 = [
+          for (var i = 0; i < 8; i++) _problem(id: 'a$i', votes: 2),
+          _problem(id: 'one'), // 1 vote (helper default)
         ];
+        final page2 = [_problem(id: 'last')]; // short page => hasMore false
+        var calls = 0;
         when(
           () => repo.watchProblems(
             geoscope: any(named: 'geoscope'),
@@ -181,8 +185,64 @@ void main() {
           (_) => Stream.value((
             problems: window,
             lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
           )),
         );
+        when(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).thenAnswer((_) async {
+          calls++;
+          return calls == 1
+              ? (problems: page1, lastDoc: _FakeDocumentSnapshot())
+              : (problems: page2, lastDoc: _FakeDocumentSnapshot());
+        });
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+
+        for (var i = 0; i < 15; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        // Two background fetches: it did NOT stop at the 1-vote problem in the
+        // first page; it kept paging until the server ran out.
+        expect(calls, 2);
+        expect(cubit.state.problems.any((p) => p.id == 'last'), isTrue);
+      },
+    );
+
+    test(
+      'eager-load and pagination wait for a server snapshot, ignoring cache',
+      () async {
+        // Regression: against prod (web persistence ON) the first watch
+        // snapshot is served from the offline cache. Seeding the cursor/eager
+        // loader from a stale cache snapshot stalled pagination (~12 stuck).
+        // The emulator runs with persistence disabled, so this never showed
+        // in earlier tests.
+        final window = [
+          for (var i = 0; i < 20; i++)
+            _problem(id: 'w${i.toString().padLeft(2, '0')}', votes: 5),
+        ];
+        final page = [_problem(id: 'p0', votes: 4), _problem(id: 'fresh')];
+        final controller =
+            StreamController<
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
+            >();
+        addTearDown(controller.close);
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) => controller.stream);
         when(
           () => repo.getProblems(
             geoscope: any(named: 'geoscope'),
@@ -196,11 +256,33 @@ void main() {
         final cubit = ProblemsCubit(repo)..subscribe();
         addTearDown(cubit.close);
 
-        // Let the stream emit and the background loader settle.
+        // Cache snapshot: shown for a fast paint, but must NOT page.
+        controller.add((
+          problems: window,
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: true,
+        ));
+        for (var i = 0; i < 5; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        expect(cubit.state.problems, hasLength(20));
+        verifyNever(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        );
+
+        // Server snapshot: now the eager loader runs and reaches the tier.
+        controller.add((
+          problems: window,
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
         for (var i = 0; i < 10; i++) {
           await Future<void>.delayed(Duration.zero);
         }
-
         expect(cubit.state.problems.any((p) => p.id == 'fresh'), isTrue);
         verify(
           () => repo.getProblems(
@@ -370,7 +452,11 @@ void main() {
         );
         final controller =
             StreamController<
-              ({List<Problem> problems, DocumentSnapshot? lastDoc})
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
             >();
         addTearDown(controller.close);
 
@@ -393,21 +479,22 @@ void main() {
           // Simulate the web JS SDK firing the listener from cache
           // (snapshot lists existing first by votes DESC, then the new
           // problem at its sorted position) before this future resolves.
-          controller.add(
-            (
-              problems: [existing, created],
-              lastDoc: _FakeDocumentSnapshot(),
-            ),
-          );
+          controller.add((
+            problems: [existing, created],
+            lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
+          ));
           await Future<void>.delayed(Duration.zero);
           return created;
         });
 
         final cubit = ProblemsCubit(repo)..subscribe();
         addTearDown(cubit.close);
-        controller.add(
-          (problems: [existing], lastDoc: _FakeDocumentSnapshot()),
-        );
+        controller.add((
+          problems: [existing],
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
         await Future<void>.delayed(Duration.zero);
 
         await cubit.addProblem(
