@@ -161,20 +161,19 @@ void main() {
     );
 
     test(
-      'eager-load keeps paging past the 1-vote tier up to the cap / end',
+      'eager-load stops at the 1-vote tier (those problems load on scroll)',
       () async {
         // A full live window (9) of multi-vote problems => hasMore.
         final window = [
           for (var i = 0; i < 9; i++) _problem(id: 'w$i', votes: 5),
         ];
-        // First background page is FULL (9) and already contains a 1-vote
-        // problem — the loader must NOT stop there. It keeps going until a
-        // short page (the server running out) ends it.
+        // The first background page reaches the 1-vote tier. The loader should
+        // stop here and NOT fetch a second page — the rest of the 1-vote tier
+        // loads only when the user scrolls.
         final page1 = [
           for (var i = 0; i < 8; i++) _problem(id: 'a$i', votes: 2),
           _problem(id: 'one'), // 1 vote (helper default)
         ];
-        final page2 = [_problem(id: 'last')]; // short page => hasMore false
         var calls = 0;
         when(
           () => repo.watchProblems(
@@ -196,9 +195,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           calls++;
-          return calls == 1
-              ? (problems: page1, lastDoc: _FakeDocumentSnapshot())
-              : (problems: page2, lastDoc: _FakeDocumentSnapshot());
+          return (problems: page1, lastDoc: _FakeDocumentSnapshot());
         });
 
         final cubit = ProblemsCubit(repo)..subscribe();
@@ -208,10 +205,10 @@ void main() {
           await Future<void>.delayed(Duration.zero);
         }
 
-        // Two background fetches: it did NOT stop at the 1-vote problem in the
-        // first page; it kept paging until the server ran out.
-        expect(calls, 2);
-        expect(cubit.state.problems.any((p) => p.id == 'last'), isTrue);
+        // Exactly one background fetch: it stopped at the page that reached the
+        // 1-vote tier instead of paging further into it.
+        expect(calls, 1);
+        expect(cubit.state.problems.any((p) => p.id == 'one'), isTrue);
       },
     );
 

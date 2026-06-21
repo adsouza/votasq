@@ -17,10 +17,9 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   final int _pageSize;
 
   /// Upper bound on how many problems the post-subscribe background loader
-  /// eagerly fetches so the list is populated without the user scrolling (and
-  /// so a freshly created problem near the bottom is in memory and can be
-  /// scrolled to). Beyond this the user can still page further by scrolling.
-  /// See [_eagerLoad].
+  /// eagerly fetches while loading the >1-vote tier (it normally stops at the
+  /// 1-vote tier first; this caps pathological cases — a huge multi-vote tier).
+  /// Beyond it the user can still page further by scrolling. See [_eagerLoad].
   ///
   /// Note: because the live window already loads [_pageSize] problems, a cap
   /// at or below that makes the background loader a no-op — the loaded list is
@@ -148,14 +147,22 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   }
 
   /// After the first (server) snapshot, page through the listing in the
-  /// background up to [_eagerLoadCap] problems, or until the server runs out,
-  /// so the list is populated without the user having to scroll. Yields
-  /// between pages so it doesn't compete with user scrolling.
+  /// background so problems with more than 1 vote are loaded without the user
+  /// scrolling, stopping once it reaches the 1-vote tier (those load on scroll)
+  /// or hits [_eagerLoadCap]. Yields between pages so it doesn't compete with
+  /// user scrolling.
+  ///
+  /// The 1-vote check is on `state.problems` rather than the last fetched page:
+  /// safe because problem votes only ever increment, so a cache-seeded entry is
+  /// never a *stale* 1-vote that could trip this early (a doc that was >1 vote
+  /// can't have dropped to 1).
   Future<void> _eagerLoad() async {
     if (_eagerLoading) return;
     _eagerLoading = true;
     try {
-      while (state.hasMore && state.problems.length < _eagerLoadCap) {
+      while (state.hasMore &&
+          state.problems.length < _eagerLoadCap &&
+          !state.problems.any((p) => p.votes <= 1)) {
         final before = state.problems.length;
         await loadMore();
         if (state.problems.length <= before) break; // no progress; bail
