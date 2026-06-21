@@ -108,7 +108,19 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Subscribe to real-time updates for the first page of problems.
   void subscribe() {
-    emit(state.copyWith(status: ProblemsStatus.loading));
+    // Reset per-subscription pagination state. A retry/resubscribe (e.g. the
+    // failure-retry button) calls this without first resetting state, so the
+    // previous subscription's cursor/hasMore would otherwise survive into the
+    // new subscription's cache-snapshot phase — where the listener
+    // deliberately doesn't reseed the cursor — and leak stale pagination.
+    // Existing problems are kept for a fast paint.
+    emit(
+      state.copyWith(
+        status: ProblemsStatus.loading,
+        lastDocument: () => null,
+        hasMore: true,
+      ),
+    );
     _hasPaginated = false;
     _eagerKickedOff = false;
     unawaited(_subscription?.cancel());

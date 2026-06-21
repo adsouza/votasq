@@ -118,6 +118,46 @@ void main() {
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
+      'resubscribe (retry) resets stale pagination state in the cache phase',
+      build: () {
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.value((
+            problems: [_problem()],
+            lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: true, // a cache snapshot of the NEW subscription
+          )),
+        );
+        return ProblemsCubit(repo);
+      },
+      // Simulates the failure-retry path: a prior subscription that had
+      // paginated left a stale cursor + hasMore=false in state when the retry
+      // button calls subscribe() (without first resetting state).
+      seed: () => ProblemsState(
+        status: ProblemsStatus.failure,
+        problems: [_problem()],
+        lastDocument: _FakeDocumentSnapshot(),
+        hasMore: false,
+      ),
+      act: (cubit) => cubit.subscribe(),
+      expect: () => [
+        isA<ProblemsState>()
+            .having((s) => s.status, 'status', ProblemsStatus.loading)
+            .having((s) => s.lastDocument, 'cursor reset', isNull)
+            .having((s) => s.hasMore, 'hasMore reset', isTrue),
+        // Cache snapshot must not reseed the cursor from the stale state.
+        isA<ProblemsState>()
+            .having((s) => s.status, 'status', ProblemsStatus.success)
+            .having((s) => s.lastDocument, 'cursor still null', isNull)
+            .having((s) => s.hasMore, 'hasMore still true', isTrue),
+      ],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
       'orders same-vote problems by lastUpdatedAt DESC (most recent first)',
       build: () {
         when(
