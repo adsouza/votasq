@@ -49,7 +49,7 @@ jobs:
     env:
       FIREBASE_SERVICE_ACCOUNT_VOTASQ: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VOTASQ }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Note skipped deploy (no service account secret)
         if: ${{ env.FIREBASE_SERVICE_ACCOUNT_VOTASQ == '' }}
         run: echo "FIREBASE_SERVICE_ACCOUNT_VOTASQ is empty (Dependabot or fork PR) — skipping Firebase preview deploy."
