@@ -98,8 +98,10 @@ class Db {
           jsonDecode(utf8.decode(base64Decode(pageToken)))
               as Map<String, dynamic>;
       startAt = fs.Cursor(
+        // Cursor values must match the orderBy: votes, lastUpdatedAt, __name__.
         values: [
           fs.Value(integerValue: '${cursor['v']}'),
+          fs.Value(timestampValue: cursor['u'] as String),
           fs.Value(referenceValue: cursor['r'] as String),
         ],
         before: false,
@@ -120,6 +122,7 @@ class Db {
     final problems = <Problem>[];
     String? lastDocName;
     int? lastVotes;
+    String? lastUpdatedAtRaw;
 
     for (final result in results) {
       final doc = result.document;
@@ -129,12 +132,21 @@ class Db {
       problems.add(problem);
       lastDocName = doc.name;
       lastVotes = problem.votes;
+      // Use the raw timestampValue string (not the parsed DateTime) so the
+      // cursor round-trips to the exact stored value, avoiding skip/duplicate.
+      lastUpdatedAtRaw = doc.fields?['lastUpdatedAt']?.timestampValue;
     }
 
     String? nextPageToken;
     if (problems.length == pageSize && lastDocName != null) {
       nextPageToken = base64Encode(
-        utf8.encode(jsonEncode({'v': lastVotes, 'r': lastDocName})),
+        utf8.encode(
+          jsonEncode({
+            'v': lastVotes,
+            'u': lastUpdatedAtRaw,
+            'r': lastDocName,
+          }),
+        ),
       );
     }
 
@@ -648,6 +660,12 @@ fs.StructuredQuery buildProblemsListingQuery({
     orderBy: [
       fs.Order(
         field: fs.FieldReference(fieldPath: 'votes'),
+        direction: 'DESCENDING',
+      ),
+      // Most recently touched first within a vote tier. Keep in lockstep with
+      // the client query / cubit comparator and the composite index.
+      fs.Order(
+        field: fs.FieldReference(fieldPath: 'lastUpdatedAt'),
         direction: 'DESCENDING',
       ),
       fs.Order(

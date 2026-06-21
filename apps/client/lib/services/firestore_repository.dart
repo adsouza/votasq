@@ -52,12 +52,17 @@ class FirestoreRepository {
       _firestore.collection(_collection);
 
   /// Unsolved, non-hidden problems matching the given geoscope or any
-  /// ancestor, ordered by votes DESC then doc ID ASC.
+  /// ancestor, ordered by votes DESC, then lastUpdatedAt DESC (most recently
+  /// touched first within a vote tier), then doc ID ASC as a stable tiebreak.
+  /// Keep this in lockstep with `ProblemsCubit._byRank` and the server's
+  /// `buildProblemsListingQuery`, and with the composite index in
+  /// `firestore.indexes.json`.
   Query<Map<String, dynamic>> _geoscopedQuery(String geoscope) => _problemsRef
       .where('geoscope', whereIn: geoscopeAncestors(geoscope))
       .where('solved', isEqualTo: false)
       .where('hidden', isEqualTo: false)
       .orderBy('votes', descending: true)
+      .orderBy('lastUpdatedAt', descending: true)
       .orderBy(FieldPath.documentId);
 
   /// Real-time stream of the first page of unsolved problems
@@ -255,16 +260,18 @@ class FirestoreRepository {
   }
 
   /// Fetch every problem that was forked from [sourceProblemId], sorted by
-  /// votes descending (then by document id for stable ordering). Sorts in
-  /// memory rather than via a server `orderBy` so we don't need a composite
-  /// index — fork counts are expected to stay small.
+  /// votes DESC, then lastUpdatedAt DESC, then doc id ASC — matching the main
+  /// listing order. Sorts in memory rather than via a server `orderBy` so we
+  /// don't need a composite index — fork counts are expected to stay small.
   Future<List<Problem>> getForksOfProblem(String sourceProblemId) async {
     final snapshot = await _problemsRef
         .where('inspoProblemId', isEqualTo: sourceProblemId)
         .get();
     return snapshot.docs.map(_docToProblem).toList()..sort((a, b) {
-      final cmp = b.votes.compareTo(a.votes);
-      if (cmp != 0) return cmp;
+      final byVotes = b.votes.compareTo(a.votes);
+      if (byVotes != 0) return byVotes;
+      final byUpdated = b.lastUpdatedAt.compareTo(a.lastUpdatedAt);
+      if (byUpdated != 0) return byUpdated;
       return a.id.compareTo(b.id);
     });
   }
@@ -998,12 +1005,14 @@ class FirestoreRepository {
   }
 
   /// Fetch up to 100 unsolved, non-hidden problems globally, sorted by
-  /// votes DESC, then doc ID ASC, for the link-to-another-problem search.
+  /// votes DESC, then lastUpdatedAt DESC, then doc ID ASC — matching the main
+  /// listing order — for the link-to-another-problem search.
   Future<List<Problem>> getGlobalProblemsForSearch({int limit = 100}) async {
     final snapshot = await _problemsRef
         .where('solved', isEqualTo: false)
         .where('hidden', isEqualTo: false)
         .orderBy('votes', descending: true)
+        .orderBy('lastUpdatedAt', descending: true)
         .orderBy(FieldPath.documentId)
         .limit(limit)
         .get();
