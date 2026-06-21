@@ -173,6 +173,18 @@ The three COLLECTION-scope entries preserve Firestore's defaults for the field (
 
 Use the `indexes` array only when the query filters on **two or more** fields (`.where('a', ...).where('b', ...)`).
 
+### Firestore offline persistence is ON in prod-web but OFF in the emulator
+
+`bootstrap.dart` enables offline persistence on web (`Settings(persistenceEnabled: true)`) but `_connectToEmulators()` sets `persistenceEnabled: false`. So **emulator and e2e tests never exercise the offline cache** — any behavior that depends on the cache-then-server emit sequence is invisible there and only shows against prod web.
+
+We shipped a bug from this gap in June 2026: a `.snapshots()` listener's *first* emit on a cold prod-web reload comes from the on-disk cache (`metadata.isFromCache == true`), and code that seeded pagination state (the `startAfterDocument` cursor) from that stale cache snapshot resumed paging at the wrong place and stalled — the listing capped at ~one page and only "unstuck" when the user switched geoscope (a fresh, cache-cold subscription). Every test passed because the emulator has no cache.
+
+Mitigations when touching Firestore listeners / pagination:
+
+1. **Surface `snapshot.metadata.isFromCache`** out of the repo layer and treat a cache snapshot as display-only — don't seed cursors or kick off one-shot loaders from it; wait for a server-confirmed (`isFromCache == false`) snapshot.
+2. **Listen with `includeMetadataChanges: true`** when you need to observe the cache→server transition — otherwise, if the server data is byte-identical to the cache, that transition is a metadata-only change and gets suppressed (so the server snapshot you're waiting for never arrives).
+3. **Manually verify against prod web** (or with `persistenceEnabled: true`) for anything cache-sensitive; the emulator/e2e suite cannot catch it.
+
 ## Architecture
 
 Update the `ARCHITECTURE.md` file in the project root dir after making architectural changes.

@@ -17,9 +17,9 @@ class ProblemsCubit extends Cubit<ProblemsState> {
   final int _pageSize;
 
   /// Upper bound on how many problems the post-subscribe background loader
-  /// will eagerly fetch so the 1-vote tier (where freshly created problems
-  /// land) is already in memory and can be scrolled to instantly. Beyond this
-  /// the user can still page further by scrolling. See [_eagerLoad].
+  /// eagerly fetches while loading the >1-vote tier (it normally stops at the
+  /// 1-vote tier first; this caps pathological cases — a huge multi-vote tier).
+  /// Beyond it the user can still page further by scrolling. See [_eagerLoad].
   ///
   /// Note: because the live window already loads [_pageSize] problems, a cap
   /// at or below that makes the background loader a no-op — the loaded list is
@@ -35,7 +35,14 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Guards [_eagerLoad] so it's only kicked off once per subscription.
   bool _eagerKickedOff = false;
-  bool _eagerLoading = false;
+
+  /// Incremented on every [subscribe]. The watch listener, the eager loader,
+  /// and in-flight [loadMore] calls capture the generation active when they
+  /// started and bail (or discard their result) if it no longer matches —
+  /// otherwise an async page from a superseded subscription (e.g. the user
+  /// switched geoscope mid-load) would merge old-geoscope data into the new
+  /// state, and the stale eager loop would keep running against it.
+  int _generation = 0;
 
   /// Monotonic sequence backing [ProblemScrollRequest] so repeated requests
   /// for the same problem still register as a state change for the view.
@@ -108,61 +115,91 @@ class ProblemsCubit extends Cubit<ProblemsState> {
 
   /// Subscribe to real-time updates for the first page of problems.
   void subscribe() {
-    emit(state.copyWith(status: ProblemsStatus.loading));
+    // Reset per-subscription pagination state. A retry/resubscribe (e.g. the
+    // failure-retry button) calls this without first resetting state, so the
+    // previous subscription's cursor/hasMore would otherwise survive into the
+    // new subscription's cache-snapshot phase — where the listener
+    // deliberately doesn't reseed the cursor — and leak stale pagination.
+    // Existing problems are kept for a fast paint.
+    emit(
+      state.copyWith(
+        status: ProblemsStatus.loading,
+        lastDocument: () => null,
+        hasMore: true,
+      ),
+    );
     _hasPaginated = false;
     _eagerKickedOff = false;
+    // Drop any in-flight loadMore guard left by a prior subscription.
+    _isLoadingMore = false;
+    final generation = ++_generation;
     unawaited(_subscription?.cancel());
     _subscription = _repo
         .watchProblems(geoscope: state.geoscope, limit: _pageSize)
         .listen(
           (result) {
+            if (generation != _generation) return; // superseded subscription
+            // An offline-cache snapshot may be stale: seeding the paginated
+            // cursor from it produces a `startAfterDocument` that resumes at
+            // the wrong place and stalls pagination, and the one-shot eager
+            // loader would latch onto it permanently. So show the cache's
+            // problems for a fast paint, but only seed the cursor/hasMore and
+            // kick off the eager loader from a server-confirmed snapshot.
+            // (The Firestore emulator runs with persistence disabled, so this
+            // cache path never appeared in testing — only against prod.)
+            final authoritative = !result.isFromCache;
+            final ownCursor = _hasPaginated || !authoritative;
             emit(
               state.copyWith(
                 status: ProblemsStatus.success,
                 problems: _reconcileWithWindow(state.problems, result.problems),
-                // Once paginated, loadMore owns the cursor/hasMore.
-                lastDocument: _hasPaginated ? null : () => result.lastDoc,
-                hasMore: _hasPaginated
-                    ? null
-                    : result.problems.length >= _pageSize,
+                lastDocument: ownCursor ? null : () => result.lastDoc,
+                hasMore: ownCursor ? null : result.problems.length >= _pageSize,
               ),
             );
-            if (!_eagerKickedOff) {
+            if (!_eagerKickedOff && authoritative) {
               _eagerKickedOff = true;
-              unawaited(_eagerLoad());
+              unawaited(_eagerLoad(generation));
             }
           },
           onError: (Object e, StackTrace st) {
+            if (generation != _generation) return; // superseded subscription
             log('subscribe failed: $e', stackTrace: st);
             emit(state.copyWith(status: ProblemsStatus.failure));
           },
         );
   }
 
-  /// After the first snapshot, page through the listing in the background until
-  /// the 1-vote tier is loaded (so newly created problems can be scrolled to),
-  /// the [_eagerLoadCap] is hit, or the server runs out. Yields between pages
-  /// so it doesn't compete with user scrolling.
-  Future<void> _eagerLoad() async {
-    if (_eagerLoading) return;
-    _eagerLoading = true;
-    try {
-      while (state.hasMore &&
-          state.problems.length < _eagerLoadCap &&
-          !state.problems.any((p) => p.votes <= 1)) {
-        final before = state.problems.length;
-        await loadMore();
-        if (state.problems.length <= before) break; // no progress; bail
-        await Future<void>.delayed(Duration.zero);
-      }
-    } finally {
-      _eagerLoading = false;
+  /// After the first (server) snapshot, page through the listing in the
+  /// background so problems with more than 1 vote are loaded without the user
+  /// scrolling, stopping once it reaches the 1-vote tier (those load on scroll)
+  /// or hits [_eagerLoadCap]. Yields between pages so it doesn't compete with
+  /// user scrolling.
+  ///
+  /// The 1-vote check is on `state.problems` rather than the last fetched page:
+  /// safe because problem votes only ever increment, so a cache-seeded entry is
+  /// never a *stale* 1-vote that could trip this early (a doc that was >1 vote
+  /// can't have dropped to 1).
+  ///
+  /// [generation] is the subscription generation active when this was kicked
+  /// off; the loop abandons itself if a newer [subscribe] supersedes it.
+  Future<void> _eagerLoad(int generation) async {
+    while (generation == _generation &&
+        state.hasMore &&
+        state.problems.length < _eagerLoadCap &&
+        !state.problems.any((p) => p.votes <= 1)) {
+      final before = state.problems.length;
+      await loadMore();
+      if (generation != _generation) return; // superseded mid-load
+      if (state.problems.length <= before) break; // no progress; bail
+      await Future<void>.delayed(Duration.zero);
     }
   }
 
   /// Load the next page of problems (merges into the existing list).
   Future<void> loadMore() async {
     if (_isLoadingMore || !state.hasMore || state.lastDocument == null) return;
+    final generation = _generation;
     _isLoadingMore = true;
     _hasPaginated = true;
     try {
@@ -171,6 +208,10 @@ class ProblemsCubit extends Cubit<ProblemsState> {
         startAfter: state.lastDocument,
         pageSize: _pageSize,
       );
+      // A newer subscribe() (e.g. geoscope switch) ran while this page was in
+      // flight — discard it so old-geoscope problems don't pollute the new
+      // state.
+      if (generation != _generation) return;
       emit(
         state.copyWith(
           problems: _merged(state.problems, result.problems),
@@ -180,9 +221,13 @@ class ProblemsCubit extends Cubit<ProblemsState> {
       );
     } on Exception catch (e, st) {
       log('loadMore failed: $e', stackTrace: st);
-      emit(state.copyWith(status: ProblemsStatus.failure));
+      if (generation == _generation) {
+        emit(state.copyWith(status: ProblemsStatus.failure));
+      }
     } finally {
-      _isLoadingMore = false;
+      // Only release the guard if still current; a superseded call must not
+      // clear a flag a newer in-flight loadMore is holding.
+      if (generation == _generation) _isLoadingMore = false;
     }
   }
 

@@ -68,9 +68,11 @@ void main() {
             limit: any(named: 'limit'),
           ),
         ).thenAnswer(
-          (_) => Stream.value(
-            (problems: [_problem()], lastDoc: _FakeDocumentSnapshot()),
-          ),
+          (_) => Stream.value((
+            problems: [_problem()],
+            lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
+          )),
         );
         return ProblemsCubit(repo);
       },
@@ -116,6 +118,46 @@ void main() {
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
+      'resubscribe (retry) resets stale pagination state in the cache phase',
+      build: () {
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.value((
+            problems: [_problem()],
+            lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: true, // a cache snapshot of the NEW subscription
+          )),
+        );
+        return ProblemsCubit(repo);
+      },
+      // Simulates the failure-retry path: a prior subscription that had
+      // paginated left a stale cursor + hasMore=false in state when the retry
+      // button calls subscribe() (without first resetting state).
+      seed: () => ProblemsState(
+        status: ProblemsStatus.failure,
+        problems: [_problem()],
+        lastDocument: _FakeDocumentSnapshot(),
+        hasMore: false,
+      ),
+      act: (cubit) => cubit.subscribe(),
+      expect: () => [
+        isA<ProblemsState>()
+            .having((s) => s.status, 'status', ProblemsStatus.loading)
+            .having((s) => s.lastDocument, 'cursor reset', isNull)
+            .having((s) => s.hasMore, 'hasMore reset', isTrue),
+        // Cache snapshot must not reseed the cursor from the stale state.
+        isA<ProblemsState>()
+            .having((s) => s.status, 'status', ProblemsStatus.success)
+            .having((s) => s.lastDocument, 'cursor still null', isNull)
+            .having((s) => s.hasMore, 'hasMore still true', isTrue),
+      ],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
       'orders same-vote problems by lastUpdatedAt DESC (most recent first)',
       build: () {
         when(
@@ -138,6 +180,7 @@ void main() {
               ),
             ],
             lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
           )),
         );
         return ProblemsCubit(repo);
@@ -158,20 +201,20 @@ void main() {
     );
 
     test(
-      'after subscribe, eagerly pages in the background until the 1-vote '
-      'tier is loaded, then stops',
+      'eager-load stops at the 1-vote tier (those problems load on scroll)',
       () async {
-        // Live window: a full page (20) of multi-vote problems => hasMore.
+        // A full live window (9) of multi-vote problems => hasMore.
         final window = [
-          for (var i = 0; i < 20; i++)
-            _problem(id: 'w${i.toString().padLeft(2, '0')}', votes: 5),
+          for (var i = 0; i < 9; i++) _problem(id: 'w$i', votes: 5),
         ];
-        // The first background page already reaches the 1-vote tier, so the
-        // loader should stop after a single fetch.
-        final page = [
-          _problem(id: 'p0', votes: 4),
-          _problem(id: 'fresh'), // 1 vote (the helper default) => 1-vote tier
+        // The first background page reaches the 1-vote tier. The loader should
+        // stop here and NOT fetch a second page — the rest of the 1-vote tier
+        // loads only when the user scrolls.
+        final page1 = [
+          for (var i = 0; i < 8; i++) _problem(id: 'a$i', votes: 2),
+          _problem(id: 'one'), // 1 vote (helper default)
         ];
+        var calls = 0;
         when(
           () => repo.watchProblems(
             geoscope: any(named: 'geoscope'),
@@ -181,8 +224,164 @@ void main() {
           (_) => Stream.value((
             problems: window,
             lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
           )),
         );
+        when(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).thenAnswer((_) async {
+          calls++;
+          return (problems: page1, lastDoc: _FakeDocumentSnapshot());
+        });
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+
+        for (var i = 0; i < 15; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        // Exactly one background fetch: it stopped at the page that reached the
+        // 1-vote tier instead of paging further into it.
+        expect(calls, 1);
+        expect(cubit.state.problems.any((p) => p.id == 'one'), isTrue);
+      },
+    );
+
+    test(
+      'switching geoscope mid-load discards the stale page and runs the new '
+      'eager loader',
+      () async {
+        // A fresh watch stream per subscription (a controller can only be
+        // listened once).
+        final watchA =
+            StreamController<
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
+            >();
+        final watchB =
+            StreamController<
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
+            >();
+        addTearDown(watchA.close);
+        addTearDown(watchB.close);
+        var watchCalls = 0;
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) {
+          watchCalls++;
+          return watchCalls == 1 ? watchA.stream : watchB.stream;
+        });
+
+        // First eager fetch (geoscope A) is held open; later fetches are empty.
+        final held =
+            Completer<({List<Problem> problems, DocumentSnapshot? lastDoc})>();
+        var getCalls = 0;
+        when(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).thenAnswer((_) {
+          getCalls++;
+          return getCalls == 1
+              ? held.future
+              : Future.value((problems: <Problem>[], lastDoc: null));
+        });
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+
+        // Full window for geoscope A => hasMore => eager kicks => loadMore
+        // (held in flight).
+        watchA.add((
+          problems: [for (var i = 0; i < 9; i++) _problem(id: 'A$i', votes: 5)],
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        expect(getCalls, 1, reason: 'eager started a page for geoscope A');
+
+        // Switch geoscope while A's page is still in flight.
+        cubit.changeGeoscope('us');
+        watchB.add((
+          problems: [for (var i = 0; i < 9; i++) _problem(id: 'B$i', votes: 5)],
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        // The new subscription's eager loader ran (not blocked by A's stale
+        // in-flight loadMore guard).
+        expect(getCalls, greaterThanOrEqualTo(2));
+
+        // Now resolve the stale A page — it must be discarded.
+        held.complete((
+          problems: [
+            for (var i = 0; i < 9; i++) _problem(id: 'Astale$i', votes: 5),
+          ],
+          lastDoc: _FakeDocumentSnapshot(),
+        ));
+        for (var i = 0; i < 6; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        expect(cubit.state.geoscope, 'us');
+        expect(
+          cubit.state.problems.any((p) => p.id.startsWith('A')),
+          isFalse,
+          reason: 'no geoscope-A data leaked into the new subscription',
+        );
+      },
+    );
+
+    test(
+      'eager-load and pagination wait for a server snapshot, ignoring cache',
+      () async {
+        // Regression: against prod (web persistence ON) the first watch
+        // snapshot is served from the offline cache. Seeding the cursor/eager
+        // loader from a stale cache snapshot stalled pagination (~12 stuck).
+        // The emulator runs with persistence disabled, so this never showed
+        // in earlier tests.
+        final window = [
+          for (var i = 0; i < 20; i++)
+            _problem(id: 'w${i.toString().padLeft(2, '0')}', votes: 5),
+        ];
+        final page = [_problem(id: 'p0', votes: 4), _problem(id: 'fresh')];
+        final controller =
+            StreamController<
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
+            >();
+        addTearDown(controller.close);
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) => controller.stream);
         when(
           () => repo.getProblems(
             geoscope: any(named: 'geoscope'),
@@ -196,11 +395,33 @@ void main() {
         final cubit = ProblemsCubit(repo)..subscribe();
         addTearDown(cubit.close);
 
-        // Let the stream emit and the background loader settle.
+        // Cache snapshot: shown for a fast paint, but must NOT page.
+        controller.add((
+          problems: window,
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: true,
+        ));
+        for (var i = 0; i < 5; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        expect(cubit.state.problems, hasLength(20));
+        verifyNever(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        );
+
+        // Server snapshot: now the eager loader runs and reaches the tier.
+        controller.add((
+          problems: window,
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
         for (var i = 0; i < 10; i++) {
           await Future<void>.delayed(Duration.zero);
         }
-
         expect(cubit.state.problems.any((p) => p.id == 'fresh'), isTrue);
         verify(
           () => repo.getProblems(
@@ -370,7 +591,11 @@ void main() {
         );
         final controller =
             StreamController<
-              ({List<Problem> problems, DocumentSnapshot? lastDoc})
+              ({
+                List<Problem> problems,
+                DocumentSnapshot? lastDoc,
+                bool isFromCache,
+              })
             >();
         addTearDown(controller.close);
 
@@ -393,21 +618,22 @@ void main() {
           // Simulate the web JS SDK firing the listener from cache
           // (snapshot lists existing first by votes DESC, then the new
           // problem at its sorted position) before this future resolves.
-          controller.add(
-            (
-              problems: [existing, created],
-              lastDoc: _FakeDocumentSnapshot(),
-            ),
-          );
+          controller.add((
+            problems: [existing, created],
+            lastDoc: _FakeDocumentSnapshot(),
+            isFromCache: false,
+          ));
           await Future<void>.delayed(Duration.zero);
           return created;
         });
 
         final cubit = ProblemsCubit(repo)..subscribe();
         addTearDown(cubit.close);
-        controller.add(
-          (problems: [existing], lastDoc: _FakeDocumentSnapshot()),
-        );
+        controller.add((
+          problems: [existing],
+          lastDoc: _FakeDocumentSnapshot(),
+          isFromCache: false,
+        ));
         await Future<void>.delayed(Duration.zero);
 
         await cubit.addProblem(

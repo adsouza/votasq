@@ -269,11 +269,14 @@ tail below it is preserved, and items that left the listing (solved / hidden /
 deleted) are dropped. Problem votes only ever increment, so a local optimistic
 upvote is never clobbered by an in-flight snapshot that predates it.
 
-**Eager tail-load.** Because new problems are created with `votes: 1` they sort
-to the bottom of the listing (the "1-vote tier"). After the first snapshot the
-cubit pages in the background until that tier is loaded, a cap of 99 problems
-is reached, or the server runs out — so a freshly created problem can be
-scrolled to immediately. Beyond the cap the user can still page by scrolling.
+**Eager tail-load.** After the first **server** snapshot, the cubit pages in
+the background so the problems with more than 1 vote are loaded without the user
+scrolling, stopping once it reaches the 1-vote tier (those load on scroll) or
+hits a cap of 99. The kickoff waits for a server-confirmed snapshot
+(`isFromCache == false`): seeding the paginated cursor from a possibly-stale
+offline-cache snapshot resumes pagination at the wrong place and stalls it. (The
+Firestore emulator runs with persistence disabled, so this cache path is
+invisible in tests and only surfaced against prod web.)
 
 **Scroll-to (`scrollable_positioned_list`).** Creating a problem inserts it at
 its honest sorted position (top of the 1-vote tier) and emits a `scrollRequest`

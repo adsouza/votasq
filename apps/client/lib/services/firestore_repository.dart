@@ -67,14 +67,29 @@ class FirestoreRepository {
 
   /// Real-time stream of the first page of unsolved problems
   /// matching the given [geoscope] or any of its ancestors.
-  Stream<({List<Problem> problems, DocumentSnapshot? lastDoc})> watchProblems({
+  ///
+  /// Emits an `isFromCache` flag so callers can tell an offline-cache snapshot
+  /// (which may be stale) from a server-confirmed one. Listening with
+  /// `includeMetadataChanges: true` guarantees the cache→server transition is
+  /// observed even when the server data is byte-identical to the cache —
+  /// otherwise that transition is a metadata-only change and gets suppressed.
+  Stream<
+    ({List<Problem> problems, DocumentSnapshot? lastDoc, bool isFromCache})
+  >
+  watchProblems({
     required String geoscope,
     int limit = _pageSize,
   }) {
-    return _geoscopedQuery(geoscope).limit(limit).snapshots().map((snapshot) {
+    return _geoscopedQuery(
+      geoscope,
+    ).limit(limit).snapshots(includeMetadataChanges: true).map((snapshot) {
       final problems = snapshot.docs.map(_docToProblem).toList();
       final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
-      return (problems: problems, lastDoc: lastDoc);
+      return (
+        problems: problems,
+        lastDoc: lastDoc,
+        isFromCache: snapshot.metadata.isFromCache,
+      );
     });
   }
 
