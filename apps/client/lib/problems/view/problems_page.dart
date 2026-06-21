@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:math' show max, min;
 
 import 'package:client/auth/auth.dart';
 import 'package:client/auto_translate/auto_translate.dart';
@@ -25,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared/shared.dart';
 
 class ProblemsPage extends StatelessWidget {
@@ -89,7 +91,13 @@ class ProblemsView extends StatefulWidget {
 }
 
 class _ProblemsViewState extends State<ProblemsView> {
-  final _scrollController = ScrollController();
+  final _itemScrollController = ItemScrollController();
+  final _positionsListener = ItemPositionsListener.create();
+  // True while a programmatic scroll-to is animating/settling, so the
+  // auto-pager in [_onPositions] doesn't treat the resulting bottom-parked
+  // viewport as "the user scrolled to the end" and cascade-load the list.
+  bool _isProgrammaticScroll = false;
+  int _scrollToken = 0;
   static final _editTapRegionGroupId = Object();
   String? _editingProblemId;
   bool _showOnlyOwned = false;
@@ -98,21 +106,99 @@ class _ProblemsViewState extends State<ProblemsView> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _positionsListener.itemPositions.addListener(_onPositions);
   }
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_onScroll)
-      ..dispose();
+    _positionsListener.itemPositions.removeListener(_onPositions);
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_isNearBottom) {
-      unawaited(context.read<ProblemsCubit>().loadMore());
+  /// Auto-page when scrolled near the end. [ItemPositionsListener] fires on
+  /// every layout (not just scroll), so we only page when the list actually
+  /// overflows the viewport — otherwise a fully-visible short list would
+  /// request more forever.
+  void _onPositions() {
+    if (!mounted || _isProgrammaticScroll) return;
+    final positions = _positionsListener.itemPositions.value;
+    if (positions.isEmpty) return;
+    final cubit = context.read<ProblemsCubit>();
+    if (!cubit.state.hasMore) return;
+    final minIndex = positions.map((p) => p.index).reduce(min);
+    final maxIndex = positions.map((p) => p.index).reduce(max);
+    final overflows =
+        minIndex > 0 ||
+        positions.any((p) => p.index == minIndex && p.itemLeadingEdge < 0);
+    if (!overflows) return;
+    final userId = context.read<UserCubit>().state.userId;
+    final itemCount = _applyFilters(cubit.state.problems, userId).length;
+    if (maxIndex >= itemCount - 3) {
+      unawaited(cubit.loadMore());
     }
+  }
+
+  /// Bring the just-created or just-upvoted problem into view — but gently:
+  /// if it's already on screen we leave the viewport alone. Deferred to after
+  /// the frame so item positions reflect the post-reorder layout.
+  void _handleScrollRequest(ProblemsState state) {
+    final request = state.scrollRequest;
+    if (request == null) return;
+    final userId = context.read<UserCubit>().state.userId;
+    final index = _applyFilters(
+      state.problems,
+      userId,
+    ).indexWhere((p) => p.id == request.problemId);
+    if (index == -1) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _ensureVisibleGently(index);
+    });
+  }
+
+  void _ensureVisibleGently(int index) {
+    if (!_itemScrollController.isAttached) return;
+    final positions = _positionsListener.itemPositions.value;
+    final visible = positions
+        .where((p) => p.itemTrailingEdge > 0 && p.itemLeadingEdge < 1)
+        .map((p) => p.index);
+    if (visible.isNotEmpty) {
+      final minVisible = visible.reduce(min);
+      final maxVisible = visible.reduce(max);
+      if (index >= minVisible && index <= maxVisible) return; // already in view
+      // Scrolling up → settle the target near the top. Scrolling down (the
+      // just-created bottom item) → request alignment 1.0; the controller
+      // clamps to maxScrollExtent, landing it flush at the bottom and fully
+      // visible regardless of tile height, rather than half-off-screen.
+      _animateTo(index, index < minVisible ? 0.1 : 1.0);
+      return;
+    }
+    _animateTo(index, 0.5);
+  }
+
+  /// Programmatically scroll to [index]. Holds [_isProgrammaticScroll] for the
+  /// duration of the animation so the resulting bottom-parked viewport doesn't
+  /// trip [_onPositions]'s auto-pager — otherwise scrolling to a freshly
+  /// created 1-vote problem (which sorts to the bottom) would cascade-load the
+  /// whole list. Once it settles, item positions stop changing, so the pager
+  /// stays quiet until the user scrolls themselves. The token guards against a
+  /// stale completion clearing the flag mid-way through a newer scroll.
+  void _animateTo(int index, double alignment) {
+    final token = ++_scrollToken;
+    _isProgrammaticScroll = true;
+    unawaited(
+      _itemScrollController
+          .scrollTo(
+            index: index,
+            alignment: alignment,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+          )
+          .whenComplete(() {
+            if (mounted && token == _scrollToken) {
+              _isProgrammaticScroll = false;
+            }
+          }),
+    );
   }
 
   void _copyProblemLink(Problem problem) {
@@ -184,12 +270,6 @@ class _ProblemsViewState extends State<ProblemsView> {
     return filtered;
   }
 
-  bool get _isNearBottom {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= maxScroll * 0.9;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -198,343 +278,357 @@ class _ProblemsViewState extends State<ProblemsView> {
     // authenticated users. Below that, it stays tucked in the hamburger
     // menu so the long title isn't crowded.
     final wide = MediaQuery.sizeOf(context).width >= 600;
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80,
-        titleSpacing: 0,
-        title: BlocBuilder<ProblemsCubit, ProblemsState>(
-          builder: (context, state) {
-            // watch (not read) so the filtered count reacts to sign-in /
-            // sign-out — _applyFilters with _showOnlyOwned uses userId.
-            final userId = context.watch<UserCubit>().state.userId;
-            final filtered = _applyFilters(state.problems, userId);
-            return Text(
-              '${filtered.length} ${l10n.problemsAppBarTitle}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            );
-          },
-        ),
-        leading: TapRegion(
-          groupId: _editTapRegionGroupId,
-          child: PopupMenuButton<String>(
-            icon: const Icon(Icons.menu),
-            iconSize: 32,
-            onSelected: (value) {
-              if (value == 'change_location') {
-                unawaited(showGeoscopePicker(context));
-              } else if (value == 'toggle_owned') {
-                setState(() {
-                  _showOnlyOwned = !_showOnlyOwned;
-                });
-              } else if (value == 'toggle_with_goals') {
-                setState(() {
-                  _showOnlyWithGoals = !_showOnlyWithGoals;
-                });
-              } else if (value == 'toggle_auto_translate') {
-                unawaited(context.read<AutoTranslateCubit>().toggle());
-              } else if (value == 'text_size') {
-                unawaited(showTextSizeDialog(context));
-              } else if (value == 'add_problem') {
-                context.go('/new');
-              } else if (value == 'send_feedback') {
-                _sendFeedback(l10n);
-              } else if (value == 'sign_out') {
-                unawaited(context.read<UserCubit>().signOut());
-              }
-            },
-            itemBuilder: (context) {
-              final isAuthenticated =
-                  context.read<UserCubit>().state.userId != null;
-              final geoState = context.read<GeoscopeCubit>().state;
-              final currentGeoscopeId = geoState.selectedGeoscope;
-              final currentGeoscopeLabel = currentGeoscopeId == '/'
-                  ? '🌐 ${l10n.geoscopeGlobal}'
-                  : (geoState.availableGeoscopes
-                            .where((g) => g.id == currentGeoscopeId)
-                            .firstOrNull
-                            ?.label ??
-                        currentGeoscopeId);
-              // When authenticated AND we have horizontal room, the
-              // add-problem affordance lives in the AppBar instead — see
-              // `actions:` below. The menu entry is suppressed in that
-              // case so the action isn't presented twice.
-              final showAddInMenu = !(isAuthenticated && wide);
-              return [
-                if (showAddInMenu)
-                  PopupMenuItem(
-                    value: 'add_problem',
-                    child: ListTile(
-                      leading: const Icon(Icons.add_circle),
-                      title: Text(l10n.addProblemTooltip),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                if (isAuthenticated)
-                  PopupMenuItem(
-                    value: 'toggle_owned',
-                    child: ListTile(
-                      leading: Icon(
-                        _showOnlyOwned
-                            ? Icons.check_box
-                            : Icons.check_box_outline_blank,
-                      ),
-                      title: Text(l10n.showOnlyOwnedMenuItem),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                PopupMenuItem(
-                  value: 'toggle_with_goals',
-                  child: ListTile(
-                    leading: Icon(
-                      _showOnlyWithGoals
-                          ? Icons.check_box
-                          : Icons.check_box_outline_blank,
-                    ),
-                    title: Text(l10n.showOnlyWithGoalsMenuItem),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                if (context.read<TranslationRepository>().canTranslateOnDevice)
-                  PopupMenuItem(
-                    value: 'toggle_auto_translate',
-                    child: ListTile(
-                      leading: Icon(
-                        context.read<AutoTranslateCubit>().state
-                            ? Icons.check_box
-                            : Icons.check_box_outline_blank,
-                      ),
-                      title: Text(l10n.autoTranslateMenuItem),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                PopupMenuItem(
-                  value: 'change_location',
-                  child: ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: Text(l10n.geoscopeChangeMenuItem),
-                    subtitle: Text(currentGeoscopeLabel),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'text_size',
-                  child: ListTile(
-                    leading: const Icon(Icons.format_size),
-                    title: Text(l10n.textSizeMenuItem),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                if (isAuthenticated) ...[
-                  PopupMenuItem(
-                    value: 'send_feedback',
-                    child: ListTile(
-                      leading: Transform.translate(
-                        offset: const Offset(0, -4),
-                        child: const Text(
-                          '🗣️',
-                          style: TextStyle(fontSize: 24, height: 1),
-                        ),
-                      ),
-                      title: Text(l10n.feedbackButton),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'sign_out',
-                    child: ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: Text(l10n.signOutButton),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    enabled: false,
-                    child: Text(
-                      (context.read<UserCubit>().state.remainingVotes ?? 0) > 0
-                          ? l10n.menuVotesRemaining(
-                              context.read<UserCubit>().state.remainingVotes!,
-                            )
-                          : l10n.menuVotesReplenishHint,
-                    ),
-                  ),
-                ],
-              ];
+    return BlocListener<ProblemsCubit, ProblemsState>(
+      listenWhen: (prev, curr) =>
+          curr.scrollRequest != null &&
+          prev.scrollRequest?.seq != curr.scrollRequest?.seq,
+      listener: (context, state) => _handleScrollRequest(state),
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 80,
+          titleSpacing: 0,
+          title: BlocBuilder<ProblemsCubit, ProblemsState>(
+            builder: (context, state) {
+              // watch (not read) so the filtered count reacts to sign-in /
+              // sign-out — _applyFilters with _showOnlyOwned uses userId.
+              final userId = context.watch<UserCubit>().state.userId;
+              final filtered = _applyFilters(state.problems, userId);
+              return Text(
+                '${filtered.length} ${l10n.problemsAppBarTitle}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              );
             },
           ),
-        ),
-        actions: [
-          BlocBuilder<UserCubit, UserState>(
-            builder: (context, authState) {
-              if (authState.status == AuthStatus.authenticated) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (wide)
-                      IconButton(
-                        tooltip: l10n.addProblemTooltip,
-                        icon: const Icon(Icons.add_circle),
-                        onPressed: () => context.go('/new'),
+          leading: TapRegion(
+            groupId: _editTapRegionGroupId,
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.menu),
+              iconSize: 32,
+              onSelected: (value) {
+                if (value == 'change_location') {
+                  unawaited(showGeoscopePicker(context));
+                } else if (value == 'toggle_owned') {
+                  setState(() {
+                    _showOnlyOwned = !_showOnlyOwned;
+                  });
+                } else if (value == 'toggle_with_goals') {
+                  setState(() {
+                    _showOnlyWithGoals = !_showOnlyWithGoals;
+                  });
+                } else if (value == 'toggle_auto_translate') {
+                  unawaited(context.read<AutoTranslateCubit>().toggle());
+                } else if (value == 'text_size') {
+                  unawaited(showTextSizeDialog(context));
+                } else if (value == 'add_problem') {
+                  context.go('/new');
+                } else if (value == 'send_feedback') {
+                  _sendFeedback(l10n);
+                } else if (value == 'sign_out') {
+                  unawaited(context.read<UserCubit>().signOut());
+                }
+              },
+              itemBuilder: (context) {
+                final isAuthenticated =
+                    context.read<UserCubit>().state.userId != null;
+                final geoState = context.read<GeoscopeCubit>().state;
+                final currentGeoscopeId = geoState.selectedGeoscope;
+                final currentGeoscopeLabel = currentGeoscopeId == '/'
+                    ? '🌐 ${l10n.geoscopeGlobal}'
+                    : (geoState.availableGeoscopes
+                              .where((g) => g.id == currentGeoscopeId)
+                              .firstOrNull
+                              ?.label ??
+                          currentGeoscopeId);
+                // When authenticated AND we have horizontal room, the
+                // add-problem affordance lives in the AppBar instead — see
+                // `actions:` below. The menu entry is suppressed in that
+                // case so the action isn't presented twice.
+                final showAddInMenu = !(isAuthenticated && wide);
+                return [
+                  if (showAddInMenu)
+                    PopupMenuItem(
+                      value: 'add_problem',
+                      child: ListTile(
+                        leading: const Icon(Icons.add_circle),
+                        title: Text(l10n.addProblemTooltip),
+                        contentPadding: EdgeInsets.zero,
                       ),
-                    const NotificationsBadge(),
+                    ),
+                  if (isAuthenticated)
+                    PopupMenuItem(
+                      value: 'toggle_owned',
+                      child: ListTile(
+                        leading: Icon(
+                          _showOnlyOwned
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                        ),
+                        title: Text(l10n.showOnlyOwnedMenuItem),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  PopupMenuItem(
+                    value: 'toggle_with_goals',
+                    child: ListTile(
+                      leading: Icon(
+                        _showOnlyWithGoals
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      title: Text(l10n.showOnlyWithGoalsMenuItem),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  if (context
+                      .read<TranslationRepository>()
+                      .canTranslateOnDevice)
+                    PopupMenuItem(
+                      value: 'toggle_auto_translate',
+                      child: ListTile(
+                        leading: Icon(
+                          context.read<AutoTranslateCubit>().state
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                        ),
+                        title: Text(l10n.autoTranslateMenuItem),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  PopupMenuItem(
+                    value: 'change_location',
+                    child: ListTile(
+                      leading: const Icon(Icons.location_on),
+                      title: Text(l10n.geoscopeChangeMenuItem),
+                      subtitle: Text(currentGeoscopeLabel),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'text_size',
+                    child: ListTile(
+                      leading: const Icon(Icons.format_size),
+                      title: Text(l10n.textSizeMenuItem),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  if (isAuthenticated) ...[
+                    PopupMenuItem(
+                      value: 'send_feedback',
+                      child: ListTile(
+                        leading: Transform.translate(
+                          offset: const Offset(0, -4),
+                          child: const Text(
+                            '🗣️',
+                            style: TextStyle(fontSize: 24, height: 1),
+                          ),
+                        ),
+                        title: Text(l10n.feedbackButton),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'sign_out',
+                      child: ListTile(
+                        leading: const Icon(Icons.logout),
+                        title: Text(l10n.signOutButton),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      enabled: false,
+                      child: Text(
+                        (context.read<UserCubit>().state.remainingVotes ?? 0) >
+                                0
+                            ? l10n.menuVotesRemaining(
+                                context.read<UserCubit>().state.remainingVotes!,
+                              )
+                            : l10n.menuVotesReplenishHint,
+                      ),
+                    ),
                   ],
-                );
-              }
-              return IconButton(
-                tooltip: l10n.signInButtonTooltip,
-                icon: const Icon(Icons.login),
-                onPressed: () => context.read<UserCubit>().signIn(),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          BlocBuilder<UserCubit, UserState>(
-            builder: (context, userState) {
-              final authed = userState.status == AuthStatus.authenticated;
-
-              final Widget? hint;
-              if (userState.status == AuthStatus.unauthenticated) {
-                hint = const _SignInHintBanner();
-              } else if (authed && userState.needsVoteHint) {
-                hint = const _VoteHintBanner();
-              } else if (authed && userState.needsTapForDetailsHint) {
-                hint = const _TapForDetailsHintBanner();
-              } else {
-                hint = null;
-              }
-
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ?hint,
-                  if (authed)
-                    BlocBuilder<GeoscopeCubit, GeoscopeState>(
-                      builder: (context, geoState) => AddProblemRow(
-                        defaultGeoscope: geoState.selectedGeoscope,
-                        onSubmit:
-                            ({
-                              required description,
-                              required goal,
-                              required geoscope,
-                            }) async {
-                              final userId = context
-                                  .read<UserCubit>()
-                                  .state
-                                  .userId!;
-                              final userLang = Localizations.localeOf(
-                                context,
-                              ).languageCode;
-                              await context.read<ProblemsCubit>().addProblem(
-                                description: description,
-                                goal: goal,
-                                ownerId: userId,
-                                userLanguage: userLang,
-                                geoscope: geoscope,
-                              );
-                            },
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          Expanded(
-            child: BlocBuilder<ProblemsCubit, ProblemsState>(
-              builder: (context, state) {
-                return switch (state.status) {
-                  ProblemsStatus.initial || ProblemsStatus.loading
-                      when state.problems.isEmpty =>
-                    const Center(child: CircularProgressIndicator()),
-                  ProblemsStatus.failure when state.problems.isEmpty => Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(context.l10n.failedToLoadProblems),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () =>
-                              context.read<ProblemsCubit>().subscribe(),
-                          child: Text(context.l10n.retryButton),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _ => Builder(
-                    builder: (context) {
-                      // watch (not read) so showEditButton / showComplaintButton
-                      // on each tile react to sign-in / sign-out without a
-                      // separate rebuild trigger. The vote chip inside
-                      // ProblemReadTile already watches UserCubit; this is the
-                      // matching subscription for the owner-driven props.
-                      final userId = context.watch<UserCubit>().state.userId;
-                      final filtered = _applyFilters(state.problems, userId);
-                      return ListView.builder(
-                        controller: _scrollController,
-                        itemCount: filtered.length + (state.hasMore ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index >= filtered.length) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-                          final problem = filtered[index];
-                          if (_editingProblemId == problem.id) {
-                            return ProblemEditTile(
-                              problem: problem,
-                              tapRegionGroupId: _editTapRegionGroupId,
-                              onCancel: _cancelEdit,
-                              onSubmit:
-                                  (
-                                    updatedProblem, {
-                                    required userLanguage,
-                                  }) async {
-                                    await context
-                                        .read<ProblemsCubit>()
-                                        .updateProblem(
-                                          updatedProblem,
-                                          userLanguage: userLanguage,
-                                        );
-                                  },
-                            );
-                          }
-                          final isOwner =
-                              userId != null && userId == problem.ownerId;
-                          return ProblemReadTile(
-                            problem: problem,
-                            showEditButton: isOwner,
-                            showComplaintButton: userId != null && !isOwner,
-                            onEdit: () => _startEdit(problem),
-                            onCopyLink: () => _copyProblemLink(problem),
-                            onComplaint: () => _confirmComplaint(problem),
-                            onViewDetails: () {
-                              if (userId != null) {
-                                unawaited(
-                                  context
-                                      .read<FirestoreRepository>()
-                                      .incrementProblemDetailsViewCount(userId),
-                                );
-                              }
-                              unawaited(
-                                context.push('/problems/${problem.id}'),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                };
+                ];
               },
             ),
           ),
-        ],
+          actions: [
+            BlocBuilder<UserCubit, UserState>(
+              builder: (context, authState) {
+                if (authState.status == AuthStatus.authenticated) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (wide)
+                        IconButton(
+                          tooltip: l10n.addProblemTooltip,
+                          icon: const Icon(Icons.add_circle),
+                          onPressed: () => context.go('/new'),
+                        ),
+                      const NotificationsBadge(),
+                    ],
+                  );
+                }
+                return IconButton(
+                  tooltip: l10n.signInButtonTooltip,
+                  icon: const Icon(Icons.login),
+                  onPressed: () => context.read<UserCubit>().signIn(),
+                );
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            BlocBuilder<UserCubit, UserState>(
+              builder: (context, userState) {
+                final authed = userState.status == AuthStatus.authenticated;
+
+                final Widget? hint;
+                if (userState.status == AuthStatus.unauthenticated) {
+                  hint = const _SignInHintBanner();
+                } else if (authed && userState.needsVoteHint) {
+                  hint = const _VoteHintBanner();
+                } else if (authed && userState.needsTapForDetailsHint) {
+                  hint = const _TapForDetailsHintBanner();
+                } else {
+                  hint = null;
+                }
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ?hint,
+                    if (authed)
+                      BlocBuilder<GeoscopeCubit, GeoscopeState>(
+                        builder: (context, geoState) => AddProblemRow(
+                          defaultGeoscope: geoState.selectedGeoscope,
+                          onSubmit:
+                              ({
+                                required description,
+                                required goal,
+                                required geoscope,
+                              }) async {
+                                final userId = context
+                                    .read<UserCubit>()
+                                    .state
+                                    .userId!;
+                                final userLang = Localizations.localeOf(
+                                  context,
+                                ).languageCode;
+                                await context.read<ProblemsCubit>().addProblem(
+                                  description: description,
+                                  goal: goal,
+                                  ownerId: userId,
+                                  userLanguage: userLang,
+                                  geoscope: geoscope,
+                                );
+                              },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            Expanded(
+              child: BlocBuilder<ProblemsCubit, ProblemsState>(
+                builder: (context, state) {
+                  return switch (state.status) {
+                    ProblemsStatus.initial || ProblemsStatus.loading
+                        when state.problems.isEmpty =>
+                      const Center(child: CircularProgressIndicator()),
+                    ProblemsStatus.failure when state.problems.isEmpty =>
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(context.l10n.failedToLoadProblems),
+                            const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  context.read<ProblemsCubit>().subscribe(),
+                              child: Text(context.l10n.retryButton),
+                            ),
+                          ],
+                        ),
+                      ),
+                    _ => Builder(
+                      builder: (context) {
+                        // watch (not read) so showEditButton /
+                        // showComplaintButton on each tile react to
+                        // sign-in / sign-out without a separate rebuild
+                        // trigger. The vote chip inside ProblemReadTile
+                        // already watches UserCubit; this is the matching
+                        // subscription for the owner-driven props.
+                        final userId = context.watch<UserCubit>().state.userId;
+                        final filtered = _applyFilters(state.problems, userId);
+                        return ScrollablePositionedList.builder(
+                          itemScrollController: _itemScrollController,
+                          itemPositionsListener: _positionsListener,
+                          itemCount: filtered.length + (state.hasMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index >= filtered.length) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            final problem = filtered[index];
+                            if (_editingProblemId == problem.id) {
+                              return ProblemEditTile(
+                                problem: problem,
+                                tapRegionGroupId: _editTapRegionGroupId,
+                                onCancel: _cancelEdit,
+                                onSubmit:
+                                    (
+                                      updatedProblem, {
+                                      required userLanguage,
+                                    }) async {
+                                      await context
+                                          .read<ProblemsCubit>()
+                                          .updateProblem(
+                                            updatedProblem,
+                                            userLanguage: userLanguage,
+                                          );
+                                    },
+                              );
+                            }
+                            final isOwner =
+                                userId != null && userId == problem.ownerId;
+                            return ProblemReadTile(
+                              problem: problem,
+                              showEditButton: isOwner,
+                              showComplaintButton: userId != null && !isOwner,
+                              onEdit: () => _startEdit(problem),
+                              onCopyLink: () => _copyProblemLink(problem),
+                              onComplaint: () => _confirmComplaint(problem),
+                              onViewDetails: () {
+                                if (userId != null) {
+                                  unawaited(
+                                    context
+                                        .read<FirestoreRepository>()
+                                        .incrementProblemDetailsViewCount(
+                                          userId,
+                                        ),
+                                  );
+                                }
+                                unawaited(
+                                  context.push('/problems/${problem.id}'),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  };
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

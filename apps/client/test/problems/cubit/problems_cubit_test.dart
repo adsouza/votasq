@@ -23,6 +23,7 @@ Problem _problem({
   String ownerId = 'user1',
   String geoscope = '/',
   int votes = 1,
+  DateTime? lastUpdatedAt,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -33,7 +34,7 @@ Problem _problem({
     geoscope: geoscope,
     votes: votes,
     createdAt: now,
-    lastUpdatedAt: now,
+    lastUpdatedAt: lastUpdatedAt ?? now,
   );
 }
 
@@ -112,6 +113,103 @@ void main() {
           ProblemsStatus.failure,
         ),
       ],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'orders same-vote problems by lastUpdatedAt DESC (most recent first)',
+      build: () {
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.value((
+            problems: [
+              _problem(
+                id: 'older',
+                votes: 5,
+                lastUpdatedAt: DateTime.utc(2024),
+              ),
+              _problem(
+                id: 'newer',
+                votes: 5,
+                lastUpdatedAt: DateTime.utc(2024, 6),
+              ),
+            ],
+            lastDoc: _FakeDocumentSnapshot(),
+          )),
+        );
+        return ProblemsCubit(repo);
+      },
+      act: (cubit) => cubit.subscribe(),
+      expect: () => [
+        isA<ProblemsState>().having(
+          (s) => s.status,
+          'status',
+          ProblemsStatus.loading,
+        ),
+        isA<ProblemsState>().having(
+          (s) => s.problems.map((p) => p.id).toList(),
+          'newest within the vote tier first',
+          ['newer', 'older'],
+        ),
+      ],
+    );
+
+    test(
+      'after subscribe, eagerly pages in the background until the 1-vote '
+      'tier is loaded, then stops',
+      () async {
+        // Live window: a full page (20) of multi-vote problems => hasMore.
+        final window = [
+          for (var i = 0; i < 20; i++)
+            _problem(id: 'w${i.toString().padLeft(2, '0')}', votes: 5),
+        ];
+        // The first background page already reaches the 1-vote tier, so the
+        // loader should stop after a single fetch.
+        final page = [
+          _problem(id: 'p0', votes: 4),
+          _problem(id: 'fresh'), // 1 vote (the helper default) => 1-vote tier
+        ];
+        when(
+          () => repo.watchProblems(
+            geoscope: any(named: 'geoscope'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.value((
+            problems: window,
+            lastDoc: _FakeDocumentSnapshot(),
+          )),
+        );
+        when(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).thenAnswer(
+          (_) async => (problems: page, lastDoc: _FakeDocumentSnapshot()),
+        );
+
+        final cubit = ProblemsCubit(repo)..subscribe();
+        addTearDown(cubit.close);
+
+        // Let the stream emit and the background loader settle.
+        for (var i = 0; i < 10; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        expect(cubit.state.problems.any((p) => p.id == 'fresh'), isTrue);
+        verify(
+          () => repo.getProblems(
+            geoscope: any(named: 'geoscope'),
+            startAfter: any(named: 'startAfter'),
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).called(1);
+      },
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
@@ -213,7 +311,8 @@ void main() {
     );
 
     blocTest<ProblemsCubit, ProblemsState>(
-      'addProblem optimistically prepends the new problem to state',
+      'addProblem inserts the new problem at its sorted position and '
+      'requests a scroll to it',
       build: () {
         when(
           () => repo.addProblem(
@@ -224,6 +323,9 @@ void main() {
             userLanguage: any(named: 'userLanguage'),
           ),
         ).thenAnswer(
+          // Both are 1-vote, so they sort by id ASC: 'existing' before 'new'.
+          // The new problem lands at the bottom of the 1-vote tier rather than
+          // being artificially prepended.
           (_) async => _problem(id: 'new', description: 'a new problem'),
         );
         return ProblemsCubit(repo);
@@ -235,11 +337,17 @@ void main() {
         userLanguage: 'en',
       ),
       expect: () => [
-        isA<ProblemsState>().having(
-          (s) => s.problems.map((p) => p.id).toList(),
-          'problems order',
-          ['new', 'existing'],
-        ),
+        isA<ProblemsState>()
+            .having(
+              (s) => s.problems.map((p) => p.id).toList(),
+              'problems order',
+              ['existing', 'new'],
+            )
+            .having(
+              (s) => s.scrollRequest?.problemId,
+              'scroll target',
+              'new',
+            ),
       ],
     );
 
@@ -308,9 +416,11 @@ void main() {
           userLanguage: 'en',
         );
 
+        // existing has 5 votes, new has 1, so the honest sort is
+        // [existing, new] — and there's exactly one copy of 'new'.
         expect(
           cubit.state.problems.map((p) => p.id).toList(),
-          ['new', 'existing'],
+          ['existing', 'new'],
         );
       },
     );
@@ -435,6 +545,69 @@ void main() {
       },
       act: (cubit) => cubit.vote(problemId: '1', userId: 'user1'),
       expect: () => <ProblemsState>[],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'vote optimistically increments, re-sorts, and requests a scroll',
+      build: () {
+        when(
+          () => repo.vote(
+            problemId: any(named: 'problemId'),
+            userId: any(named: 'userId'),
+          ),
+        ).thenAnswer((_) async {});
+        return ProblemsCubit(repo);
+      },
+      seed: () => ProblemsState(
+        status: ProblemsStatus.success,
+        problems: [
+          _problem(id: 'low'), // 1 vote (the helper default)
+          _problem(id: 'high', votes: 3),
+        ],
+      ),
+      act: (cubit) => cubit.vote(problemId: 'low', userId: 'user1'),
+      expect: () => [
+        isA<ProblemsState>()
+            .having(
+              (s) => s.problems.map((p) => '${p.id}:${p.votes}').toList(),
+              'reordered with the bumped vote',
+              ['high:3', 'low:2'],
+            )
+            .having((s) => s.scrollRequest?.problemId, 'scroll target', 'low'),
+      ],
+    );
+
+    blocTest<ProblemsCubit, ProblemsState>(
+      'vote reverts the optimistic bump when the repo write fails',
+      build: () {
+        when(
+          () => repo.vote(
+            problemId: any(named: 'problemId'),
+            userId: any(named: 'userId'),
+          ),
+        ).thenThrow(Exception('fail'));
+        return ProblemsCubit(repo);
+      },
+      seed: () => ProblemsState(
+        status: ProblemsStatus.success,
+        problems: [
+          _problem(id: 'low'), // 1 vote (the helper default)
+          _problem(id: 'high', votes: 3),
+        ],
+      ),
+      act: (cubit) => cubit.vote(problemId: 'low', userId: 'user1'),
+      expect: () => [
+        isA<ProblemsState>().having(
+          (s) => s.problems.map((p) => '${p.id}:${p.votes}').toList(),
+          'optimistic bump',
+          ['high:3', 'low:2'],
+        ),
+        isA<ProblemsState>().having(
+          (s) => s.problems.map((p) => '${p.id}:${p.votes}').toList(),
+          'reverted',
+          ['high:3', 'low:1'],
+        ),
+      ],
     );
 
     blocTest<ProblemsCubit, ProblemsState>(

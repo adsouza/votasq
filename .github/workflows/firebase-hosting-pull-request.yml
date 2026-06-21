@@ -2,13 +2,27 @@
 # https://github.com/firebase/firebase-tools
 # Hand-patched to: (1) install Flutter SDK before `flutter build web`,
 # (2) add a paths: filter so server-only PRs don't trigger a preview
-# rebuild, (3) align action versions with the rest of .github/workflows/.
+# rebuild, (3) align action versions with the rest of .github/workflows/,
+# (4) skip cleanly (instead of erroring) when the service-account secret
+# is unavailable — e.g. on Dependabot PRs, which don't receive secrets.
 #
 # Prerequisite (same as firebase-hosting-merge.yml): the GCP project
 # must have firebasehosting.googleapis.com enabled, otherwise the deploy
 # step's service-account auth returns 403 with a misleading
 # "API has not been used" message. Enable with:
 #   gcloud services enable firebasehosting.googleapis.com --project=votasq
+#
+# The deploy service account also needs read access to the Cloud Run
+# service and Cloud Functions, because finalizing a Hosting version that
+# contains the /api/** -> Cloud Run rewrite calls run.services.get and
+# cloudfunctions.functions.list. Without them the upload succeeds but
+# finalization 403s. Grant once:
+#   gcloud projects add-iam-policy-binding votasq \
+#     --member="serviceAccount:<deploy-sa>@votasq.iam.gserviceaccount.com" \
+#     --role="roles/run.viewer"
+#   gcloud projects add-iam-policy-binding votasq \
+#     --member="serviceAccount:<deploy-sa>@votasq.iam.gserviceaccount.com" \
+#     --role="roles/cloudfunctions.viewer"
 
 name: Deploy to Firebase Hosting on PR
 on:
@@ -25,17 +39,30 @@ permissions:
   pull-requests: write
 jobs:
   build_and_preview:
+    # Fork PRs never receive repository secrets — skip the whole job for them.
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
+    # `secrets` can't be referenced in `if:` conditions, but `env` can. Map the
+    # secret to an env var here so the steps below can test it. It's empty on
+    # Dependabot PRs (secrets are withheld there), so those runs skip the deploy
+    # steps instead of failing with "Input required and not supplied".
+    env:
+      FIREBASE_SERVICE_ACCOUNT_VOTASQ: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VOTASQ }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+      - name: Note skipped deploy (no service account secret)
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_VOTASQ == '' }}
+        run: echo "FIREBASE_SERVICE_ACCOUNT_VOTASQ is empty (Dependabot or fork PR) — skipping Firebase preview deploy."
       - uses: subosito/flutter-action@v2
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_VOTASQ != '' }}
         with:
           flutter-version: '3.44.0'
           cache: true
-      - run: cd apps/client && flutter build web --release --target lib/main_production.dart --dart-define=SERVER_URL=
+      - if: ${{ env.FIREBASE_SERVICE_ACCOUNT_VOTASQ != '' }}
+        run: cd apps/client && flutter build web --release --target lib/main_production.dart --dart-define=SERVER_URL=
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_VOTASQ != '' }}
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VOTASQ }}
+          firebaseServiceAccount: ${{ env.FIREBASE_SERVICE_ACCOUNT_VOTASQ }}
           projectId: votasq

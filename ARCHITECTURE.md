@@ -163,8 +163,9 @@ Key operations:
   using a Firestore `commit` (atomic batched write). Every create or update
   produces a new revision entry, providing an audit trail of text changes.
 - **getProblem** — fetches a single document by ID
-- **getProblems** — runs a `StructuredQuery` ordered by `votes DESC, __name__ ASC`
-  with cursor-based pagination. Accepts an optional `geoscope` parameter; when
+- **getProblems** — runs a `StructuredQuery` ordered by `votes DESC,
+  lastUpdatedAt DESC, __name__ ASC` with cursor-based pagination. Accepts an
+  optional `geoscope` parameter; when
   provided, builds an ancestor-inclusive filter (OR of equality checks on the
   geoscope and all its parent levels) so that country-level and global problems
   appear alongside city-scoped results
@@ -174,7 +175,8 @@ Key operations:
 ### Pagination
 
 The server uses Firestore cursor-based pagination over a composite index
-(`votes DESC`, `__name__ ASC`, defined in `firestore.indexes.json`).
+(`votes DESC`, `lastUpdatedAt DESC`, `__name__ ASC`, defined in
+`firestore.indexes.json`).
 
 ```mermaid
 sequenceDiagram
@@ -193,9 +195,11 @@ sequenceDiagram
     S-->>C: { data: [...], nextPageToken: "base64..." }
 ```
 
-The page token is a base64-encoded JSON object `{ v: votes, r: documentRef }`
-representing the last item on the previous page. When `results.length < pageSize`,
-no token is returned, signaling the end of the list.
+The page token is a base64-encoded JSON object
+`{ v: votes, u: lastUpdatedAt, r: documentRef }` representing the last item on
+the previous page (one value per `orderBy` field, so the `startAt` cursor
+resumes exactly). When `results.length < pageSize`, no token is returned,
+signaling the end of the list.
 
 ### GCP project resolution (`lib/src/resolve_project_id.dart`)
 
@@ -217,7 +221,7 @@ graph TD
     UI["ProblemsPage / ProblemsView<br/>(Flutter widgets)"]
     Cubit["ProblemsCubit<br/>(state management)"]
     GeoCubit["GeoscopeCubit<br/>(location selection)"]
-    State["ProblemsState<br/>(status, problems, lastDocument, hasMore, geoscope)"]
+    State["ProblemsState<br/>(status, problems, lastDocument, hasMore, geoscope, scrollRequest)"]
     Repo["FirestoreRepository<br/>(FlutterFire cloud_firestore)"]
     Prefs["SharedPreferences<br/>(persisted geoscope)"]
     Firestore[(Cloud Firestore)]
@@ -251,11 +255,33 @@ stateDiagram-v2
 
 `ProblemsState` holds the current `ProblemsStatus` enum (`initial`, `loading`,
 `success`, `failure`), the loaded `List<Problem>`, an optional
-`lastDocument` (for cursor-based pagination), a `hasMore` flag, and the
-current `geoscope` filter string. When the user scrolls past 90% of the list,
-`loadMore()` fetches the next page and appends the results. When the user
+`lastDocument` (for cursor-based pagination), a `hasMore` flag, the
+current `geoscope` filter string, and an optional `scrollRequest` (a one-shot
+signal asking the view to bring a problem into view). When the user scrolls
+near the end of the list, `loadMore()` fetches the next page. When the user
 changes geoscope, `changeGeoscope()` resets the state and re-subscribes with
 the new filter.
+
+**List reconciliation.** The watch stream covers only the first page (top
+`votes`), so the cubit *merges* each snapshot into the existing list rather
+than replacing it: the window is authoritative for its prefix, the paginated
+tail below it is preserved, and items that left the listing (solved / hidden /
+deleted) are dropped. Problem votes only ever increment, so a local optimistic
+upvote is never clobbered by an in-flight snapshot that predates it.
+
+**Eager tail-load.** Because new problems are created with `votes: 1` they sort
+to the bottom of the listing (the "1-vote tier"). After the first snapshot the
+cubit pages in the background until that tier is loaded, a cap of 99 problems
+is reached, or the server runs out — so a freshly created problem can be
+scrolled to immediately. Beyond the cap the user can still page by scrolling.
+
+**Scroll-to (`scrollable_positioned_list`).** Creating a problem inserts it at
+its honest sorted position (top of the 1-vote tier) and emits a `scrollRequest`
+so the view scrolls it into view; voting optimistically increments and re-sorts
+so the problem climbs, then emits a `scrollRequest` so the view keeps it visible
+(gently — it only scrolls if the problem would otherwise leave the viewport).
+This replaces the old behaviour where new problems were prepended to the top and
+appeared to "jump down" on their first vote.
 
 ### Geoscope (location scoping)
 
