@@ -11,7 +11,7 @@ resolution: workspace
 
 dependencies:
   bloc: ^9.2.0
-  cloud_firestore: ^6.2.0 # Official FlutterFire
+  cloud_firestore: ^6.6.0 # Official FlutterFire
   cloud_functions: ^6.1.0
   crypto: ^3.0.0 # sha256 of FCM tokens for the fcmTokens doc id
   cupertino_icons: ^1.0.9
