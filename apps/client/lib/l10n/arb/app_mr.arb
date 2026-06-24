@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "डीफॉल्ट",
     "textSizeOptionLarge": "मोठा",
     "textSizeOptionLarger": "अधिक मोठा",
-    "textSizeOptionLargest": "सर्वात मोठा"
+    "textSizeOptionLargest": "सर्वात मोठा",
+    "recencyFilterMenuItem": "फक्त अलीकडे अपडेट केलेल्या समस्या दाखवा",
+    "recencyFilterMenuItemOff": "फक्त अलीकडे अपडेट केलेल्या समस्या दाखवा",
+    "recencyFilterDialogTitle": "अलीकडे अपडेट केलेले",
+    "recencyFilterAnyTime": "कधीही",
+    "recencyFilterWithinDays": "{count, plural, one{मागील 1 दिवसात} other{मागील {count} दिवसांत}}"
 }

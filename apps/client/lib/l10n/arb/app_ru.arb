@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "По умолчанию",
     "textSizeOptionLarge": "Большой",
     "textSizeOptionLarger": "Больше",
-    "textSizeOptionLargest": "Самый большой"
+    "textSizeOptionLargest": "Самый большой",
+    "recencyFilterMenuItem": "Показать только недавно обновлённые проблемы",
+    "recencyFilterMenuItemOff": "Показать только недавно обновлённые проблемы",
+    "recencyFilterDialogTitle": "Недавно обновлённые",
+    "recencyFilterAnyTime": "За всё время",
+    "recencyFilterWithinDays": "{count, plural, one{За последний {count} день} few{За последние {count} дня} many{За последние {count} дней} other{За последние {count} дней}}"
 }

@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "ค่าเริ่มต้น",
     "textSizeOptionLarge": "ใหญ่",
     "textSizeOptionLarger": "ใหญ่กว่า",
-    "textSizeOptionLargest": "ใหญ่ที่สุด"
+    "textSizeOptionLargest": "ใหญ่ที่สุด",
+    "recencyFilterMenuItem": "แสดงเฉพาะปัญหาที่อัปเดตล่าสุด",
+    "recencyFilterMenuItemOff": "แสดงเฉพาะปัญหาที่อัปเดตล่าสุด",
+    "recencyFilterDialogTitle": "อัปเดตล่าสุด",
+    "recencyFilterAnyTime": "ทุกช่วงเวลา",
+    "recencyFilterWithinDays": "{count, plural, other{ภายใน {count} วัน}}"
 }

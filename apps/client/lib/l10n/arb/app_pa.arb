@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "ਡਿਫਾਲਟ",
     "textSizeOptionLarge": "ਵੱਡਾ",
     "textSizeOptionLarger": "ਜ਼ਿਆਦਾ ਵੱਡਾ",
-    "textSizeOptionLargest": "ਸਭ ਤੋਂ ਵੱਡਾ"
+    "textSizeOptionLargest": "ਸਭ ਤੋਂ ਵੱਡਾ",
+    "recencyFilterMenuItem": "ਸਿਰਫ਼ ਹਾਲ ਹੀ ਵਿੱਚ ਅੱਪਡੇਟ ਹੋਈਆਂ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਓ",
+    "recencyFilterMenuItemOff": "ਸਿਰਫ਼ ਹਾਲ ਹੀ ਵਿੱਚ ਅੱਪਡੇਟ ਹੋਈਆਂ ਸਮੱਸਿਆਵਾਂ ਦਿਖਾਓ",
+    "recencyFilterDialogTitle": "ਹਾਲ ਹੀ ਵਿੱਚ ਅੱਪਡੇਟ ਕੀਤਾ",
+    "recencyFilterAnyTime": "ਕਿਸੇ ਵੀ ਸਮੇਂ",
+    "recencyFilterWithinDays": "{count, plural, one{ਪਿਛਲੇ 1 ਦਿਨ ਵਿੱਚ} other{ਪਿਛਲੇ {count} ਦਿਨਾਂ ਵਿੱਚ}}"
 }

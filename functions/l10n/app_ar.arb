@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "افتراضي",
     "textSizeOptionLarge": "كبير",
     "textSizeOptionLarger": "أكبر",
-    "textSizeOptionLargest": "الأكبر"
+    "textSizeOptionLargest": "الأكبر",
+    "recencyFilterMenuItem": "إظهار المشاكل المُحدَّثة مؤخرًا فقط",
+    "recencyFilterMenuItemOff": "إظهار المشاكل المُحدَّثة مؤخرًا فقط",
+    "recencyFilterDialogTitle": "المُحدَّثة مؤخرًا",
+    "recencyFilterAnyTime": "في أي وقت",
+    "recencyFilterWithinDays": "{count, plural, one{خلال يوم واحد} other{خلال {count} يوم}}"
 }

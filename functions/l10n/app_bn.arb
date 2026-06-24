@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "ডিফল্ট",
     "textSizeOptionLarge": "বড়",
     "textSizeOptionLarger": "আরও বড়",
-    "textSizeOptionLargest": "সবচেয়ে বড়"
+    "textSizeOptionLargest": "সবচেয়ে বড়",
+    "recencyFilterMenuItem": "শুধুমাত্র সম্প্রতি আপডেট হওয়া সমস্যাগুলো দেখান",
+    "recencyFilterMenuItemOff": "শুধুমাত্র সম্প্রতি আপডেট হওয়া সমস্যাগুলো দেখান",
+    "recencyFilterDialogTitle": "সম্প্রতি আপডেট হয়েছে",
+    "recencyFilterAnyTime": "যেকোনো সময়",
+    "recencyFilterWithinDays": "{count, plural, one{১ দিনের মধ্যে} other{{count} দিনের মধ্যে}}"
 }

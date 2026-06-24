@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "Varsayılan",
     "textSizeOptionLarge": "Büyük",
     "textSizeOptionLarger": "Daha büyük",
-    "textSizeOptionLargest": "En büyük"
+    "textSizeOptionLargest": "En büyük",
+    "recencyFilterMenuItem": "Yalnızca yakın zamanda güncellenen sorunları göster",
+    "recencyFilterMenuItemOff": "Yalnızca yakın zamanda güncellenen sorunları göster",
+    "recencyFilterDialogTitle": "Son güncellenenler",
+    "recencyFilterAnyTime": "Herhangi bir zaman",
+    "recencyFilterWithinDays": "{count, plural, one{Son 1 gün içinde} other{Son {count} gün içinde}}"
 }

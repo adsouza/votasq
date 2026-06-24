@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "డిఫాల్ట్",
     "textSizeOptionLarge": "పెద్దది",
     "textSizeOptionLarger": "మరింత పెద్దది",
-    "textSizeOptionLargest": "అతిపెద్దది"
+    "textSizeOptionLargest": "అతిపెద్దది",
+    "recencyFilterMenuItem": "ఇటీవల నవీకరించిన సమస్యలను మాత్రమే చూపించు",
+    "recencyFilterMenuItemOff": "ఇటీవల నవీకరించిన సమస్యలను మాత్రమే చూపించు",
+    "recencyFilterDialogTitle": "ఇటీవల నవీకరించబడింది",
+    "recencyFilterAnyTime": "ఏ సమయంలోనైనా",
+    "recencyFilterWithinDays": "{count, plural, one{గత 1 రోజులో} other{గత {count} రోజుల్లో}}"
 }

@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "기본",
     "textSizeOptionLarge": "크게",
     "textSizeOptionLarger": "더 크게",
-    "textSizeOptionLargest": "가장 크게"
+    "textSizeOptionLargest": "가장 크게",
+    "recencyFilterMenuItem": "최근 업데이트된 문제만 보기",
+    "recencyFilterMenuItemOff": "최근 업데이트된 문제만 보기",
+    "recencyFilterDialogTitle": "최근 업데이트됨",
+    "recencyFilterAnyTime": "전체 기간",
+    "recencyFilterWithinDays": "{count, plural, other{최근 {count}일 이내}}"
 }

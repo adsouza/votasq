@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "Mặc định",
     "textSizeOptionLarge": "Lớn",
     "textSizeOptionLarger": "Lớn hơn",
-    "textSizeOptionLargest": "Lớn nhất"
+    "textSizeOptionLargest": "Lớn nhất",
+    "recencyFilterMenuItem": "Chỉ hiển thị vấn đề được cập nhật gần đây",
+    "recencyFilterMenuItemOff": "Chỉ hiển thị vấn đề được cập nhật gần đây",
+    "recencyFilterDialogTitle": "Cập nhật gần đây",
+    "recencyFilterAnyTime": "Bất kỳ lúc nào",
+    "recencyFilterWithinDays": "{count, plural, one{Trong 1 ngày qua} other{Trong {count} ngày qua}}"
 }

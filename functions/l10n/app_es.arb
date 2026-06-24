@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "Predeterminado",
     "textSizeOptionLarge": "Grande",
     "textSizeOptionLarger": "Más grande",
-    "textSizeOptionLargest": "El más grande"
+    "textSizeOptionLargest": "El más grande",
+    "recencyFilterMenuItem": "Mostrar solo problemas actualizados recientemente",
+    "recencyFilterMenuItemOff": "Mostrar solo problemas actualizados recientemente",
+    "recencyFilterDialogTitle": "Actualizado recientemente",
+    "recencyFilterAnyTime": "Cualquier momento",
+    "recencyFilterWithinDays": "{count, plural, one{En el último día} other{En los últimos {count} días}}"
 }

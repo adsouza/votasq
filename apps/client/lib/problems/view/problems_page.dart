@@ -132,7 +132,12 @@ class _ProblemsViewState extends State<ProblemsView> {
         positions.any((p) => p.index == minIndex && p.itemLeadingEdge < 0);
     if (!overflows) return;
     final userId = context.read<UserCubit>().state.userId;
-    final itemCount = _applyFilters(cubit.state.problems, userId).length;
+    final maxAgeDays = context.read<RecencyFilterCubit>().state;
+    final itemCount = _applyFilters(
+      cubit.state.problems,
+      userId,
+      maxAgeDays,
+    ).length;
     if (maxIndex >= itemCount - 3) {
       unawaited(cubit.loadMore());
     }
@@ -145,9 +150,11 @@ class _ProblemsViewState extends State<ProblemsView> {
     final request = state.scrollRequest;
     if (request == null) return;
     final userId = context.read<UserCubit>().state.userId;
+    final maxAgeDays = context.read<RecencyFilterCubit>().state;
     final index = _applyFilters(
       state.problems,
       userId,
+      maxAgeDays,
     ).indexWhere((p) => p.id == request.problemId);
     if (index == -1) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -256,7 +263,11 @@ class _ProblemsViewState extends State<ProblemsView> {
     }
   }
 
-  List<Problem> _applyFilters(List<Problem> problems, String? userId) {
+  List<Problem> _applyFilters(
+    List<Problem> problems,
+    String? userId,
+    int maxAgeDays,
+  ) {
     var filtered = problems;
     if (userId != null) {
       filtered = filtered.where((p) => !p.complaints.contains(userId)).toList();
@@ -266,6 +277,12 @@ class _ProblemsViewState extends State<ProblemsView> {
     }
     if (_showOnlyWithGoals) {
       filtered = filtered.where((p) => p.goal.isNotEmpty).toList();
+    }
+    if (maxAgeDays > 0) {
+      final cutoff = DateTime.now().subtract(Duration(days: maxAgeDays));
+      filtered = filtered
+          .where((p) => p.lastUpdatedAt.isAfter(cutoff))
+          .toList();
     }
     return filtered;
   }
@@ -290,9 +307,14 @@ class _ProblemsViewState extends State<ProblemsView> {
           title: BlocBuilder<ProblemsCubit, ProblemsState>(
             builder: (context, state) {
               // watch (not read) so the filtered count reacts to sign-in /
-              // sign-out — _applyFilters with _showOnlyOwned uses userId.
+              // sign-out (userId) and to the recency-filter slider changing.
               final userId = context.watch<UserCubit>().state.userId;
-              final filtered = _applyFilters(state.problems, userId);
+              final maxAgeDays = context.watch<RecencyFilterCubit>().state;
+              final filtered = _applyFilters(
+                state.problems,
+                userId,
+                maxAgeDays,
+              );
               return Text(
                 '${filtered.length} ${l10n.problemsAppBarTitle}',
                 maxLines: 2,
@@ -320,6 +342,8 @@ class _ProblemsViewState extends State<ProblemsView> {
                   unawaited(context.read<AutoTranslateCubit>().toggle());
                 } else if (value == 'text_size') {
                   unawaited(showTextSizeDialog(context));
+                } else if (value == 'recency_filter') {
+                  unawaited(showRecencyFilterDialog(context));
                 } else if (value == 'add_problem') {
                   context.go('/new');
                 } else if (value == 'send_feedback') {
@@ -331,6 +355,7 @@ class _ProblemsViewState extends State<ProblemsView> {
               itemBuilder: (context) {
                 final isAuthenticated =
                     context.read<UserCubit>().state.userId != null;
+                final recencyDays = context.read<RecencyFilterCubit>().state;
                 final geoState = context.read<GeoscopeCubit>().state;
                 final currentGeoscopeId = geoState.selectedGeoscope;
                 final currentGeoscopeLabel = currentGeoscopeId == '/'
@@ -346,6 +371,23 @@ class _ProblemsViewState extends State<ProblemsView> {
                 // case so the action isn't presented twice.
                 final showAddInMenu = !(isAuthenticated && wide);
                 return [
+                  PopupMenuItem(
+                    value: 'recency_filter',
+                    child: ListTile(
+                      leading: const Icon(Icons.update),
+                      // Off → offer ("Show only…"); on → active ("Showing
+                      // only…"), with the window in the subtitle.
+                      title: Text(
+                        recencyDays > 0
+                            ? l10n.recencyFilterMenuItem
+                            : l10n.recencyFilterMenuItemOff,
+                      ),
+                      subtitle: Text(
+                        RecencyFilterDialog.labelFor(l10n, recencyDays),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                   if (showAddInMenu)
                     PopupMenuItem(
                       value: 'add_problem',
@@ -561,7 +603,14 @@ class _ProblemsViewState extends State<ProblemsView> {
                         // already watches UserCubit; this is the matching
                         // subscription for the owner-driven props.
                         final userId = context.watch<UserCubit>().state.userId;
-                        final filtered = _applyFilters(state.problems, userId);
+                        final maxAgeDays = context
+                            .watch<RecencyFilterCubit>()
+                            .state;
+                        final filtered = _applyFilters(
+                          state.problems,
+                          userId,
+                          maxAgeDays,
+                        );
                         return ScrollablePositionedList.builder(
                           itemScrollController: _itemScrollController,
                           itemPositionsListener: _positionsListener,

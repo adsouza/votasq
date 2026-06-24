@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "Chaguo-msingi",
     "textSizeOptionLarge": "Kubwa",
     "textSizeOptionLarger": "Kubwa zaidi",
-    "textSizeOptionLargest": "Kubwa zaidi sana"
+    "textSizeOptionLargest": "Kubwa zaidi sana",
+    "recencyFilterMenuItem": "Onyesha matatizo yaliyosasishwa hivi karibuni pekee",
+    "recencyFilterMenuItemOff": "Onyesha matatizo yaliyosasishwa hivi karibuni pekee",
+    "recencyFilterDialogTitle": "Zilizosasishwa hivi karibuni",
+    "recencyFilterAnyTime": "Wakati wowote",
+    "recencyFilterWithinDays": "{count, plural, one{Ndani ya siku 1} other{Ndani ya siku {count}}}"
 }

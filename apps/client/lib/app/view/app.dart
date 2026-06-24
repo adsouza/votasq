@@ -118,6 +118,7 @@ class _AppState extends State<App> {
           ),
           BlocProvider(create: (_) => AutoTranslateCubit()),
           BlocProvider(create: (_) => TextScaleCubit()),
+          BlocProvider(create: (_) => RecencyFilterCubit()),
           BlocProvider(
             create: (context) {
               final cubit = GeoscopeCubit(

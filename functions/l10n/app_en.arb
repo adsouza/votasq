@@ -555,5 +555,30 @@
     "textSizeOptionLargest": "Largest",
     "@textSizeOptionLargest": {
         "description": "Largest of the five text-size options in the dialog (1.50x)."
+    },
+    "recencyFilterMenuItem": "Showing only recently updated problems",
+    "@recencyFilterMenuItem": {
+        "description": "Label for the entry in the AppBar popup menu that opens the recency filter dialog, limiting the listing to problems updated within the last N days."
+    },
+    "recencyFilterMenuItemOff": "Show only recently updated problems",
+    "@recencyFilterMenuItemOff": {
+        "description": "Menu label for the recency filter when it is OFF (no window selected, so all problems show) — phrased as an offer to enable it. The active-state label, used when a window is selected, is recencyFilterMenuItem."
+    },
+    "recencyFilterDialogTitle": "Recently updated",
+    "@recencyFilterDialogTitle": {
+        "description": "Title of the dialog where the user picks how recently a problem must have been updated to appear in the listing."
+    },
+    "recencyFilterAnyTime": "Any time",
+    "@recencyFilterAnyTime": {
+        "description": "The leftmost (off) option of the recency-filter slider — no recency filter is applied, so problems updated at any time are shown."
+    },
+    "recencyFilterWithinDays": "{count, plural, one{Within 1 day} other{Within {count} days}}",
+    "@recencyFilterWithinDays": {
+        "description": "A recency-filter slider option / current-selection label meaning the listing is limited to problems updated within the last {count} days.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
     }
 }

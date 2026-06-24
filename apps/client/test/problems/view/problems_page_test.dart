@@ -14,6 +14,7 @@ import 'package:client/services/feedback_repository.dart';
 import 'package:client/services/firestore_repository.dart';
 import 'package:client/services/language_detection_service.dart';
 import 'package:client/services/translation_repository.dart';
+import 'package:client/settings/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -52,6 +53,7 @@ Problem _problem({
   String geoscope = '/',
   int votes = 3,
   List<String> complaints = const [],
+  DateTime? lastUpdatedAt,
 }) {
   final now = DateTime.utc(2024);
   return Problem(
@@ -63,7 +65,7 @@ Problem _problem({
     votes: votes,
     complaints: complaints,
     createdAt: now,
-    lastUpdatedAt: now,
+    lastUpdatedAt: lastUpdatedAt ?? now,
   );
 }
 
@@ -76,6 +78,7 @@ void main() {
   late UserCubit userCubit;
   late GeoscopeCubit geoscopeCubit;
   late NotificationsCountCubit notificationsCountCubit;
+  late RecencyFilterCubit recencyFilterCubit;
   late FirestoreRepository firestoreRepo;
   late FeedbackRepository feedbackRepo;
   late LanguageDetectionService languageDetectionService;
@@ -92,6 +95,7 @@ void main() {
     userCubit = _MockUserCubit();
     geoscopeCubit = _MockGeoscopeCubit();
     notificationsCountCubit = _MockNotificationsCountCubit();
+    recencyFilterCubit = RecencyFilterCubit(prefsForTesting: mockPrefs);
     firestoreRepo = _MockFirestoreRepository();
     feedbackRepo = _MockFeedbackRepository();
     languageDetectionService = _MockLanguageDetectionService();
@@ -111,6 +115,10 @@ void main() {
     when(() => translationRepo.canTranslateOnDevice).thenReturn(false);
   });
 
+  tearDown(() async {
+    await recencyFilterCubit.close();
+  });
+
   Widget buildSubject() {
     return MultiBlocProvider(
       providers: [
@@ -123,6 +131,7 @@ void main() {
         BlocProvider<NotificationsCountCubit>.value(
           value: notificationsCountCubit,
         ),
+        BlocProvider<RecencyFilterCubit>.value(value: recencyFilterCubit),
       ],
       child: MultiRepositoryProvider(
         providers: [
@@ -644,6 +653,89 @@ void main() {
 
       expect(find.text('has goal'), findsOneWidget);
       expect(find.text('no goal'), findsNothing);
+    });
+
+    testWidgets('recency filter hides problems older than the window', (
+      tester,
+    ) async {
+      when(() => problemsCubit.state).thenReturn(
+        ProblemsState(
+          status: ProblemsStatus.success,
+          problems: [
+            _problem(
+              description: 'fresh problem',
+              lastUpdatedAt: DateTime.now(),
+            ),
+            _problem(
+              id: '2',
+              description: 'stale problem',
+              lastUpdatedAt: DateTime.now().subtract(const Duration(days: 100)),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      // Filter off (any time) — both visible.
+      expect(find.text('fresh problem'), findsOneWidget);
+      expect(find.text('stale problem'), findsOneWidget);
+
+      // Apply a 7-day window (the dialog slider drives this same call). The
+      // list watches RecencyFilterCubit, so it re-filters without a setState.
+      await recencyFilterCubit.setMaxAgeDays(7);
+      await tester.pump();
+
+      expect(find.text('fresh problem'), findsOneWidget);
+      expect(find.text('stale problem'), findsNothing);
+    });
+
+    testWidgets('recency menu item opens the slider dialog', (tester) async {
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Filter off → the menu offers to enable it ("Show only…"), with the
+      // current window in the subtitle.
+      expect(find.text('Show only recently updated problems'), findsOneWidget);
+      expect(find.text('Any time'), findsOneWidget);
+
+      await tester.tap(_menuItem('recency_filter'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Dialog with the discrete slider, defaulting to the "any time" label.
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('Any time'), findsOneWidget);
+    });
+
+    testWidgets('recency menu states the active filter when a window is set', (
+      tester,
+    ) async {
+      when(() => problemsCubit.state).thenReturn(
+        const ProblemsState(status: ProblemsStatus.success),
+      );
+      await tester.pumpWidget(buildSubject());
+
+      // Turn the filter on before opening the menu.
+      await recencyFilterCubit.setMaxAgeDays(7);
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Filter on → the menu states the active filter ("Showing only…"), with
+      // the selected window in the subtitle.
+      expect(
+        find.text('Showing only recently updated problems'),
+        findsOneWidget,
+      );
+      expect(find.text('Within 7 days'), findsOneWidget);
     });
 
     testWidgets('sign in button shown when unauthenticated', (

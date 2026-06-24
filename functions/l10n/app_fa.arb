@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "پیش‌فرض",
     "textSizeOptionLarge": "بزرگ",
     "textSizeOptionLarger": "بزرگ‌تر",
-    "textSizeOptionLargest": "بزرگ‌ترین"
+    "textSizeOptionLargest": "بزرگ‌ترین",
+    "recencyFilterMenuItem": "فقط مشکلات به‌تازگی به‌روزشده نمایش داده شود",
+    "recencyFilterMenuItemOff": "فقط مشکلات به‌تازگی به‌روزشده نمایش داده شود",
+    "recencyFilterDialogTitle": "به‌تازگی به‌روزشده",
+    "recencyFilterAnyTime": "هر زمان",
+    "recencyFilterWithinDays": "{count, plural, one{در ۱ روز گذشته} other{در {count} روز گذشته}}"
 }

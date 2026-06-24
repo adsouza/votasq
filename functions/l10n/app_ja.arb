@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "標準",
     "textSizeOptionLarge": "大",
     "textSizeOptionLarger": "特大",
-    "textSizeOptionLargest": "最大"
+    "textSizeOptionLargest": "最大",
+    "recencyFilterMenuItem": "最近更新された問題のみ表示",
+    "recencyFilterMenuItemOff": "最近更新された問題のみ表示",
+    "recencyFilterDialogTitle": "最近の更新",
+    "recencyFilterAnyTime": "すべての期間",
+    "recencyFilterWithinDays": "{count, plural, other{過去{count}日以内}}"
 }

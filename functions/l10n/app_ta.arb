@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "இயல்புநிலை",
     "textSizeOptionLarge": "பெரிய",
     "textSizeOptionLarger": "அதிக பெரிய",
-    "textSizeOptionLargest": "மிகப் பெரிய"
+    "textSizeOptionLargest": "மிகப் பெரிய",
+    "recencyFilterMenuItem": "சமீபத்தில் புதுப்பிக்கப்பட்ட பிரச்சனைகளை மட்டும் காட்டு",
+    "recencyFilterMenuItemOff": "சமீபத்தில் புதுப்பிக்கப்பட்ட பிரச்சனைகளை மட்டும் காட்டு",
+    "recencyFilterDialogTitle": "சமீபத்தில் புதுப்பிக்கப்பட்டது",
+    "recencyFilterAnyTime": "எந்த நேரமும்",
+    "recencyFilterWithinDays": "{count, plural, one{கடந்த 1 நாளில்} other{கடந்த {count} நாட்களில்}}"
 }

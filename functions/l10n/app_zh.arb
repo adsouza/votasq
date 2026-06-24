@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "默认",
     "textSizeOptionLarge": "大",
     "textSizeOptionLarger": "更大",
-    "textSizeOptionLargest": "最大"
+    "textSizeOptionLargest": "最大",
+    "recencyFilterMenuItem": "只显示最近更新的问题",
+    "recencyFilterMenuItemOff": "只显示最近更新的问题",
+    "recencyFilterDialogTitle": "最近更新",
+    "recencyFilterAnyTime": "任何时间",
+    "recencyFilterWithinDays": "{count, plural, other{最近 {count} 天内}}"
 }

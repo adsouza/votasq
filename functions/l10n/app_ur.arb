@@ -131,5 +131,10 @@
     "textSizeOptionDefault": "ڈیفالٹ",
     "textSizeOptionLarge": "بڑا",
     "textSizeOptionLarger": "زیادہ بڑا",
-    "textSizeOptionLargest": "سب سے بڑا"
+    "textSizeOptionLargest": "سب سے بڑا",
+    "recencyFilterMenuItem": "صرف حال ہی میں اپ ڈیٹ شدہ مسائل دکھائیں",
+    "recencyFilterMenuItemOff": "صرف حال ہی میں اپ ڈیٹ شدہ مسائل دکھائیں",
+    "recencyFilterDialogTitle": "حال ہی میں اپ ڈیٹ شدہ",
+    "recencyFilterAnyTime": "کسی بھی وقت",
+    "recencyFilterWithinDays": "{count, plural, one{پچھلے 1 دن میں} other{پچھلے {count} دنوں میں}}"
 }
