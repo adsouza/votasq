@@ -65,7 +65,7 @@ jobs:
           dart pub global activate dart_frog_cli
           dart pub get
 
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
